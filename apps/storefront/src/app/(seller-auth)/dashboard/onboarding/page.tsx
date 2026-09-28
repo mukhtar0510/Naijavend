@@ -42,6 +42,12 @@ const QUICK_PICKS = [
   'I ship from a supplier', 'in Lagos', 'in Abuja', 'in Port Harcourt', 'delivery available',
 ] as const;
 
+// Same slugification the API applies when the seller leaves the link blank.
+const slugify = (s: string) =>
+  s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+
+const DRAFT_KEY = 'idev_ob_draft_v1';
+
 export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
@@ -54,12 +60,57 @@ export default function OnboardingPage() {
   const [useAiCategory, setUseAiCategory] = useState(true);
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
+  const [slugTouched, setSlugTouched] = useState(false);
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('general');
+  const [draftRestored, setDraftRestored] = useState(false);
+  const [host, setHost] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const step1Valid = businessDescription.trim().length >= 10;
+
+  // Restore an interrupted session: whatever the seller typed last time
+  // reappears here, so a dropped connection or accidental back-swipe on
+  // mobile never costs them their work.
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return;
+      const d = JSON.parse(raw) as Record<string, unknown>;
+      if (typeof d.businessDescription === 'string') setBusinessDescription(d.businessDescription);
+      if (d.businessType === 'product' || d.businessType === 'service' || d.businessType === 'hybrid') setBusinessType(d.businessType);
+      if (typeof d.isDropshipper === 'boolean') setIsDropshipper(d.isDropshipper);
+      if (typeof d.name === 'string') setName(d.name);
+      if (typeof d.description === 'string') setDescription(d.description);
+      if (typeof d.category === 'string') setCategory(d.category);
+      if (typeof d.slug === 'string' && d.slug) {
+        setSlug(d.slug);
+        setSlugTouched(true);
+      }
+      if (typeof d.businessDescription === 'string' && d.businessDescription.trim().length >= 10) setDraftRestored(true);
+    } catch {
+      // Corrupt draft — ignore, start fresh.
+    }
+    setHost(window.location.host);
+  }, []);
+
+  // Autosave (debounced) so the draft survives refreshes and navigation.
+  useEffect(() => {
+    const t = setTimeout(() => {
+      try {
+        localStorage.setItem(
+          DRAFT_KEY,
+          JSON.stringify({ businessDescription, businessType, isDropshipper, name, description, category, slug })
+        );
+      } catch {
+        // Storage full/blocked — autosave is best-effort.
+      }
+    }, 400);
+    return () => clearTimeout(t);
+  }, [businessDescription, businessType, isDropshipper, name, description, category, slug]);
+
+
 
   // Live AI preview: the current provider is a deterministic template generator,
   // so running it in the browser produces EXACTLY the draft step 2 will get —
@@ -84,6 +135,14 @@ export default function OnboardingPage() {
       cancelled = true;
     };
   }, [businessDescription]);
+
+  // Auto-slug: the store link pre-fills from the store name (or the AI draft
+  // of it) until the seller edits it themselves — one less field to think
+  // about. Their manual choice always wins.
+  useEffect(() => {
+    if (slugTouched) return;
+    setSlug(slugify(name || aiPreview?.name || liveDraft?.name || ''));
+  }, [slugTouched, name, aiPreview, liveDraft]);
 
   // ---- funnel analytics (fire-and-forget, never blocks the flow) ----
   const funnel = useRef({ published: false });
@@ -114,6 +173,13 @@ export default function OnboardingPage() {
     setBusy(true);
     setError(null);
     try {
+      // The live preview already holds exactly what the server would return
+      // (same deterministic generator) — skip the network hop when it's ready.
+      if (liveDraft) {
+        setAiPreview(liveDraft);
+        setStep(2);
+        return;
+      }
       const res = await fetch('/api/ai/draft-store', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -135,6 +201,7 @@ export default function OnboardingPage() {
     setBusy(true);
     setError(null);
     try {
+      localStorage.removeItem(DRAFT_KEY); // published — draft no longer needed
       const res = await fetch('/api/onboarding', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -266,11 +333,17 @@ export default function OnboardingPage() {
                   id="desc"
                   value={businessDescription}
                   onChange={(e) => setBusinessDescription(e.target.value)}
+                  onKeyDown={(e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && step1Valid && !busy) generateDraft();
+                  }}
                   placeholder="e.g. I braid hair and do makeup for events in Surulere, Lagos. I also sell wigs."
                   maxLength={600}
                   required
                 />
-                <p className="hint">{businessDescription.trim().length}/600 — the AI drafts your name, description and category from this.</p>
+                <p className="hint">
+                  {businessDescription.trim().length}/600 — the AI drafts your name, description and category from this.
+                  {draftRestored && ' ✓ Draft restored from this device.'}
+                </p>
               </div>
 
               {liveDraft && (
@@ -433,11 +506,14 @@ export default function OnboardingPage() {
                   id="slug"
                   type="text"
                   value={slug}
-                  onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                  onChange={(e) => {
+                    setSlugTouched(true);
+                    setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''));
+                  }}
                   placeholder="adaeze-braids"
                   maxLength={60}
                 />
-                <p className="ob-slug-preview">idevtenancy.com/s/<strong>{slugPreview}</strong></p>
+                <p className="ob-slug-preview">{host || 'your store'}/s/<strong>{slugPreview}</strong></p>
               </div>
 
               <div className="ob-summary" aria-label="Launch summary">
