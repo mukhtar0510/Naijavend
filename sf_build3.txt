@@ -1,0 +1,141 @@
+
+> @idevtenancy/storefront@0.1.0 build C:\Users\mukhtar\Desktop\llm\apps\storefront
+> next build
+
+  ▲ Next.js 14.2.35
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/72) ...
+[Naijavend] chat-conversations: n [Error]: Dynamic server usage: Route /api/chat/conversations couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at l (C:\Users\mukhtar\Desktop\llm\apps\storefront\.next\server\chunks\3867.js:1:37221)
+    at f (C:\Users\mukhtar\Desktop\llm\apps\storefront\.next\server\chunks\3865.js:1:1758)
+    at v (C:\Users\mukhtar\Desktop\llm\apps\storefront\.next\server\app\(seller-auth)\dashboard\signout\route.js:1:4228)
+    at c (C:\Users\mukhtar\Desktop\llm\apps\storefront\.next\server\app\api\chat\conversations\route.js:1:852)
+    at C:\Users\mukhtar\Desktop\llm\node_modules\.pnpm\next@14.2.35_react-dom@18.3.1_react@18.3.1__react@18.3.1\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:38417
+    at C:\Users\mukhtar\Desktop\llm\node_modules\.pnpm\next@14.2.35_react-dom@18.3.1_react@18.3.1__react@18.3.1\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Users\mukhtar\Desktop\llm\node_modules\.pnpm\next@14.2.35_react-dom@18.3.1_react@18.3.1__react@18.3.1\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Users\mukhtar\Desktop\llm\node_modules\.pnpm\next@14.2.35_react-dom@18.3.1_react@18.3.1__react@18.3.1\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Users\mukhtar\Desktop\llm\node_modules\.pnpm\next@14.2.35_react-dom@18.3.1_react@18.3.1__react@18.3.1\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (C:\Users\mukhtar\Desktop\llm\node_modules\.pnpm\next@14.2.35_react-dom@18.3.1_react@18.3.1__react@18.3.1\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18854) {
+  description: "Route /api/chat/conversations couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+   Generating static pages (18/72) 
+   Generating static pages (36/72) 
+[TypeError: fetch failed] {
+  [cause]: [Error: 8C3A0000:error:0A0003FC:SSL routines:ssl3_read_bytes:ssl/tls alert bad record mac:openssl\ssl\record\rec_layer_s3.c:918:SSL alert number 20
+  ] {
+    library: 'SSL routines',
+    reason: 'ssl/tls alert bad record mac',
+    code: 'ERR_SSL_SSL/TLS_ALERT_BAD_RECORD_MAC',
+    http2ErrorCode: 2
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: [Error: 8C3A0000:error:0A0003FC:SSL routines:ssl3_read_bytes:ssl/tls alert bad record mac:openssl\ssl\record\rec_layer_s3.c:918:SSL alert number 20
+  ] {
+    library: 'SSL routines',
+    reason: 'ssl/tls alert bad record mac',
+    code: 'ERR_SSL_SSL/TLS_ALERT_BAD_RECORD_MAC',
+    http2ErrorCode: 2
+  }
+}
+   Generating static pages (54/72) 
+ ✓ Generating static pages (72/72)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                              Size     First Load JS
+┌ ○ /                                    1.39 kB        97.5 kB
+├ ○ /_not-found                          169 B          87.6 kB
+├ ○ /about                               5.14 kB         110 kB
+├ ƒ /account                             5.13 kB         101 kB
+├ ƒ /account/bookings                    213 B          96.3 kB
+├ ƒ /account/chats                       213 B          96.3 kB
+├ ƒ /account/profile                     1.79 kB        97.9 kB
+├ ƒ /account/signin                      2.72 kB         164 kB
+├ ƒ /admin                               6.94 kB         103 kB
+├ ƒ /api/account/avatar                  0 B                0 B
+├ ƒ /api/account/profile                 0 B                0 B
+├ ƒ /api/account/signout                 0 B                0 B
+├ ƒ /api/admin/audit                     0 B                0 B
+├ ƒ /api/admin/metrics                   0 B                0 B
+├ ƒ /api/admin/users                     0 B                0 B
+├ ƒ /api/admin/users/[id]                0 B                0 B
+├ ƒ /api/ai/draft-listing                0 B                0 B
+├ ƒ /api/ai/draft-store                  0 B                0 B
+├ ƒ /api/ai/style-store                  0 B                0 B
+├ ƒ /api/auth/oauth-session              0 B                0 B
+├ ƒ /api/auth/session-refresh            0 B                0 B
+├ ƒ /api/bookings/transition             0 B                0 B
+├ ƒ /api/chat/conversations              0 B                0 B
+├ ƒ /api/chat/messages                   0 B                0 B
+├ ƒ /api/chat/read                       0 B                0 B
+├ ƒ /api/checkout-summary                0 B                0 B
+├ ƒ /api/create-booking                  0 B                0 B
+├ ƒ /api/create-order                    0 B                0 B
+├ ƒ /api/discounts                       0 B                0 B
+├ ƒ /api/funnel                          0 B                0 B
+├ ƒ /api/listings/create                 0 B                0 B
+├ ƒ /api/listings/delete                 0 B                0 B
+├ ƒ /api/listings/upload-image           0 B                0 B
+├ ƒ /api/listings/upload-video           0 B                0 B
+├ ƒ /api/locations                       0 B                0 B
+├ ƒ /api/mock-pay                        0 B                0 B
+├ ƒ /api/onboarding                      0 B                0 B
+├ ƒ /api/orders/transition               0 B                0 B
+├ ƒ /api/pos/charge                      0 B                0 B
+├ ƒ /api/settings                        0 B                0 B
+├ ƒ /api/staff                           0 B                0 B
+├ ƒ /api/submit-rating                   0 B                0 B
+├ ƒ /api/track                           0 B                0 B
+├ ƒ /api/validate-promo                  0 B                0 B
+├ ƒ /api/verification/apply              0 B                0 B
+├ ○ /auth/callback                       1.58 kB         162 kB
+├ ƒ /checkout/[orderId]                  1.71 kB        97.8 kB
+├ ƒ /dashboard                           4.74 kB         110 kB
+├ ƒ /dashboard/analytics                 734 B          96.8 kB
+├ ƒ /dashboard/bookings                  666 B          88.1 kB
+├ ƒ /dashboard/chat                      2.65 kB        98.8 kB
+├ ƒ /dashboard/listings                  7.88 kB         113 kB
+├ ƒ /dashboard/onboarding                13.5 kB         101 kB
+├ ƒ /dashboard/orders                    819 B          88.2 kB
+├ ƒ /dashboard/pos                       4.5 kB          101 kB
+├ ƒ /dashboard/ratings                   169 B          87.6 kB
+├ ƒ /dashboard/settings                  12.9 kB         104 kB
+├ ƒ /dashboard/signin                    2.58 kB         163 kB
+├ ƒ /dashboard/signout                   0 B                0 B
+├ ƒ /dashboard/staff                     1.81 kB        89.2 kB
+├ ƒ /discover                            8.54 kB         105 kB
+├ ○ /faq                                 213 B          96.3 kB
+├ ○ /legal                               213 B          96.3 kB
+├ ○ /legal/cookies                       169 B          87.6 kB
+├ ○ /legal/privacy                       169 B          87.6 kB
+├ ○ /legal/terms                         169 B          87.6 kB
+├ ○ /manifest.webmanifest                0 B                0 B
+├ ○ /offline                             549 B            88 kB
+├ ○ /rankings                            213 B          96.3 kB
+├ ○ /robots.txt                          0 B                0 B
+├ ƒ /s/[slug]                            3.72 kB         117 kB
+├ ƒ /s/[slug]/book/[listingId]           1.37 kB        97.5 kB
+├ ƒ /s/[slug]/catalogue                  213 B          96.3 kB
+├ ƒ /s/[slug]/chat                       1.89 kB          98 kB
+├ ƒ /s/[slug]/listing/[id]               1.35 kB         110 kB
+├ ƒ /s/[slug]/opengraph-image            0 B                0 B
+├ ƒ /s/[slug]/order/[listingId]          1.9 kB           98 kB
+├ ƒ /s/[slug]/rate                       1.68 kB        97.8 kB
+├ ƒ /search                              213 B          96.3 kB
+└ ○ /sitemap.xml                         0 B                0 B
++ First Load JS shared by all            87.4 kB
+  ├ chunks/2749-a430d8c9fec4d3bb.js      31.7 kB
+  ├ chunks/5b8f0dd8-2617d46e4ab2f3de.js  53.6 kB
+  └ other shared chunks (total)          2.04 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
