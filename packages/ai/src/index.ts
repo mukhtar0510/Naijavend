@@ -438,9 +438,47 @@ function isDarkHex(hex: string): boolean {
   return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b) < 0.3;
 }
 
+/**
+ * Curated font pairings — each vibe maps a display-worthy heading font to a
+ * highly-readable body font. All names must exist in STORE_FONTS (the canonical
+ * list in @idevtenancy/shared) so the settings API accepts them.
+ * Pairs follow the classic rule: characterful heading + quiet body.
+ */
+const FONT_PAIRINGS: Array<{ keywords: RegExp; heading: string; body: string; vibe: string }> = [
+  // Stems deliberately have no trailing \b so 'elegan' matches 'elegant'.
+  { keywords: /\b(elegan|luxur|premium|sophisticat|gold|jeweller|jeweler|bridal)/, heading: 'Playfair Display', body: 'Lora', vibe: 'elegant' },
+  { keywords: /\b(romantic|wedding|delicate|feminine|flower|floral|soft)/, heading: 'Great Vibes', body: 'Lora', vibe: 'romantic' },
+  { keywords: /\b(handmade|artisan|craft|personal|warm|friendly|home|bakery)/, heading: 'Caveat', body: 'DM Sans', vibe: 'handmade' },
+  { keywords: /\b(creative|artist|paint|design|studio|agency|music)/, heading: 'Fraunces', body: 'Outfit', vibe: 'creative' },
+  { keywords: /\b(retro|vintage|surf|skate|casual|chill|beach)/, heading: 'Pacifico', body: 'Inter', vibe: 'retro' },
+  { keywords: /\b(modern|sleek|tech|startup|digital|software)/, heading: 'Space Grotesk', body: 'Inter', vibe: 'modern' },
+  { keywords: /\b(bold|strong|impact|power|gym|fitness|sport|street)/, heading: 'Bebas Neue', body: 'Manrope', vibe: 'bold' },
+  { keywords: /\b(futur|neon|gaming|crypto|cyber|nightlife|club)/, heading: 'Unbounded', body: 'Space Grotesk', vibe: 'futuristic' },
+  { keywords: /\b(classic|timeless|tradition|formal|consult|finance)/, heading: 'Libre Baskerville', body: 'Merriweather', vibe: 'classic' },
+  { keywords: /\b(editorial|magazine|fashion|couture|storytelling)/, heading: 'Cormorant Garamond', body: 'Lora', vibe: 'editorial' },
+  { keywords: /\b(playful|fun|kids|children|toy|party|candy|sweet)/, heading: 'Dancing Script', body: 'Plus Jakarta Sans', vibe: 'playful' },
+  { keywords: /\b(minimal|simple|quiet|zen|calm|wellness|spa|yoga)/, heading: 'Manrope', body: 'Urbanist', vibe: 'minimal' },
+];
+
+/** Pick the first pairing whose keywords appear in the brief. */
+function pickFontPairing(lower: string): { heading: string; body: string; vibe: string } | null {
+  for (const p of FONT_PAIRINGS) {
+    if (p.keywords.test(lower)) {
+      return { heading: p.heading, body: p.body, vibe: p.vibe };
+    }
+  }
+  return null;
+}
+
 // Brief keywords can override the category preset (e.g. "dark", "luxury", "playful").
 function refineBrief(lower: string, preset: StylePreset): StylePreset {
   const next = { ...preset };
+  const pairing = pickFontPairing(lower);
+  const applyPairing = () => {
+    if (!pairing) return;
+    next.font_heading = pairing.heading;
+    next.font_body = pairing.body;
+  };
   const isDarkPreset = isDarkHex(next.background_color);
   if (isDarkPreset) {
     // Dark category presets keep their backgrounds; a "dark/luxury/playful"
@@ -452,6 +490,9 @@ function refineBrief(lower: string, preset: StylePreset): StylePreset {
       next.accent_text = '#0B1120';
       next.note += ' Gold accents for a premium feel.';
     }
+    // Vibe words still deserve their typography, even on a dark preset.
+    applyPairing();
+    if (pairing) next.note += ` ${pairing.heading} + ${pairing.body} type pairing for a ${pairing.vibe} feel.`;
     next.accent_text = readableTextOn(next.accent_color);
     return next;
   }
@@ -491,6 +532,10 @@ function refineBrief(lower: string, preset: StylePreset): StylePreset {
     next.hero_style = 'gradient';
     next.note = 'Minimal layout: quiet gradients, generous whitespace, one accent colour.';
   }
+  // Font pairing runs LAST so a vibe match always wins over the category
+  // preset's default fonts — but layout/accent rules above stay untouched.
+  applyPairing();
+  if (pairing) next.note += ` ${pairing.heading} headings with ${pairing.body} body text for a ${pairing.vibe} voice.`;
   next.accent_text = readableTextOn(next.accent_color);
   return next;
 }
