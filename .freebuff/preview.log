@@ -1,0 +1,232 @@
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3100
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 47.8s
+ ○ Compiling /account/signin ...
+ ✓ Compiled /account/signin in 33.2s (682 modules)
+ GET /account/signin 200 in 39014ms
+ GET /account/signin 200 in 390ms
+ GET /account/signin 200 in 1824ms
+ GET /account/signin 200 in 2401ms
+ ✓ Compiled in 84.4s (682 modules)
+ GET /account/signin 200 in 4053ms
+ ○ Compiling /dashboard/signin ...
+ ✓ Compiled /dashboard/signin in 29.7s (688 modules)
+ GET /dashboard/signin 200 in 38578ms
+ GET /dashboard/signin 200 in 1909ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 23.3s (689 modules)
+ GET /auth/reset 404 in 25158ms
+ GET /account/forgot 404 in 227ms
+ GET /api/auth/forgot 404 in 876ms
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3100
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 80.4s
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 23.1s (504 modules)
+ GET /api/health 404 in 26796ms
+ ○ Compiling /api/track ...
+ ✓ Compiled /api/track in 10.2s (336 modules)
+ POST /api/track 404 in 21229ms
+ POST /api/track 404 in 1618ms
+ POST /api/track 404 in 730ms
+ POST /api/track 404 in 422ms
+ POST /api/track 404 in 358ms
+ POST /api/track 404 in 470ms
+ POST /api/track 404 in 462ms
+ POST /api/track 404 in 5397ms
+ POST /api/track 404 in 567ms
+ POST /api/track 404 in 885ms
+ POST /api/track 404 in 1365ms
+ POST /api/track 404 in 468ms
+ POST /api/track 404 in 390ms
+ POST /api/track 404 in 487ms
+ POST /api/track 404 in 949ms
+ POST /api/track 404 in 449ms
+ POST /api/track 404 in 353ms
+ POST /api/track 404 in 368ms
+ POST /api/track 404 in 320ms
+ POST /api/track 404 in 335ms
+ POST /api/track 404 in 335ms
+ POST /api/track 404 in 288ms
+ POST /api/track 404 in 323ms
+ POST /api/track 404 in 397ms
+ POST /api/track 404 in 285ms
+ POST /api/track 404 in 428ms
+ POST /api/track 404 in 650ms
+ POST /api/track 404 in 941ms
+ POST /api/track 404 in 887ms
+ POST /api/track 404 in 319ms
+ POST /api/track 404 in 415ms
+ POST /api/track 404 in 382ms
+ POST /api/track 404 in 348ms
+ POST /api/track 404 in 333ms
+ POST /api/track 404 in 346ms
+ POST /api/track 404 in 288ms
+ POST /api/track 404 in 350ms
+ POST /api/track 404 in 397ms
+ POST /api/track 404 in 418ms
+ POST /api/track 404 in 350ms
+ POST /api/track 404 in 344ms
+ POST /api/track 404 in 365ms
+ POST /api/track 404 in 494ms
+ POST /api/track 404 in 304ms
+ POST /api/track 404 in 372ms
+ POST /api/track 404 in 330ms
+ POST /api/track 404 in 385ms
+ POST /api/track 404 in 695ms
+ POST /api/track 404 in 381ms
+ POST /api/track 404 in 349ms
+ POST /api/track 404 in 340ms
+ POST /api/track 404 in 349ms
+ POST /api/track 404 in 301ms
+ POST /api/track 404 in 287ms
+ POST /api/track 404 in 516ms
+ POST /api/track 404 in 285ms
+ POST /api/track 404 in 387ms
+ POST /api/track 404 in 335ms
+ POST /api/track 404 in 318ms
+ POST /api/track 404 in 318ms
+ POST /api/track 404 in 283ms
+ POST /api/track 404 in 336ms
+ POST /api/track 404 in 284ms
+ POST /api/track 404 in 333ms
+ POST /api/track 404 in 299ms
+ POST /api/track 404 in 320ms
+ ○ Compiling /api/validate-promo ...
+ ✓ Compiled /api/validate-promo in 3.2s (115 modules)
+ POST /api/validate-promo 400 in 6847ms
+ POST /api/validate-promo 400 in 299ms
+ POST /api/validate-promo 400 in 84ms
+ POST /api/validate-promo 400 in 110ms
+ POST /api/validate-promo 400 in 78ms
+ POST /api/validate-promo 400 in 98ms
+ POST /api/validate-promo 400 in 100ms
+ POST /api/validate-promo 400 in 787ms
+ POST /api/validate-promo 400 in 968ms
+ POST /api/validate-promo 400 in 460ms
+ POST /api/validate-promo 400 in 83ms
+ POST /api/validate-promo 400 in 144ms
+ POST /api/validate-promo 400 in 1333ms
+ POST /api/validate-promo 400 in 102ms
+ POST /api/validate-promo 400 in 180ms
+ POST /api/validate-promo 400 in 538ms
+ POST /api/validate-promo 400 in 93ms
+ POST /api/validate-promo 400 in 88ms
+ POST /api/validate-promo 400 in 71ms
+ POST /api/validate-promo 400 in 90ms
+ POST /api/validate-promo 429 in 102ms
+ POST /api/validate-promo 429 in 363ms
+ POST /api/validate-promo 429 in 153ms
+ POST /api/validate-promo 429 in 83ms
+ POST /api/validate-promo 429 in 120ms
+ POST /api/track 400 in 164ms
+ POST /api/track 400 in 145ms
+ POST /api/track 400 in 91ms
+ POST /api/track 400 in 82ms
+ POST /api/track 400 in 108ms
+ POST /api/track 400 in 90ms
+ POST /api/track 400 in 91ms
+ POST /api/track 400 in 91ms
+ POST /api/track 400 in 89ms
+ POST /api/track 400 in 78ms
+ POST /api/track 400 in 73ms
+ POST /api/track 400 in 94ms
+ POST /api/track 400 in 79ms
+ POST /api/track 400 in 83ms
+ POST /api/track 400 in 86ms
+ POST /api/track 400 in 81ms
+ POST /api/track 400 in 84ms
+ POST /api/track 400 in 80ms
+ POST /api/track 400 in 148ms
+ POST /api/track 400 in 99ms
+ POST /api/track 400 in 97ms
+ POST /api/track 400 in 100ms
+ POST /api/track 400 in 94ms
+ POST /api/track 400 in 84ms
+ POST /api/track 400 in 82ms
+ POST /api/track 400 in 85ms
+ POST /api/track 400 in 83ms
+ POST /api/track 400 in 83ms
+ POST /api/track 400 in 89ms
+ POST /api/track 400 in 85ms
+ POST /api/track 400 in 83ms
+ POST /api/track 400 in 87ms
+ POST /api/track 400 in 87ms
+ POST /api/track 400 in 77ms
+ POST /api/track 400 in 49ms
+ POST /api/track 400 in 78ms
+ POST /api/track 400 in 93ms
+ POST /api/track 400 in 82ms
+ POST /api/track 400 in 82ms
+ POST /api/track 400 in 89ms
+ POST /api/track 400 in 98ms
+ POST /api/track 400 in 73ms
+ POST /api/track 400 in 94ms
+ POST /api/track 400 in 82ms
+ POST /api/track 400 in 80ms
+ POST /api/track 400 in 89ms
+ POST /api/track 400 in 81ms
+ POST /api/track 400 in 97ms
+ POST /api/track 400 in 103ms
+ POST /api/track 400 in 84ms
+ POST /api/track 400 in 99ms
+ POST /api/track 400 in 86ms
+ POST /api/track 400 in 93ms
+ POST /api/track 400 in 84ms
+ POST /api/track 400 in 104ms
+ POST /api/track 400 in 79ms
+ POST /api/track 400 in 86ms
+ POST /api/track 400 in 82ms
+ POST /api/track 400 in 81ms
+ POST /api/track 400 in 69ms
+ POST /api/track 429 in 192ms
+ POST /api/track 429 in 72ms
+ POST /api/track 429 in 85ms
+ POST /api/track 429 in 105ms
+ POST /api/track 429 in 82ms
+ POST /api/track 429 in 73ms
+ POST /api/track 429 in 83ms
+ POST /api/track 429 in 79ms
+ POST /api/track 429 in 85ms
+ POST /api/track 429 in 77ms
+ ✓ Compiled in 14.3s (269 modules)
+ ✓ Compiled in 1611ms
+ ✓ Compiled in 5s (255 modules)
+ ✓ Compiled in 4.1s (269 modules)
+ ✓ Compiled in 4.6s (269 modules)
+ ✓ Compiled in 2.5s (255 modules)
+ ✓ Compiled in 1782ms (269 modules)
+ ✓ Compiled in 1253ms (269 modules)
+ ✓ Compiled in 6.5s (269 modules)
+ ✓ Compiled in 4.3s (269 modules)
+ ○ Compiling /account/signin ...
+ ✓ Compiled /account/signin in 52.1s (689 modules)
+ GET /account/signin 200 in 75806ms
+ ✓ Compiled in 18.8s (703 modules)
+ ✓ Compiled in 9.6s (703 modules)
+ ✓ Compiled in 13.3s (703 modules)
+ ✓ Compiled in 6.8s (703 modules)
+ ✓ Compiled in 9.5s (703 modules)
+ ✓ Compiled in 3.4s (703 modules)
+ ✓ Compiled in 19.8s (716 modules)
+ ✓ Compiled in 6.5s (703 modules)
+ ✓ Compiled in 18.3s (703 modules)
+ ✓ Compiled in 5.4s (703 modules)
+ ✓ Compiled in 21.5s (703 modules)
+ ✓ Compiled in 7.9s (703 modules)
+ ✓ Compiled in 4s (703 modules)
+ ✓ Compiled in 11.9s (703 modules)
+ ○ Compiling / ...
+ ✓ Compiled / in 43.1s (713 modules)
+ GET / 200 in 2741ms
+ GET / 200 in 370ms
+ ✓ Compiled in 28.6s (706 modules)
+ ✓ Compiled in 9.2s (706 modules)
+ ✓ Compiled in 19s (706 modules)
+ ✓ Compiled in 89.7s (706 modules)

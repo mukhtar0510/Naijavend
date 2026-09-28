@@ -1,0 +1,647 @@
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3100
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 44.3s
+ ○ Compiling /s/[slug] ...
+ ✓ Compiled /s/[slug] in 86.3s (593 modules)
+ GET /s/zaras-cake-studio 200 in 94740ms
+ ✓ Compiled in 1241ms
+ ○ Compiling /s/[slug] ...
+ ✓ Compiled /s/[slug] in 5.9s (337 modules)
+ GET /s/zaras-cake-studio 200 in 8906ms
+ ○ Compiling /api/auth/signin ...
+ ✓ Compiled /api/auth/signin in 7.1s (373 modules)
+ POST /api/auth/signin 401 in 11182ms
+ ○ Compiling /dashboard ...
+ ✓ Compiled /dashboard in 4.9s (618 modules)
+ ⨯ src\app\dashboard\page.tsx (21:37) @ from
+ ⨯ TypeError: Cannot read properties of null (reading 'from')
+    at DashboardHome (./src/app/dashboard/page.tsx:23:38)
+digest: "761724625"
+[0m [90m 19 |[39m }) {[0m
+[0m [90m 20 |[39m   [36mconst[39m sb [33m=[39m [36mawait[39m getSellerClient()[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 21 |[39m   [36mconst[39m { data[33m:[39m store } [33m=[39m [36mawait[39m sb[33m![39m[33m.[39m[36mfrom[39m([32m'stores'[39m)[0m
+[0m [90m    |[39m                                     [31m[1m^[22m[39m[0m
+[0m [90m 22 |[39m     [33m.[39mselect([32m'*, store_rating_stats(review_count, avg_stars, overall_rank, category_rank), store_themes(*)'[39m)[0m
+[0m [90m 23 |[39m     [33m.[39mmaybeSingle()[33m;[39m[0m
+[0m [90m 24 |[39m[0m
+ GET /dashboard 307 in 5802ms
+ ○ Compiling /dashboard/settings ...
+ ✓ Compiled /dashboard/settings in 3.9s (638 modules)
+ ⨯ src\app\dashboard\settings\page.tsx (16:37) @ from
+ ⨯ TypeError: Cannot read properties of null (reading 'from')
+    at SettingsPage (./src/app/dashboard/settings/page.tsx:23:38)
+digest: "2133034086"
+[0m [90m 14 |[39m [36mexport[39m [36mdefault[39m [36masync[39m [36mfunction[39m [33mSettingsPage[39m() {[0m
+[0m [90m 15 |[39m   [36mconst[39m sb [33m=[39m [36mawait[39m getSellerClient()[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 16 |[39m   [36mconst[39m { data[33m:[39m store } [33m=[39m [36mawait[39m sb[33m![39m[33m.[39m[36mfrom[39m([32m'stores'[39m)[0m
+[0m [90m    |[39m                                     [31m[1m^[22m[39m[0m
+[0m [90m 17 |[39m     [33m.[39mselect([32m'*, whatsapp_settings(business_number, greeting_message, catalog_enabled), store_themes(*)'[39m)[0m
+[0m [90m 18 |[39m     [33m.[39mmaybeSingle()[33m;[39m[0m
+[0m [90m 19 |[39m[0m
+ GET /dashboard/settings 307 in 4831ms
+ ○ Compiling /api/auth/signup ...
+ ✓ Compiled /api/auth/signup in 4.9s (117 modules)
+ POST /api/auth/signup 400 in 9151ms
+ POST /api/auth/signup 400 in 1041ms
+ POST /api/auth/signup 400 in 1545ms
+ POST /api/auth/signup 400 in 2567ms
+ ○ Compiling /api/auth/signin ...
+ ✓ Compiled /api/auth/signin in 2.7s (117 modules)
+ POST /api/auth/signin 200 in 5865ms
+ ○ Compiling /dashboard ...
+ ✓ Compiled /dashboard in 1439ms (338 modules)
+ GET /dashboard 200 in 6885ms
+ ○ Compiling /dashboard/settings ...
+ ✓ Compiled /dashboard/settings in 934ms (349 modules)
+ GET /dashboard/settings 200 in 4908ms
+ ○ Compiling / ...
+ ✓ Compiled / in 6.6s (540 modules)
+ GET / 200 in 8192ms
+ GET / 200 in 167ms
+ GET / 200 in 652ms
+ ○ Compiling /s/[slug] ...
+ ✓ Compiled /s/[slug] in 3.8s (340 modules)
+ GET /s/amaka-glow-studio 200 in 13956ms
+ ○ Compiling /discover ...
+ ✓ Compiled /discover in 6s (592 modules)
+ GET /s/amaka-glow-studio 200 in 1017ms
+ ○ Compiling /dashboard/signin ...
+ ✓ Compiled /dashboard/signin in 7s (612 modules)
+ GET /dashboard/signin 307 in 9001ms
+ GET /dashboard/signin 307 in 213ms
+ GET /dashboard/signin 307 in 380ms
+ GET /dashboard/signin 307 in 301ms
+ GET /dashboard/signin 307 in 191ms
+ GET /dashboard/signin 307 in 239ms
+ GET /dashboard/signin 307 in 186ms
+ GET /dashboard/signin 307 in 213ms
+ GET /dashboard/signin 307 in 312ms
+ GET /dashboard/signin 307 in 364ms
+ GET /dashboard/signin 307 in 533ms
+ GET /dashboard/signin 307 in 364ms
+ GET /dashboard/signin 307 in 337ms
+ GET /dashboard/signin 307 in 193ms
+ GET /dashboard/signin 307 in 199ms
+ GET /dashboard/signin 307 in 233ms
+ GET /dashboard/signin 307 in 240ms
+ GET /dashboard/signin 307 in 252ms
+ GET /dashboard/signin 307 in 210ms
+ GET /dashboard/signin 307 in 284ms
+ GET /dashboard/signin 307 in 145ms
+ GET /dashboard/signin 307 in 297ms
+ GET /dashboard/signin 307 in 170ms
+ GET /dashboard/signin 307 in 864ms
+ GET /dashboard/signin 307 in 170ms
+ GET /dashboard/signin 307 in 169ms
+ GET /dashboard/signin 307 in 157ms
+ GET /dashboard/signin 307 in 138ms
+ GET /dashboard/signin 307 in 191ms
+ GET /dashboard/signin 307 in 213ms
+ GET /dashboard/signin 307 in 200ms
+ GET /dashboard/signin 307 in 164ms
+ GET /dashboard/signin 307 in 280ms
+ GET /dashboard/signin 307 in 196ms
+ GET /dashboard/signin 307 in 165ms
+ GET /dashboard/signin 307 in 197ms
+ GET /dashboard/signin 307 in 170ms
+ GET /dashboard/signin 307 in 189ms
+ GET /dashboard/signin 307 in 159ms
+ GET /dashboard/signin 307 in 181ms
+ GET /dashboard/signin 307 in 111ms
+ ○ Compiling /account/signin ...
+ ✓ Compiled /account/signin in 3.6s (619 modules)
+ GET /account/signin 200 in 4247ms
+ ○ Compiling /rankings ...
+ ✓ Compiled /rankings in 4.7s (621 modules)
+ GET /account/signin 200 in 1091ms
+ ○ Compiling /api/account/auth/signin ...
+ ✓ Compiled /api/account/auth/signin in 8.7s (388 modules)
+ POST /api/account/auth/signin 200 in 19453ms
+ ○ Compiling /account ...
+ ✓ Compiled /account in 12.3s (643 modules)
+ ○ Compiling /account/profile ...
+ ✓ Compiled /account/bookings in 23.9s (647 modules)
+ ○ Compiling /api/account/signout ...
+ ✓ Compiled /api/account/signout in 16.5s (390 modules)
+ GET / 200 in 5396ms
+ ○ Compiling /dashboard ...
+ ✓ Compiled /dashboard in 5.5s (649 modules)
+ ⨯ src\app\dashboard\page.tsx (21:37) @ from
+ ⨯ TypeError: Cannot read properties of null (reading 'from')
+    at DashboardHome (./src/app/dashboard/page.tsx:23:38)
+digest: "761724625"
+[0m [90m 19 |[39m }) {[0m
+[0m [90m 20 |[39m   [36mconst[39m sb [33m=[39m [36mawait[39m getSellerClient()[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 21 |[39m   [36mconst[39m { data[33m:[39m store } [33m=[39m [36mawait[39m sb[33m![39m[33m.[39m[36mfrom[39m([32m'stores'[39m)[0m
+[0m [90m    |[39m                                     [31m[1m^[22m[39m[0m
+[0m [90m 22 |[39m     [33m.[39mselect([32m'*, store_rating_stats(review_count, avg_stars, overall_rank, category_rank), store_themes(*)'[39m)[0m
+[0m [90m 23 |[39m     [33m.[39mmaybeSingle()[33m;[39m[0m
+[0m [90m 24 |[39m[0m
+ ○ Compiling /dashboard/signin ...
+ ✓ Compiled /dashboard/signin in 5.6s (653 modules)
+ GET / 200 in 3185ms
+ ⨯ src\app\dashboard\page.tsx (21:37) @ from
+ ⨯ TypeError: Cannot read properties of null (reading 'from')
+    at DashboardHome (./src/app/dashboard/page.tsx:23:38)
+digest: "761724625"
+[0m [90m 19 |[39m }) {[0m
+[0m [90m 20 |[39m   [36mconst[39m sb [33m=[39m [36mawait[39m getSellerClient()[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 21 |[39m   [36mconst[39m { data[33m:[39m store } [33m=[39m [36mawait[39m sb[33m![39m[33m.[39m[36mfrom[39m([32m'stores'[39m)[0m
+[0m [90m    |[39m                                     [31m[1m^[22m[39m[0m
+[0m [90m 22 |[39m     [33m.[39mselect([32m'*, store_rating_stats(review_count, avg_stars, overall_rank, category_rank), store_themes(*)'[39m)[0m
+[0m [90m 23 |[39m     [33m.[39mmaybeSingle()[33m;[39m[0m
+[0m [90m 24 |[39m[0m
+ GET / 200 in 312ms
+ ○ Compiling /s/[slug]/rate ...
+ ✓ Compiled /s/[slug]/rate in 13.5s (629 modules)
+ ⨯ src\app\dashboard\page.tsx (21:37) @ from
+ ⨯ TypeError: Cannot read properties of null (reading 'from')
+    at DashboardHome (./src/app/dashboard/page.tsx:23:38)
+digest: "761724625"
+[0m [90m 19 |[39m }) {[0m
+[0m [90m 20 |[39m   [36mconst[39m sb [33m=[39m [36mawait[39m getSellerClient()[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 21 |[39m   [36mconst[39m { data[33m:[39m store } [33m=[39m [36mawait[39m sb[33m![39m[33m.[39m[36mfrom[39m([32m'stores'[39m)[0m
+[0m [90m    |[39m                                     [31m[1m^[22m[39m[0m
+[0m [90m 22 |[39m     [33m.[39mselect([32m'*, store_rating_stats(review_count, avg_stars, overall_rank, category_rank), store_themes(*)'[39m)[0m
+[0m [90m 23 |[39m     [33m.[39mmaybeSingle()[33m;[39m[0m
+[0m [90m 24 |[39m[0m
+ ✓ Compiled in 17.2s (362 modules)
+ ○ Compiling /dashboard/signin ...
+ ✓ Compiled /dashboard/signin in 5.6s (625 modules)
+ ✓ Compiled in 24.9s (625 modules)
+ ✓ Compiled in 17.2s (625 modules)
+ ✓ Compiled in 10.5s (625 modules)
+ ✓ Compiled in 11.9s (625 modules)
+ ✓ Compiled in 12.6s (625 modules)
+ ✓ Compiled in 19.4s (625 modules)
+ ○ Compiling / ...
+ ✓ Compiled / in 20.8s (364 modules)
+ GET / 200 in 23921ms
+ GET / 200 in 165ms
+ GET /s/amaka-glow-studio 200 in 408ms
+ ○ Compiling /s/[slug]/chat ...
+ ✓ Compiled /s/[slug]/chat in 10.8s (628 modules)
+ GET /s/amaka-glow-studio/chat 200 in 18871ms
+ GET /account/signin 200 in 306ms
+ GET /s/amaka-glow-studio 200 in 400ms
+ ○ Compiling /s/[slug]/listing/[id] ...
+ ✓ Compiled /s/[slug]/listing/[id] in 4.3s (635 modules)
+ GET /s/amaka-glow-studio/listing/bbbbbbb1-0000-4000-8000-000000000001 200 in 9060ms
+ GET /s/amaka-glow-studio/listing/bbbbbbb1-0000-4000-8000-000000000001 200 in 930ms
+ ○ Compiling /api/chat/messages ...
+ ✓ Compiled /api/chat/messages in 10.2s (399 modules)
+ GET /api/chat/messages?storeId=aaaaaaa1-0000-4000-8000-000000000001 200 in 4238ms
+ GET /api/chat/messages?storeId=aaaaaaa1-0000-4000-8000-000000000001 200 in 8091ms
+ GET /api/chat/messages?storeId=aaaaaaa1-0000-4000-8000-000000000001 200 in 12354ms
+ GET /api/chat/messages?storeId=aaaaaaa1-0000-4000-8000-000000000001 200 in 12361ms
+ GET /api/chat/messages?storeId=aaaaaaa1-0000-4000-8000-000000000001 200 in 676ms
+[Sokoo] chat-post: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "chat_messages"'
+}
+ POST /api/chat/messages 500 in 5932ms
+ GET /api/chat/messages?storeId=aaaaaaa1-0000-4000-8000-000000000001 200 in 645ms
+ GET /api/chat/messages?storeId=aaaaaaa1-0000-4000-8000-000000000001 200 in 1785ms
+ GET /api/chat/messages?storeId=aaaaaaa1-0000-4000-8000-000000000001 200 in 532ms
+ GET /api/chat/messages?storeId=aaaaaaa1-0000-4000-8000-000000000001 200 in 518ms
+[Sokoo] chat-post: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "chat_messages"'
+}
+ POST /api/chat/messages 500 in 1115ms
+ GET /api/chat/messages?storeId=aaaaaaa1-0000-4000-8000-000000000001 200 in 1202ms
+ GET /api/chat/messages?storeId=aaaaaaa1-0000-4000-8000-000000000001 200 in 1346ms
+ GET /api/chat/messages?storeId=aaaaaaa1-0000-4000-8000-000000000001 200 in 702ms
+ GET /api/chat/messages?storeId=aaaaaaa1-0000-4000-8000-000000000001 200 in 709ms
+ GET /api/chat/messages?storeId=aaaaaaa1-0000-4000-8000-000000000001 200 in 1380ms
+ GET /api/chat/messages?storeId=aaaaaaa1-0000-4000-8000-000000000001 200 in 793ms
+ GET /s/amaka-glow-studio/listing/bbbbbbb1-0000-4000-8000-000000000001 200 in 3395ms
+ ○ Compiling /discover ...
+ ✓ Compiled /discover in 11.6s (394 modules)
+ GET /discover 200 in 10660ms
+ GET /s/amaka-glow-studio/listing/bbbbbbb1-0000-4000-8000-000000000001 200 in 639ms
+ ○ Compiling /dashboard/chat ...
+ ✓ Compiled /dashboard/chat in 12.7s (631 modules)
+ ⨯ src\app\dashboard\chat\page.tsx (10:37) @ from
+ ⨯ TypeError: Cannot read properties of null (reading 'from')
+    at SellerChatPage (./src/app/dashboard/chat/page.tsx:18:38)
+digest: "325305071"
+[0m [90m  8 |[39m [36mexport[39m [36mdefault[39m [36masync[39m [36mfunction[39m [33mSellerChatPage[39m() {[0m
+[0m [90m  9 |[39m   [36mconst[39m sb [33m=[39m [36mawait[39m getSellerClient()[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 10 |[39m   [36mconst[39m { data[33m:[39m store } [33m=[39m [36mawait[39m sb[33m![39m[33m.[39m[36mfrom[39m([32m'stores'[39m)[33m.[39mselect([32m'id, name, slug'[39m)[33m.[39mmaybeSingle()[33m;[39m[0m
+[0m [90m    |[39m                                     [31m[1m^[22m[39m[0m
+[0m [90m 11 |[39m   [36mif[39m ([33m![39mstore) {[0m
+[0m [90m 12 |[39m     [36mreturn[39m ([0m
+[0m [90m 13 |[39m       [33m<[39m[33mmain[39m[33m>[39m[0m
+ GET /dashboard/chat 307 in 14646ms
+ ○ Compiling /dashboard/signin ...
+ ✓ Compiled /dashboard/signin in 8.3s (637 modules)
+ GET /dashboard/signin 307 in 14695ms
+ GET /dashboard/signin 307 in 406ms
+ GET /dashboard/signin 307 in 131ms
+ GET /dashboard/signin 307 in 188ms
+ GET /dashboard/signin 307 in 401ms
+ GET /dashboard/signin 307 in 251ms
+ GET /dashboard/signin 307 in 383ms
+ GET /dashboard/signin 307 in 326ms
+ GET /dashboard/signin 307 in 416ms
+ GET /dashboard/signin 307 in 144ms
+ GET /dashboard/signin 307 in 358ms
+ GET /dashboard/signin 307 in 427ms
+ GET /dashboard/signin 307 in 183ms
+ GET /dashboard/signin 307 in 142ms
+ GET /dashboard/signin 307 in 193ms
+ GET /dashboard/signin 307 in 229ms
+ GET /dashboard/signin 307 in 184ms
+ GET /dashboard/signin 307 in 247ms
+ GET /dashboard/signin 307 in 284ms
+ ⨯ src\app\dashboard\chat\page.tsx (10:37) @ from
+ ⨯ TypeError: Cannot read properties of null (reading 'from')
+    at SellerChatPage (./src/app/dashboard/chat/page.tsx:18:38)
+digest: "325305071"
+[0m [90m  8 |[39m [36mexport[39m [36mdefault[39m [36masync[39m [36mfunction[39m [33mSellerChatPage[39m() {[0m
+[0m [90m  9 |[39m   [36mconst[39m sb [33m=[39m [36mawait[39m getSellerClient()[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 10 |[39m   [36mconst[39m { data[33m:[39m store } [33m=[39m [36mawait[39m sb[33m![39m[33m.[39m[36mfrom[39m([32m'stores'[39m)[33m.[39mselect([32m'id, name, slug'[39m)[33m.[39mmaybeSingle()[33m;[39m[0m
+[0m [90m    |[39m                                     [31m[1m^[22m[39m[0m
+[0m [90m 11 |[39m   [36mif[39m ([33m![39mstore) {[0m
+[0m [90m 12 |[39m     [36mreturn[39m ([0m
+[0m [90m 13 |[39m       [33m<[39m[33mmain[39m[33m>[39m[0m
+ GET /dashboard/chat 307 in 371ms
+ GET /dashboard/signin 307 in 163ms
+ GET /dashboard/signin 307 in 144ms
+ GET /dashboard/signin 307 in 125ms
+ GET /dashboard/signin 307 in 82ms
+ GET /dashboard/signin 307 in 164ms
+ GET /dashboard/signin 307 in 141ms
+ GET /dashboard/signin 307 in 121ms
+ GET /dashboard/signin 307 in 111ms
+ GET /dashboard/signin 307 in 130ms
+ GET /dashboard/signin 307 in 127ms
+ GET /dashboard/signin 307 in 165ms
+ GET /dashboard/signin 307 in 136ms
+ GET /dashboard/signin 307 in 138ms
+ GET /dashboard/signin 307 in 138ms
+ GET /dashboard/signin 307 in 151ms
+ GET /dashboard/signin 307 in 153ms
+ GET /dashboard/signin 307 in 151ms
+ GET /dashboard/signin 307 in 142ms
+ GET /dashboard/signin 307 in 154ms
+ ○ Compiling /api/auth/signin ...
+ ✓ Compiled /api/auth/signin in 18.3s (652 modules)
+ POST /api/auth/signin 200 in 23793ms
+ ○ Compiling /dashboard/chat ...
+ ✓ Compiled /dashboard/chat in 2.4s (659 modules)
+ GET /dashboard/chat 200 in 4976ms
+ GET / 200 in 2068ms
+ ○ Compiling /rankings ...
+ ✓ Compiled /rankings in 9.3s (363 modules)
+ ○ Compiling /dashboard ...
+ ✓ Compiled /dashboard in 10.6s (630 modules)
+ ⨯ src\app\dashboard\page.tsx (21:37) @ from
+ ⨯ TypeError: Cannot read properties of null (reading 'from')
+    at DashboardHome (./src/app/dashboard/page.tsx:23:38)
+digest: "761724625"
+[0m [90m 19 |[39m }) {[0m
+[0m [90m 20 |[39m   [36mconst[39m sb [33m=[39m [36mawait[39m getSellerClient()[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 21 |[39m   [36mconst[39m { data[33m:[39m store } [33m=[39m [36mawait[39m sb[33m![39m[33m.[39m[36mfrom[39m([32m'stores'[39m)[0m
+[0m [90m    |[39m                                     [31m[1m^[22m[39m[0m
+[0m [90m 22 |[39m     [33m.[39mselect([32m'*, store_rating_stats(review_count, avg_stars, overall_rank, category_rank), store_themes(*)'[39m)[0m
+[0m [90m 23 |[39m     [33m.[39mmaybeSingle()[33m;[39m[0m
+[0m [90m 24 |[39m[0m
+ ○ Compiling /dashboard/signin ...
+ ✓ Compiled /dashboard/signin in 5.1s (636 modules)
+ GET / 200 in 3379ms
+ ⨯ src\app\dashboard\page.tsx (21:37) @ from
+ ⨯ TypeError: Cannot read properties of null (reading 'from')
+    at DashboardHome (./src/app/dashboard/page.tsx:23:38)
+digest: "761724625"
+[0m [90m 19 |[39m }) {[0m
+[0m [90m 20 |[39m   [36mconst[39m sb [33m=[39m [36mawait[39m getSellerClient()[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 21 |[39m   [36mconst[39m { data[33m:[39m store } [33m=[39m [36mawait[39m sb[33m![39m[33m.[39m[36mfrom[39m([32m'stores'[39m)[0m
+[0m [90m    |[39m                                     [31m[1m^[22m[39m[0m
+[0m [90m 22 |[39m     [33m.[39mselect([32m'*, store_rating_stats(review_count, avg_stars, overall_rank, category_rank), store_themes(*)'[39m)[0m
+[0m [90m 23 |[39m     [33m.[39mmaybeSingle()[33m;[39m[0m
+[0m [90m 24 |[39m[0m
+ GET / 200 in 1048ms
+ ○ Compiling /account ...
+ ✓ Compiled /account in 18.3s (629 modules)
+ ✓ Compiled in 3.6s (355 modules)
+ ○ Compiling /api/auth/signin ...
+ ✓ Compiled /api/auth/signin in 6.7s (383 modules)
+ POST /api/auth/signin 200 in 10668ms
+ ○ Compiling /dashboard ...
+ ✓ Compiled /dashboard in 2.9s (650 modules)
+ GET /dashboard 200 in 5757ms
+ ○ Compiling /dashboard/chat ...
+ ✓ Compiled /dashboard/chat in 7.1s (657 modules)
+ GET /dashboard/chat 200 in 10687ms
+ ○ Compiling /dashboard/listings ...
+ ✓ Compiled /dashboard/listings in 6.2s (665 modules)
+ GET /dashboard/listings 200 in 8906ms
+ ○ Compiling /dashboard/settings ...
+ ✓ Compiled /dashboard/settings in 2.9s (674 modules)
+ GET /dashboard/settings 200 in 4252ms
+ GET /dashboard/chat 200 in 920ms
+ GET /s/amaka-glow-studio 200 in 458ms
+ ○ Compiling /api/chat/messages ...
+ ✓ Compiled /api/chat/messages in 6.7s (671 modules)
+ GET /api/chat/messages?storeId= 400 in 7942ms
+ POST /api/chat/messages 400 in 45ms
+ ○ Compiling /api/account/auth/signin ...
+ ✓ Compiled /api/account/auth/signin in 7.2s (674 modules)
+ POST /api/account/auth/signin 200 in 10041ms
+ GET /api/chat/messages?storeId= 400 in 50ms
+ GET /api/chat/messages?storeId= 400 in 43ms
+ GET /api/chat/messages?storeId=aaaaaaa1-0000-4000-8000-000000000001 200 in 3616ms
+ POST /api/chat/messages 201 in 1223ms
+ GET /api/chat/messages?storeId=aaaaaaa1-0000-4000-8000-000000000001 200 in 663ms
+ GET /api/chat/messages?storeId=aaaaaaa1-0000-4000-8000-000000000001 401 in 55ms
+ ✓ Compiled in 9s (382 modules)
+ GET /api/chat/messages?storeId=aaaaaaa1-0000-4000-8000-000000000001 200 in 1999ms
+ POST /api/chat/messages 201 in 2926ms
+ ○ Compiling /api/listings/upload-image ...
+ ✓ Compiled /api/listings/upload-image in 2.9s (384 modules)
+ POST /api/listings/upload-image 201 in 5193ms
+ ○ Compiling /dashboard/signin ...
+ ✓ Compiled /dashboard/signin in 7.8s (658 modules)
+ GET /dashboard/signin 307 in 9291ms
+ GET /dashboard/signin 307 in 415ms
+ GET /dashboard/signin 307 in 220ms
+ GET /dashboard/signin 307 in 286ms
+ GET /dashboard/signin 307 in 305ms
+ GET /dashboard/signin 307 in 145ms
+ GET /dashboard/signin 307 in 364ms
+ GET /dashboard/signin 307 in 461ms
+ GET /dashboard/signin 307 in 167ms
+ GET /dashboard/signin 307 in 138ms
+ GET /dashboard/signin 307 in 165ms
+ GET /dashboard/signin 307 in 186ms
+ GET /dashboard/signin 307 in 148ms
+ GET /dashboard/signin 307 in 206ms
+ GET /dashboard/signin 307 in 220ms
+ GET /dashboard/signin 307 in 182ms
+ GET /dashboard/signin 307 in 191ms
+ GET /dashboard/signin 307 in 320ms
+ GET /dashboard/signin 307 in 304ms
+ GET /dashboard/signin 307 in 272ms
+ ○ Compiling /account/signin ...
+ ✓ Compiled /account/signin in 2.5s (660 modules)
+ GET /account/signin 200 in 3472ms
+ ○ Compiling /api/account/auth/signin ...
+ ✓ Compiled /api/account/auth/signin in 2.1s (388 modules)
+ POST /api/account/auth/signin 200 in 4899ms
+ ○ Compiling /dashboard ...
+ ✓ Compiled /dashboard in 3.9s (657 modules)
+ ⨯ src\lib\auth.ts (82:39) @ auth
+ ⨯ TypeError: Cannot read properties of null (reading 'auth')
+    at getOwnStore (./src/lib/auth.ts:100:41)
+    at DashboardHome (./src/app/dashboard/page.tsx:23:79)
+digest: "5650046"
+[0m [90m 80 |[39m   select [33m=[39m [32m'*'[39m[0m
+[0m [90m 81 |[39m )[33m:[39m [33mPromise[39m[33m<[39m[33mT[39m [33m|[39m [36mnull[39m[33m>[39m {[0m
+[0m[31m[1m>[22m[39m[90m 82 |[39m   [36mconst[39m { data[33m:[39m userData } [33m=[39m [36mawait[39m sb[33m.[39mauth[33m.[39mgetUser()[33m;[39m[0m
+[0m [90m    |[39m                                       [31m[1m^[22m[39m[0m
+[0m [90m 83 |[39m   [36mconst[39m uid [33m=[39m userData[33m.[39muser[33m?[39m[33m.[39mid[33m;[39m[0m
+[0m [90m 84 |[39m   [36mif[39m ([33m![39muid) [36mreturn[39m [36mnull[39m[33m;[39m[0m
+[0m [90m 85 |[39m   [36mconst[39m { data } [33m=[39m [36mawait[39m sb[33m.[39m[36mfrom[39m([32m'stores'[39m)[33m.[39mselect(select)[33m.[39meq([32m'owner_id'[39m[33m,[39m uid)[33m.[39mmaybeSingle()[33m;[39m[0m
+ GET /dashboard 307 in 5401ms
+ ○ Compiling /dashboard/signin ...
+ ✓ Compiled /dashboard/signin in 3.1s (661 modules)
+ GET /dashboard/signin 307 in 3411ms
+ GET /dashboard/signin 307 in 359ms
+ GET /dashboard/signin 307 in 210ms
+ GET /dashboard/signin 307 in 236ms
+ GET /dashboard/signin 307 in 182ms
+ GET /dashboard/signin 307 in 264ms
+ GET /dashboard/signin 307 in 432ms
+ GET /dashboard/signin 307 in 350ms
+ GET /dashboard/signin 307 in 277ms
+ GET /dashboard/signin 307 in 300ms
+ GET /dashboard/signin 307 in 156ms
+ GET /dashboard/signin 307 in 128ms
+ GET /dashboard/signin 307 in 167ms
+ GET /dashboard/signin 307 in 130ms
+ GET /dashboard/signin 307 in 149ms
+ GET /dashboard/signin 307 in 141ms
+ GET /dashboard/signin 307 in 252ms
+ GET /dashboard/signin 307 in 250ms
+ GET /dashboard/signin 307 in 253ms
+ ⨯ src\lib\auth.ts (82:39) @ auth
+ ⨯ TypeError: Cannot read properties of null (reading 'auth')
+    at getOwnStore (./src/lib/auth.ts:100:41)
+    at DashboardHome (./src/app/dashboard/page.tsx:23:79)
+digest: "5650046"
+[0m [90m 80 |[39m   select [33m=[39m [32m'*'[39m[0m
+[0m [90m 81 |[39m )[33m:[39m [33mPromise[39m[33m<[39m[33mT[39m [33m|[39m [36mnull[39m[33m>[39m {[0m
+[0m[31m[1m>[22m[39m[90m 82 |[39m   [36mconst[39m { data[33m:[39m userData } [33m=[39m [36mawait[39m sb[33m.[39mauth[33m.[39mgetUser()[33m;[39m[0m
+[0m [90m    |[39m                                       [31m[1m^[22m[39m[0m
+[0m [90m 83 |[39m   [36mconst[39m uid [33m=[39m userData[33m.[39muser[33m?[39m[33m.[39mid[33m;[39m[0m
+[0m [90m 84 |[39m   [36mif[39m ([33m![39muid) [36mreturn[39m [36mnull[39m[33m;[39m[0m
+[0m [90m 85 |[39m   [36mconst[39m { data } [33m=[39m [36mawait[39m sb[33m.[39m[36mfrom[39m([32m'stores'[39m)[33m.[39mselect(select)[33m.[39meq([32m'owner_id'[39m[33m,[39m uid)[33m.[39mmaybeSingle()[33m;[39m[0m
+ GET /dashboard 307 in 883ms
+ GET /dashboard/signin 307 in 1497ms
+ GET /dashboard/signin 307 in 1258ms
+ GET /dashboard/signin 307 in 1764ms
+ GET /dashboard/signin 307 in 420ms
+ GET /dashboard/signin 307 in 454ms
+ GET /dashboard/signin 307 in 184ms
+ GET /dashboard/signin 307 in 230ms
+ GET /dashboard/signin 307 in 178ms
+ GET /dashboard/signin 307 in 166ms
+ GET /dashboard/signin 307 in 149ms
+ GET /dashboard/signin 307 in 138ms
+ GET /dashboard/signin 307 in 244ms
+ GET /dashboard/signin 307 in 158ms
+ GET /dashboard/signin 307 in 200ms
+ GET /dashboard/signin 307 in 164ms
+ GET /dashboard/signin 307 in 165ms
+ GET /dashboard/signin 307 in 163ms
+ GET /dashboard/signin 307 in 140ms
+ GET /dashboard/signin 307 in 152ms
+ ○ Compiling / ...
+ ✓ Compiled / in 4.9s (635 modules)
+ GET / 200 in 6682ms
+ ⨯ src\lib\auth.ts (82:39) @ auth
+ ⨯ TypeError: Cannot read properties of null (reading 'auth')
+    at getOwnStore (./src/lib/auth.ts:100:41)
+    at DashboardHome (./src/app/dashboard/page.tsx:23:79)
+digest: "5650046"
+[0m [90m 80 |[39m   select [33m=[39m [32m'*'[39m[0m
+[0m [90m 81 |[39m )[33m:[39m [33mPromise[39m[33m<[39m[33mT[39m [33m|[39m [36mnull[39m[33m>[39m {[0m
+[0m[31m[1m>[22m[39m[90m 82 |[39m   [36mconst[39m { data[33m:[39m userData } [33m=[39m [36mawait[39m sb[33m.[39mauth[33m.[39mgetUser()[33m;[39m[0m
+[0m [90m    |[39m                                       [31m[1m^[22m[39m[0m
+[0m [90m 83 |[39m   [36mconst[39m uid [33m=[39m userData[33m.[39muser[33m?[39m[33m.[39mid[33m;[39m[0m
+[0m [90m 84 |[39m   [36mif[39m ([33m![39muid) [36mreturn[39m [36mnull[39m[33m;[39m[0m
+[0m [90m 85 |[39m   [36mconst[39m { data } [33m=[39m [36mawait[39m sb[33m.[39m[36mfrom[39m([32m'stores'[39m)[33m.[39mselect(select)[33m.[39meq([32m'owner_id'[39m[33m,[39m uid)[33m.[39mmaybeSingle()[33m;[39m[0m
+ GET /dashboard 307 in 436ms
+ GET /dashboard/signin 307 in 217ms
+ GET /dashboard/signin 307 in 472ms
+ GET /dashboard/signin 307 in 461ms
+ GET /dashboard/signin 307 in 239ms
+ GET /dashboard/signin 307 in 252ms
+ GET /dashboard/signin 307 in 309ms
+ GET /dashboard/signin 307 in 271ms
+ GET /dashboard/signin 307 in 446ms
+ GET /dashboard/signin 307 in 422ms
+ GET /dashboard/signin 307 in 213ms
+ GET /dashboard/signin 307 in 386ms
+ GET /dashboard/signin 307 in 276ms
+ GET /dashboard/signin 307 in 220ms
+ GET /dashboard/signin 307 in 151ms
+ GET /dashboard/signin 307 in 200ms
+ GET /dashboard/signin 307 in 193ms
+ GET /dashboard/signin 307 in 258ms
+ GET /dashboard/signin 307 in 322ms
+ GET /dashboard/signin 307 in 177ms
+ GET / 200 in 968ms
+ ✓ Compiled in 16.3s (319 modules)
+ ✓ Compiled in 4.2s (319 modules)
+ ✓ Compiled in 2.4s (319 modules)
+ ✓ Compiled in 11ms (319 modules)
+ ✓ Compiled in 16.2s (598 modules)
+ ✓ Compiled in 5.6s (598 modules)
+ ✓ Compiled in 12.5s (319 modules)
+ ⨯ ./src/app/(marketplace)/rankings/page.tsx
+Error: 
+  [31mx[0m Unexpected token `section`. Expected jsx identifier
+    ,-[[36;1;4mC:\Users\mukhtar\Desktop\llm\apps\storefront\src\app\(marketplace)\rankings\page.tsx[0m:64:1]
+ [2m64[0m | 
+ [2m65[0m | function Leaderboard({ title, entries }: { title: string; entries: RankedStore[] }) {
+ [2m66[0m |   return (
+ [2m67[0m |     <section style={{ marginBottom: 44 }}>
+    : [31;1m     ^^^^^^^[0m
+ [2m68[0m |       <h2>{title}</h2>
+ [2m69[0m |       {entries.length === 0 ? (
+ [2m70[0m |         <div className="empty-state">Not enough reviews yet — be the first to rate a store.</div>
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/(marketplace)/rankings/page.tsx
+ ✓ Compiled in 9s (584 modules)
+ GET / 200 in 1442ms
+ GET /discover 200 in 3813ms
+ GET /rankings 200 in 944ms
+ ○ Compiling /s/[slug] ...
+ ✓ Compiled /s/[slug] in 14.9s (363 modules)
+ GET /s/amaka-glow-studio 200 in 19695ms
+ ○ Compiling /s/[slug]/catalogue ...
+ ✓ Compiled /s/[slug]/catalogue in 24.3s (629 modules)
+ GET /s/amaka-glow-studio/catalogue 200 in 52510ms
+ GET /s/amaka-glow-studio/catalogue?type=service 200 in 540ms
+ GET /s/amaka-glow-studio/catalogue 200 in 373ms
+ GET /rankings 200 in 1815ms
+ GET /rankings 200 in 8827ms
+ ✓ Compiled in 6.5s (319 modules)
+ GET /rankings 200 in 2826ms
+ GET /discover 200 in 797ms
+ GET /rankings 200 in 1167ms
+ ○ Compiling /s/[slug]/catalogue ...
+ ✓ Compiled /s/[slug]/catalogue in 3.9s (360 modules)
+ GET /s/amaka-glow-studio/catalogue 200 in 8066ms
+ ○ Compiling /s/[slug] ...
+ ✓ Compiled /s/[slug] in 13.7s (362 modules)
+ ○ Compiling /discover ...
+ ✓ Compiled /discover in 6.3s (364 modules)
+ GET / 200 in 1648ms
+ GET / 200 in 1483ms
+ GET / 200 in 1860ms
+ GET / 200 in 1037ms
+ GET / 200 in 729ms
+ ○ Compiling /dashboard ...
+ ✓ Compiled /account in 18.7s (631 modules)
+ ⨯ src\lib\auth.ts (82:39) @ auth
+ ⨯ TypeError: Cannot read properties of null (reading 'auth')
+    at getOwnStore (./src/lib/auth.ts:100:41)
+    at DashboardHome (./src/app/dashboard/page.tsx:23:79)
+digest: "5650046"
+[0m [90m 80 |[39m   select [33m=[39m [32m'*'[39m[0m
+[0m [90m 81 |[39m )[33m:[39m [33mPromise[39m[33m<[39m[33mT[39m [33m|[39m [36mnull[39m[33m>[39m {[0m
+[0m[31m[1m>[22m[39m[90m 82 |[39m   [36mconst[39m { data[33m:[39m userData } [33m=[39m [36mawait[39m sb[33m.[39mauth[33m.[39mgetUser()[33m;[39m[0m
+[0m [90m    |[39m                                       [31m[1m^[22m[39m[0m
+[0m [90m 83 |[39m   [36mconst[39m uid [33m=[39m userData[33m.[39muser[33m?[39m[33m.[39mid[33m;[39m[0m
+[0m [90m 84 |[39m   [36mif[39m ([33m![39muid) [36mreturn[39m [36mnull[39m[33m;[39m[0m
+[0m [90m 85 |[39m   [36mconst[39m { data } [33m=[39m [36mawait[39m sb[33m.[39m[36mfrom[39m([32m'stores'[39m)[33m.[39mselect(select)[33m.[39meq([32m'owner_id'[39m[33m,[39m uid)[33m.[39mmaybeSingle()[33m;[39m[0m
+ ○ Compiling /dashboard/signin ...
+ ✓ Compiled /dashboard/signin in 15.5s (635 modules)
+ ⨯ src\lib\auth.ts (82:39) @ auth
+ ⨯ TypeError: Cannot read properties of null (reading 'auth')
+    at getOwnStore (./src/lib/auth.ts:100:41)
+    at DashboardHome (./src/app/dashboard/page.tsx:23:79)
+digest: "1495681853"
+[0m [90m 80 |[39m   select [33m=[39m [32m'*'[39m[0m
+[0m [90m 81 |[39m )[33m:[39m [33mPromise[39m[33m<[39m[33mT[39m [33m|[39m [36mnull[39m[33m>[39m {[0m
+[0m[31m[1m>[22m[39m[90m 82 |[39m   [36mconst[39m { data[33m:[39m userData } [33m=[39m [36mawait[39m sb[33m.[39mauth[33m.[39mgetUser()[33m;[39m[0m
+[0m [90m    |[39m                                       [31m[1m^[22m[39m[0m
+[0m [90m 83 |[39m   [36mconst[39m uid [33m=[39m userData[33m.[39muser[33m?[39m[33m.[39mid[33m;[39m[0m
+[0m [90m 84 |[39m   [36mif[39m ([33m![39muid) [36mreturn[39m [36mnull[39m[33m;[39m[0m
+[0m [90m 85 |[39m   [36mconst[39m { data } [33m=[39m [36mawait[39m sb[33m.[39m[36mfrom[39m([32m'stores'[39m)[33m.[39mselect(select)[33m.[39meq([32m'owner_id'[39m[33m,[39m uid)[33m.[39mmaybeSingle()[33m;[39m[0m
+ GET /dashboard 307 in 8575ms
+ GET /dashboard/signin 307 in 966ms
+ GET /dashboard/signin 307 in 2893ms
+ GET /dashboard/signin 307 in 8757ms
+ GET /dashboard/signin 307 in 6561ms
+ GET /dashboard/signin 307 in 676ms
+ GET /dashboard/signin 307 in 171ms
+ GET /dashboard/signin 307 in 191ms
+ GET /dashboard/signin 307 in 1004ms
+ GET /dashboard/signin 307 in 812ms
+ GET /dashboard/signin 307 in 142ms
+ GET /dashboard/signin 307 in 216ms
+ GET /dashboard/signin 307 in 203ms
+ GET /dashboard/signin 307 in 905ms
+ GET /dashboard/signin 307 in 177ms
+ GET /dashboard/signin 307 in 361ms
+ GET /dashboard/signin 307 in 3177ms
+ GET /dashboard/signin 307 in 4067ms
+ GET /dashboard/signin 307 in 1835ms
+ GET /dashboard/signin 307 in 670ms
+ ✓ Compiled in 25s (628 modules)
+ ✓ Compiled in 20.8s (635 modules)
+ ✓ Compiled in 16s (621 modules)
+ ✓ Compiled in 16.5s (621 modules)
+ ✓ Compiled in 24.3s (630 modules)
+ ○ Compiling /api/track ...
+ ✓ Compiled /api/track in 18.6s (657 modules)
+ POST /api/track 200 in 23127ms
+ ✓ Compiled in 8.6s (268 modules)
+ ⨯ Failed to generate static paths for /s/[slug]:
+SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>)
+    at loadManifest (C:\Users\mukhtar\Desktop\llm\node_modules\.pnpm\next@14.2.35_react-dom@18.3.1_react@18.3.1__react@18.3.1\node_modules\next\dist\server\load-manifest.js:36:25)
+    at getMaybePagePath (C:\Users\mukhtar\Desktop\llm\node_modules\.pnpm\next@14.2.35_react-dom@18.3.1_react@18.3.1__react@18.3.1\node_modules\next\dist\server\require.js:57:59)
+    at getPagePath (C:\Users\mukhtar\Desktop\llm\node_modules\.pnpm\next@14.2.35_react-dom@18.3.1_react@18.3.1__react@18.3.1\node_modules\next\dist\server\require.js:92:22)
+    at requirePage (C:\Users\mukhtar\Desktop\llm\node_modules\.pnpm\next@14.2.35_react-dom@18.3.1_react@18.3.1__react@18.3.1\node_modules\next\dist\server\require.js:99:22)
+    at C:\Users\mukhtar\Desktop\llm\node_modules\.pnpm\next@14.2.35_react-dom@18.3.1_react@18.3.1__react@18.3.1\node_modules\next\dist\server\load-components.js:103:84
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async loadComponentsImpl (C:\Users\mukhtar\Desktop\llm\node_modules\.pnpm\next@14.2.35_react-dom@18.3.1_react@18.3.1__react@18.3.1\node_modules\next\dist\server\load-components.js:103:26)
+    at async Object.loadStaticPaths (C:\Users\mukhtar\Desktop\llm\node_modules\.pnpm\next@14.2.35_react-dom@18.3.1_react@18.3.1__react@18.3.1\node_modules\next\dist\server\dev\static-paths-worker.js:23:24) {
+  type: 'SyntaxError'
+}
+ ✓ Compiled in 20.1s (630 modules)
+ ✓ Compiled in 11.7s (630 modules)
+ ✓ Compiled in 19.8s (630 modules)
+ ✓ Compiled in 22s (630 modules)
+ ⨯ ./src/app/(marketplace)/layout.tsx:3:1
+Module not found: Can't resolve '@/components/CookieBanner'
+[0m [90m 1 |[39m [36mimport[39m [33mLink[39m [36mfrom[39m [32m'next/link'[39m[33m;[39m[0m
+[0m [90m 2 |[39m [36mimport[39m [32m'../../styles/globals.css'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 3 |[39m [36mimport[39m { [33mCookieBanner[39m } [36mfrom[39m [32m'@/components/CookieBanner'[39m[33m;[39m[0m
+[0m [90m   |[39m [31m[1m^[22m[39m[0m
+[0m [90m 4 |[39m[0m
+[0m [90m 5 |[39m [90m// Marketplace chrome: wraps every public page EXCEPT /s/* store pages, which render[39m[0m
+[0m [90m 6 |[39m [90m// as the seller's own independent site with its own masthead and footer.[39m[0m
+
+https://nextjs.org/docs/messages/module-not-found
+ ○ Compiling /_error ...
+ ✓ Compiled /_error in 139s (862 modules)
+ GET /s/amaka-glow-studio 200 in 1278ms

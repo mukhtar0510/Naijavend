@@ -1,0 +1,191 @@
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 31.3s
+ ○ Compiling / ...
+ ✓ Compiled / in 71s (575 modules)
+ GET / 200 in 86308ms
+ GET / 200 in 4108ms
+ GET / 200 in 19220ms
+ GET / 200 in 8743ms
+ ○ Compiling /search ...
+ ✓ Compiled /search in 10.7s (565 modules)
+ GET /search 200 in 18939ms
+ GET /search?q=braids&kind=all 200 in 3038ms
+ GET / 200 in 5891ms
+ GET /search?q=braids 200 in 214ms
+ GET / 200 in 12838ms
+ ○ Compiling /dashboard ...
+ ✓ Compiled /dashboard in 53.9s (582 modules)
+ ○ Compiling /dashboard/signin ...
+ ✓ Compiled /dashboard/signin in 23.3s (610 modules)
+ ○ Compiling /api/auth/signin ...
+ ✓ Compiled /api/auth/signin in 78.2s (640 modules)
+ GET / 200 in 26863ms
+ POST /api/auth/signin 200 in 89741ms
+ ○ Compiling /dashboard/settings ...
+ ✓ Compiled /dashboard/settings in 10.7s (654 modules)
+ GET /dashboard 307 in 761ms
+ GET /dashboard/signin 200 in 415ms
+ POST /api/auth/signin 200 in 1290ms
+ GET /dashboard 200 in 1788ms
+ GET /dashboard 200 in 1029ms
+ ○ Compiling /dashboard/ratings ...
+ ✓ Compiled /dashboard/ratings in 5.9s (656 modules)
+ ○ Compiling /dashboard/listings ...
+ ✓ Compiled /dashboard/listings in 7.7s (667 modules)
+ ○ Compiling /s/[slug] ...
+ ✓ Compiled /s/[slug] in 15.8s (678 modules)
+ GET /s/idev-inc 200 in 30844ms
+ ○ Compiling /api/track ...
+ ✓ Compiled /api/track in 3.7s (704 modules)
+ POST /api/track 200 in 6656ms
+ ○ Compiling /dashboard/signout ...
+ ✓ Compiled /dashboard/signout in 13.9s (694 modules)
+ GET /dashboard/signout? 307 in 18886ms
+ ○ Compiling / ...
+ ✓ Compiled / in 16.3s (708 modules)
+ GET / 200 in 23614ms
+ ○ Compiling /search ...
+ ✓ Compiled /search in 25.9s (682 modules)
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 36.6s
+ ○ Compiling / ...
+ ✓ Compiled / in 42.4s (624 modules)
+ GET / 200 in 48096ms
+ ○ Compiling /discover ...
+ ✓ Compiled /discover in 27.4s (598 modules)
+ GET /discover 200 in 29715ms
+ ○ Compiling /rankings ...
+ ✓ Compiled /rankings in 3.5s (602 modules)
+ GET /rankings 200 in 6235ms
+ ○ Compiling /search ...
+ ✓ Compiled /search in 2.7s (604 modules)
+ GET /search?q=cake 200 in 4153ms
+ ○ Compiling /account ...
+ ✓ Compiled /account in 2.6s (615 modules)
+ GET /account 200 in 3496ms
+ ○ Compiling /legal/privacy ...
+ ✓ Compiled /legal/privacy in 4.1s (620 modules)
+ GET /legal/privacy 200 in 4602ms
+ ○ Compiling /s/[slug] ...
+ GET /s/amaka-glow-studio 500 in 37592ms
+ GET /s/tundes-tech-hub 500 in 271ms
+ GET /dashboard/signin 500 in 4714ms
+ GET /account/signin 500 in 5611ms
+ ✓ Compiled /account/signin in 1699ms (368 modules)
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 12.3s
+ ○ Compiling /s/[slug] ...
+ ✓ Compiled /s/[slug] in 38.7s (682 modules)
+ GET /s/amaka-glow-studio 200 in 47726ms
+ GET /s/tundes-tech-hub 200 in 1264ms
+ ○ Compiling /dashboard/signin ...
+ ✓ Compiled /dashboard/signin in 29.1s (641 modules)
+ GET /dashboard/signin 200 in 30134ms
+ ○ Compiling /account/signin ...
+ ✓ Compiled /account/signin in 3.4s (669 modules)
+ GET /account/signin 200 in 3835ms
+ ○ Compiling / ...
+ ✓ Compiled / in 2.7s (677 modules)
+ GET / 200 in 4429ms
+ GET /s/amaka-glow-studio 200 in 590ms
+ GET / 200 in 185ms
+ GET / 200 in 1363ms
+ ○ Compiling /rankings ...
+ ✓ Compiled /rankings in 37.3s (596 modules)
+ GET /rankings 200 in 19156ms
+ GET / 200 in 1160ms
+ ○ Compiling /s/[slug] ...
+ ✓ Compiled /s/[slug] in 9.5s (661 modules)
+ GET /s/amaka-glow-studio 200 in 22005ms
+ ○ Compiling /api/track ...
+ ✓ Compiled /api/track in 11.8s (690 modules)
+ POST /api/track 200 in 16181ms
+ ○ Compiling /api/auth/signin ...
+ ✓ Compiled /api/auth/signin in 3.3s (699 modules)
+ POST /api/auth/signin 200 in 4927ms
+ ○ Compiling /dashboard ...
+ ✓ Compiled /dashboard in 4.5s (702 modules)
+ GET /dashboard 200 in 7015ms
+ GET / 200 in 9448ms
+ ✓ Compiled in 33s (661 modules)
+ ✓ Compiled in 26.8s (661 modules)
+ ○ Compiling /manifest.webmanifest ...
+ ✓ Compiled /manifest.webmanifest in 23.2s (696 modules)
+ GET /manifest.webmanifest 200 in 24503ms
+ ✓ Compiled in 6.3s (699 modules)
+ GET /manifest.webmanifest 200 in 1895ms
+ ○ Compiling /offline ...
+ ✓ Compiled /offline in 28.5s (705 modules)
+ GET /offline 200 in 37879ms
+ GET /offline 200 in 34923ms
+ ✓ Compiled in 6.5s (719 modules)
+ GET /manifest.webmanifest 200 in 154ms
+ GET /offline 200 in 804ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 6.3s (706 modules)
+ GET /this-page-does-not-exist 404 in 6972ms
+ GET /s/amaka-glow-studio/also-fake 404 in 77ms
+ GET /manifest.webmanifest 200 in 92ms
+ GET /this-page-does-not-exist 404 in 65ms
+ GET /s/amaka-glow-studio/also-fake 404 in 55ms
+ GET / 200 in 1547ms
+ GET /this-page-does-not-exist 404 in 73ms
+ GET /s/amaka-glow-studio/also-fake 404 in 5672ms
+ GET /s/amaka-glow-studio/also-fake 404 in 80ms
+ ✓ Compiled in 12.3s (669 modules)
+ GET /s/amaka-glow-studio/also-fake 404 in 9810ms
+ ○ Compiling /s/[slug]/chat ...
+ ✓ Compiled /s/[slug]/chat in 15.8s (684 modules)
+ GET /s/amaka-glow-studio/chat 200 in 27088ms
+ GET /this-page-does-not-exist 404 in 389ms
+ ○ Compiling /offline ...
+ ✓ Compiled /offline in 6s (673 modules)
+ GET /offline 200 in 12118ms
+ ✓ Compiled in 9.2s (677 modules)
+ GET /offline 200 in 9295ms
+ GET /offline 200 in 247ms
+ GET /offline 200 in 258ms
+ ○ Compiling /manifest.webmanifest ...
+ GET / 200 in 11074ms
+ ✓ Compiled /manifest.webmanifest in 22.7s (711 modules)
+ GET /manifest.webmanifest 200 in 25190ms
+ ○ Compiling /dashboard ...
+ ✓ Compiled /dashboard in 6.2s (688 modules)
+ ○ Compiling /dashboard/signin ...
+ ✓ Compiled /dashboard/signin in 4.6s (693 modules)
+ ○ Compiling /api/auth/signin ...
+ ✓ Compiled /api/auth/signin in 5.8s (715 modules)
+ POST /api/auth/signin 200 in 8516ms
+ GET /offline 200 in 287ms
+ ○ Compiling / ...
+ ✓ Compiled / in 2.8s (721 modules)
+ GET / 200 in 359ms
+ GET /s/zaras-cake-studio 404 in 14291ms
+ ○ Compiling /api/track ...
+ ✓ Compiled /api/track in 12.4s (718 modules)
+ POST /api/track 500 in 13039ms
+ ○ Compiling /s/[slug]/catalogue ...
+ ✓ Compiled /s/[slug]/catalogue in 4.5s (720 modules)
+ GET /s/amaka-glow-studio/catalogue 200 in 7674ms
+ ○ Compiling /discover ...
+ ✓ Compiled /discover in 9.8s (688 modules)
+ ○ Compiling /rankings ...
+ ✓ Compiled /rankings in 4s (678 modules)
+ ○ Compiling /search ...
+ ✓ Compiled /search in 2.3s (675 modules)
+ GET /search?q=power&kind=all 200 in 7691ms
+ GET / 200 in 6577ms
+ GET / 200 in 829ms
+ GET / 200 in 2917ms

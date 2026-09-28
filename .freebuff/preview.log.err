@@ -1,0 +1,12 @@
+ ⚠ Found a change in next.config.mjs. Restarting the server to apply the changes...
+ ⨯ ./src/styles/mobile.css:171:1
+Syntax error: C:\Users\mukhtar\Desktop\llm\apps\storefront\src\styles\mobile.css Unexpected }
+
+ [90m 169 | [39m  [33m.store-footer[39m [33m{[39m padding[33m:[39m 22px 16px !important[33m;[39m [33m}[39m
+ [90m 170 | [39m  [33m.store-footer-grid[39m [33m{[39m gap[33m:[39m 14px[33m;[39m [33m}[39m
+[1m[31m>[39m[22m[90m 171 | [39m[33m}[39m
+ [90m     | [39m[1m[31m^[39m[22m
+ [90m 172 | [39m
+ [90m 173 | [39m[90m/* ---------- Product/listing detail pages ---------- */[39m
+<w> [webpack.cache.PackFileCacheStrategy] Skipped not serializable cache item 'Compilation/modules|C:\Users\mukhtar\Desktop\llm\node_modules\.pnpm\next@14.2.35_react-dom@18.3.1_react@18.3.1__react@18.3.1\node_modules\next\dist\build\webpack\loaders\css-loader\src\index.js??ruleSet[1].rules[14].oneOf[12].use[2]!C:\Users\mukhtar\Desktop\llm\node_modules\.pnpm\next@14.2.35_react-dom@18.3.1_react@18.3.1__react@18.3.1\node_modules\next\dist\build\webpack\loaders\postcss-loader\src\index.js??ruleSet[1].rules[14].oneOf[12].use[3]!C:\Users\mukhtar\Desktop\llm\apps\storefront\src\styles\mobile.css': No serializer registered for PostCSSSyntaxError
+<w> while serializing webpack/lib/cache/PackFileCacheStrategy.PackContentItems -> webpack/lib/NormalModule -> webpack/lib/ModuleBuildError -> PostCSSSyntaxError

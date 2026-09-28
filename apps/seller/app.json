@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "Naijavend Seller",
+    "slug": "naijavend-seller",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "naijavend",
+    "userInterfaceStyle": "light",
+    "platforms": ["ios", "android"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.idevtenancy.seller"
+    },
+    "android": {
+      "package": "com.idevtenancy.seller"
+    },
+    "extra": {
+      "supabaseUrl": "",
+      "supabaseAnonKey": ""
+    }
+  }
+}

@@ -1,0 +1,6 @@
+/* Local copies of the storefront style modules (base → components → admin),
+   kept in sync by copying from apps/storefront/src/styles. Self-contained so
+   this app builds as its own Vercel project root. */
+@import './base.css';
+@import './components.css';
+@import './admin-skin.css';

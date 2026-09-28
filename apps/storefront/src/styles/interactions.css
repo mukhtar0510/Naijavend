@@ -1,0 +1,357 @@
+/* ================= Mobile responsiveness pass (headers → footers) ================= */
+@media (max-width: 720px) {
+  /* Marketplace header: brand left, actions row below, scrollable links */
+  .topnav { position: sticky; top: 0; z-index: 40; }
+  .topnav-inner { flex-wrap: wrap; gap: 8px; padding-top: 10px; padding-bottom: 10px; }
+  .topnav-links { width: 100%; justify-content: space-between; gap: 8px; overflow-x: auto; padding-bottom: 2px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .topnav-links::-webkit-scrollbar { display: none; }
+  .topnav-links > a:not(.btn):not(.topnav-pill) { font-size: 14px; white-space: nowrap; padding: 6px 2px; }
+  .topnav-links .btn { flex-shrink: 0; }
+
+  /* Store masthead: stack brand above nav, nav scrolls horizontally */
+  .store-masthead-inner { flex-wrap: wrap; gap: 8px; }
+  .store-masthead-links { width: 100%; overflow-x: auto; flex-wrap: nowrap; gap: 16px; padding-bottom: 2px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .store-masthead-links::-webkit-scrollbar { display: none; }
+  .store-masthead-links > a { white-space: nowrap; }
+  .store-masthead-logo { width: 30px; height: 30px; }
+
+  /* Dashboard nav: horizontal chip scroller */
+  .container > div[style*='flex'][style*='gap'] { flex-wrap: nowrap !important; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .container > div[style*='flex'][style*='gap']::-webkit-scrollbar { display: none; }
+
+  /* Hero + search stack */
+  .market-hero { padding-top: 34px; }
+  .hero-search { flex-direction: column; align-items: stretch; }
+  .hero-search select { width: 100%; }
+  .hero-search button { width: 100%; min-height: 48px; }
+
+  /* Listing detail: single column below gallery */
+  .listing-detail { grid-template-columns: 1fr; }
+
+  /* Cards + grids breathe */
+  .store-cards, .listing-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  .product-card-img { height: 130px; }
+
+  /* Summaries, summaries rows, listing rows wrap instead of squeezing */
+  .dash-listing-row { flex-wrap: wrap; }
+
+  /* Footer stacks left-aligned, tighter */
+  .site-footer, .site-footer-store { padding: 22px 16px; }
+}
+@media (max-width: 420px) {
+  .topnav .logo { font-size: 20px; }
+  .hero-title { font-size: 27px; }
+  .store-cards, .listing-grid { grid-template-columns: repeat(2, 1fr); }
+  .product-card-img { height: 110px; }
+  .btn { padding: 11px 16px; }
+  .container { padding-left: 14px; padding-right: 14px; }
+}
+
+/* ================= Nearby locator + distance card ================= */
+.nearby { margin: 6px 0 30px; }
+.nearby-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.nearby-head h2 { margin: 0; }
+.nearby-cta { padding: 16px 18px; }
+.nearby-cities { display: inline-flex; gap: 8px; flex-wrap: wrap; align-items: center; font-size: 14px; color: var(--text-muted); }
+.nearby-city {
+  border: 1px solid var(--border); background: var(--surface); border-radius: 999px;
+  padding: 6px 14px; font-size: 13.5px; font-weight: 600; cursor: pointer; font-family: var(--font-body);
+  transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+}
+.nearby-city:hover { border-color: var(--blue); color: var(--blue); }
+.nearby-sub { margin: 0 0 10px; font-size: 13.5px; }
+.nearby-list { display: grid; gap: 8px; }
+.nearby-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; }
+.nearby-rank { font-size: 16px; width: 26px; text-align: center; flex-shrink: 0; }
+.nearby-dist { flex-shrink: 0; }
+.distance-card { padding: 16px 18px; }
+.distance-big { font-family: var(--font-heading); font-size: 30px; font-weight: 800; letter-spacing: -0.02em; color: var(--blue); }
+@media (max-width: 640px) {
+  /* Compact aligned grid: rank | name+address | distance — Directions becomes
+     a full-width bottom action instead of wrapping wherever it fits. */
+  .nearby-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      'rank name  dist'
+      'act  act   act';
+    align-items: center;
+    row-gap: 8px;
+    padding: 11px 12px;
+  }
+  .nearby-row .nearby-rank { grid-area: rank; width: 22px; font-size: 14px; }
+  .nearby-row > div:nth-child(2) { grid-area: name; }
+  .nearby-row .nearby-dist { grid-area: dist; text-align: right; }
+  .nearby-row .nearby-dist strong { font-size: 13.5px; }
+  .nearby-row .nearby-dist p { display: none; } /* ETA strings overflow on phones; keep distance only */
+  .nearby-row .nearby-directions { grid-area: act; width: 100%; justify-content: center; min-height: 34px; }
+}
+
+/* ================= Header v2: glassy sticky nav with pills ================= */
+.topnav {
+  border-bottom: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.82);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  box-shadow: 0 1px 0 rgba(11, 12, 14, 0.06), 0 4px 18px rgba(11, 12, 14, 0.04);
+}
+.topnav::after {
+  content: '';
+  display: block;
+  height: 2px;
+  background: linear-gradient(90deg, var(--blue) 0%, var(--blue-soft) 35%, #f9a8d4 70%, #fcd34d 100%);
+  opacity: 0.85;
+}
+.topnav-inner { min-height: 66px; }
+.topnav-links { gap: 6px; }
+.topnav-pill {
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+  white-space: nowrap;
+}
+.topnav-pill:hover { background: var(--elevated-2); color: var(--text); text-decoration: none; }
+.topnav-pill.is-active { background: var(--blue-tint); color: var(--blue); }
+.topnav-actions { display: flex; gap: 10px; align-items: center; }
+.topnav-account {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 14px; font-weight: 600; color: var(--text-muted);
+  padding: 7px 12px; border-radius: 999px;
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.topnav-account:hover { background: var(--elevated-2); color: var(--text); text-decoration: none; }
+.topnav-account.is-active { background: var(--blue-tint); color: var(--blue); }
+.topnav-avatar { font-size: 15px; }
+
+/* ================= Page intro bands (inner-page headers) ================= */
+.page-intro {
+  background:
+    radial-gradient(560px 240px at 88% -40%, rgba(59, 130, 246, 0.16), transparent 65%),
+    radial-gradient(420px 200px at 4% 130%, rgba(249, 168, 212, 0.14), transparent 60%),
+    linear-gradient(180deg, #fbfcfe 0%, #ffffff 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 0 30px;
+  margin-bottom: 6px;
+}
+.page-intro h1 {
+  font-size: clamp(28px, 4vw, 38px);
+  letter-spacing: -0.03em;
+  margin: 0 0 8px;
+}
+.page-intro p { margin: 0; max-width: 640px; color: var(--text-muted); font-size: 15.5px; }
+.page-intro-gold {
+  background:
+    radial-gradient(560px 240px at 88% -40%, rgba(252, 211, 77, 0.28), transparent 65%),
+    radial-gradient(420px 200px at 4% 130%, rgba(59, 130, 246, 0.10), transparent 60%),
+    linear-gradient(180deg, #fffdf6 0%, #ffffff 100%);
+}
+
+@media (max-width: 720px) {
+  .topnav-inner { flex-wrap: wrap; padding: 10px 0; row-gap: 4px; }
+  .topnav-links { order: 3; width: 100%; overflow-x: auto; scrollbar-width: none; }
+  .topnav-links::-webkit-scrollbar { display: none; }
+  .topnav-actions { margin-left: auto; }
+  /* Sell button now stays visible on phones via the compact
+     .sell-short label (mobile.css); previously it was hidden here. */
+  .page-intro { padding: 26px 0 20px; }
+}
+
+/* ================= Render-performance: skip offscreen layout work ================= */
+/* Below-the-fold sections skip layout/paint until scrolled near — big win on
+   long pages (rankings boards, store grids, catalogue). */
+.podium, .rank-row, .store-cards, .product-row, .nearby-list {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 320px;
+}
+
+/* ================= Dark mode ================= */
+/* Token overrides on [data-theme='dark']; applied pre-paint by the inline script
+   in app/layout.tsx, toggled by ThemeToggle in the marketplace header. */
+[data-theme='dark'] {
+  --surface: #12141a;
+  --elevated: #1a1d25;
+  --elevated-2: #232734;
+  --text: #edeff4;
+  --text-muted: #9aa3b2;
+  --border: #2c3140;
+  --border-strong: #3c4354;
+  --blue-tint: #1c2a4a;
+  --blue-tint-2: #23345c;
+  --success-tint: #14301f;
+  --danger-tint: #381717;
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.55);
+  color-scheme: dark;
+}
+[data-theme='dark'] body { background: var(--surface); color: var(--text); }
+
+/* Header glass re-tint */
+[data-theme='dark'] .topnav {
+  background: rgba(18, 20, 26, 0.8);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06), 0 4px 18px rgba(0, 0, 0, 0.35);
+}
+[data-theme='dark'] .topnav-pill:hover,
+[data-theme='dark'] .topnav-account:hover { background: var(--elevated-2); }
+[data-theme='dark'] .topnav-pill.is-active,
+[data-theme='dark'] .topnav-account.is-active { background: var(--blue-tint); color: #8db4ff; }
+
+/* Page intro bands */
+[data-theme='dark'] .page-intro {
+  background:
+    radial-gradient(560px 240px at 88% -40%, rgba(59, 130, 246, 0.14), transparent 65%),
+    radial-gradient(420px 200px at 4% 130%, rgba(249, 168, 212, 0.08), transparent 60%),
+    linear-gradient(180deg, #171a22 0%, #12141a 100%);
+  border-bottom-color: var(--border);
+}
+[data-theme='dark'] .page-intro-gold {
+  background:
+    radial-gradient(560px 240px at 88% -40%, rgba(252, 211, 77, 0.12), transparent 65%),
+    radial-gradient(420px 200px at 4% 130%, rgba(59, 130, 246, 0.10), transparent 60%),
+    linear-gradient(180deg, #1c1a12 0%, #12141a 100%);
+}
+
+/* Auth + onboarding panels */
+[data-theme='dark'] .auth-panel,
+[data-theme='dark'] .ob-panel {
+  background:
+    radial-gradient(700px 340px at 100% 0%, rgba(28, 42, 74, 0.55), transparent 60%),
+    radial-gradient(500px 260px at 0% 100%, rgba(56, 23, 23, 0.35), transparent 55%),
+    var(--surface);
+}
+
+/* Hero + banners that hard-code light gradients */
+[data-theme='dark'] .market-hero {
+  background:
+    radial-gradient(700px 380px at 80% -10%, rgba(59, 130, 246, 0.22), transparent 60%),
+    radial-gradient(520px 300px at 10% 110%, rgba(249, 168, 212, 0.12), transparent 55%),
+    radial-gradient(460px 260px at 45% 120%, rgba(252, 211, 77, 0.10), transparent 55%),
+    linear-gradient(180deg, #14171f 0%, var(--surface) 100%);
+}
+[data-theme='dark'] .page-hero { background: var(--elevated); }
+
+/* Components with hard-coded light surfaces */
+[data-theme='dark'] .market-hero .hero-eyebrow,
+[data-theme='dark'] .hero-search { background: var(--elevated); border-color: var(--border-strong); }
+[data-theme='dark'] .product-badge.badge-lowstock { background: #33270f; color: #fbbf24; border-color: #57431c; }
+[data-theme='dark'] .podium-step.p1 { background: linear-gradient(180deg, #2a2413, var(--elevated)); }
+[data-theme='dark'] .podium-step.p2 { background: linear-gradient(180deg, #22262e, var(--elevated)); }
+[data-theme='dark'] .podium-step.p3 { background: linear-gradient(180deg, #2b211a, var(--elevated)); }
+[data-theme='dark'] .nearby-city { background: var(--surface); }
+[data-theme='dark'] .distance-big { color: #8db4ff; }
+[data-theme='dark'] .site-footer,
+[data-theme='dark'] .site-footer-store { border-top-color: var(--border); }
+[data-theme='dark'] .tpl-thumb { background: var(--elevated); }
+[data-theme='dark'] .tpl-thumb-row i { background: var(--elevated-2); }
+
+/* Store-site shell: the seller's site keeps THEIR design in both modes.
+   They picked a light background/accent as their brand — inverting it (the old
+   behaviour) left near-white text on their near-white background. Re-scope the
+   app's surface/text tokens to the light set inside every /s/* site instead;
+   only the marketplace chrome (home, discover, dashboard, auth) goes dark. */
+[data-theme='dark'] .site-shell {
+  --surface: #ffffff;
+  --elevated: #f6f8fb;
+  --elevated-2: #eef1f6;
+  --text: #0b0c0e;
+  --text-muted: #5b6472;
+  --border: #dfe4ec;
+  --border-strong: #c6cedb;
+  --blue-tint: #eaf1fe;
+  --blue-tint-2: #dbe7fd;
+  --success-tint: #e8f6ee;
+  --danger-tint: #fdecec;
+  --shadow-xs: 0 1px 2px rgba(11, 12, 14, 0.05);
+  --shadow-sm: 0 2px 8px rgba(11, 12, 14, 0.07);
+  --shadow-md: 0 8px 24px rgba(11, 12, 14, 0.09);
+  --shadow-lg: 0 16px 48px rgba(11, 12, 14, 0.14);
+  color-scheme: light;
+}
+/* Dropshipper accents keep their teal identity in dark chrome */
+[data-theme='dark'] .badge-dropship,
+[data-theme='dark'] .cat-dropshippers { color: #67e8f9; border-color: rgba(103, 232, 249, 0.35); background: #0b2b33; }
+[data-theme='dark'] .dropship-card { background: linear-gradient(180deg, #0b2b33, var(--elevated)); }
+
+/* Categories whose light-mode tint is too dim/warm for dark chrome — brighter
+   text + deep tinted backgrounds so every badge stays readable. */
+[data-theme='dark'] .cat-software { color: #93c5fd; border-color: rgba(147, 197, 253, 0.35); background: #12233f; }
+[data-theme='dark'] .cat-digital-products { color: #d8b4fe; border-color: rgba(216, 180, 254, 0.35); background: #241338; }
+[data-theme='dark'] .cat-gaming { color: #e9d5ff; border-color: rgba(233, 213, 255, 0.3); background: #2a1240; }
+[data-theme='dark'] .cat-marketing { color: #fdba74; border-color: rgba(253, 186, 116, 0.35); background: #3a1d0a; }
+[data-theme='dark'] .cat-health-wellness { color: #5eead4; border-color: rgba(94, 234, 212, 0.35); background: #0a2f2c; }
+[data-theme='dark'] .cat-baby-kids { color: #f9a8d4; border-color: rgba(249, 168, 212, 0.35); background: #3a1226; }
+[data-theme='dark'] .cat-pets { color: #fcd34d; border-color: rgba(252, 211, 77, 0.35); background: #33220a; }
+[data-theme='dark'] .cat-jewelry { color: #fde68a; border-color: rgba(253, 230, 138, 0.35); background: #332a08; }
+[data-theme='dark'] .cat-photography { color: #cbd5e1; border-color: rgba(203, 213, 225, 0.3); background: #1e293b; }
+[data-theme='dark'] .cat-music { color: #93c5fd; border-color: rgba(147, 197, 253, 0.3); background: #14213f; }
+[data-theme='dark'] .cat-art { color: #f0abfc; border-color: rgba(240, 171, 252, 0.35); background: #33123a; }
+[data-theme='dark'] .cat-events { color: #fcd34d; border-color: rgba(252, 211, 77, 0.3); background: #3a2506; }
+[data-theme='dark'] .cat-auto { color: #cbd5e1; border-color: rgba(203, 213, 225, 0.3); background: #1e293b; }
+[data-theme='dark'] .cat-agriculture { color: #bef264; border-color: rgba(190, 242, 100, 0.3); background: #1d2a06; }
+[data-theme='dark'] .cat-real-estate { color: #5eead4; border-color: rgba(94, 234, 212, 0.3); background: #0a2f2c; }
+[data-theme='dark'] .cat-professional-services { color: #a5b4fc; border-color: rgba(165, 180, 252, 0.35); background: #1a234f; }
+[data-theme='dark'] .cat-logistics { color: #fdba74; border-color: rgba(253, 186, 116, 0.3); background: #3a1d0a; }
+[data-theme='dark'] .cat-printing { color: #c4b5fd; border-color: rgba(196, 181, 253, 0.35); background: #221338; }
+[data-theme='dark'] .cat-furniture { color: #d6bfa3; border-color: rgba(214, 191, 163, 0.3); background: #2e2115; }
+[data-theme='dark'] .cat-laundry { color: #7dd3fc; border-color: rgba(125, 211, 252, 0.3); background: #0a2733; }
+
+/* Theme toggle pill */
+.theme-toggle {
+  display: inline-grid; place-items: center;
+  background: none; border: none; cursor: pointer; padding: 4px;
+}
+.theme-toggle-track {
+  display: inline-grid; place-items: center;
+  width: 40px; height: 26px; border-radius: 999px;
+  background: var(--elevated-2);
+  border: 1px solid var(--border);
+  transition: background var(--dur-fast) var(--ease);
+}
+.theme-toggle-thumb {
+  display: inline-grid; place-items: center;
+  width: 20px; height: 20px; border-radius: 999px;
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
+  font-size: 12px; line-height: 1;
+  transform: translateX(-7px);
+  transition: transform var(--dur-fast) var(--ease);
+}
+[data-theme='dark'] .theme-toggle-thumb { transform: translateX(7px); }
+
+/* ================= Search page bar ================= */
+.searchbar {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+  max-width: 680px;
+  margin: 6px 0 8px;
+  padding: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+.searchbar input[type='search'] { flex: 1; border: none; background: transparent; min-height: 44px; }
+.searchbar input[type='search']:focus { outline: none; box-shadow: none; }
+.searchbar select { width: auto; min-width: 130px; border-radius: var(--radius-md); }
+.searchbar button { border-radius: var(--radius-md); min-height: 44px; }
+@media (max-width: 640px) {
+  .searchbar { flex-direction: column; border-radius: var(--radius-lg); }
+  .searchbar select, .searchbar button { width: 100%; }
+}
+
+/* Dark mode: footer refinements (uses elevated tokens, no border flash) */
+[data-theme='dark'] .footer-social a,
+[data-theme='dark'] .store-footer-logo { background: var(--elevated-2); }
+[data-theme='dark'] .footer-social a:hover { background: var(--blue-tint); }
+[data-theme='dark'] .topnav {
+  background: rgba(18, 20, 26, 0.85);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04), 0 6px 24px rgba(0, 0, 0, 0.35);
+}

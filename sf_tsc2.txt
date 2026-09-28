@@ -1,0 +1,2 @@
+src/app/api/listings/upload-video/route.ts(56,25): error TS2551: Property 'signed_url' does not exist on type '{ signedUrl: string; token: string; path: string; }'. Did you mean 'signedUrl'?
+TSC=2

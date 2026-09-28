@@ -1,0 +1,134 @@
+/* ============================================================
+   Location photo lightbox — "Our locations" gallery on store page
+   ============================================================ */
+
+/* Clickable branch photo: subtle zoom affordance */
+.loc-photo-btn {
+  overflow: hidden;
+}
+.loc-photo-btn img {
+  transition: transform 0.35s ease;
+}
+.loc-photo-btn:hover img,
+.loc-photo-btn:focus-visible img {
+  transform: scale(1.06);
+}
+.loc-photo-hint {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 14px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.loc-photo-btn:hover .loc-photo-hint,
+.loc-photo-btn:focus-visible .loc-photo-hint {
+  opacity: 1;
+}
+
+/* Full-screen viewer */
+.loc-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  background: rgba(10, 12, 18, 0.88);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  padding: 20px;
+  animation: loc-fade-in 0.18s ease;
+}
+@keyframes loc-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.loc-lightbox-inner {
+  position: relative;
+  max-width: min(760px, 94vw);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--surface, #fff);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+  animation: loc-pop 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+@keyframes loc-pop {
+  from { transform: scale(0.94); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.loc-lightbox-inner img {
+  width: 100%;
+  max-height: 62vh;
+  object-fit: contain;
+  background: #0d1017;
+  display: block;
+}
+.loc-lightbox-caption {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 16px 14px;
+}
+.loc-lightbox-caption strong {
+  font-size: 15px;
+}
+.loc-lightbox-caption span {
+  font-size: 13px;
+  opacity: 0.72;
+}
+.loc-lightbox-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 0 16px 14px;
+  font-size: 13px;
+  opacity: 0.85;
+}
+.loc-lightbox-nav button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border, #d8dee8);
+  background: var(--surface, #fff);
+  font-size: 16px;
+  cursor: pointer;
+}
+.loc-lightbox-nav button:hover {
+  background: var(--blue-tint, #e8effc);
+}
+.loc-lightbox-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+}
+.loc-lightbox-close:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+/* Mobile: photo fills more of the screen, bigger tap targets */
+@media (max-width: 640px) {
+  .loc-lightbox { padding: 10px; }
+  .loc-lightbox-inner { max-height: 94vh; border-radius: 14px; }
+  .loc-lightbox-inner img { max-height: 58vh; }
+  .loc-lightbox-nav button { width: 44px; height: 44px; }
+}

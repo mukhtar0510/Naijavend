@@ -1,0 +1,554 @@
+/* =====================================================================
+   Naijavend — mobile refinement pass
+   Tightens every marketplace body section and seller store-site section
+   on phones: spacing scale, typography scale, touch targets, grids.
+   All rules are max-width overrides — desktop is untouched.
+   ===================================================================== */
+
+/* ---------- Marketplace header (topnav) ---------- */
+@media (max-width: 700px) {
+  .topnav { margin: 8px 10px 0; max-width: calc(100% - 20px); }
+  .topnav-inner { flex-wrap: wrap; gap: 4px 8px; min-height: 54px; }
+  .logo { font-size: 19px; margin-right: auto; }
+  .topnav-actions { gap: 4px; }
+  /* Account collapses to its avatar; Sell shortens to "Sell" */
+  .topnav-account { padding: 8px 10px; }
+  .topnav-account-label { display: none; }
+  .topnav-sell { padding: 7px 13px; font-size: 13.5px; white-space: nowrap; }
+  .topnav-sell .sell-long { display: none; }
+  .topnav-sell .sell-short { display: inline; }
+  /* Nav pills become their own thumb-scroller row under the brand row */
+  .topnav-links {
+    order: 3;
+    flex-basis: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 8px;
+    padding: 2px 2px 5px;
+  }
+  .topnav-links::-webkit-scrollbar { display: none; }
+  .topnav-pill { flex: 0 0 auto; white-space: nowrap; }
+}
+
+/* ---------- Marketplace body (homepage, discover, rankings, search) ---------- */
+@media (max-width: 640px) {
+  /* Section rhythm: shorter, consistent */
+  .market-section { margin-top: 34px; }
+  .market-section-head h2 { font-size: 21px; }
+  .market-section-head { margin-bottom: 14px; }
+
+  /* Category chips: horizontal scroll instead of wrap-cramp */
+  .cat-chips {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 6px;
+    scrollbar-width: none;
+  }
+  .cat-chips::-webkit-scrollbar { display: none; }
+  .cat-chip { flex: 0 0 auto; padding: 9px 14px; font-size: 13px; min-height: 38px; }
+
+  /* Store cards: single column, thumb-friendly rows */
+  .store-cards { grid-template-columns: 1fr; gap: 14px; }
+  .store-card-banner { height: 104px; }
+  .store-showcase-logo { width: 62px; height: 62px; }
+  .store-card-body { padding: 12px 14px 14px; }
+  .store-card-body h3 { font-size: 17px; }
+
+  /* Product rows: 2-up grid with taller covers */
+  .product-row { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .product-card-img { height: 140px; }
+  .product-card-body { padding: 10px 12px 12px; }
+  .product-card-title { font-size: 14px; line-height: 1.35; }
+
+  /* Hero */
+  .market-hero .container { padding: 30px 18px 28px !important; }
+  .market-hero h1 { font-size: 27px !important; line-height: 1.15 !important; }
+  .market-hero p { font-size: 14.5px; }
+  .hero-cta-row { gap: 8px; }
+  .hero-cta-row .btn { flex: 1 1 auto; min-height: 46px; }
+
+  /* Trending chips row: scrollable */
+  .hero-trending {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+  }
+  .hero-trending::-webkit-scrollbar { display: none; }
+  .hero-trending a, .hero-trending button { flex: 0 0 auto; }
+
+  /* Empty states & notices */
+  .empty-state { padding: 26px 16px; }
+  .empty-state h3 { font-size: 17px; }
+}
+
+/* ---------- Seller store site (every /s/* page) ---------- */
+@media (max-width: 640px) {
+  /* Hero: taller touch rows, stacked CTAs */
+  .store-hero { padding: 26px 16px 20px; }
+  .store-hero-title { font-size: 26px !important; line-height: 1.12 !important; }
+  .store-hero-meta { gap: 8px 14px; font-size: 13.5px; }
+  .store-hero .ring-3d { width: 74px !important; height: 74px !important; }
+  .store-hero-ctas { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+  .store-hero-ctas .btn { width: 100%; min-height: 48px; justify-content: center; }
+
+  /* Announcement ribbon: tappable rows, smaller text */
+  .store-ribbon { font-size: 13px; padding: 9px 14px; line-height: 1.45; }
+  .store-ribbon-tag { font-size: 10.5px; }
+
+  /* Rank chip and badges wrap nicely */
+  .rank-chip { font-size: 12.5px; padding: 5px 10px; }
+
+  /* Sections on the store page */
+  .store-section { margin-top: 30px; }
+  .store-section h2 { font-size: 20px; margin-bottom: 12px; }
+
+  /* ---- Compact store-site text: body copy fills the screen without ----
+     ---- crowding or overflowing narrow phones                        ---- */
+  .store-body {
+    padding: 22px 14px 36px !important;
+    font-size: 14.5px;
+    line-height: 1.5;
+    overflow-wrap: break-word;
+  }
+  .store-body p,
+  .store-body li,
+  .store-body td {
+    font-size: 14px;
+    line-height: 1.5;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+  .store-body h1 { font-size: 23px !important; line-height: 1.2; }
+  .store-body h2 { font-size: 19px; line-height: 1.25; }
+  .store-body h3 { font-size: 15.5px; line-height: 1.3; }
+  /* Hero copy: keep the store intro tight and fully on-screen */
+  .store-hero p { font-size: 15px !important; line-height: 1.45; margin-bottom: 6px; }
+  .store-hero .muted { font-size: 13.5px !important; }
+  .store-hero-title h1 { font-size: 24px !important; }
+  /* Cards (hours, delivery, branches, reviews) breathe less */
+  .store-body .card { padding: 13px 13px; }
+  .store-body .card p { margin: 6px 0; }
+  /* Listing cards: descriptions clip to 2 lines instead of overflowing */
+  .listing-card p { font-size: 13px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .listing-card h3 { font-size: 15px; line-height: 1.3; }
+  /* Review comments wrap instead of pushing the screen wide */
+  .store-body .card p { overflow-wrap: anywhere; }
+  /* Description on product detail: compact block, no edge-to-edge text */
+  .listing-detail p { font-size: 14.5px; line-height: 1.5; }
+
+  /* Catalogue grid: comfortable 2-up */
+  .catalogue-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .catalogue-cover { height: 120px; }
+  .catalogue-card .price { font-size: 15px; }
+
+  /* Listing cards on the store homepage */
+  .listing-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px; }
+  .listing-card { padding: 10px !important; }
+  .listing-card .price { font-size: 15px; }
+
+  /* Reach/contact grid stacks */
+  .reach-grid { grid-template-columns: 1fr !important; gap: 12px; }
+  .hours-table { font-size: 13.5px; }
+  .hours-table td, .hours-table th { padding: 7px 8px; }
+
+  /* Dropship info card */
+  .dropship-card { padding: 14px; }
+
+  /* Map + distance cards */
+  .map-canvas { height: 330px; }
+  .distance-card { padding: 12px 14px; }
+
+  /* Store footer: single column, breathing room */
+  .store-footer { padding: 22px 16px !important; }
+  .store-footer-grid { gap: 14px; }
+}
+
+/* ---------- Product/listing detail pages ---------- */
+@media (max-width: 640px) {
+  .listing-detail-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
+  .gallery-main { height: 300px !important; }
+  .gallery-thumb-row { gap: 8px; }
+  .gallery-thumb { width: 60px !important; height: 60px !important; }
+}
+
+/* ---------- Forms & auth ---------- */
+@media (max-width: 640px) {
+  .field input, .field select, .field textarea { padding: 11px 13px; }
+  .btn { min-height: 44px; }
+  .btn-lg { min-height: 50px; }
+  .card { padding: 16px 14px !important; }
+  .alert { font-size: 13.5px; padding: 11px 13px; gap: 10px; }
+  .field-error { font-size: 12px; }
+}
+
+/* ---------- Dashboard (seller admin) on phones ----------
+   The permanent sidebar is replaced by a compact top bar (brand, theme
+   toggle, hamburger) + slide-in drawer, so the nav is one tap away and the
+   theme toggle is always visible. Desktop keeps the real sidebar. */
+.dash-mobile { display: none; }
+
+@media (max-width: 900px) {
+  .dash-shell { display: block !important; }
+  .dash-sidebar { display: none !important; }
+
+  /* --- top bar --- */
+  .dash-mobile { display: block; }
+  .dash-mobile-bar {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .dash-mobile-bar .logo { font-size: 19px; text-decoration: none; }
+  .dash-mobile-actions { display: flex; align-items: center; gap: 8px; }
+  .dash-mobile-burger {
+    display: inline-grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--elevated);
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  /* --- drawer --- */
+  .dash-mobile-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(10, 12, 18, 0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  .dash-mobile-scrim.is-open { opacity: 1; pointer-events: auto; }
+  .dash-mobile-drawer {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 51;
+    width: min(78vw, 300px);
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    transform: translateX(-102%);
+    transition: transform 0.22s ease;
+    padding: 14px 12px;
+    overflow-y: auto;
+  }
+  .dash-mobile-drawer.is-open { transform: translateX(0); }
+  .dash-mobile-drawer-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 2px 4px 12px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 10px;
+  }
+  .dash-mobile-close {
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    border: 1px solid var(--border);
+    background: var(--elevated);
+    color: var(--text);
+    cursor: pointer;
+  }
+  .dash-mobile-links { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+  .dash-mobile-link {
+    display: block;
+    padding: 11px 12px;
+    border-radius: 10px;
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-decoration: none;
+    background: none;
+    border: none;
+    text-align: left;
+    font: inherit;
+    font-weight: 600;
+    font-size: 14.5px;
+    cursor: pointer;
+  }
+  .dash-mobile-link.is-active { background: var(--blue-tint); color: var(--blue); }
+  .dash-mobile-foot {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+  }
+  .dash-mobile-foot form { display: contents; }
+  .dash-mobile-signout { color: #d43a3a; }
+
+  .dash-main { padding: 18px 14px 48px !important; }
+  .dash-section { margin-top: 26px; }
+}
+
+@media (max-width: 640px) {
+  /* Stat cards: 2-up grid */
+  .listing-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px; }
+  .card-elevated p[style*="32px"] { font-size: 26px !important; }
+
+  /* Tables become stacked rows */
+  .data-table th:nth-child(n+4), .data-table td:nth-child(n+4) { display: none; }
+  .data-table th, .data-table td { padding: 9px 10px; font-size: 13px; }
+
+  /* Settings/Appearance forms breathe */
+  .appearance-grid, .tpl-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .swatch-row { gap: 8px; }
+  .chat-shell { grid-template-columns: 1fr !important; height: auto !important; }
+  .chat-list { max-height: 200px; }
+}
+
+/* ---------- Reduced motion on mobile data savers ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .store-hero .float-slow, .tilt-card { animation: none; transition: none; }
+}
+
+/* ---------- Store masthead (seller's own top nav) ---------- */
+@media (max-width: 640px) {
+  .store-masthead { padding: 9px 14px; }
+  .store-masthead-inner { flex-wrap: wrap; gap: 5px 10px; min-height: 0; }
+  /* Row 1: logo · name (shrinks) · badges — clean single line */
+  /* Two-row grid: logo spans both rows; name row + badges row underneath */
+  .store-masthead-brand {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas: "logo name" "logo badges";
+    align-items: center;
+    column-gap: 9px;
+    row-gap: 4px;
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+  .store-masthead-logo { grid-area: logo; width: 36px; height: 36px; border-radius: 10px; }
+  .store-masthead-name { grid-area: name; font-size: 17px; }
+  .store-masthead .badge { grid-area: badges; justify-self: start; font-size: 10.5px; padding: 2px 8px; white-space: nowrap; }
+  /* Dropship tag repeats in the hero; the masthead keeps Open-now */
+  .store-masthead .badge-dropship { display: none; }
+  .store-masthead .social-row { display: none; } /* socials live in the store footer */
+  /* Row 2: the seller's own nav as a smooth thumb scroller */
+  .store-masthead-links {
+    flex: 1 1 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 16px;
+    padding: 3px 0 5px;
+  }
+  .store-masthead-links::-webkit-scrollbar { display: none; }
+  .store-masthead-links > * { flex: 0 0 auto; }
+  .store-masthead-links > a:not(.btn) { font-size: 14px; padding: 5px 0; }
+  .store-masthead-links .btn-outline { min-height: 32px; padding: 4px 12px; font-size: 13px; }
+}
+
+/* ---------- Inline-grid offenders → class-based, stack on phones ---------- */
+@media (max-width: 720px) {
+  /* Chat inbox: list above thread */
+  .chat-shell { display: grid !important; grid-template-columns: 1fr !important; gap: 14px !important; }
+  /* Discount code rows: stacked fields */
+  .disc-grid { display: grid !important; grid-template-columns: 1fr !important; gap: 8px !important; }
+  /* Announcement start/end date pickers side-by-side → stacked */
+  .announce-dates { display: grid !important; grid-template-columns: 1fr !important; gap: 10px !important; }
+}
+
+/* ---------- Wide tables on phones: horizontal scroll instead of overflow ---------- */
+@media (max-width: 720px) {
+  .hours-table { display: block; overflow-x: auto; }
+  .podium { gap: 10px; }
+  .podium-medal { font-size: 34px; }
+  .rank-row { flex-wrap: wrap; gap: 8px; }
+}
+
+/* ---------- Chat area heights on phones ---------- */
+@media (max-width: 720px) {
+  .chat-messages { max-height: 46vh; }
+  .chat-composer textarea { font-size: 16px; }
+}
+
+/* =====================================================================
+   Naijavend — compact mobile redesign pass (researched)
+   Sources: learnui.design mobile typography guidelines; 2026 mobile UI
+   trend writeups (compact app-like spacing, hairline-bordered cards,
+   edge-to-edge sections, reduced chrome).
+   Appends after the earlier pass — later rules win.
+   ===================================================================== */
+@media (max-width: 640px) {
+  /* 16px gutters everywhere; edge-to-edge feel instead of boxed cards */
+  .container, .container-narrow { padding-left: 16px; padding-right: 16px; }
+
+  /* Tighter global rhythm */
+  .market-section { margin-top: 26px; }
+  .market-section-head { margin-bottom: 10px; }
+  .market-section-head h2 { font-size: 19px; letter-spacing: -0.02em; }
+  .store-section { margin-top: 24px; }
+  .store-section h2 { font-size: 19px; letter-spacing: -0.02em; }
+
+  /* Cards: tighter radius, hairline borders, near-flat */
+  .card { border-radius: 14px; }
+  .store-card, .product-card { border-radius: 14px; }
+  .product-card-img { height: 132px; }
+  .store-card-banner { height: 96px; }
+
+  /* Hero: app-like compact, headline tight */
+  .market-hero .container { padding: 26px 16px 24px !important; }
+  .market-hero h1 { font-size: 24px !important; line-height: 1.14 !important; letter-spacing: -0.02em; }
+  .market-hero p { font-size: 14px; }
+
+  /* Store hero slims down */
+  .store-hero { padding: 20px 16px 16px; }
+  .store-hero-title { font-size: 23px !important; }
+  .store-hero-ctas { gap: 8px; }
+  .store-hero-ctas .btn { min-height: 44px; }
+
+  /* Chips + cards: smaller text, less padding */
+  .cat-chip { padding: 8px 12px; font-size: 12.5px; min-height: 34px; }
+  .store-card-body { padding: 11px 13px 12px; }
+  .store-card-body h3 { font-size: 15.5px; }
+  .product-card-body { padding: 9px 11px 11px; }
+  .product-card-title { font-size: 13.5px; }
+
+  /* Buttons: compact but still 44px touch */
+  .btn { min-height: 44px; font-size: 14px; }
+  .btn-lg { min-height: 48px; font-size: 15px; }
+  .card { padding: 14px 13px !important; }
+
+  /* Compact header on phones */
+  .topnav { margin: 6px 8px 0; max-width: calc(100% - 16px); }
+  .topnav-inner { min-height: 46px; gap: 3px 7px; }
+  .logo { font-size: 18px; }
+  .topnav-sell { padding: 6px 12px; font-size: 13px; }
+  .topnav-account { padding: 7px 9px; }
+  .topnav-pill { font-size: 13px; padding: 6px 11px; }
+
+  /* Cookie banner: slim one-card strip, tiny text, pill actions */
+  .cookie-banner {
+    left: 8px;
+    right: 8px;
+    transform: none;
+    width: auto;
+    bottom: 8px;
+    padding: 9px 10px;
+    gap: 8px;
+    border-radius: 12px;
+  }
+  .cookie-banner p { min-width: 0; font-size: 11.5px; line-height: 1.4; flex: 1 1 100%; }
+  .cookie-banner .btn { min-height: 34px; padding: 4px 12px; font-size: 12.5px; flex: 1; }
+
+  /* Footer: tighter */
+  .site-footer { margin-top: 40px; padding: 22px 0 30px; font-size: 13px; }
+  .store-footer { padding: 18px 16px !important; }
+
+  /* Detail pages */
+  .gallery-main { height: 260px !important; }
+  .map-canvas { height: 280px; }
+
+  /* Auth cards fit without scroll */
+  .auth-card { padding: 18px 16px !important; }
+  .auth-panel { padding: 14px !important; }
+  .auth-points { display: none; }
+  .auth-aside { display: none; }
+  .auth-shell { display: block; }
+  .auth-mode button { font-size: 13.5px; padding: 8px 12px; }
+
+  /* Dashboard on phones: compact */
+  .dash-main { padding: 14px 12px 40px !important; }
+  .dash-section { margin-top: 20px; }
+  .card-elevated p[style*="32px"] { font-size: 24px !important; }
+  .data-table th, .data-table td { padding: 8px 9px; font-size: 12.5px; }
+}
+
+/* Phone-landscape and small tablets: soften */
+@media (max-width: 900px) and (min-width: 641px) {
+  .dash-main { padding: 20px 18px 44px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .store-hero .float-slow, .tilt-card { animation: none; transition: none; }
+}
+
+/* ===== Mobile pass: 3D wheel, QR popovers, dash QR manager ===== */
+
+/* 3D feature wheel: shrink cards so the ring fits a phone viewport */
+@media (max-width: 640px) {
+  .wheel-wrap { perspective: 900px; }
+  .wheel-scene { height: 380px; }
+  .wheel-card {
+    width: min(300px, 82vw);
+    margin-left: calc(-1 * min(300px, 82vw) / 2);
+    margin-top: -150px;
+    padding: 20px 18px 18px;
+  }
+  .wheel-card h3 { font-size: 17px; }
+  .wheel-card p { font-size: 13.5px; }
+  .wheel-card .nv-feature-ico { width: 40px; height: 40px; font-size: 20px; }
+}
+
+/* QR popover in the share bar: fixed bottom sheet, above page content */
+@media (max-width: 640px) {
+  .share-bar .qr-pop {
+    position: fixed;
+    left: 50%;
+    bottom: 84px;
+    transform: translateX(-50%);
+    width: min(320px, calc(100vw - 32px));
+    margin: 0;
+    z-index: 80;
+    box-shadow: 0 18px 50px rgba(11, 12, 14, 0.35);
+  }
+}
+
+/* Dashboard listing QR pop: clamp within viewport */
+@media (max-width: 640px) {
+  .qr-manager-pop { max-width: min(280px, calc(100vw - 48px)); }
+  .qr-sheet-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+}
+
+/* Belt-and-braces: no horizontal page scroll from 3D ring overhang */
+@media (max-width: 640px) {
+  body { overflow-x: hidden; }
+  .qr-canvas { width: 210px; height: auto; aspect-ratio: 520 / 620; }
+}
+
+/* About page mobile polish */
+@media (max-width: 640px) {
+  /* QR demo cards: branded card shrinks to fit the phone */
+  .nv-qr-demo-card .qr-canvas { width: 180px; height: auto; aspect-ratio: 520 / 620; }
+  .qr-card .qr-canvas { width: 200px !important; height: auto !important; aspect-ratio: 520 / 620; }
+  /* Hero copy: slightly tighter paragraph + full-width CTA stack */
+  .about-hero p { font-size: 16px !important; }
+  .about-hero .btn-lg { width: 100%; justify-content: center; }
+  /* Wheel: reduce dead space above/below the ring */
+  .wheel-scene { height: 360px; }
+  /* Section heads breathe less on phones */
+  .about-sec-head { margin-bottom: 20px; }
+}
+
+/* qrcode lib sets inline sizes — CSS must override on phones too */
+@media (max-width: 640px) {
+  .qr-canvas { width: 210px !important; height: auto !important; aspect-ratio: 520 / 620; }
+  .qr-card .qr-canvas { width: 220px !important; }
+  .nv-qr-demo-card .qr-canvas { width: 190px !important; }
+}
