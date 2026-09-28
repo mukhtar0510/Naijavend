@@ -1936,3 +1936,64 @@
   .staff-invite-fields { grid-template-columns: 1fr; }
 }
 [data-theme='dark'] .pos-ticket, [data-theme='dark'] .pos-tile, [data-theme='dark'] .pos-method, [data-theme='dark'] .pos-line-qty button { background: var(--surface); }
+
+/* ============ customer profile editor ============ */
+.prof-card { max-width: 640px; display: grid; gap: 16px; }
+.prof-head { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.prof-avatar-wrap { position: relative; width: 84px; height: 84px; flex: none; }
+.prof-avatar {
+  width: 84px; height: 84px; border-radius: 50%; object-fit: cover;
+  display: grid; place-items: center; border: 2px solid var(--border);
+  background: var(--surface-2, var(--surface)); font-size: 26px; font-weight: 700; color: var(--muted);
+}
+.prof-avatar-fallback.is-live { color: var(--text); border-color: var(--blue); }
+.prof-avatar-spin {
+  position: absolute; inset: -4px; border-radius: 50%;
+  border: 3px solid var(--border); border-top-color: var(--blue);
+  animation: prof-rotate .8s linear infinite; pointer-events: none;
+}
+@keyframes prof-rotate { to { transform: rotate(360deg); } }
+.prof-head-main { display: grid; gap: 3px; min-width: 0; }
+.prof-name { font-size: 17px; }
+.prof-email, .prof-since { font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; }
+.prof-avatar-actions { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.prof-remove { color: var(--danger); border-color: var(--danger); }
+.prof-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* quick-link cards under the profile form */
+.prof-links { display: grid; gap: 10px; margin-top: 20px; max-width: 640px; }
+.prof-link-card {
+  display: flex; align-items: center; gap: 14px; padding: 14px 16px;
+  border: 1px solid var(--border); border-radius: 12px; background: var(--surface);
+  text-decoration: none; color: inherit; transition: border-color .15s, transform .15s;
+}
+.prof-link-card:hover { border-color: var(--blue); transform: translateY(-1px); text-decoration: none; }
+.prof-link-ico { font-size: 22px; }
+.prof-link-card > span:nth-child(2) { display: grid; gap: 1px; flex: 1; }
+.prof-link-card strong { font-size: 14.5px; }
+.prof-link-card .muted { font-size: 12.5px; }
+.prof-link-arrow { color: var(--muted); }
+
+/* account header chip (avatar + Hi, name) */
+.acct-who {
+  display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px 4px 4px;
+  border: 1px solid var(--border); border-radius: 999px; text-decoration: none; color: inherit;
+  background: var(--surface);
+}
+.acct-who:hover { border-color: var(--blue); text-decoration: none; }
+.acct-who-avatar {
+  width: 28px; height: 28px; border-radius: 50%; object-fit: cover;
+  display: grid; place-items: center; background: var(--surface-2, var(--surface));
+  font-size: 11px; font-weight: 700; color: var(--muted); border: 1px solid var(--border);
+}
+.acct-who-name { font-size: 13.5px; font-weight: 600; }
+
+[data-theme='dark'] .prof-avatar, [data-theme='dark'] .acct-who-avatar { background: var(--surface-2, #1a1d23); }
+
+@media (max-width: 640px) {
+  .prof-head { gap: 12px; }
+  .prof-avatar-wrap, .prof-avatar { width: 68px; height: 68px; }
+  .prof-avatar { font-size: 22px; }
+  .acct-who-name { display: none; }
+  .acct-who { padding: 4px; border-radius: 50%; }
+}
