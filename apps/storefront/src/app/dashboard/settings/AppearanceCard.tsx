@@ -3,11 +3,26 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Stars } from '@/components/Stars';
-import { STORE_TEMPLATES, categoryEmoji, categoryLabel } from '@idevtenancy/shared';
+import { STORE_TEMPLATES, STORE_FONTS, LISTING_STYLES, HOVER_ANIMS, categoryEmoji, categoryLabel } from '@idevtenancy/shared';
 import type { AiStyleDraft, StoreTheme } from '@idevtenancy/shared';
 
-const FONTS = ['Sora', 'Inter', 'Playfair Display', 'DM Sans', 'Space Grotesk'] as const;
+const FONTS = STORE_FONTS;
 const HERO_STYLES = ['gradient', 'image', 'solid'] as const;
+
+// Grouped labels for the font dropdowns so 20 fonts stay scannable.
+const FONT_GROUPS: Array<{ label: string; fonts: readonly string[] }> = [
+  { label: 'Modern sans', fonts: ['Sora', 'Inter', 'DM Sans', 'Space Grotesk', 'Manrope', 'Outfit', 'Plus Jakarta Sans', 'Urbanist'] },
+  { label: 'Serif', fonts: ['Playfair Display', 'Merriweather', 'Lora', 'Libre Baskerville', 'Fraunces', 'Cormorant Garamond'] },
+  { label: 'Display', fonts: ['Bricolage Grotesque', 'Bebas Neue', 'Unbounded', 'Oswald'] },
+  { label: 'Cursive', fonts: ['Dancing Script', 'Pacifico', 'Great Vibes', 'Satisfy', 'Caveat'] },
+];
+
+const LISTING_STYLE_LABELS: Record<string, string> = {
+  plain: 'Plain', gradient: 'Gradient', glass: 'Glass', outlined: 'Outlined', elevated: 'Floating',
+};
+const HOVER_ANIM_LABELS: Record<string, string> = {
+  none: 'None', lift: 'Lift', tilt: 'Tilt', zoom: 'Zoom', glow: 'Glow', wiggle: 'Wiggle',
+};
 
 const PRESET_ACCENTS = [
   '#1D4ED8', // Naijavend blue
@@ -239,6 +254,8 @@ export function AppearanceCard({
           listingColor: state.listing_color,
           listingBgColor: state.listing_bg_color,
           cardRadius: state.card_radius,
+          listingStyle: state.listing_style ?? 'plain',
+          hoverAnim: state.hover_anim ?? 'none',
         }),
       });
       const body = await res.json();
@@ -266,6 +283,20 @@ export function AppearanceCard({
     ...(state.listing_bg_color ? { '--st-listing-bg': state.listing_bg_color } : {}),
     ...(state.listing_color ? { '--st-listing-text': state.listing_color, '--st-listing-heading': state.listing_color } : {}),
   } as React.CSSProperties;
+
+  function renderFontSelect(id: string, value: string, onChange: (v: string) => void) {
+    return (
+      <select id={id} value={value} onChange={(e) => onChange(e.target.value)}>
+        {FONT_GROUPS.map((g) => (
+          <optgroup key={g.label} label={g.label}>
+            {g.fonts.map((f) => <option key={f} value={f}>{f}</option>)}
+          </optgroup>
+        ))}
+        {/* Safety net: show the stored value even if the groups change later. */}
+        {!FONT_GROUPS.some((g) => g.fonts.includes(value)) && <option value={value}>{value}</option>}
+      </select>
+    );
+  }
 
   return (
     <div className="card" style={{ marginBottom: 16 }}>
@@ -302,7 +333,14 @@ export function AppearanceCard({
       {/* Live preview */}
       <div style={{ marginBottom: 16 }}>
         <p style={{ fontSize: 13.5, fontWeight: 600, marginBottom: 8 }}>Live preview</p>
-        <div className="site-shell" data-layout={state.layout} data-card-radius={state.card_radius === 'sharp' ? 'sharp' : 'rounded'} style={previewStyle}>
+        <div
+          className="site-shell"
+          data-layout={state.layout}
+          data-card-radius={state.card_radius === 'sharp' ? 'sharp' : 'rounded'}
+          data-listing-style={state.listing_style ?? 'plain'}
+          data-hover-anim={state.hover_anim ?? 'none'}
+          style={previewStyle}
+        >
           <div className="page-hero" style={state.hero_style === 'image' && state.banner_url ? { backgroundImage: `url('${state.banner_url}')` } : undefined}>
             <div style={{ padding: '20px 20px 24px' }}>
               <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 10 }}>
@@ -541,19 +579,55 @@ export function AppearanceCard({
         </div>
       </div>
 
+      {/* Listing-card surface style + hover animation */}
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+        <div className="field" style={{ flex: 1, minWidth: 180 }}>
+          <label>Listing style</label>
+          <div className="admin-role-tabs" role="radiogroup" aria-label="Listing card style">
+            {LISTING_STYLES.map((ls) => (
+              <button
+                key={ls}
+                type="button"
+                role="radio"
+                aria-checked={(state.listing_style ?? 'plain') === ls}
+                className={`btn btn-outline btn-sm${(state.listing_style ?? 'plain') === ls ? ' is-active' : ''}`}
+                onClick={() => set('listing_style', ls)}
+              >
+                {LISTING_STYLE_LABELS[ls]}
+              </button>
+            ))}
+          </div>
+          <p className="hint">The look of the card surface — Glass gives a frosted, see-through feel.</p>
+        </div>
+        <div className="field" style={{ flex: 1, minWidth: 180 }}>
+          <label>Hover animation</label>
+          <div className="admin-role-tabs" role="radiogroup" aria-label="Listing card hover animation">
+            {HOVER_ANIMS.map((a) => (
+              <button
+                key={a}
+                type="button"
+                role="radio"
+                aria-checked={(state.hover_anim ?? 'none') === a}
+                className={`btn btn-outline btn-sm${(state.hover_anim ?? 'none') === a ? ' is-active' : ''}`}
+                onClick={() => set('hover_anim', a)}
+              >
+                {HOVER_ANIM_LABELS[a]}
+              </button>
+            ))}
+          </div>
+          <p className="hint">How product cards react when a customer hovers over them.</p>
+        </div>
+      </div>
+
       {/* Fonts */}
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
         <div className="field" style={{ flex: 1, minWidth: 160 }}>
           <label htmlFor="fh">Heading font</label>
-          <select id="fh" value={state.font_heading} onChange={(e) => set('font_heading', e.target.value)}>
-            {FONTS.map((f) => <option key={f} value={f}>{f}</option>)}
-          </select>
+          {renderFontSelect('fh', state.font_heading, (v) => set('font_heading', v))}
         </div>
         <div className="field" style={{ flex: 1, minWidth: 160 }}>
           <label htmlFor="fb">Body font</label>
-          <select id="fb" value={state.font_body} onChange={(e) => set('font_body', e.target.value)}>
-            {FONTS.map((f) => <option key={f} value={f}>{f}</option>)}
-          </select>
+          {renderFontSelect('fb', state.font_body, (v) => set('font_body', v))}
         </div>
       </div>
 

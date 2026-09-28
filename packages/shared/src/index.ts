@@ -6,6 +6,7 @@ export * from './rankings';
 export * from './colors';
 export * from './password';
 export * from './templates';
+export * from './theme-options';
 export * from './geo';
 export * from './hours';
 export * from './store';

@@ -129,6 +129,8 @@ export default async function SettingsPage() {
                   listing_color: null,
                   listing_bg_color: null,
                   card_radius: null,
+                  listing_style: null,
+                  hover_anim: null,
                   button_shape: 'rounded',
                   card_style: 'soft',
                   updated_at: new Date().toISOString(),

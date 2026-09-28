@@ -32,9 +32,12 @@ export async function POST(req: NextRequest) {
     const store = await getOwnStore<{ id: string; name: string; category: string }>(sb, 'id, name, category');
     if (!store) return apiError(404, 'no_store', 'Create your store first.');
 
+    // Vibe keywords drive font pairing, so the store NAME stays out of the
+    // input — a store literally named "Studio" or "Bold" would otherwise
+    // hijack the vibe match. The category prefix keeps palette presets working.
     const result = await aiComplete({
       feature: 'style_store',
-      input: `${store.name} (${store.category}): ${brief}`,
+      input: `(${store.category}): ${brief}`,
     });
 
     // Log usage so the dashboard can show AI activity per store.

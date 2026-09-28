@@ -753,6 +753,98 @@
 .site-shell .listing-card p,
 .site-shell .catalogue-card p { color: var(--st-listing-text); }
 
+/* Template corner radii only apply while the seller keeps the default
+   "Rounded" toggle — a chosen Sharp/rounded wins over template styling
+   (components.css loads later, so this must set the same variable). */
+.site-shell[data-card-radius='sharp'] {
+  --st-listing-radius: 0px !important;
+}
+
+/* Cursive fonts run visually small — bump heading scale when a cursive
+   font is the heading font (set inline via data-cursive-heading). */
+.site-shell[data-cursive-heading='true'] h1 { font-size: 1.15em; }
+.site-shell[data-cursive-heading='true'] .store-masthead-name { font-size: 21px; }
+
+/* ============ Listing-card surface styles (data-listing-style) ============ */
+.site-shell[data-listing-style='gradient'] .listing-card,
+.site-shell[data-listing-style='gradient'] .catalogue-card {
+  background: linear-gradient(160deg, var(--st-listing-bg) 0%, color-mix(in srgb, var(--st-accent) 12%, var(--st-listing-bg)) 100%);
+}
+.site-shell[data-listing-style='glass'] .listing-card,
+.site-shell[data-listing-style='glass'] .catalogue-card {
+  background: color-mix(in srgb, var(--st-listing-bg) 55%, transparent);
+  backdrop-filter: blur(10px) saturate(1.2);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  border: 1px solid color-mix(in srgb, var(--st-listing-bg) 70%, var(--st-accent) 20%, var(--border));
+  box-shadow: var(--shadow-sm);
+}
+.site-shell[data-listing-style='outlined'] .listing-card,
+.site-shell[data-listing-style='outlined'] .catalogue-card {
+  background: transparent;
+  border: 2px solid var(--st-accent-border, var(--border-strong));
+  box-shadow: none;
+}
+.site-shell[data-listing-style='elevated'] .listing-card,
+.site-shell[data-listing-style='elevated'] .catalogue-card {
+  background: var(--st-listing-bg);
+  border: none;
+  box-shadow: var(--shadow-lg);
+}
+
+/* ============ Listing-card hover animations (data-hover-anim) ============ */
+/* None = plain, keep the default border-colour shift only. */
+.site-shell[data-hover-anim='lift'] a.listing-card:hover,
+.site-shell[data-hover-anim='lift'] .listing-card.is-link:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+}
+.site-shell[data-hover-anim='tilt'] a.listing-card:hover,
+.site-shell[data-hover-anim='tilt'] .listing-card.is-link:hover {
+  transform: translateY(-4px) perspective(750px) rotateX(2.2deg) rotateY(-2.2deg);
+  box-shadow: var(--shadow-md);
+}
+.site-shell[data-hover-anim='zoom'] a.listing-card:hover .catalogue-cover,
+.site-shell[data-hover-anim='zoom'] .listing-card.is-link:hover .catalogue-cover {
+  transform: scale(1.06);
+}
+.site-shell[data-hover-anim='zoom'] .listing-card .catalogue-cover { transition: transform 260ms var(--ease); }
+.site-shell[data-hover-anim='glow'] a.listing-card:hover,
+.site-shell[data-hover-anim='glow'] .listing-card.is-link:hover {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--st-accent) 35%, transparent), 0 8px 26px color-mix(in srgb, var(--st-accent) 30%, transparent);
+  border-color: var(--st-accent);
+}
+.site-shell[data-hover-anim='wiggle'] a.listing-card:hover,
+.site-shell[data-hover-anim='wiggle'] .listing-card.is-link:hover {
+  animation: listing-wiggle 0.45s ease-in-out;
+}
+@keyframes listing-wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-1.6deg) translateY(-2px); }
+  55% { transform: rotate(1.4deg) translateY(-2px); }
+  80% { transform: rotate(-0.6deg) translateY(-1px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-shell[data-hover-anim='wiggle'] a.listing-card:hover,
+  .site-shell[data-hover-anim='lift'] a.listing-card:hover,
+  .site-shell[data-hover-anim='tilt'] a.listing-card:hover { transform: none; animation: none; }
+  .site-shell[data-hover-anim='zoom'] a.listing-card:hover .catalogue-cover { transform: none; }
+}
+
+/* Platform links ("Sell on Naijavend", "More stores", legal pages) belong to
+   Naijavend, not the seller's theme — exempt them from --st-* overrides so a
+   loud seller palette can't make platform links unreadable. */
+.site-shell .xplat-link,
+.site-shell a.xplat-link,
+.site-shell .footer-base .xplat-link {
+  color: var(--text-muted, #5A5F66) !important;
+  border-color: var(--border-strong, #D8DADE);
+}
+.site-shell a.xplat-link:hover,
+.site-shell .footer-base a.xplat-link:hover {
+  color: var(--blue, #1D4ED8) !important;
+  text-decoration: none;
+}
+
 /* Button shape variants */
 .site-shell[data-buttons='pill'] .btn { border-radius: 999px; }
 .site-shell[data-buttons='rounded'] .btn { border-radius: var(--radius-md); }

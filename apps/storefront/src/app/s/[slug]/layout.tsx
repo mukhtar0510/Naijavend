@@ -11,6 +11,7 @@ import { OpenBadge } from '@/components/OpenBadge';
 import { BackToMarket } from '@/components/BackToMarket';
 import { InstagramIcon, XIcon, FacebookIcon, TikTokIcon, YouTubeIcon } from '@/components/SocialIcons';
 import type { StoreSocialLinks, StoreTheme } from '@idevtenancy/shared';
+import { CURSIVE_FONTS } from '@idevtenancy/shared';
 
 const SOCIAL_META: Array<{ key: keyof StoreSocialLinks; label: string; Icon: (p: { size?: number }) => React.ReactNode; prefix: string }> = [
   { key: 'instagram', label: 'Instagram', Icon: InstagramIcon, prefix: 'https://instagram.com/' },
@@ -143,6 +144,9 @@ export default async function StoreSiteLayout({
       data-buttons={t?.button_shape ?? DEFAULTS.button_shape}
       data-cards={t?.card_style ?? DEFAULTS.card_style}
       data-card-radius={t?.card_radius === 'sharp' ? 'sharp' : 'rounded'}
+      data-listing-style={t?.listing_style ?? 'plain'}
+      data-hover-anim={t?.hover_anim ?? 'none'}
+      data-cursive-heading={CURSIVE_FONTS.includes(t?.font_heading ?? '') ? 'true' : 'false'}
       style={themeStyle}
     >
       {s.announcement && (
@@ -166,7 +170,7 @@ export default async function StoreSiteLayout({
             {waNumber && <Link href={`/s/${store.slug}#reach`}>Contact</Link>}
             <Link href={`/s/${store.slug}/chat`}>Chat</Link>
             <Link href={`/s/${store.slug}/rate`}>Reviews</Link>
-            <Link href="/discover" className="btn btn-outline btn-sm">More on Naijavend</Link>
+            <Link className="btn btn-outline btn-sm xplat-link" href="/discover">More on Naijavend</Link>
           </nav>
         </div>
       </header>
@@ -195,15 +199,15 @@ export default async function StoreSiteLayout({
             <nav className="footer-col" aria-label="Orders and support">
               <h4>Support</h4>
               {waNumber && <Link href={`/s/${store.slug}#reach`}>Contact & location</Link>}
-              <Link href="/discover">More stores</Link>
-              <Link href="/faq">Help & FAQ</Link>
-              <Link href="/dashboard">Sell on Naijavend</Link>
+              <Link className="xplat-link" href="/discover">More stores</Link>
+              <Link className="xplat-link" href="/faq">Help & FAQ</Link>
+              <Link className="xplat-link" href="/dashboard">Sell on Naijavend</Link>
             </nav>
             <nav className="footer-col" aria-label="Legal">
               <h4>Legal</h4>
-              <Link href="/legal/privacy">Privacy policy</Link>
-              <Link href="/legal/terms">User agreement</Link>
-              <Link href="/legal/cookies">Cookies policy</Link>
+              <Link className="xplat-link" href="/legal/privacy">Privacy policy</Link>
+              <Link className="xplat-link" href="/legal/terms">User agreement</Link>
+              <Link className="xplat-link" href="/legal/cookies">Cookies policy</Link>
             </nav>
           </div>
           <div className="footer-base">
@@ -212,7 +216,7 @@ export default async function StoreSiteLayout({
             </span>
             <span>
               Built on{' '}
-              <Link href="/">Naijavend</Link> — storefronts for Nigerian sellers. 🇳🇬
+              <Link className="xplat-link" href="/">Naijavend</Link> — storefronts for Nigerian sellers. 🇳🇬
             </span>
           </div>
         </div>

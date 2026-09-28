@@ -4,16 +4,18 @@ import { NextRequest } from 'next/server';
 import { getSellerClient, getOwnStore } from '@/lib/auth';
 import { revalidateStore } from '@/lib/revalidate';
 import { apiError, apiOk, internalError } from '@/lib/api';
-import { sanitizeText, isValidPhone, isValidHexColor, isStoreCategory, categoryLabel } from '@idevtenancy/shared';
+import { sanitizeText, isValidPhone, isValidHexColor, isStoreCategory, categoryLabel, isStoreFont, isStoreLayout, LISTING_STYLES, HOVER_ANIMS } from '@idevtenancy/shared';
 
 const HEX = /^#[0-9a-fA-F]{6}$/;
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
-const FONT_NAMES = new Set(['Sora', 'Inter', 'Playfair Display', 'DM Sans', 'Space Grotesk']);
-const LAYOUTS = new Set(['modern', 'classic', 'bold', 'minimal', 'boutique', 'merchant', 'luxury', 'playful', 'sunset', 'marketplace']);
+const FONT_NAMES = new Set<string>(['Sora', 'Inter', 'Playfair Display', 'DM Sans', 'Space Grotesk', 'Manrope', 'Outfit', 'Plus Jakarta Sans', 'Urbanist', 'Merriweather', 'Lora', 'Libre Baskerville', 'Fraunces', 'Cormorant Garamond', 'Bricolage Grotesque', 'Bebas Neue', 'Unbounded', 'Oswald', 'Dancing Script', 'Pacifico', 'Great Vibes', 'Satisfy', 'Caveat'].filter(isStoreFont));
+const LAYOUTS = new Set<string>(['modern', 'classic', 'bold', 'minimal', 'boutique', 'merchant', 'luxury', 'playful', 'sunset', 'marketplace', 'editorial', 'neon', 'pastel', 'monochrome', 'showcase', 'festival', 'artisan', 'executive', 'aurora', 'corner'].filter(isStoreLayout));
 const HERO_STYLES = new Set(['gradient', 'image', 'solid']);
 const BUTTON_SHAPES = new Set(['pill', 'rounded', 'square']);
 const CARD_STYLES = new Set(['soft', 'outline', 'shadow']);
 const CARD_RADII = new Set(['sharp', 'rounded']);
+const LISTING_STYLE_SET = new Set<string>(LISTING_STYLES);
+const HOVER_ANIM_SET = new Set<string>(HOVER_ANIMS);
 
 // Validates a per-day open/close map; every present day must have two HH:MM times
 // with close strictly after open. Anything off returns undefined (keep old value).
@@ -90,6 +92,9 @@ export async function POST(req: NextRequest) {
   const listingColor = b.listingColor === undefined ? undefined : (typeof b.listingColor === 'string' && HEX.test(b.listingColor) ? b.listingColor : null);
   const listingBgColor = b.listingBgColor === undefined ? undefined : (typeof b.listingBgColor === 'string' && HEX.test(b.listingBgColor) ? b.listingBgColor : null);
   const cardRadius = typeof b.cardRadius === 'string' && CARD_RADII.has(b.cardRadius) ? b.cardRadius : undefined;
+  // Listing-card surface style + hover animation (plain/none = reset to default).
+  const listingStyle = typeof b.listingStyle === 'string' && LISTING_STYLE_SET.has(b.listingStyle) ? b.listingStyle : undefined;
+  const hoverAnim = typeof b.hoverAnim === 'string' && HOVER_ANIM_SET.has(b.hoverAnim) ? b.hoverAnim : undefined;
   const bannerUrl = b.bannerUrl === undefined ? undefined : safeUrl(b.bannerUrl);
   const faviconUrl = b.faviconUrl === undefined ? undefined : safeUrl(b.faviconUrl);
   const logoUrl = b.logoUrl === undefined ? undefined : safeUrl(b.logoUrl);
@@ -198,6 +203,8 @@ export async function POST(req: NextRequest) {
       ...(listingColor !== undefined ? { listing_color: listingColor } : {}),
       ...(listingBgColor !== undefined ? { listing_bg_color: listingBgColor } : {}),
       ...(cardRadius !== undefined ? { card_radius: cardRadius } : {}),
+      ...(listingStyle !== undefined ? { listing_style: listingStyle } : {}),
+      ...(hoverAnim !== undefined ? { hover_anim: hoverAnim } : {}),
       ...(bannerUrl !== undefined ? { banner_url: bannerUrl } : {}),
       ...(faviconUrl !== undefined ? { favicon_url: faviconUrl } : {}),
       ...(logoUrl !== undefined ? { logo_url: logoUrl } : {}),

@@ -9,7 +9,7 @@ export type AiFeature = 'store_setup' | 'listing_description' | 'style_store';
 
 /** Per-store appearance theme rendered by /s/* pages (one row per store). */
 /** Structural templates a store site can use (see packages/shared/src/templates.ts). */
-export type StoreLayout = 'modern' | 'classic' | 'bold' | 'minimal' | 'boutique' | 'merchant' | 'luxury' | 'playful' | 'sunset' | 'marketplace';
+export type StoreLayout = 'modern' | 'classic' | 'bold' | 'minimal' | 'boutique' | 'merchant' | 'luxury' | 'playful' | 'sunset' | 'marketplace' | 'editorial' | 'neon' | 'pastel' | 'monochrome' | 'showcase' | 'festival' | 'artisan' | 'executive' | 'aurora' | 'corner';
 
 export interface StoreTheme {
   store_id: string;
@@ -41,6 +41,10 @@ export interface StoreTheme {
   listing_bg_color: string | null;
   /** Product-card corners: 'sharp' = square edges, 'rounded' = theme default. null = rounded. */
   card_radius: string | null;
+  /** Product-card surface look (plain/gradient/glass/outlined/elevated). */
+  listing_style: string | null;
+  /** Product-card hover animation (none/lift/tilt/zoom/glow/wiggle). */
+  hover_anim: string | null;
   /** 1–5 uploaded photos of the shop itself, shown as a gallery on the store site. */
   gallery_urls?: string[] | null;
   updated_at: string;
