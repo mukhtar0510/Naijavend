@@ -63,11 +63,13 @@ export default async function SellerChatPage() {
     }
   }
 
-  // Group into threads by customer; anonymous threads (null customer) group by their first message id.
+  // Group into threads by customer; anonymous (guest) threads all share the
+  // store's single anon channel, so they group into ONE conversation — per-
+  // message keys used to fragment one guest chat into many threads.
   type Thread = { key: string; customerId: string | null; lastBody: string; lastAt: string; count: number };
   const threads = new Map<string, Thread>();
   for (const m of rows ?? []) {
-    const key = m.customer_id ?? `anon-${(m as { id: string }).id}`;
+    const key = m.customer_id ?? 'guest';
     const t = threads.get(key);
     if (t) {
       t.count += 1;
@@ -100,7 +102,7 @@ export default async function SellerChatPage() {
       const seen = sellerRead.get(tid);
       let unread = 0;
       for (const m of rows ?? []) {
-        const mk = m.customer_id ?? `anon-${(m as { id: string }).id}`;
+        const mk = m.customer_id ?? 'guest';
         if (mk !== t.key || m.sender !== 'customer') continue;
         if (!seen || m.created_at > seen) unread += 1;
       }
