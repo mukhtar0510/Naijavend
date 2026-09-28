@@ -488,14 +488,59 @@ export function AdminConsole({ adminEmail }: { adminEmail: string }) {
           )}
 
           {section === 'overview' && (
-            <section aria-label="Platform metrics">
+            <section aria-label="Platform overview">
               <div className="admin-section-head">
                 <h2>Overview</h2>
-                <p className="admin-section-sub">Platform health at a glance.</p>
+                <p className="admin-section-sub">Platform health at a glance — updated {new Date().toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' })}.</p>
               </div>
-              <div className="admin-metrics">
-                {metrics
-                  ? METRIC_META.map((m) => (
+              {!metrics ? (
+                <div className="admin-metrics">
+                  {Array.from({ length: 9 }).map((_, i) => (
+                    <div key={i} className="admin-metric skeleton" style={{ height: 92 }} />
+                  ))}
+                </div>
+              ) : (
+                <>
+                  {/* Hero band: money first — GMV, paid orders, MRR, conversion */}
+                  <div className="ov-hero">
+                    <div className="ov-hero-main">
+                      <span className="ov-hero-label">Paid GMV — lifetime</span>
+                      <span className="ov-hero-value">{formatNaira(metrics.gmvKobo)}</span>
+                      <span className="ov-hero-sub">
+                        {metrics.paidOrders.toLocaleString()} paid order{metrics.paidOrders === 1 ? '' : 's'}
+                        {metrics.orders > 0 ? ` · ${Math.round((metrics.paidOrders / metrics.orders) * 100)}% of all orders` : ''}
+                      </span>
+                    </div>
+                    <div className="ov-hero-side">
+                      <div className="ov-hero-cell">
+                        <span className="ov-hero-cell-value">{formatNaira(metrics.mrr?.currentKobo ?? 0)}</span>
+                        <span className="ov-hero-cell-label">MRR · {metrics.mrr?.growthStores ?? 0} growth stores</span>
+                      </div>
+                      <div className="ov-hero-cell">
+                        <span className="ov-hero-cell-value">{metrics.stores.toLocaleString()}</span>
+                        <span className="ov-hero-cell-label">stores · +{metrics.newStores7d} this week</span>
+                      </div>
+                      <div className="ov-hero-cell">
+                        <span className="ov-hero-cell-value">{metrics.users.toLocaleString()}</span>
+                        <span className="ov-hero-cell-label">accounts · +{metrics.newUsers24h} today</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Revenue trend inline under the hero */}
+                  <div className="chart-card" style={{ marginBottom: 18 }}>
+                    <h3>Paid revenue — last 30 days</h3>
+                    <p className="chart-sub">Daily GMV from paid + fulfilled orders</p>
+                    <AreaChart
+                      points={metrics.revenue30d.map((d) => ({ day: d.day, value: d.kobo }))}
+                      money
+                      label="Paid revenue per day"
+                    />
+                  </div>
+
+                  {/* Remaining KPIs in a compact strip */}
+                  <div className="admin-metrics" style={{ marginBottom: 18 }}>
+                    {METRIC_META.filter((m) => !['gmvKobo', 'paidOrders', 'stores', 'users'].includes(m.key)).map((m) => (
                       <div key={m.key} className={`admin-metric tone-${m.tone}`}>
                         <span className="admin-metric-ico" aria-hidden>{m.ico}</span>
                         <span className="admin-metric-value">
@@ -504,9 +549,29 @@ export function AdminConsole({ adminEmail }: { adminEmail: string }) {
                         <span className="admin-metric-label">{m.label}</span>
                         <span className="admin-metric-hint">{m.hint}</span>
                       </div>
-                    ))
-                  : Array.from({ length: 9 }).map((_, i) => <div key={i} className="admin-metric skeleton" style={{ height: 92 }} />)}
-              </div>
+                    ))}
+                  </div>
+
+                  {/* Glanceable charts + jump-off points */}
+                  <div className="chart-grid-2">
+                    <div className="chart-card">
+                      <h3>Stores by category</h3>
+                      <p className="chart-sub">All storefronts on the platform</p>
+                      <DonutChart slices={metrics.categories} />
+                    </div>
+                    <div className="chart-card">
+                      <h3>Orders by status</h3>
+                      <p className="chart-sub">Lifetime order pipeline</p>
+                      <DonutChart slices={metrics.ordersByStatus} />
+                    </div>
+                    <div className="chart-card" style={{ gridColumn: '1 / -1' }}>
+                      <h3>Signups — last 14 days</h3>
+                      <p className="chart-sub">Daily new seller vs customer accounts</p>
+                      <TrendBars days={metrics.signups14d} />
+                    </div>
+                  </div>
+                </>
+              )}
             </section>
           )}
 
