@@ -96,11 +96,22 @@ export async function POST(req: NextRequest) {
     );
     if (itemsErr) throw itemsErr;
 
-    // Stock stays truthful across online + in-person sales.
+    // Stock stays truthful across online + in-person sales. Atomic RPC: the
+    // check-and-decrement is one statement, so two terminals selling the last
+    // unit can't both succeed (RLS still scopes the write to this store).
     for (const l of dbListings) {
       if (l.stock != null) {
         const wanted = lines.filter((ln) => ln.listingId === l.id).reduce((s, ln) => s + ln.quantity, 0);
-        await sb.from('listings').update({ stock: Math.max(0, (l.stock as number) - wanted) }).eq('id', l.id);
+        const { error: stockErr } = await sb.rpc('decrement_listing_stock', {
+          p_listing_id: l.id,
+          p_quantity: wanted,
+        });
+        if (stockErr) {
+          if (String(stockErr.message).includes('INSUFFICIENT_STOCK')) {
+            return apiError(422, 'insufficient_stock', `Only a few of "${l.title}" left — someone just bought the last ones.`);
+          }
+          throw stockErr;
+        }
       }
     }
 

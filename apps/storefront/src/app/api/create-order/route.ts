@@ -8,6 +8,7 @@ import { supabaseService } from '@/lib/supabase';
 import { getCustomerUser } from '@/lib/auth';
 import { rateLimit, clientIp } from '@/lib/ratelimit';
 import { apiError, apiOk, internalError } from '@/lib/api';
+import { mintPayToken } from '@/lib/paytoken';
 import { parseCartLines, sanitizeText, isValidPhone } from '@idevtenancy/shared';
 
 const idempotencyCache = new Map<string, { orderId: string; expires: number }>();
@@ -107,11 +108,22 @@ export async function POST(req: NextRequest) {
       .single();
     if (orderErr) throw orderErr;
 
-    // Decrement stock for tracked products, and count promo usage.
+    // Decrement stock ATOMICALLY (check + decrement in one statement) — the
+    // old read-modify-write let two concurrent buyers oversell the same item.
+    // Service client runs the RPC as postgres, bypassing RLS by design.
     for (const l of dbListings) {
       if (l.stock != null) {
         const wanted = lines.filter((ln) => ln.listingId === l.id).reduce((s, ln) => s + ln.quantity, 0);
-        await sb.from('listings').update({ stock: Math.max(0, (l.stock as number) - wanted) }).eq('id', l.id);
+        const { error: stockErr } = await sb.rpc('decrement_listing_stock', {
+          p_listing_id: l.id,
+          p_quantity: wanted,
+        });
+        if (stockErr) {
+          if (String(stockErr.message).includes('INSUFFICIENT_STOCK')) {
+            return apiError(422, 'insufficient_stock', `Only a few of "${l.title}" left — someone just bought the last ones.`);
+          }
+          throw stockErr;
+        }
       }
     }
     if (appliedCode) {
@@ -129,7 +141,11 @@ export async function POST(req: NextRequest) {
       idempotencyCache.set(idempotencyKey, { orderId: order.id, expires: Date.now() + 10 * 60_000 });
     }
 
-    return apiOk({ orderId: order.id, totalKobo, discountKobo, discountCode: appliedCode }, 201);
+    // Mint a single-purpose payment token: mock-pay refuses to mark this order
+    // paid without it, so a random orderId is not enough to complete payment.
+    const payToken = mintPayToken(order.id);
+
+    return apiOk({ orderId: order.id, totalKobo, discountKobo, discountCode: appliedCode, payToken }, 201);
   } catch (err) {
     return internalError('create-order', err);
   }

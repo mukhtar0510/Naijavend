@@ -20,6 +20,7 @@ export default function OrderPage() {
   const [status, setStatus] = useState<'idle' | 'submitting' | 'error'>('idle');
   const [message, setMessage] = useState('');
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [payToken, setPayToken] = useState<string | null>(null);
 
   // Live promo check: debounced; only fires with 4+ characters so we don't
   // hammer the API on every keystroke of "WELCOME10".
@@ -69,6 +70,7 @@ export default function OrderPage() {
         return;
       }
       setOrderId(body.orderId);
+      setPayToken(body.payToken ?? null);
       setStatus('idle');
     } catch {
       setStatus('error');
@@ -84,7 +86,10 @@ export default function OrderPage() {
           <p className="muted">Order reference</p>
           <p className="mono" style={{ fontSize: 18, color: 'var(--blue)' }}>{orderId}</p>
           <p className="muted">Next step: confirm payment to send the order to the seller.</p>
-          <Link className="btn btn-primary" href={`/checkout/${orderId}`}>
+          <Link
+            className="btn btn-primary"
+            href={payToken ? `/checkout/${orderId}?pt=${payToken}` : `/checkout/${orderId}`}
+          >
             Continue to payment
           </Link>
         </div>

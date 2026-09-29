@@ -16,8 +16,15 @@ function naira(kobo: number) {
   return `₦${(kobo / 100).toLocaleString('en-NG', { maximumFractionDigits: 0 })}`;
 }
 
-export default function CheckoutPage({ params }: { params: Promise<{ orderId: string }> }) {
+export default function CheckoutPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ orderId: string }>;
+  searchParams: Promise<{ pt?: string }>;
+}) {
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [payToken, setPayToken] = useState('');
   const [data, setData] = useState<CheckoutData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [paying, setPaying] = useState(false);
@@ -25,7 +32,8 @@ export default function CheckoutPage({ params }: { params: Promise<{ orderId: st
 
   useEffect(() => {
     params.then((p) => setOrderId(p.orderId));
-  }, [params]);
+    searchParams.then((p) => setPayToken(p.pt ?? ''));
+  }, [params, searchParams]);
 
   useEffect(() => {
     if (!orderId) return;
@@ -45,7 +53,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ orderId: st
       const res = await fetch('/api/mock-pay', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId }),
+        body: JSON.stringify({ orderId, payToken }),
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body?.error?.message ?? 'Payment failed.');

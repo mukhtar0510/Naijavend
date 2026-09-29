@@ -10,7 +10,12 @@ interface ChatApiMessage {
   created_at: string;
 }
 
-const dayKey = (iso: string) => new Date(iso).toISOString().slice(0, 10);
+// Local-time day bucket — matches dayLabel's local "Today/Yesterday". A UTC
+// bucket would split one evening (Nigeria is UTC+1) into two days.
+const dayKey = (iso: string) => {
+  const d = new Date(iso);
+  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+};
 
 function dayLabel(iso: string): string {
   const d = new Date(iso);
@@ -71,12 +76,17 @@ export function ChatBox({
     }
   }, [storeId]);
 
-  // Stamp the customer's read marker whenever messages arrive while the tab is
-  // visible, so the seller's replies stop counting as unread in the customer's
-  // inbox. (The seller stamps on thread-open in ChatInbox.) Hidden-tab visits
-  // are skipped so background polling doesn't mark things read unread.
+  // Stamp the customer's read marker when the latest message changes while the
+  // tab is visible, so the seller's replies stop counting as unread in the
+  // customer's inbox. (The seller stamps on thread-open in ChatInbox.) Gated on
+  // the newest message id so the 4s poll doesn't re-POST an identical marker
+  // forever; hidden-tab visits are skipped entirely.
+  const lastSeenIdRef = useRef<string | null>(null);
   useEffect(() => {
     if (role !== 'customer' || messages.length === 0) return;
+    const newestId = messages[messages.length - 1]!.id;
+    if (newestId === lastSeenIdRef.current) return;
+    lastSeenIdRef.current = newestId;
     if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
     const threadId = `${storeId}:me`;
     void fetch('/api/chat/read', {
