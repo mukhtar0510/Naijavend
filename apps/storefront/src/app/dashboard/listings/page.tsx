@@ -4,6 +4,7 @@ import { getSellerClient, getOwnStore } from '@/lib/auth';
 import { siteUrl } from '@/lib/site';
 import { formatNaira } from '@idevtenancy/shared';
 import { ListingEditor } from './ListingEditor';
+import { ListingRow } from './ListingRow';
 import { DiscountManager, type DiscountRow } from './DiscountManager';
 import { ListingQrManager } from './ListingQrManager';
 import type { Listing, Store } from '@idevtenancy/shared';
@@ -55,41 +56,43 @@ export default async function ListingsPage({ searchParams }: { searchParams: Pro
           {(listings as Listing[]).map((l) => {
             const cover = (l.image_urls ?? []).find((u) => typeof u === 'string' && /^https?:\/\//.test(u)) ?? null;
             return (
-            <div key={l.id} className="card dash-listing-row" style={{ justifyContent: 'space-between', flexWrap: 'wrap' }}>
-              <div style={{ display: 'flex', gap: 14, alignItems: 'center', minWidth: 0 }}>
-                {cover ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- seller-supplied remote URL
-                  <img className="dash-listing-thumb" src={cover} alt="" />
-                ) : (
-                  <div className="dash-listing-thumb" aria-hidden>{l.type === 'service' ? '📅' : '🛍️'}</div>
-                )}
-                <div style={{ minWidth: 0 }}>
-                  <strong>{l.title}</strong>{' '}
-                  <span className="badge badge-blue">{l.type}</span>
-                  {(l.image_urls?.length ?? 0) > 0 && (
-                    <span className="badge" style={{ marginLeft: 4 }}>🖼 {l.image_urls.length}</span>
+              <ListingRow
+                key={l.id}
+                listing={l}
+                storeId={(store as Store).id}
+                previewUrl={`/s/${(store as Store).slug}/listing/${l.id}`}
+                removeAction={
+                  <form action="/api/listings/delete" method="post">
+                    <input type="hidden" name="listingId" value={l.id} />
+                    <button className="btn btn-outline btn-sm" type="submit">Remove</button>
+                  </form>
+                }
+              >
+                <div style={{ display: 'flex', gap: 14, alignItems: 'center', minWidth: 0 }}>
+                  {cover ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- seller-supplied remote URL
+                    <img className="dash-listing-thumb" src={cover} alt="" />
+                  ) : (
+                    <div className="dash-listing-thumb" aria-hidden>{l.type === 'service' ? '📅' : '🛍️'}</div>
                   )}
-                  <p className="muted mono" style={{ margin: '4px 0 0', fontSize: 14 }}>
-                    {formatNaira(l.price_kobo)}
-                    {l.compare_at_kobo != null && l.compare_at_kobo > l.price_kobo && (
-                      <> <span className="product-badge badge-sale">Sale</span></>
+                  <div style={{ minWidth: 0 }}>
+                    <strong>{l.title}</strong>{' '}
+                    <span className="badge badge-blue">{l.type}</span>
+                    {(l.image_urls?.length ?? 0) > 0 && (
+                      <span className="badge" style={{ marginLeft: 4 }}>🖼 {l.image_urls.length}</span>
                     )}
-                    {l.type === 'product' && l.stock === 0 && (
-                      <> <span className="product-badge badge-soldout">Sold out</span></>
-                    )}
-                  </p>
+                    <p className="muted mono" style={{ margin: '4px 0 0', fontSize: 14 }}>
+                      {formatNaira(l.price_kobo)}
+                      {l.compare_at_kobo != null && l.compare_at_kobo > l.price_kobo && (
+                        <> <span className="product-badge badge-sale">Sale</span></>
+                      )}
+                      {l.type === 'product' && l.stock === 0 && (
+                        <> <span className="product-badge badge-soldout">Sold out</span></>
+                      )}
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                <Link className="btn btn-outline btn-sm" href={`/s/${(store as Store).slug}/listing/${l.id}`} target="_blank">
-                  Preview ↗
-                </Link>
-                <form action={`/api/listings/delete`} method="post">
-                  <input type="hidden" name="listingId" value={l.id} />
-                  <button className="btn btn-outline btn-sm" type="submit">Remove</button>
-                </form>
-              </div>
-            </div>
+              </ListingRow>
             );
           })}
           <ListingQrManager

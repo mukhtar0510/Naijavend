@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import type { Listing } from '@idevtenancy/shared';
 
 const MAX_IMAGES = 5;
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -9,17 +10,20 @@ const MAX_VIDEO_BYTES = 60 * 1024 * 1024;
 const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 const VIDEO_TYPES = new Set(['video/mp4', 'video/webm', 'video/quicktime']);
 
-export function ListingEditor({ storeId }: { storeId: string }) {
+const koboToInput = (kobo: number | null) => (kobo == null ? '' : String(kobo / 100));
+
+export function ListingEditor({ storeId, listing }: { storeId: string; listing?: Listing }) {
   const router = useRouter();
-  const [type, setType] = useState<'product' | 'service'>('product');
-  const [title, setTitle] = useState('');
-  const [price, setPrice] = useState('');
-  const [compareAt, setCompareAt] = useState('');
-  const [stock, setStock] = useState('');
-  const [description, setDescription] = useState('');
-  const [aiDescription, setAiDescription] = useState(false);
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const editing = listing != null;
+  const [type, setType] = useState<'product' | 'service'>(listing?.type ?? 'product');
+  const [title, setTitle] = useState(listing?.title ?? '');
+  const [price, setPrice] = useState(koboToInput(listing?.price_kobo ?? null));
+  const [compareAt, setCompareAt] = useState(koboToInput(listing?.compare_at_kobo ?? null));
+  const [stock, setStock] = useState(koboToInput(listing?.stock ?? null));
+  const [description, setDescription] = useState(listing?.description ?? '');
+  const [aiDescription, setAiDescription] = useState(listing?.ai_generated_description ?? false);
+  const [imageUrls, setImageUrls] = useState<string[]>(listing?.image_urls ?? []);
+  const [videoUrl, setVideoUrl] = useState<string | null>(listing?.video_url ?? null);
   const [videoName, setVideoName] = useState('');
   const [videoProgress, setVideoProgress] = useState<number | null>(null); // 0–100, null = not uploading
   const [aiBusy, setAiBusy] = useState(false);
@@ -190,6 +194,29 @@ export function ListingEditor({ storeId }: { storeId: string }) {
     setError(null);
     setSuccess(null);
     try {
+      if (editing) {
+        const res = await fetch('/api/listings/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            listingId: listing!.id,
+            title,
+            priceKobo,
+            compareAtKobo: compareKobo,
+            stock: stockCount,
+            description,
+            aiDescription,
+            imageUrls,
+            videoUrl,
+          }),
+        });
+        const body = await res.json();
+        if (!res.ok) throw new Error(body?.error?.message ?? 'Could not save this listing.');
+        setSuccess('Changes saved.');
+        router.refresh();
+        return;
+      }
+
       const res = await fetch('/api/listings/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -233,26 +260,32 @@ export function ListingEditor({ storeId }: { storeId: string }) {
       {success && <div className="alert alert-success">{success}</div>}
 
       <div className="field">
-        <label htmlFor="ltype">Type</label>
-        <select id="ltype" value={type} onChange={(e) => setType(e.target.value as 'product' | 'service')}>
+        <label htmlFor={editing ? `ltype-${listing!.id}` : 'ltype'}>Type</label>
+        <select
+          id={editing ? `ltype-${listing!.id}` : 'ltype'}
+          value={type}
+          onChange={(e) => setType(e.target.value as 'product' | 'service')}
+          disabled={editing}
+        >
           <option value="product">Product</option>
           <option value="service">Service (bookable)</option>
         </select>
+        {editing && <p className="hint">Type can't change after creation — orders and bookings depend on it.</p>}
       </div>
       <div className="field">
-        <label htmlFor="ltitle">Title</label>
-        <input id="ltitle" type="text" value={title} onChange={(e) => setTitle(e.target.value)} required minLength={2} maxLength={160} placeholder={type === 'product' ? 'Ankara tote bag' : 'Knotless braids (medium)'} />
+        <label htmlFor={editing ? `ltitle-${listing!.id}` : 'ltitle'}>Title</label>
+        <input id={editing ? `ltitle-${listing!.id}` : 'ltitle'} type="text" value={title} onChange={(e) => setTitle(e.target.value)} required minLength={2} maxLength={160} placeholder={type === 'product' ? 'Ankara tote bag' : 'Knotless braids (medium)'} />
       </div>
       <div className="field">
-        <label htmlFor="lprice">Price (₦)</label>
-        <input id="lprice" type="number" min={0} step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} required placeholder="15000" />
+        <label htmlFor={editing ? `lprice-${listing!.id}` : 'lprice'}>Price (₦)</label>
+        <input id={editing ? `lprice-${listing!.id}` : 'lprice'} type="number" min={0} step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} required placeholder="15000" />
         <p className="hint">Stored as {priceKobo.toLocaleString()} kobo — never float currency.</p>
       </div>
       {type === 'product' && (
         <>
           <div className="field">
-            <label htmlFor="lcompare">Compare-at price (₦, optional)</label>
-            <input id="lcompare" type="number" min={0} step="0.01" value={compareAt} onChange={(e) => setCompareAt(e.target.value)} placeholder="20000" />
+            <label htmlFor={editing ? `lcompare-${listing!.id}` : 'lcompare'}>Compare-at price (₦, optional)</label>
+            <input id={editing ? `lcompare-${listing!.id}` : 'lcompare'} type="number" min={0} step="0.01" value={compareAt} onChange={(e) => setCompareAt(e.target.value)} placeholder="20000" />
             <p className="hint">
               {compareKobo && compareKobo > priceKobo
                 ? `Shoppers see a strikethrough ₦${(compareKobo / 100).toLocaleString()} and a Sale badge (${Math.round((1 - priceKobo / compareKobo) * 100)}% off).`
@@ -260,8 +293,8 @@ export function ListingEditor({ storeId }: { storeId: string }) {
             </p>
           </div>
           <div className="field">
-            <label htmlFor="lstock">Stock quantity (optional)</label>
-            <input id="lstock" type="number" min={0} step="1" value={stock} onChange={(e) => setStock(e.target.value)} placeholder="25" />
+            <label htmlFor={editing ? `lstock-${listing!.id}` : 'lstock'}>Stock quantity (optional)</label>
+            <input id={editing ? `lstock-${listing!.id}` : 'lstock'} type="number" min={0} step="1" value={stock} onChange={(e) => setStock(e.target.value)} placeholder="25" />
             <p className="hint">
               {stockCount === 0
                 ? '0 = shown as Sold out until you restock.'
@@ -271,8 +304,8 @@ export function ListingEditor({ storeId }: { storeId: string }) {
         </>
       )}
       <div className="field">
-        <label htmlFor="ldesc">Description</label>
-        <textarea id="ldesc" value={description} onChange={(e) => { setDescription(e.target.value); setAiDescription(false); }} maxLength={2000} placeholder="What is it, who is it for, what makes it good?" />
+        <label htmlFor={editing ? `ldesc-${listing!.id}` : 'ldesc'}>Description</label>
+        <textarea id={editing ? `ldesc-${listing!.id}` : 'ldesc'} value={description} onChange={(e) => { setDescription(e.target.value); setAiDescription(false); }} maxLength={2000} placeholder="What is it, who is it for, what makes it good?" />
         <button type="button" className="btn btn-outline btn-sm" onClick={draftWithAi} disabled={aiBusy || title.trim().length < 2} style={{ marginTop: 8 }}>
           {aiBusy ? 'Drafting…' : 'Draft with AI'}
         </button>
@@ -280,9 +313,9 @@ export function ListingEditor({ storeId }: { storeId: string }) {
       </div>
 
       <div className="field">
-        <label htmlFor="limages">Photos (up to {MAX_IMAGES})</label>
+        <label htmlFor={editing ? `limages-${listing!.id}` : 'limages'}>Photos (up to {MAX_IMAGES})</label>
         <input
-          id="limages"
+          id={editing ? `limages-${listing!.id}` : 'limages'}
           ref={fileInput}
           type="file"
           accept="image/jpeg,image/png,image/webp,image/gif"
@@ -322,9 +355,9 @@ export function ListingEditor({ storeId }: { storeId: string }) {
       </div>
 
       <div className="field">
-        <label htmlFor="lvideo">Product video (optional — one)</label>
+        <label htmlFor={editing ? `lvideo-${listing!.id}` : 'lvideo'}>Product video (optional — one)</label>
         <input
-          id="lvideo"
+          id={editing ? `lvideo-${listing!.id}` : 'lvideo'}
           ref={videoInput}
           type="file"
           accept="video/mp4,video/webm,video/quicktime"
@@ -362,7 +395,7 @@ export function ListingEditor({ storeId }: { storeId: string }) {
       </div>
 
       <button className="btn btn-primary" type="submit" disabled={busy || uploading}>
-        {busy ? 'Adding…' : 'Add listing'}
+        {busy ? (editing ? 'Saving…' : 'Adding…') : editing ? 'Save changes' : 'Add listing'}
       </button>
     </form>
   );
