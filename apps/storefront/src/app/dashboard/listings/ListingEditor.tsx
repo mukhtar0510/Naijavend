@@ -11,6 +11,8 @@ const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/g
 const VIDEO_TYPES = new Set(['video/mp4', 'video/webm', 'video/quicktime']);
 
 const koboToInput = (kobo: number | null) => (kobo == null ? '' : String(kobo / 100));
+// Stock is a count, not money — it must NOT go through the kobo conversion.
+const countToInput = (n: number | null | undefined) => (n == null ? '' : String(n));
 
 export function ListingEditor({ storeId, listing }: { storeId: string; listing?: Listing }) {
   const router = useRouter();
@@ -19,7 +21,7 @@ export function ListingEditor({ storeId, listing }: { storeId: string; listing?:
   const [title, setTitle] = useState(listing?.title ?? '');
   const [price, setPrice] = useState(koboToInput(listing?.price_kobo ?? null));
   const [compareAt, setCompareAt] = useState(koboToInput(listing?.compare_at_kobo ?? null));
-  const [stock, setStock] = useState(koboToInput(listing?.stock ?? null));
+  const [stock, setStock] = useState(countToInput(listing?.stock));
   const [description, setDescription] = useState(listing?.description ?? '');
   const [aiDescription, setAiDescription] = useState(listing?.ai_generated_description ?? false);
   const [imageUrls, setImageUrls] = useState<string[]>(listing?.image_urls ?? []);
@@ -309,7 +311,7 @@ export function ListingEditor({ storeId, listing }: { storeId: string; listing?:
         <button type="button" className="btn btn-outline btn-sm" onClick={draftWithAi} disabled={aiBusy || title.trim().length < 2} style={{ marginTop: 8 }}>
           {aiBusy ? 'Drafting…' : 'Draft with AI'}
         </button>
-        {aiDescription && <p className="hint">AI-drafted — edit freely; the AI-assisted label stays on the listing.</p>}
+        {aiDescription && <p className="hint">AI-drafted — edit freely; changing the text clears the AI-assisted label.</p>}
       </div>
 
       <div className="field">
