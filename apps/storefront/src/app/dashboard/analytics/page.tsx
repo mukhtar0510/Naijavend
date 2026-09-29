@@ -1,37 +1,14 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getSellerClient, getOwnStore } from '@/lib/auth';
+import { siteUrl } from '@/lib/site';
 import { DailyChart, TopReferrers } from './Charts';
+import { classifyTrafficSource, ownHostsFromSiteUrl } from '@idevtenancy/shared';
 import type { Store, StoreEvent } from '@idevtenancy/shared';
 
 export const dynamic = 'force-dynamic';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-
-function referrerLabel(referrer: string | null, source: string | null): string {
-  if (source) return `Shared via ${source}`;
-  if (!referrer) return 'Direct / typed';
-  try {
-    const host = new URL(referrer).hostname.replace(/^www\./, '');
-    const map: Record<string, string> = {
-      'wa.me': 'WhatsApp',
-      'chat.whatsapp.com': 'WhatsApp',
-      't.co': 'X (Twitter)',
-      'twitter.com': 'X (Twitter)',
-      'x.com': 'X (Twitter)',
-      'facebook.com': 'Facebook',
-      'instagram.com': 'Instagram',
-      'tiktok.com': 'TikTok',
-      'youtube.com': 'YouTube',
-      't.me': 'Telegram',
-      'google.com': 'Google search',
-      'bing.com': 'Bing search',
-    };
-    return map[host] ?? host;
-  } catch {
-    return referrer.slice(0, 40);
-  }
-}
 
 export default async function AnalyticsPage() {
   const sb = await getSellerClient();
@@ -83,11 +60,17 @@ export default async function AnalyticsPage() {
     if (bucket) bucket.visits += 1;
   }
 
-  // Referrer/source breakdown over the last 30 days of views.
+  // Where visitors came from, folded into seller-readable groups (Home page,
+  // Search, Link, named social apps). Raw hosts and the seller's own dev
+  // traffic never reach this list — see classifyTrafficSource.
+  const ownHosts = ownHostsFromSiteUrl(siteUrl());
   const refCounts = new Map<string, number>();
+  let attributedViews = 0;
   for (const r of views) {
-    const label = referrerLabel(r.referrer, r.source);
-    refCounts.set(label, (refCounts.get(label) ?? 0) + 1);
+    const src = classifyTrafficSource(r.referrer, r.source, ownHosts);
+    if (src.ignore) continue;
+    refCounts.set(src.label, (refCounts.get(src.label) ?? 0) + 1);
+    attributedViews += 1;
   }
   const topReferrers = [...refCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
 
@@ -144,12 +127,17 @@ export default async function AnalyticsPage() {
 
       <div className="card">
         <h2 style={{ fontSize: 18 }}>Where visitors come from</h2>
+        <p className="muted" style={{ margin: '0 0 14px', fontSize: 13.5 }}>
+          Grouped by how they arrived: <strong>Home page</strong> means they were browsing Naijavend itself,{' '}
+          <strong>Search</strong> means a search engine, and <strong>Link</strong> means a shared link from another site.
+          Views from your own device aren&apos;t counted.
+        </p>
         {topReferrers.length === 0 ? (
           <p className="muted" style={{ margin: 0 }}>
             No traffic recorded yet. Share your store link and the sources will appear here.
           </p>
         ) : (
-          <TopReferrers data={topReferrers.map(([label, count]) => ({ label, count }))} total={views.length || 1} />
+          <TopReferrers data={topReferrers.map(([label, count]) => ({ label, count }))} total={attributedViews || 1} />
         )}
       </div>
     </main>
