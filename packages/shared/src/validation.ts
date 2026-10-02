@@ -41,6 +41,26 @@ export interface CartLineInput {
   quantity: number;
 }
 
+/**
+ * Merge duplicate cart lines by listingId (summing quantities, preserving
+ * first-seen order). Consumers assume one line per listing — create-order and
+ * POS both match DB rows against the id list, which used to break when the
+ * same item appeared twice in a cart ("unknown_listing" on a valid cart).
+ * Merged quantity per listing is capped at the same 999 max as a single line.
+ */
+export function coalesceCartLines(lines: CartLineInput[]): CartLineInput[] {
+  const merged = new Map<string, CartLineInput>();
+  for (const line of lines) {
+    const existing = merged.get(line.listingId);
+    if (existing) {
+      existing.quantity = Math.min(999, existing.quantity + line.quantity);
+    } else {
+      merged.set(line.listingId, { listingId: line.listingId, quantity: line.quantity });
+    }
+  }
+  return [...merged.values()];
+}
+
 export function parseCartLines(value: unknown): CartLineInput[] | null {
   if (!Array.isArray(value) || value.length === 0 || value.length > 50) return null;
   const lines: CartLineInput[] = [];
@@ -60,5 +80,5 @@ export function parseCartLines(value: unknown): CartLineInput[] | null {
       quantity: (item as Record<string, unknown>).quantity as number,
     });
   }
-  return lines;
+  return coalesceCartLines(lines);
 }

@@ -57,12 +57,19 @@ export async function POST(req: NextRequest) {
     // Fake payment reference shaped like a Paystack reference.
     const reference = `MOCK-${Date.now().toString(36).toUpperCase()}-${orderId.slice(0, 8)}`;
 
-    const { error: updateErr } = await sb
+    // Guarded update + row-count check: if a concurrent request flipped the
+    // status first, 0 rows change and we must NOT claim success.
+    const { data: updated, error: updateErr } = await sb
       .from('orders')
       .update({ status: 'paid', payment_reference: reference })
       .eq('id', orderId)
-      .eq('status', 'pending'); // guard against races
+      .eq('status', 'pending') // guard against races
+      .select('id');
     if (updateErr) throw updateErr;
+    if (!updated || updated.length === 0) {
+      // The pending order was just paid (or transitioned) by someone else.
+      return apiError(409, 'not_payable', 'This order is no longer awaiting payment.');
+    }
 
     return apiOk({ paid: true, reference });
   } catch (err) {

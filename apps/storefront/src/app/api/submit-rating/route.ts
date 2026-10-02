@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
         .select('id, customer_phone')
         .eq('store_id', store.id)
         .in('status', ['paid', 'fulfilled'])
-        .limit(50);
+        .limit(500);
       if (orderErr) throw orderErr;
       const order = (paidOrders ?? []).find(
         (o) => String(o.customer_phone).replace(/[^0-9]/g, '').replace(/^0/, '234') === buyerDigits
@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
         .from('bookings')
         .select('id, customer_phone, listing_id, listings!inner(store_id)')
         .eq('listings.store_id', store.id)
-        .limit(50);
+        .limit(500);
       if (bookingErr) throw bookingErr;
       const booking = (bookings ?? []).find(
         (bk) => String(bk.customer_phone).replace(/[^0-9]/g, '').replace(/^0/, '234') === buyerDigits

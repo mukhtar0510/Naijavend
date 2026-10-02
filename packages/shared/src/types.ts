@@ -45,6 +45,22 @@ export interface StoreTheme {
   listing_style: string | null;
   /** Product-card hover animation (none/lift/tilt/zoom/glow/wiggle). */
   hover_anim: string | null;
+  /** Optional site-wide background photo/pattern URL (null = flat colour / gradient). */
+  background_image_url: string | null;
+  /** How the background photo fills the page: 'cover' (single image) or 'tile' (repeating pattern). */
+  background_image_style: string | null;
+  /** Darkening overlay over the background photo ('none'/'dim'/'dark') so text stays readable. */
+  background_overlay: string | null;
+  /** Site-wide background gradient preset key (see BACKGROUND_GRADIENTS; null = none). */
+  background_gradient: string | null;
+  /** Page container width on the store site ('narrow'/'normal'/'wide'; null = normal). */
+  content_width: string | null;
+  /** Optional hero band background colour (null = theme default). */
+  hero_bg_color: string | null;
+  /** Optional background colour behind the product-grid sections (null = page background). */
+  grid_bg_color: string | null;
+  /** Optional footer background colour (null = theme default). */
+  footer_bg_color: string | null;
   /** 1–5 uploaded photos of the shop itself, shown as a gallery on the store site. */
   gallery_urls?: string[] | null;
   updated_at: string;

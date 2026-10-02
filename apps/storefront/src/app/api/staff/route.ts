@@ -118,6 +118,7 @@ export async function PATCH(req: NextRequest) {
   const active = b.active === true;
 
   if (!slug || !staffId) return apiError(400, 'missing_fields', 'Store and staff member are required.');
+  if (!/^[0-9a-f-]{36}$/i.test(staffId)) return apiError(400, 'invalid_id', 'Invalid staff id.');
 
   const gate = await ownerGate(slug);
   if ('error' in gate) return gate.error;
@@ -142,6 +143,7 @@ export async function DELETE(req: NextRequest) {
   const slug = sanitizeText(b.slug, 80);
   const staffId = sanitizeText(b.staffId, 60);
   if (!slug || !staffId) return apiError(400, 'missing_fields', 'Store and staff member are required.');
+  if (!/^[0-9a-f-]{36}$/i.test(staffId)) return apiError(400, 'invalid_id', 'Invalid staff id.');
 
   const gate = await ownerGate(slug);
   if ('error' in gate) return gate.error;

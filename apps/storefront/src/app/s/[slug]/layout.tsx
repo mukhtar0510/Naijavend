@@ -11,7 +11,7 @@ import { OpenBadge } from '@/components/OpenBadge';
 import { BackToMarket } from '@/components/BackToMarket';
 import { InstagramIcon, XIcon, FacebookIcon, TikTokIcon, YouTubeIcon } from '@/components/SocialIcons';
 import type { StoreSocialLinks, StoreTheme } from '@idevtenancy/shared';
-import { CURSIVE_FONTS } from '@idevtenancy/shared';
+import { CURSIVE_FONTS, BACKGROUND_GRADIENTS, isBackgroundGradient } from '@idevtenancy/shared';
 
 const SOCIAL_META: Array<{ key: keyof StoreSocialLinks; label: string; Icon: (p: { size?: number }) => React.ReactNode; prefix: string }> = [
   { key: 'instagram', label: 'Instagram', Icon: InstagramIcon, prefix: 'https://instagram.com/' },
@@ -135,6 +135,18 @@ export default async function StoreSiteLayout({
     ...(t?.listing_color
       ? { '--st-listing-text': t.listing_color, '--st-listing-heading': t.listing_color }
       : {}),
+    // Site-wide background photo/pattern + gradient preset. The photo URL is
+    // embedded in a CSS url() — escape quotes so a crafted URL can't break out.
+    ...(t?.background_gradient && isBackgroundGradient(t.background_gradient)
+      ? { '--st-bg-gradient': BACKGROUND_GRADIENTS[t.background_gradient] }
+      : {}),
+    ...(t?.background_image_url
+      ? { '--st-bg-image': `url('${t.background_image_url.replace(/'/g, '%27')}')` }
+      : {}),
+    // Section-level colour overrides (only set when the seller picked them).
+    ...(t?.hero_bg_color ? { '--st-hero-bg': t.hero_bg_color } : {}),
+    ...(t?.grid_bg_color ? { '--st-grid-bg': t.grid_bg_color } : {}),
+    ...(t?.footer_bg_color ? { '--st-footer-bg': t.footer_bg_color } : {}),
   } as React.CSSProperties;
 
   return (
@@ -146,6 +158,12 @@ export default async function StoreSiteLayout({
       data-card-radius={t?.card_radius === 'sharp' ? 'sharp' : 'rounded'}
       data-listing-style={t?.listing_style ?? 'plain'}
       data-hover-anim={t?.hover_anim ?? 'none'}
+      data-bg-image-style={t?.background_image_url && t?.background_image_style === 'tile' ? 'tile' : 'cover'}
+      data-bg-overlay={t?.background_overlay && t?.background_overlay !== 'none' ? t.background_overlay : undefined}
+      data-content-width={t?.content_width && t?.content_width !== 'normal' ? t.content_width : undefined}
+      data-hero-bg={t?.hero_bg_color ? 'true' : undefined}
+      data-grid-bg={t?.grid_bg_color ? 'true' : undefined}
+      data-footer-bg={t?.footer_bg_color ? 'true' : undefined}
       data-cursive-heading={CURSIVE_FONTS.includes(t?.font_heading ?? '') ? 'true' : 'false'}
       style={themeStyle}
     >

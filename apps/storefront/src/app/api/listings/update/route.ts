@@ -40,9 +40,13 @@ export async function POST(req: NextRequest) {
   }
   if (b.videoUrl === null) videoUrl = null;
 
-  const compareRaw = b.compareAtKobo;
+  // Empty strings mean "not provided" — Number('') is 0, which would
+  // silently save stock 0 ("Sold out") or a 0 compare-at price.
+  const toOptionalNumber = (v: unknown): unknown =>
+    typeof v === 'string' && v.trim() === '' ? null : v;
+  const compareRaw = toOptionalNumber(b.compareAtKobo);
   const compareKobo = compareRaw == null ? null : Math.round(Number(compareRaw));
-  const stockRaw = b.stock;
+  const stockRaw = toOptionalNumber(b.stock);
   const stock = stockRaw == null ? null : Math.round(Number(stockRaw));
 
   if (title.length < 2) return apiError(422, 'invalid_title', 'Give the listing a title.');

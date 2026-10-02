@@ -42,8 +42,13 @@ function parseLocation(b: Record<string, unknown>): { loc: LocationInput | null;
   const label = sanitizeText(b.label, 60);
   if (!label) return { loc: null };
   const address = sanitizeText(b.address, 300);
-  const lat = typeof b.latitude === 'number' && b.latitude >= -90 && b.latitude <= 90 ? b.latitude : null;
-  const lng = typeof b.longitude === 'number' && b.longitude >= -180 && b.longitude <= 180 ? b.longitude : null;
+  const latRaw = typeof b.latitude === 'number' && b.latitude >= -90 && b.latitude <= 90 ? b.latitude : null;
+  const lngRaw = typeof b.longitude === 'number' && b.longitude >= -180 && b.longitude <= 180 ? b.longitude : null;
+  // A pin is stored only when BOTH coordinates are valid — never half-set
+  // (a lat without lng previously produced a pin at the equator/prime-meridian).
+  const paired = latRaw !== null && lngRaw !== null;
+  const lat = paired ? latRaw : null;
+  const lng = paired ? lngRaw : null;
   // Normalise common typing styles: "0801 234 5678", "+234-801-234-5678",
   // "(0801) 234 5678" → digits + optional leading +, then validate.
   // Local numbers (no +) get the +234 prefix so all phone links dial correctly.
@@ -70,7 +75,7 @@ function parseLocation(b: Record<string, unknown>): { loc: LocationInput | null;
     label,
     address,
     latitude: lat,
-    longitude: lat !== null && lng !== null ? lng : null,
+    longitude: lng,
     phone,
     note: sanitizeText(b.note, 160),
     imageUrl,

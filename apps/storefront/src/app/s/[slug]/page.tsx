@@ -328,7 +328,7 @@ export default async function StorePage({ params }: { params: { slug: string } }
       )}
 
       {/* Listings — homepage shows a highlight reel; the full catalogue lives on its own page */}
-      <section className="store-section" style={{ marginBottom: 40 }}>
+      <section className="store-section listing-section" style={{ marginBottom: 40 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 8 }}>
           <h2 style={{ marginBottom: 4 }}>{store.business_type === 'service' ? 'Featured services' : 'Featured items'}</h2>
           <Link href={`/s/${store.slug}/catalogue`}>Full catalogue →</Link>

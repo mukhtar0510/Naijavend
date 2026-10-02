@@ -40,7 +40,7 @@ export default async function CataloguePage({
 
   return (
     <main>
-      <div className="container" style={{ padding: '28px 20px' }}>
+      <div className="container listing-section" style={{ padding: '28px 20px' }}>
         <nav aria-label="Breadcrumb" style={{ marginBottom: 14 }}>
           <Link href={`/s/${s.slug}`} className="muted">← Back to {s.name}</Link>
         </nav>

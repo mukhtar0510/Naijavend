@@ -133,6 +133,14 @@ export default async function SettingsPage() {
                   hover_anim: null,
                   button_shape: 'rounded',
                   card_style: 'soft',
+                  background_image_url: null,
+                  background_image_style: null,
+                  background_overlay: null,
+                  background_gradient: null,
+                  content_width: null,
+                  hero_bg_color: null,
+                  grid_bg_color: null,
+                  footer_bg_color: null,
                   updated_at: new Date().toISOString(),
                 }
               }

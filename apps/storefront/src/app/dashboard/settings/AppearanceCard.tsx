@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Stars } from '@/components/Stars';
-import { STORE_TEMPLATES, STORE_FONTS, LISTING_STYLES, HOVER_ANIMS, categoryEmoji, categoryLabel } from '@idevtenancy/shared';
+import { STORE_TEMPLATES, STORE_FONTS, LISTING_STYLES, HOVER_ANIMS, BACKGROUND_GRADIENTS, isBackgroundGradient, BACKGROUND_OVERLAYS, CONTENT_WIDTHS, categoryEmoji, categoryLabel } from '@idevtenancy/shared';
 import type { AiStyleDraft, StoreTheme } from '@idevtenancy/shared';
 
 const FONTS = STORE_FONTS;
@@ -22,6 +22,13 @@ const LISTING_STYLE_LABELS: Record<string, string> = {
 };
 const HOVER_ANIM_LABELS: Record<string, string> = {
   none: 'None', lift: 'Lift', tilt: 'Tilt', zoom: 'Zoom', glow: 'Glow', wiggle: 'Wiggle',
+};
+const BG_GRADIENT_LABELS: Record<string, string> = {
+  sunset: 'Sunset', ocean: 'Ocean', mint: 'Mint', lavender: 'Lavender',
+  rosewater: 'Rosewater', gold: 'Gold', charcoal: 'Charcoal', plum: 'Plum',
+};
+const BG_OVERLAY_LABELS: Record<string, string> = {
+  none: 'None', dim: 'Dim', dark: 'Dark',
 };
 
 const PRESET_ACCENTS = [
@@ -256,6 +263,14 @@ export function AppearanceCard({
           cardRadius: state.card_radius,
           listingStyle: state.listing_style ?? 'plain',
           hoverAnim: state.hover_anim ?? 'none',
+          backgroundImageUrl: state.background_image_url,
+          backgroundImageStyle: state.background_image_style ?? 'cover',
+          backgroundOverlay: state.background_overlay,
+          backgroundGradient: state.background_gradient,
+          contentWidth: state.content_width,
+          heroBgColor: state.hero_bg_color,
+          gridBgColor: state.grid_bg_color,
+          footerBgColor: state.footer_bg_color,
         }),
       });
       const body = await res.json();
@@ -282,6 +297,15 @@ export function AppearanceCard({
     ...(state.muted_color ? { '--st-muted': state.muted_color } : {}),
     ...(state.listing_bg_color ? { '--st-listing-bg': state.listing_bg_color } : {}),
     ...(state.listing_color ? { '--st-listing-text': state.listing_color, '--st-listing-heading': state.listing_color } : {}),
+    ...(state.background_gradient && isBackgroundGradient(state.background_gradient)
+      ? { '--st-bg-gradient': BACKGROUND_GRADIENTS[state.background_gradient] }
+      : {}),
+    ...(state.background_image_url
+      ? { '--st-bg-image': `url('${state.background_image_url.replace(/'/g, '%27')}')` }
+      : {}),
+    ...(state.hero_bg_color ? { '--st-hero-bg': state.hero_bg_color } : {}),
+    ...(state.grid_bg_color ? { '--st-grid-bg': state.grid_bg_color } : {}),
+    ...(state.footer_bg_color ? { '--st-footer-bg': state.footer_bg_color } : {}),
   } as React.CSSProperties;
 
   function renderFontSelect(id: string, value: string, onChange: (v: string) => void) {
@@ -339,6 +363,12 @@ export function AppearanceCard({
           data-card-radius={state.card_radius === 'sharp' ? 'sharp' : 'rounded'}
           data-listing-style={state.listing_style ?? 'plain'}
           data-hover-anim={state.hover_anim ?? 'none'}
+          data-bg-image-style={state.background_image_url && state.background_image_style === 'tile' ? 'tile' : 'cover'}
+          data-bg-overlay={state.background_overlay && state.background_overlay !== 'none' ? state.background_overlay : undefined}
+          data-content-width={state.content_width && state.content_width !== 'normal' ? state.content_width : undefined}
+          data-hero-bg={state.hero_bg_color ? 'true' : undefined}
+          data-grid-bg={state.grid_bg_color ? 'true' : undefined}
+          data-footer-bg={state.footer_bg_color ? 'true' : undefined}
           style={previewStyle}
         >
           <div className="page-hero" style={state.hero_style === 'image' && state.banner_url ? { backgroundImage: `url('${state.banner_url}')` } : undefined}>
@@ -418,6 +448,160 @@ export function AppearanceCard({
           <label htmlFor="atext">Button text colour</label>
           <input id="atext" type="color" value={state.accent_text} onChange={(e) => set('accent_text', e.target.value)} style={{ width: '100%', height: 40, padding: 4 }} />
         </div>
+      </div>
+
+      {/* Background gradient presets — sit on top of the flat background colour. */}
+      <div className="field">
+        <label>Background gradient <span className="muted" style={{ fontWeight: 400 }}>(optional)</span></label>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+          <button
+            type="button"
+            className={`btn btn-outline btn-sm${!state.background_gradient ? ' is-active' : ''}`}
+            onClick={() => set('background_gradient', null)}
+          >
+            None
+          </button>
+          {Object.entries(BACKGROUND_GRADIENTS).map(([key, css]) => (
+            <button
+              key={key}
+              type="button"
+              aria-label={`Background gradient ${BG_GRADIENT_LABELS[key] ?? key}`}
+              onClick={() => set('background_gradient', key)}
+              style={{
+                width: 44, height: 30, borderRadius: 8, padding: 0, cursor: 'pointer',
+                background: css,
+                border: state.background_gradient === key ? '3px solid var(--text)' : '1px solid var(--border)',
+              }}
+            />
+          ))}
+        </div>
+        <p className="hint">A soft colour wash over the whole page — pairs with any background colour underneath.</p>
+      </div>
+
+      {/* Site-wide background photo / pattern + readability overlay. */}
+      <ImageUploadField
+        id="bgimage"
+        label="Background image — whole-page photo or pattern"
+        hint="Fill the whole page with a photo, or tile a small pattern across it. A background gradient shows underneath if the photo has gaps."
+        value={state.background_image_url}
+        onChange={(url) => set('background_image_url', url)}
+      />
+      {state.background_image_url && (
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <div className="field" style={{ flex: 1, minWidth: 180 }}>
+            <label>Image display</label>
+            <div className="admin-role-tabs" role="radiogroup" aria-label="Background image display">
+              {(['cover', 'tile'] as const).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  role="radio"
+                  aria-checked={(state.background_image_style ?? 'cover') === s}
+                  className={`btn btn-outline btn-sm${(state.background_image_style ?? 'cover') === s ? ' is-active' : ''}`}
+                  onClick={() => set('background_image_style', s)}
+                >
+                  {s === 'cover' ? '■ Cover' : '▦ Tile pattern'}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="field" style={{ flex: 1, minWidth: 180 }}>
+            <label>Readability overlay</label>
+            <div className="admin-role-tabs" role="radiogroup" aria-label="Background readability overlay">
+              {BACKGROUND_OVERLAYS.map((o) => (
+                <button
+                  key={o}
+                  type="button"
+                  role="radio"
+                  aria-checked={(state.background_overlay ?? 'none') === o}
+                  className={`btn btn-outline btn-sm${(state.background_overlay ?? 'none') === o ? ' is-active' : ''}`}
+                  onClick={() => set('background_overlay', o)}
+                >
+                  {BG_OVERLAY_LABELS[o]}
+                </button>
+              ))}
+            </div>
+            <p className="hint">Darkens a busy photo so your text stays readable.</p>
+          </div>
+        </div>
+      )}
+
+      {/* Section-level colour overrides. */}
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+        <div className="field" style={{ flex: 1, minWidth: 160 }}>
+          <label htmlFor="hbg">Hero background <span className="muted" style={{ fontWeight: 400 }}>(optional)</span></label>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            <input
+              id="hbg"
+              type="color"
+              value={state.hero_bg_color ?? state.background_color}
+              onChange={(e) => set('hero_bg_color', e.target.value)}
+              style={{ width: 52, height: 40, padding: 4 }}
+            />
+            {state.hero_bg_color && (
+              <button type="button" className="btn btn-outline btn-sm" onClick={() => set('hero_bg_color', null)}>
+                Default
+              </button>
+            )}
+          </div>
+          <p className="hint">The top band with your store name and buttons.</p>
+        </div>
+        <div className="field" style={{ flex: 1, minWidth: 160 }}>
+          <label htmlFor="gbg">Product sections <span className="muted" style={{ fontWeight: 400 }}>(optional)</span></label>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            <input
+              id="gbg"
+              type="color"
+              value={state.grid_bg_color ?? state.background_color}
+              onChange={(e) => set('grid_bg_color', e.target.value)}
+              style={{ width: 52, height: 40, padding: 4 }}
+            />
+            {state.grid_bg_color && (
+              <button type="button" className="btn btn-outline btn-sm" onClick={() => set('grid_bg_color', null)}>
+                Default
+              </button>
+            )}
+          </div>
+          <p className="hint">The band behind your featured items and catalogue.</p>
+        </div>
+        <div className="field" style={{ flex: 1, minWidth: 160 }}>
+          <label htmlFor="fbg2">Footer background <span className="muted" style={{ fontWeight: 400 }}>(optional)</span></label>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            <input
+              id="fbg2"
+              type="color"
+              value={state.footer_bg_color ?? state.background_color}
+              onChange={(e) => set('footer_bg_color', e.target.value)}
+              style={{ width: 52, height: 40, padding: 4 }}
+            />
+            {state.footer_bg_color && (
+              <button type="button" className="btn btn-outline btn-sm" onClick={() => set('footer_bg_color', null)}>
+                Default
+              </button>
+            )}
+          </div>
+          <p className="hint">A dark footer under a light page (or the reverse) adds contrast.</p>
+        </div>
+      </div>
+
+      {/* Page content width. */}
+      <div className="field">
+        <label>Page width</label>
+        <div className="admin-role-tabs" role="radiogroup" aria-label="Page content width">
+          {CONTENT_WIDTHS.map((w) => (
+            <button
+              key={w}
+              type="button"
+              role="radio"
+              aria-checked={(state.content_width ?? 'normal') === w}
+              className={`btn btn-outline btn-sm${(state.content_width ?? 'normal') === w ? ' is-active' : ''}`}
+              onClick={() => set('content_width', w)}
+            >
+              {w === 'narrow' ? ' Narrow' : w === 'normal' ? 'Normal' : ' Wide'}
+            </button>
+          ))}
+        </div>
+        <p className="hint">How much of the screen your products and sections span.</p>
       </div>
 
       {/* Text colours */}

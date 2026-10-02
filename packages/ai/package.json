@@ -16,6 +16,7 @@
     "@idevtenancy/shared": "workspace:*"
   },
   "devDependencies": {
+    "@types/node": "^20.19.43",
     "typescript": "^5.6.0",
     "vitest": "^2.1.0"
   }

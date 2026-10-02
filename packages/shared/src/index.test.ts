@@ -9,6 +9,12 @@ import {
   formatNaira,
   weightedScore,
   rankDirection,
+  BACKGROUND_GRADIENTS,
+  isBackgroundGradient,
+  BACKGROUND_IMAGE_STYLES,
+  BACKGROUND_OVERLAYS,
+  CONTENT_WIDTHS,
+  isValidHexColor,
 } from './index';
 
 describe('validation', () => {
@@ -42,6 +48,72 @@ describe('validation', () => {
     expect(parseCartLines([{ listingId: 'abc', quantity: 0 }])).toBeNull();
     expect(parseCartLines('nope')).toBeNull();
     expect(parseCartLines([])).toBeNull();
+  });
+
+  it('merges duplicate cart lines into one', () => {
+    const merged = parseCartLines([
+      { listingId: 'abc', quantity: 2 },
+      { listingId: 'def', quantity: 1 },
+      { listingId: 'abc', quantity: 3 },
+    ]);
+    expect(merged).toEqual([
+      { listingId: 'abc', quantity: 5 },
+      { listingId: 'def', quantity: 1 },
+    ]);
+  });
+
+  it('caps a merged line at 999 units', () => {
+    const merged = parseCartLines([
+      { listingId: 'abc', quantity: 999 },
+      { listingId: 'abc', quantity: 999 },
+    ]);
+    expect(merged).toEqual([{ listingId: 'abc', quantity: 999 }]);
+  });
+
+  it('preserves first-seen order when merging', () => {
+    const merged = parseCartLines([
+      { listingId: 'z', quantity: 1 },
+      { listingId: 'a', quantity: 1 },
+      { listingId: 'z', quantity: 1 },
+    ]);
+    if (!merged) throw new Error('parseCartLines returned null');
+    expect(merged.map((l) => l.listingId)).toEqual(['z', 'a']);
+  });
+});
+
+describe('background theme options', () => {
+  it('recognises gradient preset keys and rejects unknown ones', () => {
+    for (const key of Object.keys(BACKGROUND_GRADIENTS)) {
+      expect(isBackgroundGradient(key)).toBe(true);
+    }
+    expect(isBackgroundGradient('nope')).toBe(false);
+    expect(isBackgroundGradient('constructor')).toBe(false);
+  });
+
+  it('gradient values are safe CSS gradients with valid hex stops', () => {
+    for (const css of Object.values(BACKGROUND_GRADIENTS)) {
+      expect(css.startsWith('linear-gradient(')).toBe(true);
+      expect(css).not.toContain('url(');
+      expect(css).not.toContain(';');
+      const stops = [...css.matchAll(/#[0-9a-fA-F]{6}/g)].map((m) => m[0]);
+      expect(stops.length).toBeGreaterThanOrEqual(2);
+      for (const stop of stops) {
+        // Every stop must be readable against black or white ink — i.e. it must
+        // be a plain colour the contrast checker accepts against one of the two.
+        expect(isValidHexColor(stop, '#0B0C0E') || isValidHexColor(stop, '#FFFFFF')).toBe(true);
+      }
+    }
+  });
+
+  it('display-style / overlay / width lists contain their documented values', () => {
+    expect(BACKGROUND_IMAGE_STYLES).toContain('cover');
+    expect(BACKGROUND_IMAGE_STYLES).toContain('tile');
+    expect(BACKGROUND_OVERLAYS).toContain('none');
+    expect(BACKGROUND_OVERLAYS).toContain('dim');
+    expect(BACKGROUND_OVERLAYS).toContain('dark');
+    expect(CONTENT_WIDTHS).toContain('narrow');
+    expect(CONTENT_WIDTHS).toContain('normal');
+    expect(CONTENT_WIDTHS).toContain('wide');
   });
 });
 

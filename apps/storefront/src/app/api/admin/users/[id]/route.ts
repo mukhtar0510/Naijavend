@@ -3,7 +3,7 @@
 // their auth account (cascades to owned stores via FK) — type-to-confirm on the
 // client; here the action itself is atomic.
 import { NextRequest } from 'next/server';
-import { requireAdminActor, audit } from '@/lib/admin';
+import { requireAdminActor, audit, adminEmails } from '@/lib/admin';
 import { apiOk, apiError } from '@/lib/api';
 
 interface Ctx {
@@ -44,8 +44,10 @@ export async function POST(req: NextRequest, { params }: Ctx) {
       return apiOk({ ok: true, action: 'unban' });
     }
     case 'delete': {
-      // Refuse to delete another admin's account.
-      if (targetEmail && (process.env.ADMIN_EMAILS ?? '').toLowerCase().includes(targetEmail.toLowerCase())) {
+      // Refuse to delete another admin's account. Exact-match against the
+      // parsed admin list — a substring test mis-protected lookalikes
+      // (ADMIN_EMAILS="admin@x.com" also matched "dmin@x.com").
+      if (targetEmail && adminEmails().includes(targetEmail.toLowerCase())) {
         return apiError(400, 'protected', 'Admin accounts cannot be deleted.');
       }
       await svc.from('banned_users').delete().eq('user_id', userId);

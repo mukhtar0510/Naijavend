@@ -11,6 +11,12 @@ import { apiError, apiOk, internalError } from '@/lib/api';
 import { mintPayToken } from '@/lib/paytoken';
 import { parseCartLines, sanitizeText, isValidPhone } from '@idevtenancy/shared';
 
+// Idempotency cache keyed by CALLER IP + the client-supplied key — the raw key
+// alone would let anyone replay another buyer's key and receive their orderId.
+// Entries expire after 10 minutes; the map is opportunistically trimmed so it
+// can't grow unbounded.
+const IDEMPOTENCY_TTL_MS = 10 * 60_000;
+const IDEMPOTENCY_MAX_ENTRIES = 10_000;
 const idempotencyCache = new Map<string, { orderId: string; expires: number }>();
 
 export async function POST(req: NextRequest) {
@@ -39,9 +45,11 @@ export async function POST(req: NextRequest) {
   if (!lines) return apiError(400, 'invalid_items', 'Your cart is empty or contains invalid items.');
 
   const idempotencyKey = req.headers.get('idempotency-key');
-  if (idempotencyKey) {
-    const cached = idempotencyCache.get(idempotencyKey);
+  const cacheKey = idempotencyKey ? `${clientIp(req)}:${idempotencyKey}` : null;
+  if (cacheKey) {
+    const cached = idempotencyCache.get(cacheKey);
     if (cached && cached.expires > Date.now()) return apiOk({ orderId: cached.orderId });
+    if (cached) idempotencyCache.delete(cacheKey); // expired entry
   }
 
   try {
@@ -137,8 +145,20 @@ export async function POST(req: NextRequest) {
     );
     if (itemsErr) throw itemsErr;
 
-    if (idempotencyKey) {
-      idempotencyCache.set(idempotencyKey, { orderId: order.id, expires: Date.now() + 10 * 60_000 });
+    if (cacheKey) {
+      if (idempotencyCache.size >= IDEMPOTENCY_MAX_ENTRIES) {
+        const now = Date.now();
+        for (const [k, v] of idempotencyCache) {
+          if (v.expires <= now) idempotencyCache.delete(k);
+        }
+        // Still full? Drop the oldest entries (Map preserves insertion order).
+        while (idempotencyCache.size >= IDEMPOTENCY_MAX_ENTRIES) {
+          const oldest = idempotencyCache.keys().next().value;
+          if (oldest === undefined) break;
+          idempotencyCache.delete(oldest);
+        }
+      }
+      idempotencyCache.set(cacheKey, { orderId: order.id, expires: Date.now() + IDEMPOTENCY_TTL_MS });
     }
 
     // Mint a single-purpose payment token: mock-pay refuses to mark this order

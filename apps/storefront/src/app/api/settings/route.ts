@@ -4,7 +4,7 @@ import { NextRequest } from 'next/server';
 import { getSellerClient, getOwnStore } from '@/lib/auth';
 import { revalidateStore } from '@/lib/revalidate';
 import { apiError, apiOk, internalError } from '@/lib/api';
-import { sanitizeText, isValidPhone, isValidHexColor, isStoreCategory, categoryLabel, isStoreFont, isStoreLayout, LISTING_STYLES, HOVER_ANIMS } from '@idevtenancy/shared';
+import { sanitizeText, isValidPhone, isValidHexColor, isStoreCategory, categoryLabel, isStoreFont, isStoreLayout, LISTING_STYLES, HOVER_ANIMS, isBackgroundGradient, BACKGROUND_IMAGE_STYLES, BACKGROUND_OVERLAYS, CONTENT_WIDTHS } from '@idevtenancy/shared';
 
 const HEX = /^#[0-9a-fA-F]{6}$/;
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -16,6 +16,9 @@ const CARD_STYLES = new Set(['soft', 'outline', 'shadow']);
 const CARD_RADII = new Set(['sharp', 'rounded']);
 const LISTING_STYLE_SET = new Set<string>(LISTING_STYLES);
 const HOVER_ANIM_SET = new Set<string>(HOVER_ANIMS);
+const BG_IMAGE_STYLE_SET = new Set<string>(BACKGROUND_IMAGE_STYLES);
+const BG_OVERLAY_SET = new Set<string>(BACKGROUND_OVERLAYS);
+const CONTENT_WIDTH_SET = new Set<string>(CONTENT_WIDTHS);
 
 // Validates a per-day open/close map; every present day must have two HH:MM times
 // with close strictly after open. Anything off returns undefined (keep old value).
@@ -67,12 +70,17 @@ export async function POST(req: NextRequest) {
   }
   const b = body as Record<string, unknown>;
 
-  const address = sanitizeText(b.address, 300);
-  const latitude = typeof b.latitude === 'number' && b.latitude >= -90 && b.latitude <= 90 ? b.latitude : null;
-  const longitude = typeof b.longitude === 'number' && b.longitude >= -180 && b.longitude <= 180 ? b.longitude : null;
-  const whatsappNumber = sanitizeText(b.whatsappNumber, 16);
-  const greetingMessage = sanitizeText(b.greetingMessage, 300);
-  const catalogEnabled = b.catalogEnabled === true;
+  // All business-basics fields are OPTIONAL BY PRESENCE: the settings UI saves
+  // in independent slices (announcement, gallery, appearance each POST only
+  // their own fields), so a partial save must never wipe fields the caller
+  // didn't send — that used to clear the address, map pin and WhatsApp
+  // settings on every announcement save.
+  const address = b.address === undefined ? undefined : sanitizeText(b.address, 300);
+  const latitude = b.latitude === undefined ? undefined : (typeof b.latitude === 'number' && b.latitude >= -90 && b.latitude <= 90 ? b.latitude : null);
+  const longitude = b.longitude === undefined ? undefined : (typeof b.longitude === 'number' && b.longitude >= -180 && b.longitude <= 180 ? b.longitude : null);
+  const whatsappNumber = b.whatsappNumber === undefined ? undefined : sanitizeText(b.whatsappNumber, 16);
+  const greetingMessage = b.greetingMessage === undefined ? undefined : sanitizeText(b.greetingMessage, 300);
+  const catalogEnabled = b.catalogEnabled === undefined ? undefined : b.catalogEnabled === true;
 
   // Appearance / theme fields (all optional).
   const accentColor = typeof b.accentColor === 'string' && HEX.test(b.accentColor) ? b.accentColor : undefined;
@@ -99,6 +107,21 @@ export async function POST(req: NextRequest) {
   const faviconUrl = b.faviconUrl === undefined ? undefined : safeUrl(b.faviconUrl);
   const logoUrl = b.logoUrl === undefined ? undefined : safeUrl(b.logoUrl);
   const subheaderUrl = b.subheaderUrl === undefined ? undefined : safeUrl(b.subheaderUrl);
+
+  // Site-wide background customization: photo/pattern (URL upload), how it fills
+  // the page, readability overlay over it, gradient preset and page width.
+  // Gradient/overlay/width follow the optional-colour pattern: undefined = don't
+  // touch, valid key = set, anything else = clear (back to defaults).
+  const backgroundImageUrl = b.backgroundImageUrl === undefined ? undefined : safeUrl(b.backgroundImageUrl);
+  const backgroundImageStyle = typeof b.backgroundImageStyle === 'string' && BG_IMAGE_STYLE_SET.has(b.backgroundImageStyle) ? b.backgroundImageStyle : undefined;
+  const backgroundOverlay = b.backgroundOverlay === undefined ? undefined : (typeof b.backgroundOverlay === 'string' && BG_OVERLAY_SET.has(b.backgroundOverlay) ? b.backgroundOverlay : null);
+  const backgroundGradient = b.backgroundGradient === undefined ? undefined : (typeof b.backgroundGradient === 'string' && isBackgroundGradient(b.backgroundGradient) ? b.backgroundGradient : null);
+  const contentWidth = b.contentWidth === undefined ? undefined : (typeof b.contentWidth === 'string' && CONTENT_WIDTH_SET.has(b.contentWidth) ? b.contentWidth : null);
+  // Section-level colour overrides (hero band / product-grid sections / footer):
+  // undefined = don't touch, valid hex = set, anything else = clear.
+  const heroBgColor = b.heroBgColor === undefined ? undefined : (typeof b.heroBgColor === 'string' && HEX.test(b.heroBgColor) ? b.heroBgColor : null);
+  const gridBgColor = b.gridBgColor === undefined ? undefined : (typeof b.gridBgColor === 'string' && HEX.test(b.gridBgColor) ? b.gridBgColor : null);
+  const footerBgColor = b.footerBgColor === undefined ? undefined : (typeof b.footerBgColor === 'string' && HEX.test(b.footerBgColor) ? b.footerBgColor : null);
 
   // Store gallery: 1–5 uploaded https urls (photos of the shop itself).
   let galleryUrls: string[] | undefined;
@@ -145,7 +168,10 @@ export async function POST(req: NextRequest) {
   if (whatsappNumber && !isValidPhone(whatsappNumber)) {
     return apiError(422, 'invalid_phone', 'Enter the WhatsApp number in international format, e.g. +2348012345678.');
   }
-  if ((latitude === null) !== (longitude === null)) {
+  if (
+    (latitude !== undefined || longitude !== undefined) &&
+    (latitude === undefined) !== (longitude === undefined)
+  ) {
     return apiError(422, 'incomplete_location', 'Set both latitude and longitude, or clear both.');
   }
   // Contrast guard: button text must be readable on the chosen accent.
@@ -160,10 +186,10 @@ export async function POST(req: NextRequest) {
     const { error: storeErr } = await sb
       .from('stores')
       .update({
-        address,
-        latitude,
-        longitude,
-        whatsapp_number: whatsappNumber,
+        ...(address !== undefined ? { address } : {}),
+        ...(latitude !== undefined ? { latitude } : {}),
+        ...(longitude !== undefined ? { longitude } : {}),
+        ...(whatsappNumber !== undefined ? { whatsapp_number: whatsappNumber } : {}),
         ...(socialLinks !== undefined ? { social_links: socialLinks } : {}),
         ...(announcement !== undefined ? { announcement } : {}),
         ...(annStart !== undefined ? { announcement_starts_at: annStart } : {}),
@@ -177,13 +203,18 @@ export async function POST(req: NextRequest) {
       .eq('id', store.id);
     if (storeErr) throw storeErr;
 
-    const { error: waErr } = await sb.from('whatsapp_settings').upsert({
-      store_id: store.id,
-      business_number: whatsappNumber,
-      greeting_message: greetingMessage,
-      catalog_enabled: catalogEnabled,
-    });
-    if (waErr) throw waErr;
+    // Only touch whatsapp_settings when a WhatsApp field was actually sent —
+    // otherwise the upsert would reset greeting/catalog to their defaults on
+    // every unrelated save.
+    if (whatsappNumber !== undefined || greetingMessage !== undefined || catalogEnabled !== undefined) {
+      const { error: waErr } = await sb.from('whatsapp_settings').upsert({
+        store_id: store.id,
+        ...(whatsappNumber !== undefined ? { business_number: whatsappNumber } : {}),
+        ...(greetingMessage !== undefined ? { greeting_message: greetingMessage } : {}),
+        ...(catalogEnabled !== undefined ? { catalog_enabled: catalogEnabled } : {}),
+      });
+      if (waErr) throw waErr;
+    }
 
     // Appearance theme — only touch store_themes when any theme field was sent.
     const themePatch: Record<string, unknown> = {
@@ -210,6 +241,14 @@ export async function POST(req: NextRequest) {
       ...(logoUrl !== undefined ? { logo_url: logoUrl } : {}),
       ...(subheaderUrl !== undefined ? { subheader_url: subheaderUrl } : {}),
       ...(galleryUrls !== undefined ? { gallery_urls: galleryUrls } : {}),
+      ...(backgroundImageUrl !== undefined ? { background_image_url: backgroundImageUrl } : {}),
+      ...(backgroundImageStyle !== undefined ? { background_image_style: backgroundImageStyle } : {}),
+      ...(backgroundOverlay !== undefined ? { background_overlay: backgroundOverlay } : {}),
+      ...(backgroundGradient !== undefined ? { background_gradient: backgroundGradient } : {}),
+      ...(contentWidth !== undefined ? { content_width: contentWidth } : {}),
+      ...(heroBgColor !== undefined ? { hero_bg_color: heroBgColor } : {}),
+      ...(gridBgColor !== undefined ? { grid_bg_color: gridBgColor } : {}),
+      ...(footerBgColor !== undefined ? { footer_bg_color: footerBgColor } : {}),
     };
     if (Object.keys(themePatch).length > 0) {
       const { error: themeErr } = await sb.from('store_themes').upsert({

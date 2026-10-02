@@ -740,7 +740,17 @@
   --st-font-body: var(--font-body);
   --st-accent-tint: color-mix(in srgb, var(--st-accent) 10%, #ffffff);
   --st-accent-border: color-mix(in srgb, var(--st-accent) 35%, #ffffff);
-  background: var(--st-bg);
+  /* Background layers, top to bottom: darkening overlay, seller photo/pattern,
+     gradient preset, then the flat base colour. The layout only sets
+     --st-bg-image/--st-bg-gradient when the seller chose them; unset vars fall
+     back to 'none' so existing themes render exactly as before. */
+  --st-bg-image: none;
+  --st-bg-gradient: none;
+  background-color: var(--st-bg);
+  background-image: var(--st-bg-overlay, none), var(--st-bg-image), var(--st-bg-gradient);
+  background-size: auto, var(--st-bg-image-size, cover), auto;
+  background-repeat: repeat, var(--st-bg-image-repeat, no-repeat), repeat;
+  background-position: center;
   font-family: var(--st-font-body);
   /* Re-resolve the inherited body colour INSIDE the shell: body's color was
      computed outside with the marketplace tokens, so in dark mode children
@@ -797,6 +807,25 @@
 }
 .site-shell .listing-card h3,
 .site-shell .catalogue-card h3 { color: var(--st-listing-heading); }
+
+/* Seller-uploaded background photo: 'cover' fills the viewport once; 'tile'
+   repeats a small pattern (the layout only renders data-bg-image-style when a
+   photo exists). data-bg-overlay is only rendered for dim/dark — the darkening
+   layer sits on top of the photo so text stays readable on busy images. */
+.site-shell[data-bg-image-style='tile'] {
+  --st-bg-image-size: 240px auto;
+  --st-bg-image-repeat: repeat;
+}
+.site-shell[data-bg-overlay='dim'] {
+  --st-bg-overlay: linear-gradient(rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0.28));
+}
+.site-shell[data-bg-overlay='dark'] {
+  --st-bg-overlay: linear-gradient(rgba(0, 0, 0, 0.52), rgba(0, 0, 0, 0.52));
+}
+
+/* Page content width: default (1080px) / narrow / wide. */
+.site-shell[data-content-width='narrow'] .container { max-width: 880px; }
+.site-shell[data-content-width='wide'] .container { max-width: 1280px; }
 .site-shell .listing-card p,
 .site-shell .catalogue-card p { color: var(--st-listing-text); }
 
@@ -1142,3 +1171,11 @@
 .dash-topbar {
   border-radius: 14px;
 }
+
+/* Section-level colour overrides (seller-chosen; the data attributes are only
+   rendered when the seller actually picked a colour, so default themes are
+   untouched). Appended last so these beat the per-layout hero/footer rules
+   above at equal specificity. */
+.site-shell[data-hero-bg='true'] .page-hero { background: var(--st-hero-bg); }
+.site-shell[data-grid-bg='true'] .listing-section { background: var(--st-grid-bg); }
+.site-shell[data-footer-bg='true'] .site-footer-store { background: var(--st-footer-bg); }

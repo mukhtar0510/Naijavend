@@ -36,9 +36,13 @@ export async function POST(req: NextRequest) {
   }
 
   // Optional sale price + stock (products only). Validated here, stored in kobo.
-  const compareRaw = b.compareAtKobo;
+  // Empty strings mean "not provided" — Number('') is 0, which would silently
+  // save stock 0 ("Sold out") or a 0 compare-at price.
+  const toOptionalNumber = (v: unknown): unknown =>
+    typeof v === 'string' && v.trim() === '' ? null : v;
+  const compareRaw = toOptionalNumber(b.compareAtKobo);
   const compareKobo = compareRaw == null ? null : Math.round(Number(compareRaw));
-  const stockRaw = b.stock;
+  const stockRaw = toOptionalNumber(b.stock);
   const stock = stockRaw == null ? null : Math.round(Number(stockRaw));
 
   if (!/^[0-9a-f-]{36}$/i.test(storeId)) return apiError(400, 'invalid_store', 'Invalid store.');
