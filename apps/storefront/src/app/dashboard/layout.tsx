@@ -16,6 +16,7 @@ const NAV = [
   { href: '/dashboard/bookings', label: 'Bookings' },
   { href: '/dashboard/staff', label: 'Staff' },
   { href: '/dashboard/chat', label: 'Chat' },
+  { href: '/dashboard/ai', label: 'AI Studio' },
   { href: '/dashboard/analytics', label: 'Analytics' },
   { href: '/dashboard/ratings', label: 'Ratings' },
   { href: '/dashboard/settings', label: 'Settings' },

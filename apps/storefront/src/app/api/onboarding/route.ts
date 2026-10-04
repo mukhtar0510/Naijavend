@@ -101,7 +101,15 @@ export async function POST(req: NextRequest) {
     }
 
     if (aiUsed) {
-      await sb.from('ai_usage_log').insert({ store_id: store.id, feature: 'store_setup', tokens_used: tokensUsed });
+      // user_id is REQUIRED by the ai_usage_owner_insert policy — without it
+      // RLS silently drops the row.
+      const { data: userData } = await sb.auth.getUser();
+      await sb.from('ai_usage_log').insert({
+        store_id: store.id,
+        feature: 'store_setup',
+        tokens_used: tokensUsed,
+        user_id: userData.user?.id ?? null,
+      });
     }
 
     return apiOk({ storeId: store.id, slug: store.slug }, 201);

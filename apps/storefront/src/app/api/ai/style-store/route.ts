@@ -40,13 +40,17 @@ export async function POST(req: NextRequest) {
       input: `(${store.category}): ${brief}`,
     });
 
-    // Log usage so the dashboard can show AI activity per store.
+    // Log usage so the dashboard can show AI activity per store. user_id is
+    // REQUIRED by the ai_usage_owner_insert policy — without it RLS silently
+    // drops the row.
+    const { data: userData } = await sb.auth.getUser();
     await sb.from('ai_usage_log').insert({
       store_id: store.id,
       feature: 'style_store',
       input: brief,
       tokens_used: result.tokensUsed,
       provider: result.provider,
+      user_id: userData.user?.id ?? null,
     });
 
     return apiOk({ style: result.draft as AiStyleDraft });

@@ -1,9 +1,15 @@
 // aiComplete — suite-wide AI wrapper interface (blueprint §1/§5).
-// Current provider: "dummy" (deterministic template generator, no API key needed).
-// To wire a real provider later: implement AiProvider and change getProvider().
+// Providers: GeminiProvider when GEMINI_API_KEY is set (Google AI Studio free
+// tier — see .env.example), otherwise the deterministic "dummy" template
+// generator, so every AI surface works with or without a key. Real-provider
+// failures degrade to the dummy rather than erroring seller flows.
 // Every call is meant to be logged to ai_usage_log by the caller (server route).
 
-import type { AiFeature, AiStoreDraft, AiListingDraft, AiStyleDraft } from '@idevtenancy/shared';
+import type {
+  AiFeature, AiStoreDraft, AiListingDraft, AiStyleDraft, AiAssistantDraft, AiSocialPostDraft,
+} from '@idevtenancy/shared';
+import { readableTextOn, isDarkHex } from './color';
+import { GeminiProvider, GEMINI_DEFAULT_MODEL } from './gemini';
 
 export interface AiRequest {
   feature: AiFeature;
@@ -11,7 +17,7 @@ export interface AiRequest {
 }
 
 export interface AiResponse {
-  draft: AiStoreDraft | AiListingDraft | AiStyleDraft;
+  draft: AiStoreDraft | AiListingDraft | AiStyleDraft | AiAssistantDraft | AiSocialPostDraft;
   tokensUsed: number;
   provider: string;
 }
@@ -98,17 +104,6 @@ interface StylePreset {
   heading_color?: string;
   muted_color?: string;
   note: string;
-}
-
-// Relative-luminance based black/white text pick so accents stay readable.
-function readableTextOn(hex: string): string {
-  const h = hex.replace('#', '');
-  const r = parseInt(h.slice(0, 2), 16) / 255;
-  const g = parseInt(h.slice(2, 4), 16) / 255;
-  const b = parseInt(h.slice(4, 6), 16) / 255;
-  const lin = (c: number) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
-  const L = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
-  return L > 0.45 ? '#0B0C0E' : '#FFFFFF';
 }
 
 const CATEGORY_PRESETS: Record<string, StylePreset> = {
@@ -427,17 +422,6 @@ const CATEGORY_PRESETS: Record<string, StylePreset> = {
   },
 };
 
-/** Relative-luminance check: true when a hex background is dark enough that
- * light text is required (guards the brief-refiner against dark presets). */
-function isDarkHex(hex: string): boolean {
-  const h = hex.replace('#', '');
-  const r = parseInt(h.slice(0, 2), 16) / 255;
-  const g = parseInt(h.slice(2, 4), 16) / 255;
-  const b = parseInt(h.slice(4, 6), 16) / 255;
-  const lin = (c: number) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
-  return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b) < 0.3;
-}
-
 /**
  * Curated font pairings — each vibe maps a display-worthy heading font to a
  * highly-readable body font. All names must exist in STORE_FONTS (the canonical
@@ -540,6 +524,99 @@ function refineBrief(lower: string, preset: StylePreset): StylePreset {
   return next;
 }
 
+// ---------------------------------------------------------------------------
+// Dummy grounding parsers — the API routes pass structured context lines
+// ([Store]/[Stats]/[Chat] for assistant chats, [Store]/[Platform]/[Topic] for
+// social posts) so the dummy and Gemini providers share one input contract.
+// ---------------------------------------------------------------------------
+
+function parseContextLine(input: string, tag: string): string {
+  const m = input.match(new RegExp(`\\[${tag}\\]\\s*(.+)`));
+  return m ? m[1].trim() : '';
+}
+
+function lastSellerMessage(input: string): string {
+  const matches = [...input.matchAll(/Seller:\s*(.+)/g)];
+  return matches.length ? matches[matches.length - 1][1].trim() : input;
+}
+
+/** Keyless assistant: practical, deterministic advice keyed off the question. */
+function dummyAssistantReply(input: string): string {
+  const store = parseContextLine(input, 'Store').split('|')[0].trim() || 'your store';
+  const stats = parseContextLine(input, 'Stats');
+  const q = lastSellerMessage(input).toLowerCase();
+  const has = (re: RegExp) => re.test(q);
+
+  if (has(/order|sale|customer|buy/)) {
+    return (
+      `Here are the fastest wins for ${store}:\n` +
+      `1. Add clear photos and complete descriptions to every listing — buyers trust what they can see.\n` +
+      `2. Reply to order messages on WhatsApp within minutes; fast replies close most sales.\n` +
+      `3. Ask happy buyers to leave a rating — social proof converts new visitors.\n` +
+      `${stats ? `Current snapshot — ${stats}. ` : ''}Pick one of these today and build from there.`
+    );
+  }
+  if (has(/price|pricing|discount|cheap|expensive/)) {
+    return (
+      `Pricing tips for ${store}:\n` +
+      `- Price around your costs plus a fair margin; check similar sellers on the marketplace first.\n` +
+      `- Bundle small items (e.g. buy 2 get 1) instead of cutting prices — it protects your margin.\n` +
+      `- Run short discount codes for festivals and weekends to create urgency.`
+    );
+  }
+  if (has(/post|content|photo|video|advert|promot|market|status/)) {
+    return (
+      `Content ideas for ${store}:\n` +
+      `- Post one product photo or short video a day — consistency beats perfection.\n` +
+      `- Show the making or packaging process; behind-the-scenes posts build the most trust.\n` +
+      `- Use the Social Posts tab on this page: it drafts ready-to-share captions for WhatsApp status and Instagram.`
+    );
+  }
+  if (has(/deliver|shipping|logistics|waybill/)) {
+    return (
+      `Delivery tips for ${store}:\n` +
+      `- State your delivery areas and fees clearly on every listing to avoid long negotiations.\n` +
+      `- Use dispatch riders for same-day city delivery and verified interstate couriers for the rest.\n` +
+      `- Send delivery photos with your WhatsApp replies — it reassures buyers instantly.`
+    );
+  }
+  return (
+    `Quick wins for ${store}:\n` +
+    `1. Keep your catalogue fresh — listings with complete details and good photos sell faster.\n` +
+    `2. Share your store link on WhatsApp status at least twice a week.\n` +
+    `3. Answer questions fast and ask happy customers for a rating.\n` +
+    `Ask me about orders, pricing, content ideas or delivery and I'll go deeper.`
+  );
+}
+
+/** Keyless social-post drafts: one deterministic template per platform. */
+function dummySocialPost(input: string): string {
+  const store = parseContextLine(input, 'Store').split('|')[0].trim() || 'our store';
+  const platform = parseContextLine(input, 'Platform').toLowerCase() || 'whatsapp';
+  const topic = parseContextLine(input, 'Topic') || 'our latest arrivals';
+
+  if (platform === 'instagram') {
+    return (
+      `${topic} — now available at ${store}! ✨\n\n` +
+      `Quality you can trust, prices you'll love, and fast delivery across Nigeria.\n` +
+      `Send us a DM or tap the WhatsApp link in bio to order. 📦\n\n` +
+      `#NaijaBusiness #ShopSmall #BuyNaija #Naijavend`
+    );
+  }
+  if (platform === 'facebook') {
+    return (
+      `NEW IN: ${topic} at ${store}! 🎉\n\n` +
+      `Fresh stock just landed. Great quality, fair prices, and we deliver nationwide.\n\n` +
+      `Ordering is simple: comment here or message us on WhatsApp and we'll sort you out today.`
+    );
+  }
+  return (
+    `🔥 ${topic} is available at ${store}!\n\n` +
+    `Quality items, friendly prices, fast delivery.\n` +
+    `Message us on WhatsApp now to place your order. 📲`
+  );
+}
+
 class DummyProvider implements AiProvider {
   readonly name = 'dummy';
 
@@ -573,6 +650,18 @@ class DummyProvider implements AiProvider {
       return { draft, tokensUsed, provider: this.name };
     }
 
+    if (req.feature === 'assistant_chat') {
+      // Parse the full input, not the 600-char preview: the latest seller
+      // message sits at the END of the transcript.
+      const draft: AiAssistantDraft = { reply: dummyAssistantReply(req.input) };
+      return { draft, tokensUsed, provider: this.name };
+    }
+
+    if (req.feature === 'social_post') {
+      const draft: AiSocialPostDraft = { post: dummySocialPost(req.input) };
+      return { draft, tokensUsed, provider: this.name };
+    }
+
     // listing_description
     const draft: AiListingDraft = {
       description:
@@ -585,24 +674,49 @@ class DummyProvider implements AiProvider {
 
 let provider: AiProvider | null = null;
 
-/** Returns the configured provider. Swap point for a real LLM provider later. */
+/**
+ * Pure env → provider mapping (no module cache) so tests can exercise it
+ * directly. GEMINI_API_KEY present → real Gemini drafts; otherwise the
+ * deterministic dummy provider keeps every AI surface working keyless.
+ */
+export function createProviderFromEnv(env: Record<string, string | undefined> = process.env): AiProvider {
+  const apiKey = env.GEMINI_API_KEY?.trim();
+  if (apiKey) {
+    return new GeminiProvider(apiKey, env.GEMINI_MODEL?.trim() || GEMINI_DEFAULT_MODEL);
+  }
+  return new DummyProvider();
+}
+
+/** Returns the configured provider (cached after first call). */
 export function getProvider(): AiProvider {
-  if (!provider) provider = new DummyProvider();
+  if (!provider) provider = createProviderFromEnv();
   return provider;
 }
 
 // Minimal timer typing — this package targets a pure ES2022 lib (no DOM/Node types).
 declare function setTimeout(handler: () => void, timeout: number): unknown;
+declare function clearTimeout(handle: unknown): void;
+
+function withTimeout<T>(promise: Promise<T>): Promise<T> {
+  let handle: unknown;
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) => {
+      handle = setTimeout(() => reject(new Error('aiComplete timeout after 15s')), 15_000);
+    }),
+  ]).finally(() => clearTimeout(handle));
+}
 
 /** aiComplete — the one entry point the rest of the suite calls. */
 export async function aiComplete(req: AiRequest): Promise<AiResponse> {
-  // Explicit timeout (backend skill #33) — dummy is instant, but the contract holds
-  // when a real provider lands.
-  const result = await Promise.race([
-    getProvider().complete(req),
-    new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('aiComplete timeout after 15s')), 15_000)
-    ),
-  ]);
-  return result;
+  const primary = getProvider();
+  try {
+    // Explicit timeout (backend skill #33).
+    return await withTimeout(primary.complete(req));
+  } catch (err) {
+    // Real provider failed (network, quota, bad output) — degrade to the
+    // deterministic dummy so seller flows never break on a bad AI day.
+    if (primary.name === 'dummy') throw err;
+    return await withTimeout(new DummyProvider().complete(req));
+  }
 }

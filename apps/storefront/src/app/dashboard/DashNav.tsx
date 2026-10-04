@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   IconHome, IconTerminal, IconTag, IconBox, IconCart, IconCalendar,
-  IconUsers, IconChat, IconChart, IconStar, IconGear,
+  IconUsers, IconChat, IconChart, IconStar, IconGear, IconSpark,
 } from '@/components/NavIcons';
 
 const ICONS: Record<string, ComponentType<{ size?: number }>> = {
@@ -16,6 +16,7 @@ const ICONS: Record<string, ComponentType<{ size?: number }>> = {
   '/dashboard/bookings': IconCalendar,
   '/dashboard/staff': IconUsers,
   '/dashboard/chat': IconChat,
+  '/dashboard/ai': IconSpark,
   '/dashboard/analytics': IconChart,
   '/dashboard/ratings': IconStar,
   '/dashboard/settings': IconGear,

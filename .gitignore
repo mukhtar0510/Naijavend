@@ -12,3 +12,5 @@ coverage/
 
 .vercel
 .env*
+# …but DO track the names-only example (never contains real values).
+!.env.example

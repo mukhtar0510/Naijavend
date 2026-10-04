@@ -1997,3 +1997,70 @@
   .acct-who-name { display: none; }
   .acct-who { padding: 4px; border-radius: 50%; }
 }
+
+/* ---- AI Studio (dashboard/ai) ---- */
+.ai-provider-badge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  color: inherit;
+  opacity: 0.85;
+}
+[data-theme='dark'] .ai-provider-badge { border-color: rgba(255, 255, 255, 0.22); }
+
+.ai-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+@media (max-width: 900px) { .ai-grid { grid-template-columns: 1fr; } }
+
+.ai-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 340px;
+  overflow-y: auto;
+  padding: 4px 2px;
+  margin-bottom: 10px;
+}
+.ai-bubble {
+  max-width: 85%;
+  padding: 9px 12px;
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.ai-bubble-user { align-self: flex-end; background: var(--accent, #1d4ed8); color: #fff; border-bottom-right-radius: 4px; }
+.ai-bubble-bot { align-self: flex-start; background: rgba(0, 0, 0, 0.05); border-bottom-left-radius: 4px; }
+[data-theme='dark'] .ai-bubble-bot { background: rgba(255, 255, 255, 0.08); }
+.ai-bubble-typing { opacity: 0.6; font-style: italic; }
+
+.ai-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.ai-chip {
+  font-size: 12.5px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.ai-chip:hover { background: rgba(0, 0, 0, 0.05); }
+[data-theme='dark'] .ai-chip { border-color: rgba(255, 255, 255, 0.2); }
+[data-theme='dark'] .ai-chip:hover { background: rgba(255, 255, 255, 0.08); }
+
+.ai-composer { display: flex; gap: 10px; }
+.ai-composer input { flex: 1; }
+
+.ai-post-preview {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 14px;
+  line-height: 1.55;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px dashed rgba(0, 0, 0, 0.15);
+}
+[data-theme='dark'] .ai-post-preview { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.18); }

@@ -5,7 +5,12 @@ export type ListingType = 'product' | 'service';
 export type OrderStatus = 'pending' | 'paid' | 'fulfilled' | 'cancelled';
 export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
 export type Plan = 'free' | 'growth';
-export type AiFeature = 'store_setup' | 'listing_description' | 'style_store';
+export type AiFeature =
+  | 'store_setup'
+  | 'listing_description'
+  | 'style_store'
+  | 'assistant_chat'
+  | 'social_post';
 
 /** Per-store appearance theme rendered by /s/* pages (one row per store). */
 /** Structural templates a store site can use (see packages/shared/src/templates.ts). */
@@ -251,4 +256,14 @@ export interface AiStyleDraft {
   heading_color?: string | null;
   muted_color?: string | null;
   note: string;
+}
+
+/** Seller-assistant chat reply (feature: assistant_chat). */
+export interface AiAssistantDraft {
+  reply: string;
+}
+
+/** Ready-to-share social caption (feature: social_post). */
+export interface AiSocialPostDraft {
+  post: string;
 }

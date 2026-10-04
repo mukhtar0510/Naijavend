@@ -130,3 +130,12 @@ export function IconUsers({ size = 17, style }: IconProps) {
     </svg>
   );
 }
+
+export function IconSpark({ size = 17, style }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" style={base(size, style)} aria-hidden {...S}>
+      <path d="M12 3.5l1.8 5.2 5.2 1.8-5.2 1.8L12 17.5l-1.8-5.2L5 10.5l5.2-1.8L12 3.5Z" />
+      <path d="M18.6 15.6l.8 2.3 2.3.8-2.3.8-.8 2.3-.8-2.3-2.3-.8 2.3-.8.8-2.3Z" />
+    </svg>
+  );
+}
