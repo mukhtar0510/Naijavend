@@ -51,6 +51,11 @@ const HOW_TO = [
   'I draft, you review, you publish. Every draft can be edited before use.',
 ];
 
+function sendInitial(chatInput: React.Dispatch<React.SetStateAction<string>>, threadRef: React.RefObject<HTMLDivElement | null>, question: string) {
+  chatInput(question);
+  setTimeout(() => threadRef.current?.scrollTo({ top: threadRef.current.scrollHeight, behavior: 'smooth' }), 30);
+}
+
 async function callApi(url: string, body: unknown): Promise<Record<string, unknown>> {
   const res = await fetch(url, {
     method: 'POST',
@@ -65,7 +70,6 @@ async function callApi(url: string, body: unknown): Promise<Record<string, unkno
 }
 
 export function AiStudio({ storeName }: { storeName: string }) {
-  // Assistant state
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [chatBusy, setChatBusy] = useState(false);
@@ -82,6 +86,8 @@ export function AiStudio({ storeName }: { storeName: string }) {
 
   // 'gemini' | 'dummy' | 'welcome' — surfaced so sellers know which brain answered.
   const [provider, setProvider] = useState<string | null>(null);
+
+  const chatInputRef = useRef<HTMLInputElement>(null);
 
   async function sendChat(e?: FormEvent) {
     e?.preventDefault();
@@ -131,6 +137,10 @@ export function AiStudio({ storeName }: { storeName: string }) {
     }
   }
 
+  function focusChatInput() {
+    chatInputRef.current?.focus();
+  }
+
   return (
     <main>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
@@ -172,40 +182,29 @@ export function AiStudio({ storeName }: { storeName: string }) {
           </div>
 
           <div className="ai-chips">
-            <button type="button" className="ai-chip ai-chip-pick" onClick={() => setChatInput('I sell handmade beads and craft kits — how do I get more orders?')}>
-              ✨ Start with: I sell handmade beads and craft kits
+            <button type="button" className="ai-chip ai-chip-pick" onClick={() => { setChatInput('I sell handmade beads and craft kits — how do I get more orders?'); sendChat(); focusChatInput(); }}>
+              ✨ I sell handmade beads and craft kits
             </button>
-            <button type="button" className="ai-chip ai-chip-pick" onClick={() => setChatInput('What should I post on WhatsApp status today?')}>
-              📣 Start with: a WhatsApp status post
+            <button type="button" className="ai-chip ai-chip-pick" onClick={() => { setChatInput('What should I post on WhatsApp status today?'); sendChat(); focusChatInput(); }}>
+              📣 WhatsApp status post
             </button>
-            <button type="button" className="ai-chip ai-chip-pick" onClick={() => setChatInput('How should I price my products?')}>
-              💰 Start with: product pricing
+            <button type="button" className="ai-chip ai-chip-pick" onClick={() => { setChatInput('How should I price my products?'); sendChat(); focusChatInput(); }}>
+              💰 Product pricing
             </button>
           </div>
         </section>
       )}
 
-      {messages.length > 0 && (
-        <div className="ai-thread" ref={threadRef} aria-live="polite">
-          {messages.map((m, i) => (
-            <div key={i} className={`ai-bubble ${m.role === 'user' ? 'ai-bubble-user' : 'ai-bubble-bot'}`}>
-              {m.content}
-            </div>
-          ))}
-          {chatBusy && <div className="ai-bubble ai-bubble-bot ai-bubble-typing">Thinking…</div>}
-        </div>
-      )}
-
       {messages.length === 0 && (
         <div className="ai-chips">
-          <button type="button" className="ai-chip" onClick={() => setChatInput('I sell handmade beads and craft kits — how do I get more orders?')}>
-            ✨ Introduce my store
+          <button type="button" className="ai-chip" onClick={() => { setChatInput('I sell handmade beads and craft kits — how do I get more orders?'); sendChat(); focusChatInput(); }}>
+            ✨ I sell handmade beads and craft kits
           </button>
-          <button type="button" className="ai-chip" onClick={() => setChatInput('What should I post on WhatsApp status today?')}>
-            📣 First social post
+          <button type="button" className="ai-chip" onClick={() => { setChatInput('What should I post on WhatsApp status today?'); sendChat(); focusChatInput(); }}>
+            📣 WhatsApp status post
           </button>
-          <button type="button" className="ai-chip" onClick={() => setChatInput('How should I price my products?')}>
-            💰 Pricing strategy
+          <button type="button" className="ai-chip" onClick={() => { setChatInput('How should I price my products?'); sendChat(); focusChatInput(); }}>
+            💰 Product pricing
           </button>
         </div>
       )}
@@ -229,6 +228,7 @@ export function AiStudio({ storeName }: { storeName: string }) {
 
           <form className="ai-composer" onSubmit={sendChat}>
             <input
+              ref={chatInputRef}
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
               placeholder="Ask about orders, pricing, promotions…"
