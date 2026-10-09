@@ -18,7 +18,7 @@ import { isStoreFont, isStoreLayout, sanitizeText, STORE_FONTS, STORE_LAYOUTS } 
 import type { AiProvider, AiRequest, AiResponse } from './index';
 import { isDarkHex, readableTextOn } from './color';
 
-export const GEMINI_DEFAULT_MODEL = 'gemini-2.5-flash';
+export const GEMINI_DEFAULT_MODEL = 'gemini-3.8-flash';
 
 const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models';
 const HERO_STYLES = new Set(['gradient', 'image', 'solid']);

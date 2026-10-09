@@ -42,7 +42,7 @@ describe('provider selection', () => {
 describe('GeminiProvider request/response', () => {
   it('store_setup: posts to generateContent with the key header and sanitizes the draft', async () => {
     const fetchMock = stubFetch((url, init) => {
-      expect(url).toContain('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent');
+      expect(url).toContain('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent');
       expect((init.headers as Record<string, string>)['x-goog-api-key']).toBe('test-key-123');
       return geminiReply(
         JSON.stringify({
