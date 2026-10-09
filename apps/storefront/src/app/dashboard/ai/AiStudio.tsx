@@ -46,9 +46,9 @@ const FEATURES = [
 ];
 
 const HOW_TO = [
-  '1. Tell me about your store — category, what you sell, what you want to grow.',
-  '2. Pick a feature above or send me any question.',
-  '3. I draft, you review, you publish. Every draft can be edited before use.',
+  'Tell me about your store — category, what you sell, what you want to grow.',
+  'Pick a feature above or send me any question.',
+  'I draft, you review, you publish. Every draft can be edited before use.',
 ];
 
 async function callApi(url: string, body: unknown): Promise<Record<string, unknown>> {
@@ -147,9 +147,9 @@ export function AiStudio({ storeName }: { storeName: string }) {
 
       {messages.length === 0 && (
         <section className="card card-elevated ai-welcome">
-          <h2 style={{ margin: '0 0 6px', fontSize: 20 }}>👋 Welcome to your new AI Studio</h2>
+          <h2 style={{ margin: '0 0 6px', fontSize: 20 }}>👋 Welcome to AI Studio</h2>
           <p className="muted" style={{ marginBottom: 14 }}>
-            Like signing up for a studio: tell me about your store, and I will set up your AI features one by one.
+            Smart help for {storeName}, built in. No key needed to start — the personalised drafts turn on when GEMINI_API_KEY is set (Google AI Studio, free tier).
           </p>
 
           <div className="ai-features">
@@ -163,7 +163,7 @@ export function AiStudio({ storeName }: { storeName: string }) {
           </div>
 
           <div className="ai-howto">
-            <h3 style={{ margin: '14px 0 6px' }}>How your first session works</h3>
+            <h3 style={{ margin: '14px 0 6px' }}>Now — start with a question about your store</h3>
             <ol className="ai-howto-list">
               {HOW_TO.map((s) => (
                 <li key={s}>{s}</li>
@@ -173,19 +173,14 @@ export function AiStudio({ storeName }: { storeName: string }) {
 
           <div className="ai-chips">
             <button type="button" className="ai-chip ai-chip-pick" onClick={() => setChatInput('I sell handmade beads and craft kits — how do I get more orders?')}>
-              ✨ Introduce my store
+              ✨ Start with: I sell handmade beads and craft kits
             </button>
             <button type="button" className="ai-chip ai-chip-pick" onClick={() => setChatInput('What should I post on WhatsApp status today?')}>
-              📣 First social post
+              📣 Start with: a WhatsApp status post
             </button>
             <button type="button" className="ai-chip ai-chip-pick" onClick={() => setChatInput('How should I price my products?')}>
-              💰 Pricing strategy
+              💰 Start with: product pricing
             </button>
-          </div>
-
-          <div className="ai-note">
-            No API key needed to start — these first drafts are built in. The smarter, personalised drafts switch on when{' '}
-            <code>GEMINI_API_KEY</code> is set (Google AI Studio, free tier).
           </div>
         </section>
       )}
