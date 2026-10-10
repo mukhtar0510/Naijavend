@@ -3,5 +3,17 @@
   "buildCommand": "pnpm --filter @idevtenancy/storefront build",
   "outputDirectory": "apps/storefront/.next",
   "installCommand": "pnpm install --frozen-lockfile",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "images": {
+    "remotePatterns": [
+      {
+        "protocol": "https",
+        "hostname": "*.supabase.co"
+      },
+      {
+        "protocol": "https",
+        "hostname": "images.unsplash.com"
+      }
+    ]
+  }
 }

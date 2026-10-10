@@ -11,7 +11,7 @@ import type { FormEvent } from 'react';
 interface ChatMsg {
   role: 'user' | 'assistant';
   content: string;
-  kind?: 'text' | 'post';
+  kind?: 'text' | 'post' | 'image';
 }
 
 const STARTERS = [
@@ -47,7 +47,8 @@ export function AiStudio({ storeName }: { storeName: string }) {
 
   // Social-post generator (opened from the tools strip)
   const [toolsOpen, setToolsOpen] = useState(false);
-  const [platform, setPlatform] = useState('whatsapp');
+  const [platform, setPlatform] = useState<'whatsapp' | 'instagram' | 'facebook'>('whatsapp');
+  const setPlatformSafe = (p: typeof platform) => setPlatform(p);
   const [copied, setCopied] = useState(false);
 
   // Latest generated caption, for the Copy button on post bubbles. A ref (not
@@ -56,6 +57,17 @@ export function AiStudio({ storeName }: { storeName: string }) {
 
   // 'gemini' | 'basic' — surfaced so sellers know which brain answered.
   const [provider, setProvider] = useState<string | null>(null);
+
+  // AI image generator (opened from the tools strip)
+  const [imageToolOpen, setImageToolOpen] = useState(false);
+  const [imagePrompt, setImagePrompt] = useState('');
+  const [imageBusy, setImageBusy] = useState(false);
+  const [imageError, setImageError] = useState('');
+  const latestImageRef = useRef<{ url: string; alt: string } | null>(null);
+
+  // Downloaded/generated image the seller can save or re-send. A ref so the
+  // last generated image is easy to download / send to WhatsApp without re-fetch.
+  const lastImageRef = useRef<{ url: string; alt: string } | null>(null);
 
   useEffect(() => {
     threadRef.current?.scrollTo({ top: threadRef.current.scrollHeight, behavior: 'smooth' });
@@ -119,7 +131,93 @@ export function AiStudio({ storeName }: { storeName: string }) {
     }
   }
 
+  const [aiStatus, setAiStatus] = useState<{
+    imageGen: { enabled: boolean; provider: string };
+    whatsapp: { configured: boolean; hasNumber: boolean; tokenSet: boolean; phoneIdSet: boolean };
+  } | null>(null);
+
+  async function loadAiStatus() {
+    try {
+      const json = await callApi('/api/ai/status', {});
+      if (json.ok && typeof json.imageGen === 'object' && typeof json.whatsapp === 'object') {
+        setAiStatus({
+          imageGen: json.imageGen as { enabled: boolean; provider: string },
+          whatsapp: json.whatsapp as { configured: boolean; hasNumber: boolean; tokenSet: boolean; phoneIdSet: boolean },
+        });
+      } else {
+        setAiStatus(null);
+      }
+    } catch {
+      setAiStatus(null);
+    }
+  }
+
+  async function generateImage(e?: FormEvent) {
+    e?.preventDefault();
+    const prompt = imagePrompt.trim();
+    if (prompt.length < 3 || imageBusy) return;
+    setImageBusy(true);
+    setImageError('');
+    try {
+      const json = await callApi('/api/ai/image-gen', { prompt });
+      setProvider(typeof json.provider === 'string' ? json.provider : null);
+      const image = json.image as { imageUrl: string | null; alt: string } | null;
+      if (!image || !image.alt) throw new Error('Something went wrong.');
+      lastImageRef.current = { url: image.imageUrl ?? '', alt: image.alt };
+      latestImageRef.current = lastImageRef.current;
+      setMessages((prev) => [
+        ...prev,
+        { role: 'user' as const, content: prompt, kind: 'text' as const },
+        ...(image.imageUrl
+          ? [{ role: 'assistant' as const, content: image.imageUrl, kind: 'image' as const }]
+          : []),
+      ]);
+    } catch (err) {
+      setImageError(err instanceof Error ? err.message : 'Something went wrong.');
+    } finally {
+      setImageBusy(false);
+    }
+  }
+
+  async function downloadImage() {
+    const img = lastImageRef.current ?? latestImageRef.current;
+    if (!img?.url) return;
+    try {
+      const a = document.createElement('a');
+      a.href = img.url;
+      a.download = `ai-image-${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch {
+      // Data URIs and blob URLs may not be downloadable this way in every browser;
+      // the image is still visible in the thread in that case.
+    }
+  }
+
+  async function sendToWhatsApp() {
+    const img = lastImageRef.current ?? latestImageRef.current;
+    if (!img?.url || !img.alt) return;
+    setChatBusy(true);
+    setChatError('');
+    try {
+      const json = await callApi('/api/ai/whatsapp-send', { imageUrl: img.url, caption: img.alt });
+      setMessages((prev) => [
+        ...prev,
+        { role: 'user' as const, content: 'Send image to WhatsApp', kind: 'text' as const },
+        { role: 'assistant' as const, content: 'Image sent to your WhatsApp business number.', kind: 'text' as const },
+      ]);
+    } catch (err) {
+      setChatError(err instanceof Error ? err.message : 'Something went wrong.');
+    } finally {
+      setChatBusy(false);
+    }
+  }
+
   const empty = messages.length === 0;
+
+  // Prime the status early so the header status pill can render.
+  useEffect(() => { loadAiStatus(); }, []);
 
   return (
     <main className="ai-app">
@@ -132,6 +230,21 @@ export function AiStudio({ storeName }: { storeName: string }) {
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {aiStatus && (
+            <span className="ai-status-pill" title="AI Studio status">
+              {aiStatus.imageGen.enabled
+                ? `🖼 ${aiStatus.imageGen.provider === 'gemini' ? 'Gemini images' : 'placeholder images'}`
+                : '🖼 image gen off (no Gemini key)'}
+              {' · '}
+              {aiStatus.whatsapp.configured
+                ? '📱 WhatsApp send ready'
+                : !aiStatus.whatsapp.hasNumber
+                  ? '📱 add WhatsApp number'
+                  : !aiStatus.whatsapp.tokenSet || !aiStatus.whatsapp.phoneIdSet
+                    ? '📱 WhatsApp not configured'
+                    : '📱 WhatsApp number set'}
+            </span>
+          )}
           {provider && (
             <span
               className="ai-provider-badge"
@@ -149,6 +262,15 @@ export function AiStudio({ storeName }: { storeName: string }) {
           >
             📣 Social posts
           </button>
+          <button
+            type="button"
+            className={`ai-tool-btn ${imageToolOpen ? 'ai-tool-btn-open' : ''}`}
+            onClick={() => setImageToolOpen((v) => !v)}
+            aria-expanded={imageToolOpen}
+            title="AI image generator"
+          >
+            🖼 AI images
+          </button>
         </div>
       </header>
 
@@ -160,7 +282,7 @@ export function AiStudio({ storeName }: { storeName: string }) {
             <h3>Welcome to AI Studio</h3>
             <p className="muted">
               Ask me anything about growing your store — orders, pricing, promotions — or open{' '}
-              <strong>Social posts</strong> to draft a caption. No key needed to start.
+              <strong>Social posts</strong> to draft a caption, or <strong>AI images</strong> to generate a product/store image. No key needed to start.
             </p>
             <div className="ai-app-starters">
               {STARTERS.map((s) => (
@@ -175,9 +297,23 @@ export function AiStudio({ storeName }: { storeName: string }) {
         {messages.map((m, i) => (
           <div
             key={i}
-            className={`ai-bubble ${m.role === 'user' ? 'ai-bubble-user' : 'ai-bubble-bot'} ${m.kind === 'post' ? 'ai-bubble-post' : ''}`}
+            className={`ai-bubble ${m.role === 'user' ? 'ai-bubble-user' : 'ai-bubble-bot'} ${m.kind === 'post' ? 'ai-bubble-post' : ''} ${m.kind === 'image' ? 'ai-bubble-image' : ''}`}
           >
-            {m.content}
+            {m.kind === 'image' && m.content ? (
+              <figure style={{ margin: 0 }}>
+                <img src={m.content} alt="" style={{ maxWidth: '100%', borderRadius: 8 }} />
+                <figcaption style={{ marginTop: 6, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <button type="button" className="btn btn-sm" onClick={downloadImage}>
+                    Download
+                  </button>
+                  <button type="button" className="btn btn-sm btn-whatsapp" onClick={sendToWhatsApp}>
+                    Send to WhatsApp
+                  </button>
+                </figcaption>
+              </figure>
+            ) : m.kind === 'image' ? null : (
+              m.content
+            )}
             {m.kind === 'post' && (
               <div style={{ marginTop: 8 }}>
                 <button type="button" className="btn btn-sm" onClick={copyPost}>
@@ -201,13 +337,60 @@ export function AiStudio({ storeName }: { storeName: string }) {
                 key={p}
                 type="button"
                 className={`ai-chip ${platform === p ? 'ai-chip-active' : ''}`}
-                onClick={() => setPlatform(p)}
+                onClick={() => setPlatformSafe(p as 'whatsapp' | 'instagram' | 'facebook')}
               >
                 {p.charAt(0).toUpperCase() + p.slice(1)}
               </button>
             ))}
           </div>
+          <p className="muted" style={{ fontSize: 11.5, marginTop: 10 }}>
+            Instagram/Facebook auto-post needs a Business/Creator account + app review. For now, copy the caption and download the image, then post manually.
+          </p>
         </div>
+      )}
+
+      {/* AI Studio status + image generator */}
+      {aiStatus && aiStatus.imageGen && (
+        <div className="ai-app-tools" style={{ marginBottom: 8 }}>
+          <span className="muted" style={{ fontSize: 11.5 }}>
+            Image gen: {aiStatus.imageGen.provider === 'gemini' ? 'Gemini' : 'placeholder'} · WhatsApp: {aiStatus.whatsapp.configured ? 'ready' : !aiStatus.whatsapp.hasNumber ? 'no number' : !aiStatus.whatsapp.tokenSet || !aiStatus.whatsapp.phoneIdSet ? 'not configured' : 'number set'}
+          </span>
+        </div>
+      )}
+      {imageToolOpen && (
+        <form
+          className="ai-app-composer"
+          onSubmit={(e) => {
+            e.preventDefault();
+            generateImage();
+          }}
+        >
+          <textarea
+            className="ai-app-input"
+            value={imagePrompt}
+            rows={1}
+            onChange={(e) => setImagePrompt(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                generateImage();
+              }
+            }}
+            placeholder="Describe the image you want, e.g. a clean product shot of beaded earrings on a neutral background"
+            maxLength={1000}
+            aria-label="Describe the image"
+          />
+          <button
+            type="submit"
+            className="btn btn-primary ai-app-send"
+            disabled={imageBusy || imagePrompt.trim().length < 3}
+          >
+            {imageBusy ? '…' : 'Generate image'}
+          </button>
+          {imageError && (
+            <div className="alert alert-error" style={{ marginTop: 8 }}>{imageError}</div>
+          )}
+        </form>
       )}
 
       {/* Composer — sticky at the bottom like a chat app */}

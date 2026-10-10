@@ -6,7 +6,7 @@
 // Every call is meant to be logged to ai_usage_log by the caller (server route).
 
 import type {
-  AiFeature, AiStoreDraft, AiListingDraft, AiStyleDraft, AiAssistantDraft, AiSocialPostDraft,
+  AiFeature, AiStoreDraft, AiListingDraft, AiStyleDraft, AiAssistantDraft, AiSocialPostDraft, AiImageDraft,
 } from '@idevtenancy/shared';
 import { readableTextOn, isDarkHex } from './color';
 import { GeminiProvider, GEMINI_DEFAULT_MODEL } from './gemini';
@@ -17,7 +17,7 @@ export interface AiRequest {
 }
 
 export interface AiResponse {
-  draft: AiStoreDraft | AiListingDraft | AiStyleDraft | AiAssistantDraft | AiSocialPostDraft;
+  draft: AiStoreDraft | AiListingDraft | AiStyleDraft | AiAssistantDraft | AiSocialPostDraft | AiImageDraft;
   tokensUsed: number;
   provider: string;
 }
@@ -662,6 +662,11 @@ class DummyProvider implements AiProvider {
       return { draft, tokensUsed, provider: this.name };
     }
 
+    if (req.feature === 'image_gen') {
+      const draft: AiImageDraft = dummyImageDraft(req.input);
+      return { draft, tokensUsed, provider: this.name };
+    }
+
     // listing_description
     const draft: AiListingDraft = {
       description:
@@ -670,6 +675,29 @@ class DummyProvider implements AiProvider {
     };
     return { draft, tokensUsed, provider: this.name };
   }
+}
+
+/** Deterministic dummy image draft — no real image is generated; the URL points at a
+ * small inline SVG placeholder so the UI flow (image bubble + download button) keeps
+ * working keyless, and the alt text still names the prompt for the seller. */
+export function dummyImageDraft(input: string): AiImageDraft {
+  const prompt = input.trim().slice(0, 200).replace(/[\u0000-\u001F]+/g, ' ').trim() || 'product image';
+  const label = encodeURIComponent(prompt.slice(0, 48));
+  return {
+    imageUrl: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
+      `<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1024\" height=\"1024\" viewBox=\"0 0 1024 1024\">` +
+      `<rect width=\"1024\" height=\"1024\" fill=\"#f6f7fb\"/>` +
+      `<g fill=\"none\" stroke=\"#c9ced8\" stroke-width=\"2\">` +
+      `<rect x=\"140\" y=\"220\" width=\"744\" height=\"584\" rx=\"12\"/>` +
+      `<circle cx=\"320\" cy=\"420\" r=\"120\"/>` +
+      `<circle cx=\"704\" cy=\"420\" r=\"120\"/>` +
+      `</g>` +
+      `<text x=\"512\" y=\"760\" font-family=\"sans-serif\" font-size=\"40\" text-anchor=\"middle\" fill=\"#6b7280\">AI image (placeholder)</text>` +
+      `<text x=\"512\" y=\"812\" font-family=\"sans-serif\" font-size=\"28\" text-anchor=\"middle\" fill=\"#9aa1ad\">${label}</text>` +
+      `</svg>`,
+    )}`,
+    alt: `AI-generated image for: ${prompt}`,
+  };
 }
 
 let provider: AiProvider | null = null;
@@ -685,6 +713,21 @@ export function createProviderFromEnv(env: Record<string, string | undefined> = 
     return new GeminiProvider(apiKey, env.GEMINI_MODEL?.trim() || GEMINI_DEFAULT_MODEL);
   }
   return new DummyProvider();
+}
+
+/** Like `createProviderFromEnv`, but returns a Gemini provider even when there is
+ * no text-model key — image generation may be enabled under a separate model key.
+ * Returns null when no Gemini key at all so callers can fall back to a dummy image. */
+export function createImageProviderFromEnv(
+  env: Record<string, string | undefined> = process.env,
+): InstanceType<typeof GeminiProvider> | null {
+  const apiKey = env.GEMINI_API_KEY?.trim();
+  if (!apiKey) return null;
+  // Use the explicit image model when set; otherwise the current recommended
+  // Nano Banana image model. Do not fall back to the text model id, because
+  // text models do not reliably produce images via this endpoint.
+  const imageModel = env.GEMINI_IMAGE_MODEL?.trim() || 'gemini-nano-banana-2.1' || GEMINI_DEFAULT_MODEL;
+  return new GeminiProvider(apiKey, imageModel);
 }
 
 /** Returns the configured provider (cached after first call). */

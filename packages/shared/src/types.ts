@@ -10,7 +10,14 @@ export type AiFeature =
   | 'listing_description'
   | 'style_store'
   | 'assistant_chat'
-  | 'social_post';
+  | 'social_post'
+  | 'image_gen';
+
+export interface AiImageDraft {
+  /** Short public URL a browser can load; null when generation is intentionally deferred to send-time (e.g. WhatsApp-only). */
+  imageUrl: string | null;
+  alt: string;
+}
 
 /** Per-store appearance theme rendered by /s/* pages (one row per store). */
 /** Structural templates a store site can use (see packages/shared/src/templates.ts). */
@@ -266,4 +273,19 @@ export interface AiAssistantDraft {
 /** Ready-to-share social caption (feature: social_post). */
 export interface AiSocialPostDraft {
   post: string;
+}
+
+/** Generated image draft (feature: image_gen).
+ *
+ * `imageUrl` is either:
+ * - a public reachable URL when a real Gemini image was generated and persisted to
+ *   store-media (so WhatsApp send and downloads can use it), or
+ * - a `data:` URL / null when this is a placeholder, fallback, or deferred to
+ *   send-time.
+ *
+ * Dummy/fallback images intentionally have no reachable url; the WhatsApp send
+ * route must not try to post those to the WhatsApp Cloud API. */
+export interface AiImageDraft {
+  imageUrl: string | null;
+  alt: string;
 }
