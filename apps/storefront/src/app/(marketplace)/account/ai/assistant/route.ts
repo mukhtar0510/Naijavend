@@ -13,7 +13,7 @@
 // This is intentionally separate from the seller assistant route. The seller
 // route is grounded in store stats the buyer must never see.
 import { NextRequest } from 'next/server';
-import { getCustomerClient } from '@/lib/auth';
+import { getCustomerUser } from '@/lib/auth';
 import { supabaseAnon } from '@/lib/supabase';
 import { apiError, apiOk, internalError } from '@/lib/api';
 import { rateLimit, clientIp } from '@/lib/ratelimit';
@@ -53,6 +53,7 @@ interface BuyerContext {
     slotEnd: string;
   }>;
   recentChatStores: Array<{ storeSlug: string; storeName: string }>;
+  savedIds: Set<string>;
 }
 
 interface AskAnswer {
@@ -146,7 +147,7 @@ async function loadBuyerContext(sb: ReturnType<typeof supabaseAnon>, customerId:
   }
   if (storeIdSet.size) {
     const storeNames = await sb.from('stores').select('id, slug, name').in('id', [...storeIdSet]).limit(storeIdSet.size);
-    for (const s of (storeNames ?? [])) {
+    for (const s of (storeNames.data ?? [])) {
       recentChatStores.push({ storeSlug: String(s.slug), storeName: String(s.name) });
     }
   }
@@ -256,7 +257,7 @@ function fallbackAnswer(
   // Catalog + buyer overlap: prefer stores the buyer has already engaged with.
   const preferredSlugs = new Set([
     ...buyer.recentChatStores.map((s) => s.storeSlug),
-  );
+  ]);
 
   const scored = catalog.map((s) => {
     const hay = (`${s.name} ${s.category} ${s.description} ${s.items.map((i) => i.title).join(' ')}`).toLowerCase();
@@ -281,13 +282,21 @@ function fallbackAnswer(
 
   const pick = matched.length ? matched : fallback;
   const first = pick[0]?.s;
-  const itemLine = first?.items[0] ? ` Try “${first.items[0].title}” — ₦${Math.round(first.items[0].priceKobo / 100).toLocaleString('en-NG')}.` : '';
-  const distLine = first && origin && first.lat != null && first.lng != null
-    ? ` It's about ${formatDistance(haversineKm(origin, { lat: first.lat, lng: first.lng }))} from you.`
-    : '';
 
+  let itemLine = '';
+  if (first && first.items[0]) {
+    itemLine = ' Try ' + String.fromCharCode(8216) + first.items[0].title + String.fromCharCode(8217) + ' — ' + String.fromCharCode(8356) + Math.round(first.items[0].priceKobo / 100).toLocaleString('en-NG') + '.';
+  }
+
+  let distLine = '';
+  if (first && origin && first.lat != null && first.lng != null) {
+    distLine = ' It' + String.fromCharCode(8217) + 's about ' + formatDistance(haversineKm(origin, { lat: first.lat, lng: first.lng })) + ' from you.';
+  }
+
+  const personalNote = preferredSlugs.size > 0 ? ', including stores you' + String.fromCharCode(8217) + 've chatted with' : '';
+  const storeList = (pick.map((m) => m.s.name).join(', ') || 'a few stores');
   return {
-    reply: `Based on what's listed on Naijavend${preferredSlugs.size ? ', including stores you've chatted with' : ''}, ${pick.map((m) => m.s.name).join(', ') || 'a few stores'} look like your best bet.${itemLine}${distLine} Tap a store below to see everything they offer.`,
+    reply: 'Based on what' + String.fromCharCode(8217) + 's listed on Naijavend' + personalNote + ', ' + storeList + ' look like your best bet.' + itemLine + distLine + ' Tap a store below to see everything they offer.',
     stores: pick.slice(0, 4).map((m) => ({ slug: m.s.slug, name: m.s.name, category: m.s.category })),
   };
 }
@@ -396,7 +405,7 @@ async function geminiAnswer(
 // ---------------------------------------------------------------------------
 
 export async function POST(req: NextRequest) {
-  const customer = await getCustomerClient();
+  const customer = await getCustomerUser();
   if (!customer) {
     return apiError(401, 'unauthenticated', 'Sign in first.');
   }

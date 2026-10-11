@@ -40,10 +40,7 @@ export default function AiAssistantPage() {
       const res = await fetch('/account/ai/assistant', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          q,
-          lat: window.performance?.memory ? undefined : undefined,
-        }),
+        body: JSON.stringify({ q }),
       });
       const data = (await res.json()) as { error?: { code: string; message: string }; reply?: string; stores?: Answer['stores']; orders?: Answer['orders']; listings?: Answer['listings'] };
 
