@@ -29,7 +29,7 @@ export function isBusinessType(v: unknown): v is BusinessType {
 }
 
 export function isListingType(v: unknown): v is ListingType {
-  return v === 'product' || v === 'service';
+  return v === 'product' || v === 'service' || v === 'digital';
 }
 
 export function isStars(v: unknown): v is 1 | 2 | 3 | 4 | 5 {

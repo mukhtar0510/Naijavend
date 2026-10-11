@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
   const stock = stockRaw == null ? null : Math.round(Number(stockRaw));
 
   if (!/^[0-9a-f-]{36}$/i.test(storeId)) return apiError(400, 'invalid_store', 'Invalid store.');
-  if (!isListingType(type)) return apiError(422, 'invalid_type', 'Type must be product or service.');
+  if (!isListingType(type)) return apiError(422, 'invalid_type', 'Type must be product, service or digital.');
   if (title.length < 2) return apiError(422, 'invalid_title', 'Give the listing a title.');
   if (priceKobo === null) return apiError(422, 'invalid_price', 'Enter a valid price.');
   if (compareKobo !== null && (!Number.isFinite(compareKobo) || compareKobo < 0)) {
@@ -73,6 +73,8 @@ export async function POST(req: NextRequest) {
       compare_at_kobo: type === 'product' ? compareKobo : null,
       stock: type === 'product' ? stock : null,
       is_bookable: type === 'service',
+      // Digital listings start empty; the file is attached via /api/listings/digital-upload.
+      ...(type === 'digital' ? { digital_file_path: null, digital_file_name: null, digital_file_size: null } : {}),
       ai_generated_description: b.aiDescription === true,
       image_urls: imageUrls,
       video_url: videoUrl,

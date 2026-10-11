@@ -17,7 +17,7 @@ const countToInput = (n: number | null | undefined) => (n == null ? '' : String(
 export function ListingEditor({ storeId, listing }: { storeId: string; listing?: Listing }) {
   const router = useRouter();
   const editing = listing != null;
-  const [type, setType] = useState<'product' | 'service'>(listing?.type ?? 'product');
+  const [type, setType] = useState<'product' | 'service' | 'digital'>(listing?.type ?? 'product');
   const [title, setTitle] = useState(listing?.title ?? '');
   const [price, setPrice] = useState(koboToInput(listing?.price_kobo ?? null));
   const [compareAt, setCompareAt] = useState(koboToInput(listing?.compare_at_kobo ?? null));
@@ -266,11 +266,12 @@ export function ListingEditor({ storeId, listing }: { storeId: string; listing?:
         <select
           id={editing ? `ltype-${listing!.id}` : 'ltype'}
           value={type}
-          onChange={(e) => setType(e.target.value as 'product' | 'service')}
+          onChange={(e) => setType(e.target.value as 'product' | 'service' | 'digital')}
           disabled={editing}
         >
           <option value="product">Product</option>
           <option value="service">Service (bookable)</option>
+          <option value="digital">Digital (ebook, code, file)</option>
         </select>
         {editing && <p className="hint">Type can't change after creation — orders and bookings depend on it.</p>}
       </div>
@@ -355,6 +356,49 @@ export function ListingEditor({ storeId, listing }: { storeId: string; listing?:
         )}
         {uploading && <p className="hint">Uploading…</p>}
       </div>
+
+        {type === 'digital' && (
+          <div className="field" style={{ background: 'var(--elevated-2)', padding: 12, borderRadius: 10, marginTop: 10 }}>
+            <label htmlFor="digital-file">💳 File to sell (PDF, EPUB, ZIP, MP3, MP4…)</label>
+            {editing && listing && (
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const input = document.getElementById('digital-file') as HTMLInputElement | null;
+                  const f = input?.files?.[0];
+                  if (!f) return;
+                  setBusy(true);
+                  try {
+                    const fd = new FormData();
+                    fd.append('listingId', listing.id);
+                    fd.append('file', f);
+                    const res = await fetch('/api/listings/digital-upload', { method: 'POST', body: fd });
+                    const body = await res.json();
+                    if (!res.ok) throw new Error(body?.error?.message ?? 'Upload failed.');
+                    setSuccess(`File attached: ${body.fileName}`);
+                  } catch (err) {
+                    setError((err as Error).message);
+                  } finally {
+                    setBusy(false);
+                  }
+                }}
+                style={{ display: 'grid', gap: 8 }}
+              >
+                <input id="digital-file" type="file" accept=".pdf,.epub,.mobi,.zip,.txt,.md,.csv,.doc,.docx,.mp3,.wav,.mp4" required />
+                <p className="hint" style={{ margin: 0 }}>Max 50 MB. Buyers get a one-time secure download link after paying — the file itself is never publicly exposed.</p>
+                <button type="submit" className="btn btn-primary btn-sm" disabled={busy}>
+                  {busy ? 'Uploading…' : 'Attach file'}
+                </button>
+              </form>
+            )}
+            {editing && !listing && <p className="hint">Save the listing first, then attach the file.</p>}
+            {!editing && (
+              <p className="hint" style={{ margin: 0 }}>
+                Create this listing first (click below), then come back and attach your file — the upload needs the listing id.
+              </p>
+            )}
+          </div>
+        )}
 
       <div className="field">
         <label htmlFor={editing ? `lvideo-${listing!.id}` : 'lvideo'}>Product video (optional — one)</label>

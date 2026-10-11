@@ -4,6 +4,7 @@ import { Stars } from '@/components/Stars';
 import { NearbyStores } from '@/components/NearbyStores';
 import { StoreMap, type MapStore } from '@/components/StoreMap';
 import { DiscoverTabs } from '@/components/DiscoverTabs';
+import { AiPickRow } from '@/components/AiPickRow';
 import { VerifiedTick } from '@/components/VerifiedTick';
 import { SavedHeart } from '@/components/SavedHeart';
 import { isOpenNow, STORE_CATEGORIES, categoryLabel, categoryEmoji, categoryClass } from '@idevtenancy/shared';
@@ -80,6 +81,7 @@ export default async function DiscoverPage({
       <DiscoverTabs
         list={
           <>
+      <AiPickRow />
       <NearbyStores stores={nearbyStores} />
 
       <form style={{ display: 'flex', gap: 8, margin: '18px 0 14px', flexWrap: 'wrap' }} action="/discover">

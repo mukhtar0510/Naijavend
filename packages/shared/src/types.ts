@@ -1,7 +1,7 @@
 // Naijavend shared domain types — used by storefront, seller app, and server routes.
 
 export type BusinessType = 'product' | 'service' | 'hybrid';
-export type ListingType = 'product' | 'service';
+export type ListingType = 'product' | 'service' | 'digital';
 export type OrderStatus = 'pending' | 'paid' | 'fulfilled' | 'cancelled';
 export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
 export type Plan = 'free' | 'growth';
@@ -129,6 +129,10 @@ export interface Listing {
   id: string;
   store_id: string;
   type: ListingType;
+  /** Digital listings: private storage path + buyer-facing file metadata. */
+  digital_file_path?: string | null;
+  digital_file_name?: string | null;
+  digital_file_size?: number | null;
   title: string;
   description: string;
   ai_generated_description: boolean;

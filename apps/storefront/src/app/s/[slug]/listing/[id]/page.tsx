@@ -106,6 +106,7 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
   const waNumber = (waSettingsRow.data as { business_number: string } | null)?.business_number || store.whatsapp_number;
 
   const isService = listing.type === 'service';
+  const isDigital = listing.type === 'digital';
   const orderHref = `/s/${store.slug}/${isService ? 'book' : 'order'}/${listing.id}`;
   const onSale = listing.compare_at_kobo != null && listing.compare_at_kobo > listing.price_kobo;
   const soldOut = listing.stock === 0;
@@ -136,7 +137,7 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
           <nav aria-label="Breadcrumb" className="muted" style={{ fontSize: 13.5, marginBottom: 14 }}>
             <Link href={`/s/${store.slug}`}>← Back to {store.name}</Link>
           </nav>
-          <span className="badge badge-blue">{isService ? 'Service' : 'Product'}</span>
+          <span className="badge badge-blue">{isDigital ? '⚡ Digital download' : isService ? 'Service' : 'Product'}</span>
         </div>
       </div>
 
@@ -172,7 +173,7 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
                   </button>
                 ) : (
                   <Link className="btn btn-primary btn-lg" href={orderHref}>
-                    {isService ? 'Book appointment' : 'Order now'}
+                    {isDigital ? 'Buy & get download' : isService ? 'Book appointment' : 'Order now'}
                   </Link>
                 )}
                 {isValidPhone(waNumber ?? '') && (
@@ -227,7 +228,9 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
                 </p>
               )}
               <p className="hint" style={{ marginTop: 12, marginBottom: 0 }}>
-                {isService
+                {isDigital
+                  ? `Instant delivery: pay here, and a one-time download link is issued the moment your order is confirmed. Your file${listing.digital_file_name ? ` (${listing.digital_file_name.replace(/</g, '&lt;')})` : ''} arrives immediately — no shipping, no waiting.`
+                  : isService
                   ? 'How booking works: pick a time → the seller confirms → any deposit is arranged before your appointment.'
                   : 'Payments are arranged with the seller — order here, confirm on WhatsApp, pick-up or delivery.'}
               </p>

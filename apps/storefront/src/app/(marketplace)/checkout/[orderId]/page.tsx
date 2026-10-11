@@ -10,6 +10,7 @@ interface CheckoutData {
   totalKobo: number;
   status: string;
   items: Array<{ title: string; quantity: number; unitPriceKobo: number }>;
+  digitalDownloads?: Array<{ title: string; fileName: string; downloadUrl: string }>;
 }
 
 function naira(kobo: number) {
@@ -95,6 +96,19 @@ export default function CheckoutPage({
             {data.storeName} received {naira(data.totalKobo)}. The seller has been notified and will contact you on
             the number you provided.
           </p>
+          {data.digitalDownloads && data.digitalDownloads.length > 0 && (
+            <div style={{ margin: '18px 0 4px', padding: 16, border: '1px solid var(--border)', borderRadius: 12, background: 'var(--elevated-2)', textAlign: 'left' }}>
+              <strong style={{ fontSize: 15 }}>⚡ Your downloads are ready</strong>
+              <p className="muted" style={{ fontSize: 13, marginTop: 4 }}>
+                Each link works once — download now and save your file.
+              </p>
+              {data.digitalDownloads.map((d) => (
+                <a key={d.downloadUrl} href={d.downloadUrl} className="btn btn-primary" style={{ margin: '6px 8px 6px 0' }} download>
+                  ⬇ Download {d.fileName}
+                </a>
+              ))}
+            </div>
+          )}
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link className="btn btn-primary" href={`/s/${data.storeSlug}/rate`}>
               Rate this store
