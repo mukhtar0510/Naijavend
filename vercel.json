@@ -5,6 +5,7 @@
   "installCommand": "pnpm install --frozen-lockfile",
   "framework": "nextjs",
   "images": {
+    "sizes": [640, 768, 1024, 1280, 1600],
     "remotePatterns": [
       {
         "protocol": "https",
