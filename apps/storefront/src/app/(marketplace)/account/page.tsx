@@ -8,6 +8,7 @@ import { ReferralCard } from '@/components/ReferralCard';
 import { ProductCard, type ProductCardItem } from '@/components/ProductCard';
 import { OrderShare } from '@/components/OrderShare';
 import { siteUrl } from '@/lib/site';
+import { IconSpark } from '@/components/NavIcons';
 
 export const dynamic = 'force-dynamic';
 
@@ -154,6 +155,7 @@ export default async function MyOrdersPage() {
           </section>
         )}
         <RecentProducts />
+        <AskAiCard />
         <OrdersList customerId={customer.id} />
       </div>
     </main>
@@ -162,6 +164,25 @@ export default async function MyOrdersPage() {
 
 // Server-side read of the customer's own orders with the customer's own JWT —
 // the orders_customer_read RLS policy scopes rows to auth.uid() = customer_id.
+async function AskAiCard() {
+  return (
+    <section className="card card-elevated" style={{ marginTop: 22, padding: '16px 18px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <IconSpark size={26} />
+        <div>
+          <h2 style={{ margin: 0, fontSize: 18 }}>Ask Naijavend</h2>
+          <p className="muted" style={{ margin: 0, fontSize: 13.5 }}>
+            Your personal shopping assistant — find stores near you, track your last order, or ask what to buy for any occasion.
+          </p>
+        </div>
+        <Link href="/account/ai" className="btn btn-primary" style={{ flexShrink: 0, marginLeft: 'auto' }}>
+          Ask AI
+        </Link>
+      </div>
+    </section>
+  );
+}
+
 async function OrdersList({ customerId }: { customerId: string }) {
   const { getCustomerClient } = await import('@/lib/auth');
   const sb = await getCustomerClient();
