@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { sanitizeText } from '@idevtenancy/shared';
 
 interface Answer {
@@ -18,7 +19,8 @@ const STARTERS = [
 ];
 
 export default function AiAssistantPage() {
-  const [question, setQuestion] = useState('');
+  const searchParams = useSearchParams();
+  const [question, setQuestion] = useState(() => sanitizeText(searchParams?.get('q') ?? '', 300));
   const [answer, setAnswer] = useState<Answer | null>(null);
   const [status, setStatus] = useState<'idle' | 'asking' | 'done' | 'error'>('idle');
   const [errorMsg, setErrorMsg] = useState('');
@@ -28,6 +30,47 @@ export default function AiAssistantPage() {
   useEffect(() => {
     threadRef.current?.scrollTo({ top: threadRef.current.scrollHeight, behavior: 'smooth' });
   }, [answer, status]);
+
+  // Deep-link support: /account/ai?q=... pre-fills and fires the question once.
+  const initialQ = sanitizeText(searchParams?.get('q') ?? '', 300);
+  const autoSent = useRef(false);
+  useEffect(() => {
+    if (initialQ && !autoSent.current) {
+      autoSent.current = true;
+      setQuestion(initialQ);
+      // Fire only when the component is stable; direct call is fine.
+      void (async () => {
+        const q = initialQ;
+        setStatus('asking');
+        try {
+          const res = await fetch('/account/ai/assistant', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ q }),
+          });
+          const data = (await res.json()) as {
+            error?: { code: string; message: string };
+            reply?: string;
+            stores?: Answer['stores'];
+            orders?: Answer['orders'];
+            listings?: Answer['listings'];
+          };
+          if (!res.ok) {
+            setStatus('error');
+            setErrorMsg(data.error?.message ?? 'Something went wrong.');
+            return;
+          }
+          setAnswer(data as Answer);
+          setSource(res.headers?.get?.('x-ai-source') ?? null);
+          setStatus('done');
+        } catch {
+          setStatus('error');
+          setErrorMsg('Network error. Try again.');
+        }
+      })();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const send = async () => {
     const q = sanitizeText(question, 300);

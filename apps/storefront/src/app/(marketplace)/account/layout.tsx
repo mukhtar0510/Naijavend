@@ -2,11 +2,13 @@ import Link from 'next/link';
 import { getCustomerUser, getCustomerClient } from '@/lib/auth';
 import { AccountNav } from './AccountNav';
 import { ThemeToggleCompact } from '@/components/ThemeToggleCompact';
+import { IconSpark } from '@/components/NavIcons';
 
 const NAV = [
   { href: '/account', label: 'Orders' },
   { href: '/account/bookings', label: 'Bookings' },
   { href: '/account/chats', label: 'Chats' },
+  { href: '/account/ai', label: 'Ask AI' },
   { href: '/account/profile', label: 'Profile' },
 ];
 

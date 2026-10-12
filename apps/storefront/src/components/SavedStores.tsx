@@ -11,8 +11,8 @@ export interface SavedCandidate {
   logo: string | null;
 }
 
-// "Saved stores" row on /account — reads the local saved list and renders the
-// matching stores from the server-provided index. Live-updates when hearts
+// "Saved stores" section on /account — reads the local saved list and renders
+// the matching stores from the server-provided index. Live-updates when hearts
 // are toggled anywhere else in the app.
 export function SavedStores({ stores }: { stores: SavedCandidate[] }) {
   const [slugs, setSlugs] = useState<string[]>([]);
@@ -31,11 +31,16 @@ export function SavedStores({ stores }: { stores: SavedCandidate[] }) {
   const saved = stores.filter((s) => slugs.includes(s.slug));
 
   return (
-    <section className="saved-section" aria-label="Saved stores">
-      <h2>♥ Saved stores</h2>
+    <section className="card card-elevated saved-section" aria-label="Saved stores">
+      <div className="saved-head">
+        <h2>♥ Saved stores</h2>
+        <span className="muted" style={{ fontSize: 12.5 }}>
+          Tap the heart on any store to keep it here.
+        </span>
+      </div>
       {saved.length === 0 ? (
         <div className="empty-state">
-          Nothing saved yet — tap the ♡ on any store card or store page to keep it here.
+          <p>Nothing saved yet — find stores you like and save them.</p>
           <div style={{ marginTop: 12 }}>
             <Link href="/discover" className="btn btn-outline btn-sm">Browse stores</Link>
           </div>
@@ -46,7 +51,7 @@ export function SavedStores({ stores }: { stores: SavedCandidate[] }) {
             <Link key={s.slug} href={`/s/${s.slug}`} className="card saved-card">
               {s.logo ? (
                 // eslint-disable-next-line @next/next/no-img-element -- seller-supplied remote URL
-                <img src={s.logo} alt={`${s.name} logo`} />
+                <img src={s.logo} alt={`${s.name} logo`} className="saved-card-logo" />
               ) : (
                 <span className="saved-card-initial" aria-hidden>{s.name.charAt(0).toUpperCase()}</span>
               )}

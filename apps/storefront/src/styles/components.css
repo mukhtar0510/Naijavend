@@ -338,6 +338,123 @@
   color: #fff;
 }
 
+/* ================= NEW: Buyer account page card-first layout ================= */
+.account-page { padding-top: 28px; }
+.account-page-hero {
+  background:
+    radial-gradient(900px 320px at 15% -30%, var(--blue-tint-2), transparent 70%),
+    radial-gradient(700px 280px at 85% -20%, #f3ede2, transparent 70%),
+    var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 0 32px;
+}
+.account-page-hero h1 {
+  font-size: 34px;
+  margin: 0 0 8px;
+  letter-spacing: -0.02em;
+}
+.account-page-hero p { color: var(--text-muted); max-width: 60ch; font-size: 15.5px; margin: 0; }
+
+.account-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 320px);
+  gap: 22px;
+  align-items: start;
+}
+@media (max-width: 980px) { .account-grid { grid-template-columns: 1fr; } }
+.account-grid-main > * { margin-bottom: 22px; }
+.account-grid-main > :last-child { margin-bottom: 0; }
+.account-grid-side { display: grid; gap: 18px; align-content: start; }
+
+/* Shared section header used across the page's cards */
+.section-head { margin-bottom: 14px; }
+.section-head h2 {
+  font-size: 20px;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+.section-head .muted { font-size: 12.5px; }
+
+/* Referral card — cleaner row with full-width link input */
+.referral-head { margin-bottom: 12px; }
+.referral-head h2 { font-size: 18px; }
+.referral-row { display: flex; gap: 10px; align-items: stretch; }
+.referral-row input {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--elevated);
+  color: var(--text);
+}
+.referral-row input:focus-visible { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-tint-2); }
+
+/* Saved stores — compact grid of portrait cards */
+.saved-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+.saved-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 12px;
+  text-align: center;
+  text-decoration: none;
+  color: var(--text);
+  border-color: var(--border);
+}
+.saved-card-logo { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); }
+.saved-card-initial { width: 52px; height: 52px; border-radius: 50%; background: var(--blue); color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.saved-card-name { font-weight: 600; font-size: 14px; }
+
+/* Recently viewed — horizontal scrolling card row */
+.recent-head { margin-bottom: 12px; }
+.recent-section { padding: 18px 20px; }
+.recent-row { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none; }
+.recent-row::-webkit-scrollbar { display: none; }
+.recent-card { flex: 0 0 150px; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 12px; text-align: center; text-decoration: none; color: var(--text); border-color: var(--border); }
+.recent-card img { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); }
+.recent-card .recent-initial { width: 52px; height: 52px; border-radius: 50%; background: var(--blue); color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.recent-name { font-size: 13px; font-weight: 600; }
+.recent-visit { font-size: 11.5px; color: var(--text-muted); }
+
+/* Buy again card */
+.buy-again-card { padding: 18px 20px; }
+.buy-again-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.buy-again-head h2 { font-size: 18px; margin: 0; }
+.buy-again-head .muted { margin: 0; }
+
+/* Ask AI card */
+.ask-ai-card { padding: 18px 20px; }
+.ask-ai-head { display: flex; align-items: center; gap: 12px; }
+.ask-ai-icon { width: 42px; height: 42px; border-radius: var(--radius-lg); background: var(--blue-tint); color: var(--blue); display: inline-grid; place-items: center; flex-shrink: 0; }
+.ask-ai-title { flex: 1; min-width: 0; }
+.ask-ai-title h2 { font-size: 17px; margin: 0; }
+.ask-ai-title .muted { margin: 0; }
+.ask-ai-card .btn { flex-shrink: 0; }
+
+/* Order cards */
+.order-card-head { display: flex; justify-content: space-between; gap: 10px; align-items: center; flex-wrap: wrap; }
+.order-card-head .muted { font-size: 12.5px; margin: 0; }
+.order-card-meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.order-card-store { font-weight: 600; font-size: 14px; }
+.order-steps { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+.order-step { height: 5px; flex: 1; max-width: 34px; border-radius: 999px; background: var(--elevated-2); }
+.order-step.is-done { background: var(--blue-tint-2); }
+.order-step.is-current { background: var(--blue); }
+.order-card-discount { display: block; font-size: 12px; color: var(--success); font-weight: 600; margin-top: 6px; }
+.order-card-footer { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.price { font-size: 15px; font-weight: 800; color: var(--blue); }
+.order-card { border-color: var(--border); }
+
+/* Ask AI inline card on /account (keeps existing AskAiCard behaviour) */
+.ask-ai-inline { padding: 18px 20px; }
 /* ================= Buyer & seller chat surfaces ================= */
 .convo-list { display: grid; gap: 10px; max-width: 640px; }
 .convo-row {
@@ -2249,4 +2366,82 @@
   .ai-app { height: calc(100dvh - 118px); }
   .ai-app-top { padding: 4px 0 10px; }
   .ai-app-composer { padding: 8px 10px; }
+}
+
+/* ================= Buyer account page: hero actions, quick tiles, stats ================= */
+.account-hero-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+
+.account-speed-dial {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 18px 20px 0;
+}
+.acct-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 14px 14px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
+  text-decoration: none;
+  color: var(--text);
+  transition: transform 160ms var(--ease), border-color 160ms var(--ease), box-shadow 160ms var(--ease);
+}
+.acct-tile:hover { transform: translateY(-2px); border-color: var(--blue); box-shadow: var(--shadow-sm); text-decoration: none; }
+.acct-tile-ico { font-size: 20px; line-height: 1.3; }
+.acct-tile strong { font-size: 14px; }
+.acct-tile .muted { font-size: 12px; }
+
+/* Summary stat strip */
+.account-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.account-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(280px 120px at 100% -30%, var(--blue-tint), transparent 70%),
+    var(--surface);
+}
+.account-stat-ico { font-size: 17px; line-height: 1.2; }
+.account-stat-value { font-family: var(--font-heading); font-size: 22px; letter-spacing: -0.02em; }
+.account-stat-label { font-size: 12px; }
+
+/* Seller upsell */
+.seller-upsell { padding: 18px 20px; }
+.seller-upsell-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+
+/* Ask AI starters */
+.ask-ai-starters { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.ask-ai-starters .ai-chip { cursor: pointer; }
+
+/* Buy-again row sits in the narrow right column: 2-up instead of 4-up */
+.account-buy-again-row { grid-template-columns: repeat(2, 1fr) !important; gap: 12px; }
+
+/* Orders section card */
+.orders-list .order-card { margin-bottom: 10px; }
+.orders-list .order-card:last-child { margin-bottom: 0; }
+
+@media (max-width: 700px) {
+  .account-page-hero { padding: 30px 0 26px; }
+  .account-page-hero h1 { font-size: 27px; }
+  .account-page-hero p { font-size: 14.5px; }
+  .account-hero-actions .btn { flex: 1 1 auto; min-height: 46px; }
+  .account-speed-dial { grid-template-columns: repeat(2, 1fr); padding: 16px 12px 0; }
+  .acct-tile { padding: 12px; }
+  .account-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .account-stat { padding: 12px 14px; }
+  .account-stat-value { font-size: 19px; }
+  .account-grid-main > *, .account-grid-side { gap: 14px; }
+  .orders-list { display: grid; gap: 10px; }
 }

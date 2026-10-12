@@ -18,21 +18,23 @@ export function ReferralCard({ link, invited }: { link: string; invited: number 
   }
 
   return (
-    <div className="card card-elevated referral-card">
-      <h2 style={{ margin: '0 0 4px', fontSize: 18 }}>🎁 Invite friends</h2>
-      <p className="muted" style={{ margin: '0 0 12px', fontSize: 13.5 }}>
-        Share your link — when a friend signs up through it, they&apos;re counted here.
-      </p>
+    <section className="card card-elevated referral-card" aria-label="Invite friends">
+      <div className="referral-head">
+        <h2>🎁 Invite friends</h2>
+        <span className="muted" style={{ fontSize: 12.5 }}>
+          Share your link — friends who sign up through it are counted here.
+        </span>
+      </div>
       <div className="referral-row">
         <input readOnly value={link} aria-label="Your referral link" onFocus={(e) => e.currentTarget.select()} />
         <button type="button" className="btn btn-primary btn-sm" onClick={copy}>
           {copied ? 'Copied ✓' : 'Copy link'}
         </button>
       </div>
-      <p style={{ margin: '10px 0 0', fontSize: 14 }}>
+      <p className="muted" style={{ margin: 0, fontSize: 13.5, paddingTop: 10 }}>
         <strong>{invited}</strong> friend{invited === 1 ? '' : 's'} joined with your link
-        {invited > 0 ? ' 🎉' : ''} <span className="muted" style={{ fontSize: 12.5 }}>· links credit signups for 30 days</span>
+        {invited > 0 ? ' 🎉' : ''} · links credit signups for 30 days
       </p>
-    </div>
+    </section>
   );
 }
