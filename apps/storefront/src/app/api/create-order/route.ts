@@ -37,7 +37,12 @@ export async function POST(req: NextRequest) {
   const customerName = sanitizeText(b.customerName, 120);
   const customerPhone = sanitizeText(b.customerPhone, 16);
   const promoInput = sanitizeText(b.promoCode, 40).toUpperCase();
+  const deliveryMethod = sanitizeText(b.deliveryMethod, 20); // '', pickup, rider or courier
   const lines = parseCartLines(b.items);
+
+  if (deliveryMethod && !['pickup', 'rider', 'courier'].includes(deliveryMethod)) {
+    return apiError(422, 'invalid_delivery', 'Pick a valid delivery option.');
+  }
 
   if (!slug) return apiError(400, 'missing_store', 'Store is required.');
   if (customerName.length < 2) return apiError(400, 'invalid_name', 'Enter your full name (at least 2 characters).');
@@ -55,7 +60,7 @@ export async function POST(req: NextRequest) {
   try {
     const sb = supabaseService();
 
-    const { data: store, error: storeErr } = await sb.from('stores').select('id').eq('slug', slug).maybeSingle();
+    const { data: store, error: storeErr } = await sb.from('stores').select('id, delivery_options').eq('slug', slug).maybeSingle();
     if (storeErr) throw storeErr;
     if (!store) return apiError(404, 'store_not_found', 'That store does not exist.');
 
@@ -104,14 +109,25 @@ export async function POST(req: NextRequest) {
       discountKobo = Math.round((grossKobo * p.percent_off) / 100);
       appliedCode = p.code;
     }
-    const totalKobo = Math.max(0, grossKobo - discountKobo);
+    // Delivery: fee comes from the store's own options — never from the client.
+    let deliveryFeeKobo = 0;
+    if (deliveryMethod) {
+      const opts = store.delivery_options as Record<string, { enabled?: boolean; fee_kobo?: number }> | null;
+      const opt = opts?.[deliveryMethod];
+      if (!opt?.enabled) {
+        return apiError(422, 'invalid_delivery', 'That delivery option is not available for this store.');
+      }
+      deliveryFeeKobo = Math.max(0, Number(opt.fee_kobo ?? 0));
+    }
+
+    const totalKobo = Math.max(0, grossKobo - discountKobo) + deliveryFeeKobo;
 
     // Attribute the order to the signed-in customer (if any) so it shows in /account.
     const customer = await getCustomerUser();
 
     const { data: order, error: orderErr } = await sb
       .from('orders')
-      .insert({ store_id: store.id, customer_id: customer?.id ?? null, customer_name: customerName, customer_phone: customerPhone, total_kobo: totalKobo, discount_code: appliedCode, discount_kobo: discountKobo, status: 'pending' })
+      .insert({ store_id: store.id, customer_id: customer?.id ?? null, customer_name: customerName, customer_phone: customerPhone, total_kobo: totalKobo, discount_code: appliedCode, discount_kobo: discountKobo, delivery_method: deliveryMethod, delivery_fee_kobo: deliveryFeeKobo, status: 'pending' })
       .select('id')
       .single();
     if (orderErr) throw orderErr;
@@ -165,7 +181,7 @@ export async function POST(req: NextRequest) {
     // paid without it, so a random orderId is not enough to complete payment.
     const payToken = mintPayToken(order.id);
 
-    return apiOk({ orderId: order.id, totalKobo, discountKobo, discountCode: appliedCode, payToken }, 201);
+    return apiOk({ orderId: order.id, totalKobo, discountKobo, discountCode: appliedCode, deliveryMethod, deliveryFeeKobo, payToken }, 201);
   } catch (err) {
     return internalError('create-order', err);
   }

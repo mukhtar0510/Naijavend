@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
     const sb = supabaseService();
     const { data: order, error } = await sb
       .from('orders')
-      .select('id, status, total_kobo, store_id, stores(name, slug), order_items(quantity, unit_price_kobo, listings(title, type))')
+      .select('id, status, total_kobo, store_id, delivery_method, delivery_fee_kobo, stores(name, slug), order_items(quantity, unit_price_kobo, listings(title, type))')
       .eq('id', orderId)
       .maybeSingle();
     if (error) throw error;
@@ -58,6 +58,8 @@ export async function GET(req: NextRequest) {
       orderId: order.id,
       status: order.status,
       totalKobo: order.total_kobo,
+      deliveryMethod: order.delivery_method ?? '',
+      deliveryFeeKobo: order.delivery_fee_kobo ?? 0,
       storeName: (order.stores as unknown as { name: string } | null)?.name ?? 'Store',
       storeSlug: (order.stores as unknown as { slug: string } | null)?.slug ?? '',
       items: items.map((i) => ({ title: i.listings?.title ?? 'Item', quantity: i.quantity, unitPriceKobo: i.unit_price_kobo })),

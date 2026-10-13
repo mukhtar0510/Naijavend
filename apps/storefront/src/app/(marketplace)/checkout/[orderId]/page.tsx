@@ -9,6 +9,8 @@ interface CheckoutData {
   storeSlug: string;
   totalKobo: number;
   status: string;
+  deliveryMethod?: string;
+  deliveryFeeKobo?: number;
   items: Array<{ title: string; quantity: number; unitPriceKobo: number }>;
   digitalDownloads?: Array<{ title: string; fileName: string; downloadUrl: string }>;
 }
@@ -146,6 +148,14 @@ export default function CheckoutPage({
             <span className="mono">{naira(item.unitPriceKobo * item.quantity)}</span>
           </div>
         ))}
+        {data.deliveryMethod && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--border)' }}>
+            <span>
+              Delivery — {data.deliveryMethod === 'pickup' ? 'Pickup' : data.deliveryMethod === 'rider' ? 'Same-city rider' : 'Nationwide courier'}
+            </span>
+            <span className="mono">{naira(data.deliveryFeeKobo ?? 0)}</span>
+          </div>
+        )}
         <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 12, fontWeight: 700 }}>
           <span>Total</span>
           <span className="mono" style={{ color: 'var(--blue)' }}>{naira(data.totalKobo)}</span>

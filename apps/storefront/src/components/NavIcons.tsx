@@ -131,6 +131,23 @@ export function IconUsers({ size = 17, style }: IconProps) {
   );
 }
 
+export function IconBell({ size = 17, style }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" style={base(size, style)} aria-hidden {...S}>
+      <path d="M6 9a6 6 0 0 1 12 0c0 4 1.4 5.6 2.2 6.5.4.5 0 1.2-.6 1.2H4.4c-.6 0-1-.7-.6-1.2C4.6 14.6 6 13 6 9Z" />
+      <path d="M10 19.5a2.2 2.2 0 0 0 4 0" />
+    </svg>
+  );
+}
+
+export function IconFlag({ size = 17, style }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" style={base(size, style)} aria-hidden {...S}>
+      <path d="M5 21V4.5c0-.8.7-1.5 1.5-1.5h9.8c.8 0 1.3.9.9 1.6L15 9l2.2 4.4c.4.7-.1 1.6-.9 1.6H5" />
+    </svg>
+  );
+}
+
 export function IconSpark({ size = 17, style }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" style={base(size, style)} aria-hidden {...S}>

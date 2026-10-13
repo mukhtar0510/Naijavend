@@ -1,8 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+
+function naira(kobo: number) {
+  return kobo === 0 ? 'Free' : `₦${(kobo / 100).toLocaleString('en-NG')}`;
+}
 
 type PromoState =
   | { kind: 'idle' }
@@ -21,6 +25,29 @@ export default function OrderPage() {
   const [message, setMessage] = useState('');
   const [orderId, setOrderId] = useState<string | null>(null);
   const [payToken, setPayToken] = useState<string | null>(null);
+  // Delivery options configured by the seller (pickup / rider / courier).
+  const [deliveryOptions, setDeliveryOptions] = useState<Array<{ method: string; label: string; feeKobo: number }>>([]);
+  const [deliveryMethod, setDeliveryMethod] = useState('');
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const res = await fetch(`/api/delivery-options?slug=${encodeURIComponent(slug)}`, { cache: 'no-store' });
+        if (!res.ok) return;
+        const json = (await res.json()) as { options: Array<{ method: string; label: string; feeKobo: number }> };
+        if (!alive) return;
+        setDeliveryOptions(json.options);
+        // Default to the first available option (usually pickup).
+        if (json.options.length > 0) setDeliveryMethod((m) => m || json.options[0].method);
+      } catch {
+        /* store has no structured options — order ships with free-form delivery */
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [slug]);
 
   // Live promo check: debounced; only fires with 4+ characters so we don't
   // hammer the API on every keystroke of "WELCOME10".
@@ -61,6 +88,7 @@ export default function OrderPage() {
           customerName: name,
           customerPhone: phone,
           promoCode: promo.trim() || undefined,
+          deliveryMethod: deliveryMethod || undefined,
         }),
       });
       const body = await res.json();
@@ -131,6 +159,38 @@ export default function OrderPage() {
           />
           <p className="hint">International format, e.g. +2348012345678. Used for this order only.</p>
         </div>
+        {deliveryOptions.length > 0 && (
+          <div className="field">
+            <label>Delivery option</label>
+            <div style={{ display: 'grid', gap: 8 }}>
+              {deliveryOptions.map((o) => (
+                <label
+                  key={o.method}
+                  className="card"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '10px 12px',
+                    cursor: 'pointer',
+                    borderColor: deliveryMethod === o.method ? 'var(--blue)' : undefined,
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="delivery"
+                    value={o.method}
+                    checked={deliveryMethod === o.method}
+                    onChange={() => setDeliveryMethod(o.method)}
+                  />
+                  <span style={{ flex: 1, fontSize: 14.5 }}>{o.label}</span>
+                  <strong style={{ fontSize: 14 }}>{naira(o.feeKobo)}</strong>
+                </label>
+              ))}
+            </div>
+            <p className="hint">Fee is set by the store and added to your total before payment.</p>
+          </div>
+        )}
         <div className="field">
           <label htmlFor="promo">Discount code (optional)</label>
           <input

@@ -7,6 +7,7 @@ import { RecentProducts } from '@/components/RecentProducts';
 import { ReferralCard } from '@/components/ReferralCard';
 import { ProductCard, type ProductCardItem } from '@/components/ProductCard';
 import { OrderShare } from '@/components/OrderShare';
+import { OrderDispute } from './OrderDispute';
 import { siteUrl } from '@/lib/site';
 
 const STATUS_BADGE: Record<string, string> = {
@@ -14,6 +15,7 @@ const STATUS_BADGE: Record<string, string> = {
   paid: 'badge-blue',
   fulfilled: 'badge-success',
   cancelled: 'badge-danger',
+  refunded: 'badge-blue',
 };
 
 export default async function MyOrdersPage() {
@@ -127,6 +129,11 @@ export default async function MyOrdersPage() {
           <span className="acct-tile-ico">💬</span>
           <strong>Chats</strong>
           <span className="muted">Message sellers</span>
+        </Link>
+        <Link href="/account/alerts" className="acct-tile">
+          <span className="acct-tile-ico">🔔</span>
+          <strong>Alerts</strong>
+          <span className="muted">Orders, drops, chats</span>
         </Link>
         <Link href="/account/profile" className="acct-tile">
           <span className="acct-tile-ico">👤</span>
@@ -313,7 +320,7 @@ async function OrdersList({ customerId }: { customerId: string }) {
           const summary = count > 0 ? (count <= 2 ? titles.join(' · ') : `${titles[0]} + ${count - 1} more`) : null;
           const steps = ['pending', 'paid', 'fulfilled'] as const;
           const stepIndex = steps.indexOf(o.status as (typeof steps)[number]);
-          const cancelled = o.status === 'cancelled';
+          const cancelled = o.status === 'cancelled' || o.status === 'refunded';
           return (
             <div key={o.id} className="card order-card">
               <div className="order-card-head">
@@ -348,6 +355,7 @@ async function OrdersList({ customerId }: { customerId: string }) {
                   🎟️ {o.discount_code} — saved {formatNaira(o.discount_kobo as number)}
                 </span>
               )}
+              <OrderDispute orderId={String(o.id)} orderStatus={String(o.status)} />
               <div className="order-card-footer">
                 <span className="price">{formatNaira(o.total_kobo as number)}</span>
                 <span className="mono muted" style={{ fontSize: 12 }}>#{String(o.id).slice(0, 8)}</span>

@@ -45,6 +45,26 @@ function safeHours(v: unknown): Record<string, [string, string]> | undefined {
   return out;
 }
 
+// Structured delivery options ({pickup|rider|courier: {enabled, fee_kobo}}).
+// Only known methods survive; fees clamp to 0..100,000,000 kobo (₦1m). null clears.
+function safeDeliveryOptions(v: unknown): Record<string, { enabled: boolean; fee_kobo: number }> | null {
+  if (v === null) return null;
+  if (typeof v !== 'object') return null;
+  const raw = v as Record<string, unknown>;
+  const out: Record<string, { enabled: boolean; fee_kobo: number }> = {};
+  for (const method of ['pickup', 'rider', 'courier']) {
+    const opt = raw[method];
+    if (opt == null || typeof opt !== 'object') continue;
+    const o = opt as Record<string, unknown>;
+    const fee = Number(o.fee_kobo);
+    out[method] = {
+      enabled: o.enabled === true,
+      fee_kobo: Number.isFinite(fee) ? Math.min(100_000_000, Math.max(0, Math.round(fee))) : 0,
+    };
+  }
+  return out;
+}
+
 function safeUrl(v: unknown): string | null {
   if (typeof v !== 'string') return null;
   const s = v.trim().slice(0, 500);
@@ -138,6 +158,9 @@ export async function POST(req: NextRequest) {
   const annStart = b.announcement_starts_at === undefined ? undefined : (typeof b.announcement_starts_at === 'string' && b.announcement_starts_at ? b.announcement_starts_at : null);
   const annEnd = b.announcement_ends_at === undefined ? undefined : (typeof b.announcement_ends_at === 'string' && b.announcement_ends_at ? b.announcement_ends_at : null);
   const deliveryInfo = b.deliveryInfo === undefined ? undefined : sanitizeText(b.deliveryInfo, 400) || null;
+  // Structured delivery options: { pickup | rider | courier: { enabled, fee_kobo } }.
+  // Fees are in kobo; only these three methods exist; caps keep junk out of orders.
+  const deliveryOptions = b.deliveryOptions === undefined ? undefined : safeDeliveryOptions(b.deliveryOptions);
   const businessHours = b.businessHours === undefined ? undefined : safeHours(b.businessHours);
   const isDropshipper = typeof b.isDropshipper === 'boolean' ? b.isDropshipper : undefined;
   const dropshipInfo = b.dropshipInfo === undefined ? undefined : sanitizeText(b.dropshipInfo, 400) || null;
@@ -195,6 +218,7 @@ export async function POST(req: NextRequest) {
         ...(annStart !== undefined ? { announcement_starts_at: annStart } : {}),
         ...(annEnd !== undefined ? { announcement_ends_at: annEnd } : {}),
         ...(deliveryInfo !== undefined ? { delivery_info: deliveryInfo } : {}),
+        ...(deliveryOptions !== undefined ? { delivery_options: deliveryOptions } : {}),
         ...(businessHours !== undefined ? { business_hours: businessHours } : {}),
         ...(isDropshipper !== undefined ? { is_dropshipper: isDropshipper } : {}),
         ...(dropshipInfo !== undefined ? { dropship_info: dropshipInfo } : {}),

@@ -76,6 +76,7 @@ export default async function SettingsPage() {
                 business_hours: (s.business_hours as Store['business_hours']) ?? null,
                 announcement: s.announcement ?? null,
                 delivery_info: s.delivery_info ?? null,
+                delivery_options: (s as unknown as { delivery_options?: Record<string, { enabled: boolean; fee_kobo: number }> | null }).delivery_options ?? null,
                 is_dropshipper: s.is_dropshipper ?? false,
                 dropship_info: s.dropship_info ?? null,
               }}

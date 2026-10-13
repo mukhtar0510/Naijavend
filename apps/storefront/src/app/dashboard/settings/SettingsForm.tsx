@@ -18,6 +18,7 @@ interface StoreSettings {
   business_hours: BusinessHours | null;
   announcement: string | null;
   delivery_info: string | null;
+  delivery_options: Record<string, { enabled: boolean; fee_kobo: number }> | null;
   is_dropshipper: boolean;
   dropship_info: string | null;
 }
@@ -33,6 +34,16 @@ const SOCIAL_FIELDS: Array<{ key: string; label: string; placeholder: string }> 
   { key: 'tiktok', label: 'TikTok', placeholder: 'amakaglow' },
   { key: 'youtube', label: 'YouTube', placeholder: '@amakaglow' },
 ];
+
+const DELIVERY_METHODS: Array<{ key: string; label: string; hint: string }> = [
+  { key: 'pickup', label: 'Pickup', hint: 'Customer collects from your shop' },
+  { key: 'rider', label: 'Same-city rider', hint: 'Dispatch within your city' },
+  { key: 'courier', label: 'Nationwide courier', hint: 'GIG, Fez or similar' },
+];
+
+function feeNairaInput(kobo: number): string {
+  return kobo === 0 ? '' : String(Math.round(kobo / 100));
+}
 
 interface WhatsAppSettings {
   businessNumber: string;
@@ -53,6 +64,15 @@ export function SettingsForm({ store, whatsapp }: { store: StoreSettings; whatsa
   const [hours, setHours] = useState<BusinessHours>(store.business_hours ?? {});
   const [announcement, setAnnouncement] = useState(store.announcement ?? '');
   const [deliveryInfo, setDeliveryInfo] = useState(store.delivery_info ?? '');
+  // Structured delivery options: fee in NAIRA while editing, converted to kobo on save.
+  const [deliveryOpts, setDeliveryOpts] = useState<Record<string, { enabled: boolean; feeNaira: string }>>(() => {
+    const out: Record<string, { enabled: boolean; feeNaira: string }> = {};
+    for (const m of DELIVERY_METHODS) {
+      const o = store.delivery_options?.[m.key];
+      out[m.key] = { enabled: o?.enabled ?? false, feeNaira: feeNairaInput(o?.fee_kobo ?? 0) };
+    }
+    return out;
+  });
   const [isDropshipper, setIsDropshipper] = useState(store.is_dropshipper);
   const [dropshipInfo, setDropshipInfo] = useState(store.dropship_info ?? '');
   const [busy, setBusy] = useState(false);
@@ -79,6 +99,12 @@ export function SettingsForm({ store, whatsapp }: { store: StoreSettings; whatsa
           socialLinks: socials,
           announcement,
           deliveryInfo,
+          deliveryOptions: Object.fromEntries(
+            DELIVERY_METHODS.filter((m) => deliveryOpts[m.key].enabled).map((m) => [
+              m.key,
+              { enabled: true, fee_kobo: Math.max(0, Math.round((Number(deliveryOpts[m.key].feeNaira) || 0) * 100)) },
+            ])
+          ),
           businessHours: hours,
           isDropshipper,
           dropshipInfo,
@@ -252,6 +278,54 @@ export function SettingsForm({ store, whatsapp }: { store: StoreSettings; whatsa
             placeholder="We deliver across Lagos Mainland — ₦1,500 flat. Pickup at our Lekki shop Mon–Sat, 9am–6pm."
           />
           <p className="hint">Areas, fees and pickup options — shown in your store&apos;s contact section.</p>
+        </div>
+        <div className="field">
+          <label>Checkout delivery options</label>
+          <p className="hint" style={{ marginTop: 0 }}>
+            Turn on the ways customers can receive orders. The fee you set is added at checkout — shown before payment.
+          </p>
+          <div style={{ display: 'grid', gap: 10 }}>
+            {DELIVERY_METHODS.map((m) => (
+              <div
+                key={m.key}
+                className="card"
+                style={{ padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}
+              >
+                <label style={{ display: 'flex', gap: 8, alignItems: 'center', flex: 1, minWidth: 200 }}>
+                  <input
+                    type="checkbox"
+                    checked={deliveryOpts[m.key].enabled}
+                    onChange={(e) =>
+                      setDeliveryOpts((prev) => ({ ...prev, [m.key]: { ...prev[m.key], enabled: e.target.checked } }))
+                    }
+                    style={{ width: 'auto' }}
+                  />
+                  <span>
+                    <strong style={{ fontSize: 14 }}>{m.label}</strong>
+                    <br />
+                    <span className="hint">{m.hint}</span>
+                  </span>
+                </label>
+                {deliveryOpts[m.key].enabled && (
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13.5 }}>
+                    Fee ₦
+                    <input
+                      type="number"
+                      min={0}
+                      max={1_000_000}
+                      value={deliveryOpts[m.key].feeNaira}
+                      onChange={(e) =>
+                        setDeliveryOpts((prev) => ({ ...prev, [m.key]: { ...prev[m.key], feeNaira: e.target.value } }))
+                      }
+                      style={{ width: 110 }}
+                      placeholder="0"
+                    />
+                    <span className="hint">(0 = free)</span>
+                  </label>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 

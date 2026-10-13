@@ -3,12 +3,14 @@
 import type { ComponentType } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { IconCart, IconCalendar, IconChat, IconUser } from '@/components/NavIcons';
+import { IconCart, IconCalendar, IconChat, IconUser, IconBell, IconSpark } from '@/components/NavIcons';
 
 const ICONS: Record<string, ComponentType<{ size?: number }>> = {
   '/account': IconCart,
   '/account/bookings': IconCalendar,
   '/account/chats': IconChat,
+  '/account/alerts': IconBell,
+  '/account/ai': IconSpark,
   '/account/profile': IconUser,
 };
 

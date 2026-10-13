@@ -10,6 +10,8 @@ import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { TrackStoreView } from '@/components/TrackStoreView';
 import { ShareBar } from '@/components/ShareBar';
 import { SavedHeart } from '@/components/SavedHeart';
+import { FollowButton } from '@/components/FollowButton';
+import { ReportButton } from '@/components/ReportButton';
 import { VerifiedTick } from '@/components/VerifiedTick';
 import { RecordRecentView } from '@/components/RecordRecentView';
 import { OpenBadge } from '@/components/OpenBadge';
@@ -212,6 +214,7 @@ export default async function StorePage({ params }: { params: { slug: string } }
                   Get directions
                 </a>
               )}
+              <FollowButton storeId={store.id} storeName={store.name} />
             </div>
             <ShareBar
               storeId={store.id}
@@ -422,6 +425,11 @@ export default async function StorePage({ params }: { params: { slug: string } }
           </div>
         )}
       </section>
+
+      {/* Buyer safety: report a scam/fake store (files into store_reports) */}
+      <div style={{ borderTop: '1px solid var(--border)', paddingTop: 14, marginTop: 30, display: 'flex', justifyContent: 'flex-end' }}>
+        <ReportButton storeId={store.id} storeName={store.name} />
+      </div>
       </div>
     </main>
   );
