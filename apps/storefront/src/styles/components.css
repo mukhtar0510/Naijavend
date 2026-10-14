@@ -934,15 +934,15 @@
 
 /* ================= Store template: MINIMAL ================= */
 .site-shell[data-layout='minimal'] { --st-radius: 4px; }
-.site-shell[data-layout='minimal'] .store-masthead { border-bottom: 1px solid var(--st-border); box-shadow: none; background: var(--st-bg); }
+.site-shell[data-layout='minimal'] .store-masthead { border-bottom: 1px solid var(--st-border, var(--border)); box-shadow: none; background: var(--st-bg); }
 .site-shell[data-layout='minimal'] .store-masthead-inner { justify-content: space-between; }
 .site-shell[data-layout='minimal'] .store-masthead-name { font-weight: 500; letter-spacing: 0.02em; }
 .site-shell[data-layout='minimal'] .store-masthead-links a { text-transform: uppercase; font-size: 12px; letter-spacing: 0.1em; }
-.site-shell[data-layout='minimal'] .page-hero { background: var(--st-bg); border-bottom: 1px solid var(--st-border); }
+.site-shell[data-layout='minimal'] .page-hero { background: var(--st-bg); border-bottom: 1px solid var(--st-border, var(--border)); }
 .site-shell[data-layout='minimal'] .page-hero h1 { font-size: 34px; font-weight: 500; letter-spacing: -0.01em; }
-.site-shell[data-layout='minimal'] .listing-card { border-radius: var(--st-radius); box-shadow: none; border: 1px solid var(--st-border); }
+.site-shell[data-layout='minimal'] .listing-card { border-radius: var(--st-radius, var(--radius-md)); box-shadow: none; border: 1px solid var(--st-border, var(--border)); }
 .site-shell[data-layout='minimal'] .listing-card:hover { box-shadow: none; border-color: var(--st-accent); }
-.site-shell[data-layout='minimal'] .site-footer-store { border-top: 1px solid var(--st-border); background: var(--st-bg); }
+.site-shell[data-layout='minimal'] .site-footer-store { border-top: 1px solid var(--st-border, var(--border)); background: var(--st-bg); }
 
 /* ================= Store template: BOUTIQUE (editorial) ================= */
 .site-shell[data-layout='boutique'] .store-masthead-inner { flex-direction: column; justify-content: center; gap: 8px; padding-top: 18px; padding-bottom: 14px; }
@@ -955,7 +955,7 @@
 .site-shell[data-layout='boutique'] .page-hero h1 { font-family: var(--st-font-heading); font-size: 44px; font-weight: 700; font-style: italic; letter-spacing: -0.01em; }
 .site-shell[data-layout='boutique'] .page-hero p { font-size: 16px; max-width: 560px; margin-inline: auto; }
 .site-shell[data-layout='boutique'] .listing-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 22px; }
-.site-shell[data-layout='boutique'] .listing-card { border-radius: var(--st-radius); box-shadow: var(--shadow-sm); }
+.site-shell[data-layout='boutique'] .listing-card { border-radius: var(--st-radius, var(--radius-md)); box-shadow: var(--shadow-sm); }
 .site-shell[data-layout='boutique'] .listing-card h3 { font-family: var(--st-font-heading); font-style: italic; }
 .site-shell[data-layout='boutique'] .site-footer-store { text-align: center; background: color-mix(in srgb, var(--st-accent) 6%, var(--st-bg)); }
 
@@ -971,7 +971,7 @@
 .site-shell[data-layout='merchant'] .page-hero { background: linear-gradient(160deg, var(--st-ink, #14161c) 0%, var(--st-accent) 140%); }
 .site-shell[data-layout='merchant'] .page-hero h1 { font-size: 40px; }
 .site-shell[data-layout='merchant'] .listing-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
-.site-shell[data-layout='merchant'] .listing-card { border-radius: var(--st-radius); border: 1px solid var(--st-border); }
+.site-shell[data-layout='merchant'] .listing-card { border-radius: var(--st-radius, var(--radius-md)); border: 1px solid var(--st-border, var(--border)); }
 .site-shell[data-layout='merchant'] .listing-card .btn { min-height: 40px; font-weight: 700; }
 .site-shell[data-layout='merchant'] .site-footer-store { background: var(--st-ink, #14161c); color: rgba(255,255,255,0.85); }
 .site-shell[data-layout='merchant'] .site-footer-store a { color: #ffffff; }
@@ -2451,3 +2451,78 @@
   .account-grid-main > *, .account-grid-side { gap: 14px; }
   .orders-list { display: grid; gap: 10px; }
 }
+
+/* ================= Missing component styles =================
+   These hooks were referenced from TSX but never defined here, so the
+   browser dropped the styling entirely (unstyled alerts inbox, dispute
+   strips with no container, inline labels, etc.). */
+
+/* Alerts inbox (/account/alerts) — modelled on .convo-row */
+.alerts-list { display: grid; gap: 10px; max-width: 640px; }
+.alert-row {
+  display: flex; align-items: flex-start; gap: 12px; width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--elevated);
+  color: inherit; font: inherit; text-align: left; cursor: pointer;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.alert-row:hover { border-color: var(--blue); box-shadow: var(--shadow-xs); }
+.alert-row.is-unread { border-left: 3px solid var(--blue); }
+.alert-row-ico { font-size: 18px; line-height: 1.3; flex-shrink: 0; }
+.alert-row-title { display: block; font-weight: 600; font-size: 14px; }
+.alert-row-body { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; overflow-wrap: anywhere; }
+.alert-row-time { display: block; font-size: 11.5px; margin-top: 4px; }
+.alert-row-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); flex-shrink: 0; margin-top: 6px; margin-left: auto; }
+
+/* Order disputes (/account order cards) */
+.dispute-strip { margin-top: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--elevated); }
+.dispute-note { margin: 8px 0 0; font-size: 13px; }
+.dispute-report-btn { margin-top: 10px; }
+.dispute-form { margin-top: 10px; padding: 14px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--elevated); }
+
+/* Account chrome */
+.account-tabs { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.acct-who-initials { text-transform: uppercase; }
+.order-card-tags { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.saved-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.saved-head h2 { margin: 0; font-size: 18px; }
+.seller-upsell-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.seller-upsell-head h2 { margin: 0; font-size: 18px; }
+
+/* Buyer Ask AI (/account/ai) — replies contain newlines */
+.ai-reply { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.5; }
+
+/* Discover */
+.filter-row { align-items: center; }
+
+/* Store report modal (ReportButton) — labels sat inline next to their inputs */
+.field-label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.input { display: block; width: 100%; }
+
+/* About page — keep decorative blobs/parallax from causing h-scroll */
+.about-page { overflow-x: clip; }
+
+/* Store QR card */
+.qr-link { margin-top: 10px; }
+
+/* AI Studio status pill */
+.ai-status-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; padding: 5px 10px;
+  border: 1px solid var(--border); border-radius: 999px;
+  background: var(--elevated); color: var(--muted); white-space: nowrap;
+}
+
+/* POS — prevent grid blowout from long product titles */
+.pos-products { min-width: 0; }
+
+/* Distance card result */
+.distance-body { margin-top: 10px; }
+
+/* Wordmark lockup (about hero, headers) */
+.nv-wordmark-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.15; }
+
+/* Admin accounts section */
+.admin-users { display: grid; gap: 16px; }

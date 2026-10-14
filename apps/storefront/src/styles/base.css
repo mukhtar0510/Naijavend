@@ -28,6 +28,14 @@
   /* Lines */
   --border: #dfe4ec;
   --border-strong: #c6cedb;
+  /* Aliases for tokens used across components but previously never defined
+     (rules referencing them were dropped entirely by the browser). */
+  --line: var(--border);
+  --border-inset: #e8ecf3;
+  --muted: var(--text-muted);
+  --bg: var(--surface);
+  --surface-2: #eef1f6;
+  --elevated-1: #f1f3f7;
 
   /* Semantic */
   --success: #15803d;
