@@ -8,6 +8,7 @@
 //   - seller cookies: idev_access_token / idev_refresh_token
 //   - customer cookies: idev_customer_token / idev_customer_refresh_token
 
+import { cache } from '@/lib/server-cache';
 import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
@@ -168,8 +169,22 @@ export interface CustomerIdentity {
   email: string;
 }
 
-/** Returns a Supabase client acting as the signed-in customer (RLS-scoped to their own rows), or null. */
-export async function getCustomerClient(): Promise<SupabaseClient | null> {
+export interface CustomerSession {
+  user: CustomerIdentity;
+  /** RLS-scoped to this customer's own rows. */
+  client: SupabaseClient;
+}
+
+/**
+ * Single-flight customer session: ONE auth verification per request, shared by
+ * everything on the page (account layout + page + nested components). Before
+ * this, /account called getCustomerUser + getCustomerClient from the layout and
+ * again from the page and its subcomponents — each call is a network round trip
+ * to Supabase's /auth/v1/user, which stacked into seconds of blocking render.
+ * Two callers can also race the same single-use refresh token; memoizing makes
+ * that impossible.
+ */
+export const getCustomerSession = cache(async (): Promise<CustomerSession | null> => {
   const jar = await cookies();
   const hdrs = headers();
   let access = jar.get(CUSTOMER_TOKEN_COOKIE)?.value;
@@ -177,8 +192,8 @@ export async function getCustomerClient(): Promise<SupabaseClient | null> {
 
   const sb = supabaseAuthClient();
   const canPersist = makeWritabilityProbe(jar);
-  // Same fix as the seller path: an evicted 1h access cookie is not a logout —
-  // recover from the 30-day refresh token before giving up.
+  // An evicted 1h access cookie is not a logout — recover from the 30-day
+  // refresh token before giving up (same story as the seller path).
   if (!access) {
     if (!refresh) return null;
     if (!canPersist()) bounceToSessionRefresh('customer', hdrs);
@@ -187,8 +202,9 @@ export async function getCustomerClient(): Promise<SupabaseClient | null> {
     access = refreshed.session.access_token;
     refresh = refreshed.session.refresh_token;
     await setCustomerSessionCookies(access, refresh);
+    return sessionFrom(access, refreshed.session.user.id, refreshed.session.user.email ?? '');
   }
-  // Same rotation story as the seller session above.
+  // Verify; refresh + persist the rotated token if expired.
   const { data: userData, error } = await sb.auth.getUser(access);
   if (error || !userData.user) {
     if (!refresh) return null;
@@ -198,45 +214,31 @@ export async function getCustomerClient(): Promise<SupabaseClient | null> {
     access = refreshed.session.access_token;
     refresh = refreshed.session.refresh_token;
     await setCustomerSessionCookies(access, refresh);
+    return sessionFrom(access, refreshed.session.user.id, refreshed.session.user.email ?? '');
   }
+  return sessionFrom(access, userData.user.id, userData.user.email ?? '');
+});
 
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      auth: { persistSession: false },
-      global: { headers: { Authorization: `Bearer ${access}` } },
-    }
-  );
+function sessionFrom(access: string, id: string, email: string): CustomerSession {
+  return {
+    user: { id, email },
+    client: createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        auth: { persistSession: false },
+        global: { headers: { Authorization: `Bearer ${access}` } },
+      }
+    ),
+  };
+}
+
+/** Returns a Supabase client acting as the signed-in customer (RLS-scoped to their own rows), or null. */
+export async function getCustomerClient(): Promise<SupabaseClient | null> {
+  return (await getCustomerSession())?.client ?? null;
 }
 
 /** Returns the signed-in customer's identity, refreshing an expired session once. */
 export async function getCustomerUser(): Promise<CustomerIdentity | null> {
-  const jar = await cookies();
-  const hdrs = headers();
-  let access = jar.get(CUSTOMER_TOKEN_COOKIE)?.value;
-  let refresh = jar.get(CUSTOMER_REFRESH_COOKIE)?.value;
-
-  const sb = supabaseAuthClient();
-  const canPersist = makeWritabilityProbe(jar);
-  // Recover from an evicted access cookie via the refresh token (see above).
-  if (!access) {
-    if (!refresh) return null;
-    if (!canPersist()) bounceToSessionRefresh('customer', hdrs);
-    const { data: refreshed, error: refreshErr } = await sb.auth.refreshSession({ refresh_token: refresh });
-    if (refreshErr || !refreshed.session) return null;
-    await setCustomerSessionCookies(refreshed.session.access_token, refreshed.session.refresh_token);
-    return { id: refreshed.session.user.id, email: refreshed.session.user.email ?? '' };
-  }
-  const { data: userData, error } = await sb.auth.getUser(access);
-  if (error || !userData.user) {
-    if (!refresh) return null;
-    if (!canPersist()) bounceToSessionRefresh('customer', hdrs);
-    const { data: refreshed, error: refreshErr } = await sb.auth.refreshSession({ refresh_token: refresh });
-    if (refreshErr || !refreshed.session) return null;
-    access = refreshed.session.access_token;
-    await setCustomerSessionCookies(refreshed.session.access_token, refreshed.session.refresh_token);
-    return { id: refreshed.session.user.id, email: refreshed.session.user.email ?? '' };
-  }
-  return { id: userData.user.id, email: userData.user.email ?? '' };
+  return (await getCustomerSession())?.user ?? null;
 }

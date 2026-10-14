@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getCustomerClient, getCustomerUser } from '@/lib/auth';
+import { getCustomerSession } from '@/lib/auth';
 import { supabaseAnon } from '@/lib/supabase';
 import { formatNaira } from '@idevtenancy/shared';
 import { SavedStores, type SavedCandidate } from '@/components/SavedStores';
@@ -18,11 +18,45 @@ const STATUS_BADGE: Record<string, string> = {
   refunded: 'badge-blue',
 };
 
-export default async function MyOrdersPage() {
-  const customer = await getCustomerUser();
-  const sb = await getCustomerClient();
+const BUY_AGAIN_MAX = 8;
+const ORDERS_SUMMARY_LIMIT = 200;
+const ORDERS_LIST_LIMIT = 50;
+const STORE_INDEX_LIMIT = 120;
 
-  if (!customer || !sb) {
+interface OrderRow {
+  id: string;
+  total_kobo: number | null;
+  status: string;
+  created_at: string;
+  discount_code: string | null;
+  discount_kobo: number | null;
+  stores: { name: string; slug: string } | Array<{ name: string; slug: string }> | null;
+  order_items: Array<{
+    listings: {
+      id: string;
+      title: string;
+      price_kobo: number;
+      compare_at_kobo: number | null;
+      image_urls: string[] | null;
+      type: string;
+      stock: number | null;
+      stores: { name: string; slug: string } | Array<{ name: string; slug: string }> | null;
+    } | null;
+  }> | null;
+}
+
+interface SummaryRow {
+  total_kobo: number | null;
+  status: string;
+}
+
+export default async function MyOrdersPage() {
+  // ONE auth verification per request, shared with the account layout (auth.ts
+  // memoizes it), instead of layout+page+subcomponents each round-tripping.
+  const session = await getCustomerSession();
+  const sb = session?.client ?? null;
+
+  if (!session || !sb) {
     return (
       <main>
         <div className="page-intro">
@@ -41,15 +75,27 @@ export default async function MyOrdersPage() {
     );
   }
 
-  const [storeIndexRes, referralsRes] = await Promise.all([
+  const customer = session.user;
+
+  // All independent reads fire together — page render waits for ONE round trip
+  // instead of a serial chain (this was the buyer-page freeze).
+  const [storeIndexRes, referralsRes, summaryRes, ordersRes, codeRowRes] = await Promise.all([
     supabaseAnon()
       .from('stores')
       .select('slug, name, category, store_themes(logo_url, favicon_url)')
       .order('name')
-      .limit(200),
+      .limit(STORE_INDEX_LIMIT),
     sb.from('referrals').select('*', { count: 'exact', head: true }).eq('referrer', customer.id),
+    sb.from('orders').select('total_kobo, status').eq('customer_id', customer.id).limit(ORDERS_SUMMARY_LIMIT),
+    sb.from('orders')
+      .select('id, total_kobo, status, created_at, discount_code, discount_kobo, stores(name, slug), order_items(listings(id, title, price_kobo, compare_at_kobo, image_urls, type, stock, stores(name, slug)))')
+      .eq('customer_id', customer.id)
+      .order('created_at', { ascending: false })
+      .limit(ORDERS_LIST_LIMIT),
+    sb.from('referral_codes').select('code').eq('user_id', customer.id).maybeSingle(),
   ]);
-  const savedCandidates: SavedCandidate[] = (storeIndexRes.data ?? []).map((row) => {
+
+  const savedCandidates: SavedCandidate[] = ((storeIndexRes.data ?? []) as Array<unknown>).map((row) => {
     const r = row as unknown as {
       slug: string;
       name: string;
@@ -60,41 +106,11 @@ export default async function MyOrdersPage() {
     return { slug: r.slug, name: r.name, category: r.category, logo: t?.logo_url ?? t?.favicon_url ?? null };
   });
 
-  const { data: orderRows } = await sb
-    .from('orders')
-    .select('order_items(listings(id, title, price_kobo, compare_at_kobo, image_urls, type, stock, stores(name, slug)))')
-    .eq('customer_id', customer.id)
-    .order('created_at', { ascending: false })
-    .limit(25);
-  const seen = new Set<string>();
-  const buyAgain: ProductCardItem[] = [];
-  for (const row of orderRows ?? []) {
-    const items = (row as { order_items?: Array<{ listings?: unknown }> }).order_items ?? [];
-    for (const it of items) {
-      const l = it?.listings as
-        | { id: string; title: string; price_kobo: number; compare_at_kobo: number | null; image_urls: string[] | null; type: string; stock: number | null; stores: { name: string; slug: string } | { name: string; slug: string }[] | null }
-        | null;
-      if (!l || seen.has(l.id)) continue;
-      seen.add(l.id);
-      const storeObj = Array.isArray(l.stores) ? l.stores[0] : l.stores;
-      buyAgain.push({
-        id: l.id,
-        title: l.title,
-        priceKobo: l.price_kobo,
-        type: l.type,
-        imageUrl: l.image_urls?.[0] ?? null,
-        storeName: storeObj?.name ?? '',
-        storeSlug: storeObj?.slug ?? '',
-        compareAtKobo: l.compare_at_kobo,
-        stock: l.stock,
-      });
-      if (buyAgain.length >= 8) break;
-    }
-    if (buyAgain.length >= 8) break;
-  }
+  const orders = (ordersRes.data ?? []) as unknown as OrderRow[];
+  const buyAgain = collectBuyAgain(orders, BUY_AGAIN_MAX);
+  const summaryRows = (summaryRes.data ?? []) as SummaryRow[];
 
-  const { data: codeRow } = await sb.from('referral_codes').select('code').eq('user_id', customer.id).maybeSingle();
-  let refCode = codeRow?.code as string | undefined;
+  let refCode = codeRowRes.data?.code as string | undefined;
   if (!refCode) {
     refCode = Array.from({ length: 8 }, () => 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 31)]).join('');
     await sb.from('referral_codes').upsert({ user_id: customer.id, code: refCode });
@@ -145,8 +161,8 @@ export default async function MyOrdersPage() {
       <div className="container" style={{ padding: '24px 20px 0' }}>
         <div className="account-grid">
           <div className="account-grid-main">
-            <OrdersSummary customerId={customer.id} />
-            <OrdersList customerId={customer.id} />
+            <OrdersSummary rows={summaryRows} />
+            <OrdersList orders={orders} loadError={ordersRes.error ? true : false} />
             <RecentProducts />
             <SavedStores stores={savedCandidates} />
             <ReferralCard link={`${siteUrl()}/account/signin?ref=${refCode}`} invited={invited} />
@@ -207,7 +223,7 @@ function BuyAgainCard({ buyAgain }: { buyAgain: ProductCardItem[] }) {
   );
 }
 
-async function AskAiCard() {
+function AskAiCard() {
   const starters = [
     { label: 'Track my last order', q: 'Where is my last order?' },
     { label: 'Recommend something', q: 'Recommend products I might like' },
@@ -237,27 +253,18 @@ async function AskAiCard() {
   );
 }
 
-async function OrdersSummary({ customerId }: { customerId: string }) {
-  const { getCustomerClient: getClient } = await import('@/lib/auth');
-  const sbc = await getClient();
-  if (!sbc) return null;
-
-  const { data: rows } = await sbc
-    .from('orders')
-    .select('total_kobo, status')
-    .eq('customer_id', customerId)
-    .limit(200);
-
-  const list = (rows ?? []) as Array<{ total_kobo: number | null; status: string }>;
-  if (list.length === 0) return null;
-  const spent = list
+// Sync: stats come from the page's single parallel query batch — no extra
+// auth round trip, no extra orders query inside the render tree.
+function OrdersSummary({ rows }: { rows: SummaryRow[] }) {
+  if (rows.length === 0) return null;
+  const spent = rows
     .filter((o) => o.status !== 'cancelled')
     .reduce((sum, o) => sum + (o.total_kobo ?? 0), 0);
-  const active = list.filter((o) => o.status === 'pending' || o.status === 'paid').length;
-  const delivered = list.filter((o) => o.status === 'fulfilled').length;
+  const active = rows.filter((o) => o.status === 'pending' || o.status === 'paid').length;
+  const delivered = rows.filter((o) => o.status === 'fulfilled').length;
 
   const stats = [
-    { label: 'Orders placed', value: Number(list.length), ico: '🧾' },
+    { label: 'Orders placed', value: Number(rows.length), ico: '🧾' },
     { label: 'Total spent', value: formatNaira(spent), ico: '💳' },
     { label: 'In progress', value: Number(active), ico: '⏳' },
     { label: 'Delivered', value: Number(delivered), ico: '✅' },
@@ -275,25 +282,14 @@ async function OrdersSummary({ customerId }: { customerId: string }) {
   );
 }
 
-async function OrdersList({ customerId }: { customerId: string }) {
-  const { getCustomerClient } = await import('@/lib/auth');
-  const sb = await getCustomerClient();
-  if (!sb) {
-    return <div className="alert alert-error">Your session expired. Refresh the page to sign in again.</div>;
-  }
-  const { data: orders, error } = await sb
-    .from('orders')
-    .select('id, total_kobo, status, created_at, discount_code, discount_kobo, stores(name, slug), order_items(listings(title, type))')
-    .eq('customer_id', customerId)
-    .order('created_at', { ascending: false })
-    .limit(50);
-
-  if (error) {
-    console.error('[account] orders load failed:', error);
+// Sync: renders the already-fetched order rows (previously re-ran the same
+// query with its own auth round trip).
+function OrdersList({ orders, loadError }: { orders: OrderRow[]; loadError: boolean }) {
+  if (loadError) {
     return <div className="alert alert-error">Could not load your orders. Try again shortly.</div>;
   }
 
-  if (!orders || orders.length === 0) {
+  if (orders.length === 0) {
     return (
       <section className="card card-elevated" aria-label="Your orders">
         <div className="section-head"><h2>🧾 Your orders</h2></div>
@@ -313,8 +309,8 @@ async function OrdersList({ customerId }: { customerId: string }) {
       <div className="section-head"><h2>🧾 Your orders</h2></div>
       <div className="orders-list">
         {orders.map((o) => {
-          const store = o.stores as unknown as { name: string; slug: string } | null;
-          const items = (o.order_items as unknown as Array<{ listings?: { title: string; type: string } | null }> | null) ?? [];
+          const store = Array.isArray(o.stores) ? o.stores[0] : o.stores;
+          const items = o.order_items ?? [];
           const titles = items.map((it) => it.listings?.title).filter(Boolean) as string[];
           const count = titles.length;
           const summary = count > 0 ? (count <= 2 ? titles.join(' · ') : `${titles[0]} + ${count - 1} more`) : null;
@@ -334,7 +330,7 @@ async function OrdersList({ customerId }: { customerId: string }) {
                 <div className="order-card-meta">
                   <Link href={`/s/${store.slug}`} className="order-card-store">🏪 {store.name}</Link>
                   <span className="muted" style={{ fontSize: 12.5 }}>
-                    {new Date(o.created_at as string).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    {new Date(o.created_at).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}
                     {count > 0 && ` · ${count} item${count === 1 ? '' : 's'}`}
                   </span>
                 </div>
@@ -350,7 +346,7 @@ async function OrdersList({ customerId }: { customerId: string }) {
                   ))}
                 </div>
               )}
-              {(o.discount_kobo as number | null ?? 0) > 0 && (
+              {(o.discount_kobo ?? 0) > 0 && (
                 <span className="order-card-discount">
                   🎟️ {o.discount_code} — saved {formatNaira(o.discount_kobo as number)}
                 </span>
@@ -366,4 +362,30 @@ async function OrdersList({ customerId }: { customerId: string }) {
       </div>
     </section>
   );
+}
+
+function collectBuyAgain(orderRows: OrderRow[], max: number): ProductCardItem[] {
+  const seen = new Set<string>();
+  const out: ProductCardItem[] = [];
+  for (const row of orderRows) {
+    for (const it of row.order_items ?? []) {
+      const l = it?.listings ?? null;
+      if (!l || seen.has(l.id)) continue;
+      seen.add(l.id);
+      const storeObj = Array.isArray(l.stores) ? l.stores[0] : l.stores;
+      out.push({
+        id: l.id,
+        title: l.title,
+        priceKobo: l.price_kobo,
+        type: l.type,
+        imageUrl: l.image_urls?.[0] ?? null,
+        storeName: storeObj?.name ?? '',
+        storeSlug: storeObj?.slug ?? '',
+        compareAtKobo: l.compare_at_kobo,
+        stock: l.stock,
+      });
+      if (out.length >= max) return out;
+    }
+  }
+  return out;
 }

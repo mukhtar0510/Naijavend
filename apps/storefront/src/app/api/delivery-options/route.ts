@@ -5,10 +5,12 @@ import { NextRequest } from 'next/server';
 import { supabaseAnon } from '@/lib/supabase';
 import { apiError, apiOk, internalError } from '@/lib/api';
 
-export const METHODS = ['pickup', 'rider', 'courier'] as const;
-export type DeliveryMethod = (typeof METHODS)[number];
+// Not exported: Next.js route files may only export HTTP handlers + route
+// config, so `next build`'s type validation rejects extra exports.
+const METHODS = ['pickup', 'rider', 'courier'] as const;
+type DeliveryMethod = (typeof METHODS)[number];
 
-export const METHOD_LABELS: Record<DeliveryMethod, string> = {
+const METHOD_LABELS: Record<DeliveryMethod, string> = {
   pickup: 'Pickup',
   rider: 'Same-city rider',
   courier: 'Nationwide courier',
