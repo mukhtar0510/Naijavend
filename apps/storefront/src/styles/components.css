@@ -1275,6 +1275,9 @@
 .skel-card { height: 240px; }
 .skel-stat { height: 110px; }
 .skel-card-wide { height: 180px; margin-top: 16px; }
+/* /account streaming skeletons: stacked order-card placeholders + header pill */
+.account-skel-stack { display: grid; gap: 12px; }
+.skel-order { height: 118px; }
 [data-theme='dark'] .skel {
   background: linear-gradient(100deg, var(--elevated-1) 40%, var(--elevated-2) 50%, var(--elevated-1) 60%);
   background-size: 200% 100%;

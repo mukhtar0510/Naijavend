@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { getCustomerSession } from '@/lib/auth';
 import { supabaseAnon } from '@/lib/supabase';
 import { formatNaira } from '@idevtenancy/shared';
@@ -50,6 +51,11 @@ interface SummaryRow {
   status: string;
 }
 
+interface OrdersBundle {
+  rows: OrderRow[];
+  loadError: boolean;
+}
+
 export default async function MyOrdersPage() {
   // ONE auth verification per request, shared with the account layout (auth.ts
   // memoizes it), instead of layout+page+subcomponents each round-tripping.
@@ -77,45 +83,16 @@ export default async function MyOrdersPage() {
 
   const customer = session.user;
 
-  // All independent reads fire together — page render waits for ONE round trip
-  // instead of a serial chain (this was the buyer-page freeze).
-  const [storeIndexRes, referralsRes, summaryRes, ordersRes, codeRowRes] = await Promise.all([
-    supabaseAnon()
-      .from('stores')
-      .select('slug, name, category, store_themes(logo_url, favicon_url)')
-      .order('name')
-      .limit(STORE_INDEX_LIMIT),
-    sb.from('referrals').select('*', { count: 'exact', head: true }).eq('referrer', customer.id),
-    sb.from('orders').select('total_kobo, status').eq('customer_id', customer.id).limit(ORDERS_SUMMARY_LIMIT),
-    sb.from('orders')
-      .select('id, total_kobo, status, created_at, discount_code, discount_kobo, stores(name, slug), order_items(listings(id, title, price_kobo, compare_at_kobo, image_urls, type, stock, stores(name, slug)))')
-      .eq('customer_id', customer.id)
-      .order('created_at', { ascending: false })
-      .limit(ORDERS_LIST_LIMIT),
-    sb.from('referral_codes').select('code').eq('user_id', customer.id).maybeSingle(),
-  ]);
-
-  const savedCandidates: SavedCandidate[] = ((storeIndexRes.data ?? []) as Array<unknown>).map((row) => {
-    const r = row as unknown as {
-      slug: string;
-      name: string;
-      category: string;
-      store_themes?: Array<{ logo_url: string | null; favicon_url: string | null }> | { logo_url: string | null; favicon_url: string | null };
-    };
-    const t = Array.isArray(r.store_themes) ? r.store_themes[0] : r.store_themes;
-    return { slug: r.slug, name: r.name, category: r.category, logo: t?.logo_url ?? t?.favicon_url ?? null };
-  });
-
-  const orders = (ordersRes.data ?? []) as unknown as OrderRow[];
-  const buyAgain = collectBuyAgain(orders, BUY_AGAIN_MAX);
-  const summaryRows = (summaryRes.data ?? []) as SummaryRow[];
-
-  let refCode = codeRowRes.data?.code as string | undefined;
-  if (!refCode) {
-    refCode = Array.from({ length: 8 }, () => 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 31)]).join('');
-    await sb.from('referral_codes').upsert({ user_id: customer.id, code: refCode });
-  }
-  const invited = referralsRes.count ?? 0;
+  // Kick off every independent read NOW, before any JSX, so they run in
+  // parallel with the shell streaming to the browser. Each section below
+  // awaits its own promise behind a Suspense boundary — so the orders list no
+  // longer waits for the (often-empty) saved-stores index, and the referral
+  // code UPSERT (a write!) is off the critical path entirely. A rejected
+  // query degrades its own section only.
+  const summaryP = loadSummary(sb, customer.id);
+  const ordersP = loadOrders(sb, customer.id);
+  const storeIndexP = loadStoreIndex();
+  const referralP = loadReferral(sb, customer.id);
 
   return (
     <main className="account-page">
@@ -161,23 +138,174 @@ export default async function MyOrdersPage() {
       <div className="container" style={{ padding: '24px 20px 0' }}>
         <div className="account-grid">
           <div className="account-grid-main">
-            <OrdersSummary rows={summaryRows} />
-            <OrdersList orders={orders} loadError={ordersRes.error ? true : false} />
+            <Suspense fallback={<StatsSkeleton />}>
+              <OrdersSummarySection promise={summaryP} />
+            </Suspense>
+            <Suspense fallback={<OrdersListSkeleton />}>
+              <OrdersListSection promise={ordersP} />
+            </Suspense>
             <RecentProducts />
-            <SavedStores stores={savedCandidates} />
-            <ReferralCard link={`${siteUrl()}/account/signin?ref=${refCode}`} invited={invited} />
+            <Suspense fallback={<WideCardSkeleton lines={1} block={110} />}>
+              <SavedStoresSection promise={storeIndexP} />
+            </Suspense>
+            <Suspense fallback={<WideCardSkeleton lines={1} block={104} />}>
+              <ReferralSection promise={referralP} />
+            </Suspense>
             <SellerUpsellCard />
           </div>
 
           <div className="account-grid-side">
             <AskAiCard />
-            <BuyAgainCard buyAgain={buyAgain} />
+            <Suspense fallback={<WideCardSkeleton lines={1} block={210} />}>
+              <BuyAgainSection promise={ordersP} />
+            </Suspense>
           </div>
         </div>
       </div>
     </main>
   );
 }
+
+// ============ Data loaders (each a plain promise factory, degrades on error) ============
+
+async function loadSummary(sb: NonNullable<Awaited<ReturnType<typeof getCustomerSession>>>['client'], customerId: string): Promise<SummaryRow[]> {
+  try {
+    const res = await sb
+      .from('orders')
+      .select('total_kobo, status')
+      .eq('customer_id', customerId)
+      .limit(ORDERS_SUMMARY_LIMIT);
+    return (res.data ?? []) as unknown as SummaryRow[];
+  } catch {
+    return [] as SummaryRow[];
+  }
+}
+
+async function loadOrders(sb: NonNullable<Awaited<ReturnType<typeof getCustomerSession>>>['client'], customerId: string): Promise<OrdersBundle> {
+  try {
+    const res = await sb
+      .from('orders')
+      .select('id, total_kobo, status, created_at, discount_code, discount_kobo, stores(name, slug), order_items(listings(id, title, price_kobo, compare_at_kobo, image_urls, type, stock, stores(name, slug)))')
+      .eq('customer_id', customerId)
+      .order('created_at', { ascending: false })
+      .limit(ORDERS_LIST_LIMIT);
+    return { rows: (res.data ?? []) as unknown as OrderRow[], loadError: !!res.error };
+  } catch {
+    return { rows: [] as OrderRow[], loadError: true };
+  }
+}
+
+// Public store index for the saved-stores grid — the heaviest read on this
+// page, and pointless to block orders on (many buyers have nothing saved).
+async function loadStoreIndex(): Promise<SavedCandidate[]> {
+  try {
+    const res = await supabaseAnon()
+      .from('stores')
+      .select('slug, name, category, store_themes(logo_url, favicon_url)')
+      .order('name')
+      .limit(STORE_INDEX_LIMIT);
+    return ((res.data ?? []) as unknown as Array<{
+      slug: string;
+      name: string;
+      category: string;
+      store_themes?: Array<{ logo_url: string | null; favicon_url: string | null }> | { logo_url: string | null; favicon_url: string | null };
+    }>).map((r) => {
+      const t = Array.isArray(r.store_themes) ? r.store_themes[0] : r.store_themes;
+      return { slug: r.slug, name: r.name, category: r.category, logo: t?.logo_url ?? t?.favicon_url ?? null };
+    });
+  } catch {
+    return [] as SavedCandidate[];
+  }
+}
+
+// Referral count + code. First visit also mints the code with an upsert — a
+// WRITE that used to sit serially after the orders batch, delaying the whole
+// page. It now only delays this card.
+async function loadReferral(
+  sb: NonNullable<Awaited<ReturnType<typeof getCustomerSession>>>['client'],
+  customerId: string
+): Promise<{ link: string; invited: number }> {
+  try {
+    const [referralsRes, codeRowRes] = await Promise.all([
+      sb.from('referrals').select('*', { count: 'exact', head: true }).eq('referrer', customerId),
+      sb.from('referral_codes').select('code').eq('user_id', customerId).maybeSingle(),
+    ]);
+
+    let refCode = codeRowRes.data?.code as string | undefined;
+    if (!refCode) {
+      refCode = Array.from({ length: 8 }, () => 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 31)]).join('');
+      await sb.from('referral_codes').upsert({ user_id: customerId, code: refCode });
+    }
+    return { link: `${siteUrl()}/account/signin?ref=${refCode}`, invited: referralsRes.count ?? 0 };
+  } catch {
+    const refCode = Array.from({ length: 8 }, () => 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 31)]).join('');
+    return { link: `${siteUrl()}/account/signin?ref=${refCode}`, invited: 0 };
+  }
+}
+
+// ============ Streamed sections (async server components) ============
+
+async function OrdersSummarySection({ promise }: { promise: Promise<SummaryRow[]> }) {
+  const rows = await promise;
+  return <OrdersSummary rows={rows} />;
+}
+
+async function OrdersListSection({ promise }: { promise: Promise<OrdersBundle> }) {
+  const { rows, loadError } = await promise;
+  return <OrdersList orders={rows} loadError={loadError} />;
+}
+
+async function BuyAgainSection({ promise }: { promise: Promise<OrdersBundle> }) {
+  const { rows } = await promise;
+  return <BuyAgainCard buyAgain={collectBuyAgain(rows, BUY_AGAIN_MAX)} />;
+}
+
+async function SavedStoresSection({ promise }: { promise: Promise<SavedCandidate[]> }) {
+  const stores = await promise;
+  return <SavedStores stores={stores} />;
+}
+
+async function ReferralSection({ promise }: { promise: Promise<{ link: string; invited: number }> }) {
+  const { link, invited } = await promise;
+  return <ReferralCard link={link} invited={invited} />;
+}
+
+// ============ Skeletons (shaped like the real sections) ============
+
+function StatsSkeleton() {
+  return (
+    <div className="skel-grid skel-grid-4" aria-busy="true" aria-label="Loading order summary">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="skel skel-stat" />
+      ))}
+    </div>
+  );
+}
+
+function OrdersListSkeleton() {
+  return (
+    <section className="card card-elevated" style={{ padding: 18 }} aria-busy="true" aria-label="Loading your orders">
+      <div className="skel skel-line w-25" style={{ height: 20 }} />
+      <div className="account-skel-stack" style={{ marginTop: 14 }}>
+        <div className="skel skel-order" />
+        <div className="skel skel-order" />
+      </div>
+    </section>
+  );
+}
+
+function WideCardSkeleton({ lines, block }: { lines: number; block: number }) {
+  return (
+    <section className="card card-elevated" style={{ padding: 18 }} aria-busy="true" aria-label="Loading">
+      {Array.from({ length: lines }).map((_, i) => (
+        <div key={i} className="skel skel-line w-30" style={{ height: 18 }} />
+      ))}
+      <div className="skel" style={{ height: block, marginTop: 12 }} />
+    </section>
+  );
+}
+
+// ============ Static sections (no data needed) ============
 
 function SellerUpsellCard() {
   return (
