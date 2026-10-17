@@ -24,6 +24,9 @@ export function ListingEditor({ storeId, listing }: { storeId: string; listing?:
   const [stock, setStock] = useState(countToInput(listing?.stock));
   const [description, setDescription] = useState(listing?.description ?? '');
   const [aiDescription, setAiDescription] = useState(listing?.ai_generated_description ?? false);
+  const [tags, setTags] = useState<string[]>((listing as unknown as { tags?: string[] })?.tags ?? []);
+  const [category, setCategory] = useState<string>((listing as unknown as { category?: string })?.category ?? '');
+  const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
   const [imageUrls, setImageUrls] = useState<string[]>(listing?.image_urls ?? []);
   const [videoUrl, setVideoUrl] = useState<string | null>(listing?.video_url ?? null);
   const [videoName, setVideoName] = useState('');
@@ -87,6 +90,28 @@ export function ListingEditor({ storeId, listing }: { storeId: string; listing?:
 
   function removeImage(url: string) {
     setImageUrls((prev) => prev.filter((u) => u !== url));
+  }
+
+  // Image tools: swap the photo in-place so the seller keeps their place.
+  async function editPhoto(url: string, action: 'remove-background' | 'enhance') {
+    setError(null);
+    setSuccess(null);
+    setBusy(true);
+    try {
+      const res = await fetch('/api/ai/image-edit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, action }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body?.error?.message ?? 'Could not edit that photo.');
+      setImageUrls((prev) => prev.map((u) => (u === url ? (body.url as string) : u)));
+      setSuccess(action === 'remove-background' ? 'Background replaced with white.' : 'Photo cleaned up.');
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function handleVideo(file: File | null | undefined) {
@@ -174,15 +199,41 @@ export function ListingEditor({ storeId, listing }: { storeId: string; listing?:
     setAiBusy(true);
     setError(null);
     try {
+      // The photo matters more than the type: a seller who just shot the item
+      // should get the whole listing from it (photo + rough notes → everything).
       const res = await fetch('/api/ai/draft-listing', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ hint: `${type === 'product' ? 'Product' : 'Service'}: ${title}. ${description}` }),
+        body: JSON.stringify({
+          hint: `${type === 'product' ? 'Product' : 'Service'}: ${title}. ${description}`,
+          imageUrl: imageUrls[0] ?? null,
+        }),
       });
       const body = await res.json();
-      if (!res.ok) throw new Error(body?.error?.message ?? 'Could not draft a description.');
-      setDescription(body.draft.description);
-      setAiDescription(true);
+      if (!res.ok) throw new Error(body?.error?.message ?? 'Could not draft this listing.');
+      const draft = body.draft ?? {};
+      if (typeof draft.title === 'string' && draft.title.trim() && !title.trim()) {
+        setTitle(draft.title.trim());
+      }
+      if (typeof draft.description === 'string' && draft.description.trim()) {
+        setDescription(draft.description.trim());
+        setAiDescription(true);
+      }
+      if (Array.isArray(draft.tags)) {
+        const next = draft.tags.filter((t: unknown): t is string => typeof t === 'string').slice(0, 6);
+        if (next.length) setTags(next);
+      }
+      if (typeof draft.category === 'string' && draft.category) setCategory(draft.category);
+      const filled: string[] = [];
+      if (typeof draft.title === 'string' && draft.title) filled.push('title');
+      if (typeof draft.description === 'string' && draft.description) filled.push('description');
+      if (Array.isArray(draft.tags) && draft.tags.length) filled.push('tags');
+      if (typeof draft.category === 'string' && draft.category) filled.push('category');
+      setAiSuggestion(
+        filled.length
+          ? `Drafted your ${filled.join(', ')} from ${body.usedPhoto ? 'the photo and' : ''} your notes — check them and edit.`
+          : null
+      );
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -210,6 +261,8 @@ export function ListingEditor({ storeId, listing }: { storeId: string; listing?:
             aiDescription,
             imageUrls,
             videoUrl,
+            tags,
+            category: category || undefined,
           }),
         });
         const body = await res.json();
@@ -234,11 +287,17 @@ export function ListingEditor({ storeId, listing }: { storeId: string; listing?:
           isBookable: type === 'service',
           imageUrls,
           videoUrl,
+          tags,
+          category: category || undefined,
         }),
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body?.error?.message ?? 'Could not add this listing.');
-      setSuccess('Listing added.');
+      if (body.duplicateOf) {
+        setSuccess('Listing added — heads-up: it looks the same as an existing listing.');
+      } else {
+        setSuccess('Listing added.');
+      }
       setTitle('');
       setPrice('');
       setCompareAt('');
@@ -309,10 +368,33 @@ export function ListingEditor({ storeId, listing }: { storeId: string; listing?:
       <div className="field">
         <label htmlFor={editing ? `ldesc-${listing!.id}` : 'ldesc'}>Description</label>
         <textarea id={editing ? `ldesc-${listing!.id}` : 'ldesc'} value={description} onChange={(e) => { setDescription(e.target.value); setAiDescription(false); }} maxLength={2000} placeholder="What is it, who is it for, what makes it good?" />
-        <button type="button" className="btn btn-outline btn-sm" onClick={draftWithAi} disabled={aiBusy || title.trim().length < 2} style={{ marginTop: 8 }}>
-          {aiBusy ? 'Drafting…' : 'Draft with AI'}
-        </button>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginTop: 8 }}>
+          <button type="button" className="btn btn-outline btn-sm" onClick={draftWithAi} disabled={aiBusy || (title.trim().length < 2 && imageUrls.length === 0)}>
+            {aiBusy ? 'Drafting…' : imageUrls.length ? '✍️ Draft from photo' : 'Draft with AI'}
+          </button>
+          {(title.trim().length >= 2 || imageUrls.length > 0) && (
+            <span className="hint" style={{ margin: 0 }}>
+              {imageUrls.length ? 'Uses your first photo + these notes.' : 'Needs only your notes.'}
+            </span>
+          )}
+        </div>
+        {aiSuggestion && <p className="hint">{aiSuggestion}</p>}
         {aiDescription && <p className="hint">AI-drafted — edit freely; changing the text clears the AI-assisted label.</p>}
+        {tags.length > 0 && (
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }} aria-label="Search tags">
+            {tags.map((t) => (
+              <span key={t} className="badge" style={{ fontSize: 11.5 }}># {t}</span>
+            ))}
+            <button
+              type="button"
+              className="btn btn-outline btn-sm"
+              onClick={() => setTags([])}
+              title="Remove the drafted search tags"
+            >
+              Clear tags
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="field">
@@ -330,7 +412,7 @@ export function ListingEditor({ storeId, listing }: { storeId: string; listing?:
 
         {imageUrls.length > 0 && (
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 8 }}>
-            {imageUrls.map((url) => (
+            {imageUrls.map((url, i) => (
               <div key={url} style={{ position: 'relative' }}>
                 {/* eslint-disable-next-line @next/next/no-img-element -- local preview of uploaded file */}
                 <img
@@ -350,6 +432,28 @@ export function ListingEditor({ storeId, listing }: { storeId: string; listing?:
                 >
                   ✕
                 </button>
+                <div style={{ display: 'grid', gap: 4, marginTop: 4, width: 76 }}>
+                  <button
+                    type="button"
+                    className="btn btn-outline btn-sm"
+                    style={{ padding: '2px 4px', fontSize: 10.5, lineHeight: 1.2 }}
+                    disabled={busy || uploading}
+                    onClick={() => void editPhoto(url, 'remove-background')}
+                    title="Swap the background for clean white"
+                  >
+                    🖼️ Remove bg
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline btn-sm"
+                    style={{ padding: '2px 4px', fontSize: 10.5, lineHeight: 1.2 }}
+                    disabled={busy || uploading}
+                    onClick={() => void editPhoto(url, 'enhance')}
+                    title="Crop, straighten and brighten"
+                  >
+                    ✨ Clean up
+                  </button>
+                </div>
               </div>
             ))}
           </div>

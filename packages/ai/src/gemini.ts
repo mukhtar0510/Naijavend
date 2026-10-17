@@ -13,8 +13,12 @@
 
 import type {
   AiStoreDraft, AiListingDraft, AiStyleDraft, AiAssistantDraft, AiSocialPostDraft, AiImageDraft,
+  AiSuggestRepliesDraft, AiTranslationDraft, AiInsightDraft, AiModerationDraft, LanguageCode,
 } from '@idevtenancy/shared';
-import { isStoreFont, isStoreLayout, sanitizeText, STORE_FONTS, STORE_LAYOUTS } from '@idevtenancy/shared';
+import {
+  FRAUD_LABEL_TEXT, LANGUAGES, STORE_CATEGORIES as CANONICAL_CATEGORIES,
+  isStoreFont, isStoreLayout, sanitizeText, STORE_FONTS, STORE_LAYOUTS,
+} from '@idevtenancy/shared';
 import type { AiProvider, AiRequest, AiResponse } from './index';
 import { isDarkHex, readableTextOn } from './color';
 
@@ -46,7 +50,8 @@ const SYSTEM_INSTRUCTION = [
 // Per-feature prompt builders + sanitizers
 // ---------------------------------------------------------------------------
 
-type AiDraft = AiStoreDraft | AiListingDraft | AiStyleDraft | AiAssistantDraft | AiSocialPostDraft | AiImageDraft;
+type AiDraft = AiStoreDraft | AiListingDraft | AiStyleDraft | AiAssistantDraft | AiSocialPostDraft | AiImageDraft
+  | AiSuggestRepliesDraft | AiTranslationDraft | AiInsightDraft | AiModerationDraft;
 
 interface FeatureSpec {
   system: string;
@@ -226,7 +231,158 @@ const FEATURES: Record<AiRequest['feature'], FeatureSpec> = {
       return dummyImageDraft(input);
     },
   },
+
+  listing_draft: {
+    system: SYSTEM_INSTRUCTION,
+    user: (input) =>
+      [
+        'A Nigerian seller dropped a photo and rough notes (often typed on a phone — forgive the shorthand):',
+        input,
+        'Draft the complete listing as JSON:',
+        '{"title": string, "description": string, "category": string, "tags": string[]}',
+        '- title: max 60 characters, Title Case where natural, front-load the product name, no emojis, no quoted prices.',
+        '- description: 2-4 selling sentences (180-420 characters), plain text, mention the key feature a buyer asks about,\n',
+        '  and end with a natural nudge to message on WhatsApp before ordering.',
+        `- category: exactly one of: ${CANONICAL_CATEGORIES.join(', ')}.`,
+        '- tags: 3-6 short lowercase phrases a buyer would actually search (include colour/size words if given).',
+        'If a photo was supplied, read the product from it — use ONLY what is visible or written; never invent sizes, brands or stock.',
+      ].join('\n'),
+    sanitize: (parsed): AiListingDraft => {
+      const title = sanitizeText(parsed.title, 80);
+      const description = sanitizeText(parsed.description, 700);
+      const rawCategory = typeof parsed.category === 'string' ? parsed.category.trim().toLowerCase() : '';
+      const tags = (Array.isArray(parsed.tags) ? parsed.tags : [])
+        .map((t) => sanitizeText(t, 40))
+        .filter((t) => t.length >= 2)
+        .map((t) => t.toLowerCase())
+        .slice(0, 6);
+      if (title.length < 3) throw new Error('gemini listing draft: unusable title');
+      if (description.length < 40) throw new Error('gemini listing draft: description too short');
+      if (!(CANONICAL_CATEGORIES as readonly string[]).includes(rawCategory)) {
+        throw new Error('gemini listing draft: category outside whitelist');
+      }
+      return { title, description, category: rawCategory, tags };
+    },
+  },
+
+  suggest_reply: {
+    system: [
+      'You reply on behalf of a Nigerian seller in their store inbox.',
+      'Ground EVERY price, stock claim, delivery fee, address and opening hour in the catalogue and policy lines',
+      'provided below — if the answer is not there, say you will confirm rather than guessing a number.',
+      'Suggestions are tapped-to-send, so each must read like a human typing it: warm, short, no bullet points, no emojis.',
+      'Always reply with a single valid JSON object and nothing else.',
+    ].join(' '),
+    user: (input) =>
+      [
+        'Seller context:',
+        input,
+        'Respond as JSON: {"replies": string[]}',
+        '- 0-3 reply candidates for the customer message, in the SAME language the customer wrote in.',
+        '- Each 1-3 sentences (max ~60 characters each is ideal on a phone).',
+        '- Never promise a price, stock or delivery time that is not in the context above.',
+        "- If the customer asked for something off-platform payment, reply must tell them to pay only through Naijavend.",
+      ].join('\n'),
+    sanitize: (parsed): AiSuggestRepliesDraft => {
+      const suggestions = (Array.isArray(parsed.replies) ? parsed.replies : [])
+        .map((r) => sanitizeMultiline(r, 400))
+        .filter((r) => r.length >= 4)
+        .slice(0, 3);
+      if (suggestions.length === 0) throw new Error('gemini suggest_reply: no usable replies');
+      return { suggestions };
+    },
+  },
+
+  translation: {
+    system: [
+      'You are a professional translator for a Nigerian marketplace.',
+      'The target languages are Nigerian English, Naija Pidgin, Yoruba, Hausa and Igbo.',
+      'Translate faithfully: keep names, prices, product terms and tone (conversational),',
+      'shorten naturally when Nigerian speech would say it differently, and keep any phone number or link untouched.',
+      'Never add commentary or transliterate names. Always reply with a single valid JSON object and nothing else.',
+    ].join(' '),
+    user: (input) =>
+      [
+        input,
+        'Respond as JSON: {"text": string}',
+        '- text: the translation into the target language only. No explanations, no quotes around it.\n',
+        '- If the text is already in the target language, return it unchanged.',
+      ].join('\n'),
+    sanitize: (parsed, input): AiTranslationDraft => {
+      const lang = (taggedLang(input) ?? 'en') as LanguageCode;
+      const text = sanitizeMultiline(parsed.text, 6000);
+      if (text.length === 0) throw new Error('gemini translation: empty text');
+      return { text, lang };
+    },
+  },
+
+  weekly_insight: {
+    system: [
+      'You are the friendly weekly-report writer for a Nigerian seller on Naijavend.',
+      'You are GIVEN the numbers — never invent, round away or restate them differently.',
+      'Write like a shop partner talking to a busy trader: plain words, no marketing fluff,',
+      'no jargon like “KPI” or “funnel”, max 60 words. Always reply with a single valid JSON object and nothing else.',
+    ].join(' '),
+    user: (input) =>
+      [
+        input,
+        'Respond as JSON: {"summary": string, "points": string[], "action": string}',
+        '- summary: 1-2 sentences saying whether this week was better or worse and why (use the numbers).',
+        '- points: 0-3 short observations (max 90 characters each), only ones supported by the numbers.',
+        '- action: ONE concrete thing to do this week, max 120 characters, tailored to what changed.',
+      ].join('\n'),
+    sanitize: (parsed): AiInsightDraft => {
+      const summary = sanitizeMultiline(parsed.summary, 500);
+      const action = sanitizeMultiline(parsed.action, 300);
+      const points = (Array.isArray(parsed.points) ? parsed.points : [])
+        .map((p) => sanitizeMultiline(p, 200))
+        .filter((p) => p.length >= 8)
+        .slice(0, 3);
+      if (summary.length < 20) throw new Error('gemini insight: summary too short');
+      if (action.length < 10) throw new Error('gemini insight: missing action');
+      return { summary, points, action };
+    },
+  },
+
+  moderation: {
+    system: [
+      'You are a trust-and-safety classifier for a Nigerian marketplace.',
+      'Decide whether a piece of text is a scam attempt, spam, harassment, NSFW/inappropriate content, or a fake review.',
+      'Be precise: ordinary trading talk (negotiating a price, asking about delivery) is NOT suspicious.',
+      'Always reply with a single valid JSON object and nothing else.',
+    ].join(' '),
+    user: (input) =>
+      [
+        input,
+        `Respond as JSON: {"flagged": boolean, "labels": string[], "note": string}`,
+        `- labels: only these codes: ${[...Object.keys(FRAUD_LABEL_TEXT), 'nsfw_image', 'harassment', 'spam', 'fake_review'].join(', ')}. Use as many as apply, or an empty array.`,
+        '- flagged: true when at least one label applies.',
+        '- note: one plain sentence a human can act on (max 140 characters). Empty string when not flagged.',
+      ].join('\n'),
+    sanitize: (parsed): AiModerationDraft => {
+      const allowed = new Set([
+        ...Object.keys(FRAUD_LABEL_TEXT),
+        'nsfw_image', 'harassment', 'spam', 'fake_review',
+        // Rule-setter review signals (packages/shared/src/fraud.ts).
+        'promotion', 'link', 'contact_offplatform', 'irrelevant', 'repetition', 'shouting',
+      ]);
+      const labels = (Array.isArray(parsed.labels) ? parsed.labels : [])
+        .map((l) => (typeof l === 'string' ? l.trim() : ''))
+        .filter((l): l is string => allowed.has(l))
+        .slice(0, 6);
+      const flagged = parsed.flagged === true || labels.length > 0;
+      const note = flagged ? sanitizeText(parsed.note, 200) : '';
+      return { flagged: flagged && labels.length > 0, labels, note };
+    },
+  },
 };
+
+/** Target language from the translation input contract (`[Lang] yo`). */
+function taggedLang(input: string): string | null {
+  const m = input.match(/\[Lang\]\s*([a-z]{2,4})/i);
+  const code = m?.[1].toLowerCase() ?? null;
+  return code && (LANGUAGES as ReadonlyArray<{ code: string }>).some((l) => l.code === code) ? code : null;
+}
 
 // ---------------------------------------------------------------------------
 // Gemini REST client
@@ -255,7 +411,7 @@ export class GeminiProvider implements AiProvider {
 
   async complete(req: AiRequest): Promise<AiResponse> {
     const spec = FEATURES[req.feature];
-    const { text, tokensUsed } = await this.callGemini(spec.system, spec.user(req.input));
+    const { text, tokensUsed } = await this.callGemini(spec.system, spec.user(req.input), req.image);
     const parsed = parseJsonLoose(text);
     return {
       draft: spec.sanitize(parsed, req.input),
@@ -338,6 +494,65 @@ export class GeminiProvider implements AiProvider {
     }
   }
 
+  /** Edit a photo we already have — background removal, auto-crop/clean-up.
+   * Text `generateContent` can't return binary, so image editing goes through
+   * the image response modalities on its own call. Any failure degrades to the
+   * placeholder draft (same contract as `generateImage`). */
+  async editImage(
+    image: { mimeType: string; base64: string },
+    prompt: string,
+  ): Promise<AiImageDraft> {
+    const alt = `AI-edited product photo — ${prompt.slice(0, 120)}`;
+    if (!this.apiKey) return { imageUrl: null, alt };
+
+    const model = process.env.GEMINI_IMAGE_MODEL?.trim() || 'gemini-nano-banana-2.1';
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 25_000);
+    try {
+      const res = await this.fetchImpl(
+        `${GEMINI_ENDPOINT}/${encodeURIComponent(model)}:generateContent`,
+        {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            'x-goog-api-key': this.apiKey,
+          },
+          signal: controller.signal,
+          body: JSON.stringify({
+            contents: [{
+              role: 'user',
+              parts: [
+                { inlineData: { mimeType: image.mimeType, data: image.base64 } },
+                { text: prompt },
+              ],
+            }],
+            generationConfig: {
+              // IMAGE must be requested explicitly — the text path above only
+              // ever asks for JSON, and would fail here.
+              responseModalities: ['TEXT', 'IMAGE'],
+              temperature: 0.2,
+            },
+          }),
+        },
+      );
+      if (!res.ok) throw new Error(`gemini edit http ${res.status}`);
+      const data = (await res.json()) as {
+        candidates?: Array<{ content?: { parts?: Array<{ inlineData?: { mimeType?: string; data?: string } }> } }>;
+      };
+      const parts = data.candidates?.[0]?.content?.parts ?? [];
+      const edited = parts.find((p) => p.inlineData?.data);
+      if (edited?.inlineData?.data) {
+        const mime = edited.inlineData.mimeType || 'image/png';
+        return { imageUrl: `data:${mime};base64,${edited.inlineData.data}`, alt };
+      }
+      throw new Error('gemini edit: no image in response');
+    } catch {
+      return dummyImageDraft(prompt);
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   /** Create an image generation client from env, mirroring `createProviderFromEnv`
    * in packages/ai/src/index.ts but using a possibly-different image model id.
    * Uses the same default image model as createImageProviderFromEnv. */
@@ -351,7 +566,11 @@ export class GeminiProvider implements AiProvider {
     return new GeminiProvider(apiKey, imageModel);
   }
 
-  private async callGemini(system: string, user: string): Promise<{ text: string; tokensUsed: number }> {
+  private async callGemini(
+    system: string,
+    user: string,
+    image?: { mimeType: string; base64: string },
+  ): Promise<{ text: string; tokensUsed: number }> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 12_000);
     let res: Response;
@@ -366,7 +585,15 @@ export class GeminiProvider implements AiProvider {
         signal: controller.signal,
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: system }] },
-          contents: [{ role: 'user', parts: [{ text: user }] }],
+          // Photo first, then the text prompt — vision models weight the image
+          // correctly when it precedes the instructions that refer to it.
+          contents: [{
+            role: 'user',
+            parts: [
+              ...(image ? [{ inlineData: { mimeType: image.mimeType, data: image.base64 } }] : []),
+              { text: user },
+            ],
+          }],
           generationConfig: {
             temperature: 0.8,
             maxOutputTokens: 1024,

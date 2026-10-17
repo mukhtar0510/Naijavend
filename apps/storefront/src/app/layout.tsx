@@ -9,6 +9,7 @@ import '../styles/admin.css';
 import '../styles/mobile.css';
 import '../styles/locations-lightbox.css';
 import { PwaRegister } from '@/components/PwaRegister';
+import { LanguageDock } from '@/components/LanguageDock';
 
 export const metadata: Metadata = {
   title: {
@@ -61,6 +62,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         {children}
         <PwaRegister />
+        {/* Language + interface translation (EN / Pidgin / Yoruba / Hausa / Igbo). */}
+        <LanguageDock />
       </body>
     </html>
   );

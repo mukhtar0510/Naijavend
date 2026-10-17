@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { getSellerClient, getOwnStore } from '@/lib/auth';
 import { siteUrl } from '@/lib/site';
 import { DailyChart, TopReferrers } from './Charts';
+import { InsightCard } from './InsightCard';
 import { classifyTrafficSource, ownHostsFromSiteUrl } from '@idevtenancy/shared';
 import type { Store, StoreEvent } from '@idevtenancy/shared';
 
@@ -84,6 +85,10 @@ export default async function AnalyticsPage() {
       <p className="muted">
         How people find and use {store.name}&apos;s site over the last 30 days. Visitors are counted anonymously — no personal data is stored.
       </p>
+
+      {/* Plain-language weekly summary — fetched in the background so these
+          charts paint first. See /api/ai/insights. */}
+      <InsightCard />
 
       <div className="metric-grid" style={{ margin: '20px 0 28px' }}>
         <div className="metric-card">

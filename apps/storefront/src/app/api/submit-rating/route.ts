@@ -4,7 +4,8 @@ import { NextRequest } from 'next/server';
 import { supabaseService } from '@/lib/supabase';
 import { apiError, apiOk, internalError } from '@/lib/api';
 import { rateLimit, clientIp } from '@/lib/ratelimit';
-import { sanitizeText, isValidPhone, isStars } from '@idevtenancy/shared';
+import { sanitizeText, isValidPhone, isStars, assessReview, duplicateSimilarity } from '@idevtenancy/shared';
+import { recordFlag } from '@/lib/moderation';
 
 export async function POST(req: NextRequest) {
   const rl = rateLimit(`submit-rating:${clientIp(req)}`, 6, 60_000);
@@ -91,19 +92,43 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const { error: insertErr } = await sb.from('store_ratings').insert({
+    const { data: inserted, error: insertErr } = await sb.from('store_ratings').insert({
       store_id: store.id,
       customer_phone: customerPhone,
       order_id: orderId,
       booking_id: bookingId,
       stars,
       comment,
-    });
+    }).select('id').maybeSingle();
     if (insertErr) {
       if (String(insertErr.message).includes('ratings_unique_per_customer')) {
         return apiError(409, 'already_reviewed', 'You\'ve already reviewed this store.');
       }
       throw insertErr;
+    }
+
+    // Content-shaped review checks (offline, packages/shared/fraud.ts): the
+    // verified-purchase rule above already blocks fake *buyers* from reviewing,
+    // and this catches ads, links, filler and copy-pastes. A match RECORDS a
+    // flag for review — the review itself stays visible, it is not censored.
+    const verdict = assessReview(comment, stars);
+    if (verdict.flagged) {
+      const { data: duplicate } = await sb
+        .from('store_ratings')
+        .select('id, comment')
+        .eq('store_id', store.id)
+        .neq('id', inserted?.id ?? '')
+        .order('created_at', { ascending: false })
+        .limit(200);
+      const copy = (duplicate ?? []).find((r) => duplicateSimilarity(comment, String(r.comment)) >= 0.9);
+      const labels = copy ? [...verdict.labels, 'near_duplicate_review'] : verdict.labels;
+      await recordFlag(sb, {
+        storeId: store.id,
+        kind: 'review',
+        refId: inserted?.id ?? null,
+        labels,
+        excerpt: comment,
+      });
     }
 
     // Rankings refresh automatically via the DB trigger on store_ratings.

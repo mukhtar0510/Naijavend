@@ -11,7 +11,28 @@ export type AiFeature =
   | 'style_store'
   | 'assistant_chat'
   | 'social_post'
-  | 'image_gen';
+  | 'image_gen'
+  // Added with the marketplace AI feature set (see AI_STARTUP_GUARDRAILS.md):
+  | 'listing_draft'
+  | 'suggest_reply'
+  | 'translation'
+  | 'weekly_insight'
+  | 'moderation';
+
+/** Interface + chat languages supported by Naijavend translation. */
+export type LanguageCode = 'en' | 'pid' | 'yo' | 'ha' | 'ig';
+
+export const LANGUAGES: ReadonlyArray<{ code: LanguageCode; label: string; native: string }> = [
+  { code: 'en', label: 'English', native: 'English' },
+  { code: 'pid', label: 'Pidgin', native: 'Naijá Pidgin' },
+  { code: 'yo', label: 'Yoruba', native: 'Yorùbá' },
+  { code: 'ha', label: 'Hausa', native: 'Hausa' },
+  { code: 'ig', label: 'Igbo', native: 'Igbo' },
+];
+
+export function isLanguageCode(v: unknown): v is LanguageCode {
+  return typeof v === 'string' && (LANGUAGES as ReadonlyArray<{ code: string }>).some((l) => l.code === v);
+}
 
 export interface AiImageDraft {
   /** Short public URL a browser can load; null when generation is intentionally deferred to send-time (e.g. WhatsApp-only). */
@@ -136,6 +157,10 @@ export interface Listing {
   title: string;
   description: string;
   ai_generated_description: boolean;
+  /** Product-level category for smart search (STORE_CATEGORIES, `general` fallback). */
+  category?: string;
+  /** Buyer-facing search keywords drafted with the listing. */
+  tags?: string[];
   price_kobo: number;
   compare_at_kobo: number | null;
   stock: number | null;
@@ -251,6 +276,40 @@ export interface AiStoreDraft {
 
 export interface AiListingDraft {
   description: string;
+  /** Structured draft (feature `listing_draft`) — absent on legacy description-only drafts. */
+  title?: string;
+  /** A STORE_CATEGORIES slug, whitelisted again by the route before it is stored. */
+  category?: string;
+  /** Search keywords for buyers — 2-6 short lowercase phrases. */
+  tags?: string[];
+}
+
+/** Tap-to-send reply candidates for the seller inbox (feature `suggest_reply`). */
+export interface AiSuggestRepliesDraft {
+  suggestions: string[];
+}
+
+/** One translated string (feature `translation`). `lang` is the TARGET language. */
+export interface AiTranslationDraft {
+  text: string;
+  lang: LanguageCode;
+}
+
+/** Plain-language weekly performance summary for a seller (feature `weekly_insight`). */
+export interface AiInsightDraft {
+  summary: string;
+  points: string[];
+  /** One concrete thing the seller can do this week. */
+  action: string;
+}
+
+/** Determinate fraud/moderation verdict (feature `moderation`). */
+export interface AiModerationDraft {
+  flagged: boolean;
+  /** Machine-stable reasons, e.g. `off_platform_payment`. */
+  labels: string[];
+  /** Short human explanation shown to staff/sellers. */
+  note: string;
 }
 
 export interface AiStyleDraft {

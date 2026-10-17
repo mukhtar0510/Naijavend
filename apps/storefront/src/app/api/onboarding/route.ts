@@ -4,7 +4,8 @@
 import { NextRequest } from 'next/server';
 import { getSellerClient } from '@/lib/auth';
 import { apiError, apiOk, internalError } from '@/lib/api';
-import { sanitizeText, isBusinessType, isValidSlug } from '@idevtenancy/shared';
+import { sanitizeText, isBusinessType, isValidSlug, detectStoreSignals } from '@idevtenancy/shared';
+import { recordFlag } from '@/lib/moderation';
 import { aiComplete } from '@idevtenancy/ai';
 import { rateLimit, clientIp } from '@/lib/ratelimit';
 
@@ -98,6 +99,20 @@ export async function POST(req: NextRequest) {
         return apiError(409, 'slug_taken', 'That store link is taken — pick another.');
       }
       throw error;
+    }
+
+    // Fake-store screen (offline): ROI promises and "official Naijavend partner"
+    // claims are what reported scam stores actually say. Flag for review — the
+    // store still exists and can be cleaned up; nothing is auto-removed.
+    const signals = detectStoreSignals([finalName, businessDescription, finalDescription].join(' '));
+    if (signals.length > 0) {
+      await recordFlag(sb, {
+        storeId: store.id,
+        kind: 'store',
+        refId: store.id,
+        labels: signals,
+        excerpt: finalDescription,
+      });
     }
 
     if (aiUsed) {

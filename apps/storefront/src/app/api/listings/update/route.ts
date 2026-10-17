@@ -7,7 +7,9 @@ import { NextRequest } from 'next/server';
 import { getSellerClient, getOwnStore } from '@/lib/auth';
 import { revalidateStore } from '@/lib/revalidate';
 import { apiError, apiOk, internalError } from '@/lib/api';
-import { sanitizeText, parsePriceKobo } from '@idevtenancy/shared';
+import { sanitizeText, parsePriceKobo, STORE_CATEGORIES, isDuplicateTitle, duplicateSimilarity, containment } from '@idevtenancy/shared';
+import { recordFlag } from '@/lib/moderation';
+import { isMissingColumn } from '@/lib/supabase';
 
 export async function POST(req: NextRequest) {
   const sb = await getSellerClient();
@@ -51,6 +53,18 @@ export async function POST(req: NextRequest) {
 
   if (title.length < 2) return apiError(422, 'invalid_title', 'Give the listing a title.');
   if (priceKobo === null) return apiError(422, 'invalid_price', 'Enter a valid price.');
+
+  // Smart-search fields: omitted keys leave the stored values alone, an invalid
+  // category never overwrites a valid one, and an empty array clears the tags.
+  const rawCategory = typeof b.category === 'string' ? sanitizeText(b.category, 40).toLowerCase() : '';
+  const searchPatch: { category?: string; tags?: string[] } = {};
+  if (rawCategory && (STORE_CATEGORIES as readonly string[]).includes(rawCategory)) searchPatch.category = rawCategory;
+  if (Array.isArray(b.tags)) {
+    searchPatch.tags = b.tags
+      .map((t) => sanitizeText(t, 40).toLowerCase())
+      .filter((t) => t.length >= 2)
+      .slice(0, 6);
+  }
   if (compareKobo !== null && (!Number.isFinite(compareKobo) || compareKobo < 0)) {
     return apiError(422, 'invalid_compare_at', 'Compare-at price must be a positive number.');
   }
@@ -69,7 +83,7 @@ export async function POST(req: NextRequest) {
     // RLS + the .eq('store_id') below guarantee this read is own-store only.
     const { data: existing, error: fetchError } = await sb
       .from('listings')
-      .select('id, type')
+      .select('id, type, title')
       .eq('id', listingId)
       .eq('store_id', store.id)
       .maybeSingle();
@@ -88,18 +102,71 @@ export async function POST(req: NextRequest) {
         ai_generated_description: b.aiDescription === true,
         image_urls: imageUrls,
         video_url: videoUrl,
+        ...searchPatch,
         updated_at: new Date().toISOString(),
       })
       .eq('id', listingId)
       .eq('store_id', store.id) // belt-and-suspenders alongside RLS
       .select('id')
       .maybeSingle();
+    let updateError = error;
+    let saved = updated;
 
-    if (error) throw error;
-    if (!updated) return apiError(404, 'not_found', 'That listing could not be found in your store.');
+    if (isMissingColumn(updateError) && Object.keys(searchPatch).length > 0) {
+      // Migration 20261017 not pushed yet: save the edit the seller already made
+      // rather than throwing away their changes over a pending migration.
+      const retry = await sb
+        .from('listings')
+        .update({
+          title,
+          description,
+          price_kobo: priceKobo,
+          compare_at_kobo: isProduct ? compareKobo : null,
+          stock: isProduct ? stock : null,
+          ai_generated_description: b.aiDescription === true,
+          image_urls: imageUrls,
+          video_url: videoUrl,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', listingId)
+        .eq('store_id', store.id)
+        .select('id')
+        .maybeSingle();
+      saved = retry.data;
+      updateError = retry.error;
+    }
+    const errorOut = updateError;
+
+    if (errorOut) throw errorOut;
+    if (!saved) return apiError(404, 'not_found', 'That listing could not be found in your store.');
+
+    // Renaming a listing onto one it already owns (id excluded) is a duplicate.
+    const oldTitle = String((existing as { title?: string }).title ?? '');
+    let duplicateOf: string | null = null;
+    if (!isDuplicateTitle(title, [oldTitle])) {
+      const { data: siblings } = await sb
+        .from('listings')
+        .select('title')
+        .eq('store_id', store.id)
+        .neq('id', listingId)
+        .limit(500);
+      const titles = (siblings ?? []).map((r) => String(r.title));
+      duplicateOf = isDuplicateTitle(title, titles)
+        ? titles.find((t) => duplicateSimilarity(title, t) >= 0.7 || containment(title, t) >= 0.8) ?? null
+        : null;
+      if (duplicateOf) {
+        await recordFlag(sb, {
+          storeId: store.id,
+          kind: 'listing',
+          refId: listingId,
+          labels: ['duplicate_listing'],
+          excerpt: `${title} ↔ ${duplicateOf}`,
+        });
+      }
+    }
 
     revalidateStore(store.slug);
-    return apiOk({ updated: true });
+    return apiOk({ updated: true, duplicateOf });
   } catch (err) {
     return internalError('listings-update', err);
   }

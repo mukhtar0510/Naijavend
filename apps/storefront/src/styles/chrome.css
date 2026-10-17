@@ -441,6 +441,144 @@
 }
 .chat-form textarea:focus-visible { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-tint); }
 .chat-send { border-radius: 14px; min-height: 44px; padding-inline: 18px; }
+
+/* Scam-badge under an incoming bubble — offline rules, shown for whoever did
+   not send the message (a buyer sees seller-side risk too). */
+.chat-scam {
+  max-width: 76%;
+  margin-top: 4px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--danger, #dc2626) 35%, var(--border));
+  background: color-mix(in srgb, var(--danger, #dc2626) 8%, var(--surface));
+  color: var(--text);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+.chat-row.mine { flex-wrap: wrap; }
+.chat-row.mine .chat-scam { max-width: 76%; margin-left: auto; }
+
+/* Suggested replies — seller taps a chip to load it into the composer (they
+   still write the final message themselves). */
+.reply-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 12px 2px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+.reply-suggestions-label {
+  flex-basis: 100%;
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.reply-chip {
+  appearance: none;
+  cursor: pointer;
+  max-width: 100%;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-2, var(--surface));
+  color: var(--text);
+  font-size: 13.5px;
+  line-height: 1.35;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+.reply-chip:hover { border-color: var(--blue); background: var(--blue-tint); }
+.reply-chip:active { transform: translateY(1px); }
+.reply-chip:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+@media (max-width: 640px) {
+  .chat-scam, .reply-suggestions { width: 100%; }
+  .chat-scam { max-width: 100%; }
+  .reply-chip { flex: 1 1 auto; }
+}
+
+/* Language dock — floating language switcher + page-translation control. */
+.lang-dock {
+  position: fixed;
+  left: 14px;
+  bottom: 14px;
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  z-index: 70;
+  font-size: 13.5px;
+}
+.lang-dock-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 13px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-sm, 0 4px 14px rgba(15, 23, 42, 0.12));
+  font-weight: 600;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+.lang-dock-toggle:hover { border-color: var(--blue); }
+.lang-dock-busy {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--blue);
+  animation: nv-pulse 1s ease-in-out infinite;
+}
+@keyframes nv-pulse { 50% { opacity: 0.25; transform: scale(0.7); } }
+.lang-dock-menu {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 8px);
+  min-width: 210px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow-md, 0 14px 40px rgba(15, 23, 42, 0.18));
+  display: grid;
+  gap: 4px;
+}
+.lang-dock-title {
+  margin: 2px 6px 4px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.lang-dock-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+.lang-dock-item:hover { background: var(--surface-2, var(--elevated)); }
+.lang-dock-item.is-active { border-color: var(--blue); background: var(--blue-tint); font-weight: 700; }
+.lang-dock-sub { color: var(--muted); font-size: 12.5px; }
+.lang-dock-reset { color: var(--blue); font-weight: 600; }
+.lang-dock-note { margin: 4px 6px 2px; color: var(--muted); font-size: 12px; line-height: 1.4; }
+@media (max-width: 640px) {
+  .lang-dock { left: 10px; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
+  .lang-dock-menu { min-width: 190px; }
+}
 @media (max-width: 640px) {
   .chat-log { padding: 12px; }
   .chat-bubble { max-width: 86%; }

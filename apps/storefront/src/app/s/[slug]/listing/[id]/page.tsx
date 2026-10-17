@@ -12,6 +12,8 @@ import { siteUrl } from '@/lib/site';
 import { StoreQrCode } from '@/components/StoreQrCode';
 import { CopyLinkButton } from '@/components/CopyLinkButton';
 import type { Listing, Store, StoreRatingStats, StoreTheme } from '@idevtenancy/shared';
+import { alsoBought } from '@/lib/also-bought';
+import { ProductCard, type ProductCardItem } from '@/components/ProductCard';
 
 export const revalidate = 60; // ISR — static-fast, invalidated on seller writes via revalidatePath
 
@@ -104,6 +106,18 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
     .eq('store_id', store.id)
     .maybeSingle();
   const waNumber = (waSettingsRow.data as { business_number: string } | null)?.business_number || store.whatsapp_number;
+
+  const { items: recItems, source: recSource } = await alsoBought(store.id, listing.id, 6);
+  const recommendations: ProductCardItem[] = recItems.map((r) => ({
+    id: r.id,
+    title: r.title,
+    priceKobo: r.priceKobo,
+    compareAtKobo: r.compareAtKobo,
+    type: r.type,
+    imageUrl: r.imageUrl,
+    storeName: r.storeName,
+    storeSlug: r.storeSlug,
+  }));
 
   const isService = listing.type === 'service';
   const isDigital = listing.type === 'digital';
@@ -235,6 +249,27 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
                   : 'Payments are arranged with the seller — order here, confirm on WhatsApp, pick-up or delivery.'}
               </p>
             </div>
+
+            {/* Order-history recommendations — what else buyers of THIS item
+                picked up from the same store. Falls back to the newest
+                catalogue neighbours when there is not a co-purchase yet. */}
+            {recommendations.length > 0 && (
+              <div className="card">
+                <div style={{ display: 'flex', gap: 8, alignItems: 'baseline', flexWrap: 'wrap' }}>
+                  <h2 style={{ fontSize: 18, margin: 0 }}>
+                    {recSource === 'orders' ? 'People who bought this also bought' : 'More from ' + store.name}
+                  </h2>
+                  <span className="badge" style={{ fontSize: 11.5 }}>
+                    {recSource === 'orders' ? 'From buyer orders' : 'You may also like'}
+                  </span>
+                </div>
+                <div className="product-row" style={{ marginTop: 14 }}>
+                  {recommendations.map((item) => (
+                    <ProductCard key={item.id} item={item} />
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Store card */}
             <div className="card card-elevated" style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>

@@ -2,6 +2,16 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ChatMessage } from '@idevtenancy/shared';
+// Trust rules run in the browser too: the seller (and the buyer) see a scam
+// badge on any message they didn't send, using the exact same offline rules
+// the server stores flags from — always-on, no round-trip, no model key.
+import { detectScamPhrases, FRAUD_LABEL_TEXT } from '@idevtenancy/shared';
+import { callApi } from '@/lib/api-client';
+
+interface SuggestReplyResponse {
+  suggestions: string[];
+  scan: { flagged: boolean; labels?: string[]; warning?: string };
+}
 
 interface ChatApiMessage {
   id: string;
@@ -53,6 +63,9 @@ export function ChatBox({
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Seller-only: grounded draft replies for the newest customer message.
+  const [suggestions, setSuggestions] = useState<{ lastId: string; texts: string[]; warning: string } | null>(null);
+  const [suggesting, setSuggesting] = useState(false);
   const logRef = useRef<HTMLDivElement>(null);
   const atBottomRef = useRef(true);
 
@@ -110,6 +123,42 @@ export function ChatBox({
     }
   }, [messages.length]);
 
+  // Ask for reply drafts only when the newest message is one the seller needs
+  // to answer — and only once per message (the 4s poll must not re-trigger it).
+  const lastCustomer = [...messages].reverse().find((m) => m.sender === 'customer') ?? null;
+  const latestId = messages[messages.length - 1]?.id ?? null;
+  const needsSuggestion =
+    role === 'seller' && !!lastCustomer && !lastCustomer.id.startsWith('tmp-') && latestId === lastCustomer.id;
+  const suggestionFor = suggestions?.lastId ?? null;
+
+  useEffect(() => {
+    if (!needsSuggestion || !lastCustomer || suggestionFor === lastCustomer.id) return;
+    let cancelled = false;
+    setSuggesting(true);
+    callApi<SuggestReplyResponse>('/api/chat/suggest-replies', { storeId, customerId })
+      .then((data) => {
+        if (cancelled) return;
+        setSuggestions({
+          lastId: lastCustomer.id,
+          texts: (data.suggestions ?? []).slice(0, 3),
+          warning: data.scan?.flagged ? (data.scan.warning ?? '') : '',
+        });
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setSuggestions({ lastId: lastCustomer.id, texts: [], warning: '' });
+      })
+      .finally(() => {
+        if (!cancelled) setSuggesting(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [needsSuggestion, lastCustomer, suggestionFor, storeId, customerId]);
+
+  const suggestionChips = needsSuggestion ? (suggestions?.texts ?? []) : [];
+  const needSuggestionWarning = role === 'seller' && needsSuggestion && !!suggestions?.warning;
+
   async function send(e: React.FormEvent) {
     e.preventDefault();
     const text = draft.trim();
@@ -163,6 +212,7 @@ export function ChatBox({
           const prev = messages[i - 1];
           const newDay = !prev || dayKey(prev.created_at) !== dayKey(m.created_at);
           const grouped = !!prev && prev.sender === m.sender && !newDay;
+          const scam = mine ? [] : detectScamPhrases(m.body);
           return (
             <div key={m.id}>
               {newDay && (
@@ -175,12 +225,43 @@ export function ChatBox({
                   {m.body}
                   <span className="chat-time">{timeOf(m.created_at)}</span>
                 </div>
+                {scam.length > 0 && (
+                  <div className="chat-scam" role="status">
+                    ⚠️ <strong>{FRAUD_LABEL_TEXT[scam[0]]}.</strong>{' '}
+                    {scam.length > 1 ? '+ other risk signals · ' : ''}
+                    Send the seller a reminder: payments stay on Naijavend.
+                  </div>
+                )}
               </div>
             </div>
           );
         })}
       </div>
       {error && <div className="alert alert-error" style={{ margin: '10px 12px 0' }}>{error}</div>}
+      {role === 'seller' && needSuggestionWarning && (
+        <div className="alert alert-error" style={{ margin: '10px 12px 0' }} role="status">
+          ⚠️ {suggestions?.warning}
+        </div>
+      )}
+      {role === 'seller' && (needsSuggestion || suggesting) && (
+        <div className="reply-suggestions" aria-label="Suggested replies">
+          <span className="reply-suggestions-label">
+            {suggesting && !suggestionChips.length ? 'Drafting replies…' : 'Suggested — tap to use'}
+          </span>
+          {suggestionChips.map((text, i) => (
+            <button
+              key={`${text.slice(0, 24)}` + i}
+              type="button"
+              className="reply-chip"
+              onClick={() => {
+                setDraft(text);
+              }}
+            >
+              {text}
+            </button>
+          ))}
+        </div>
+      )}
       {disabled ? (
         <div style={{ padding: 14, borderTop: '1px solid var(--border)' }}>
           <p className="muted" style={{ margin: 0, fontSize: 14 }}>{disabledHint}</p>

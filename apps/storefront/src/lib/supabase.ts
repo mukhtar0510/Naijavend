@@ -33,3 +33,20 @@ export function supabaseServiceOptional(): SupabaseClient | null {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }
+
+/**
+ * Does this PostgREST error mean a column/table does not exist yet?
+ *
+ * Migration 20261017 (listings.category/tags, moderation_flags, vector columns)
+ * is applied with `pnpm db:push`, which can lag a deploy. Code that touches the
+ * new columns must degrade to the pre-migration behaviour instead of failing the
+ * whole request — 42703 is Postgres' undefined_column, PGRST204 is PostgREST's
+ * "column not found in schema cache".
+ */
+export function isMissingColumn(
+  error: { code?: string; message?: string } | null | undefined,
+): boolean {
+  if (!error) return false;
+  if (error.code === '42703' || error.code === 'PGRST204') return true;
+  return /does not exist|column .*\.?.? not found/i.test(error.message ?? '');
+}

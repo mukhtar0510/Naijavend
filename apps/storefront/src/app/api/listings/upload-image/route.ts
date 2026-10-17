@@ -3,9 +3,11 @@
 // Images ≤ 5 MB; videos (mp4/webm/quicktime) ≤ 60 MB. Video goes through a
 // signed direct-to-storage upload because Vercel serverless bodies cap ~4.5 MB.
 import { NextRequest } from 'next/server';
-import { getSellerClient } from '@/lib/auth';
+import { getSellerClient, getOwnStore } from '@/lib/auth';
 import { apiError, apiOk, internalError } from '@/lib/api';
 import { rateLimit, clientIp } from '@/lib/ratelimit';
+import { aiComplete, createProviderFromEnv } from '@idevtenancy/ai';
+import { recordFlag } from '@/lib/moderation';
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5 MB per image
 const MAX_VIDEO_BYTES = 60 * 1024 * 1024; // 60 MB per video
@@ -58,9 +60,12 @@ export async function POST(req: NextRequest) {
 
     const ext = EXTENSIONS[file.type];
     const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    // Read images into memory ONCE: the same bytes go to storage and to the
+    // moderation pass below (a File body can only be consumed a single time).
+    const imageBytes = isImage ? Buffer.from(await file.arrayBuffer()) : null;
     const { error } = await sb.storage
       .from('store-media')
-      .upload(path, file, { contentType: file.type, cacheControl: '31536000', upsert: false });
+      .upload(path, imageBytes ?? file, { contentType: file.type, cacheControl: '31536000', upsert: false });
     if (error) {
       // Supabase enforces the 64 MB bucket cap at the storage layer too —
       // surface its rejection clearly instead of a generic 500.
@@ -71,7 +76,49 @@ export async function POST(req: NextRequest) {
     }
 
     const { data: publicUrl } = sb.storage.from('store-media').getPublicUrl(path);
-    return apiOk({ url: publicUrl.publicUrl, kind: isVideo ? 'video' : 'image' }, 201);
+
+    // --- Image moderation --------------------------------------------------
+    // Only runs when a vision-capable model is configured: without a key the
+    // rules fallback has no eyes, and claiming "flagged: false" from a blind
+    // pass would be worse than saying nothing. Hard-NSFW is blocked (file
+    // removed); anything else is recorded as a flag for review and the photo
+    // stays live for a human to judge.
+    let labels: string[] = [];
+    let blocked = false;
+    if (isImage && imageBytes && createProviderFromEnv().name !== 'dummy') {
+      try {
+        const verdict = await aiComplete({
+          feature: 'moderation',
+          input:
+            '[Kind] image\n[Text] A seller is uploading a product photo to a Nigerian marketplace. ' +
+            'Judge ONLY what is visible: sexually explicit content, graphic violence, hate symbols, or a photo ' +
+            'of a private document (bank card, passport, ID, licence). Ordinary product photos are fine.',
+          image: { mimeType: file.type, base64: imageBytes.toString('base64') },
+        });
+        const draft = verdict.draft as { flagged?: boolean; labels?: string[] };
+        labels = Array.isArray(draft.labels) ? draft.labels : [];
+        blocked = draft.flagged === true && labels.some((l) => l === 'nsfw_image' || l === 'harassment');
+      } catch (err) {
+        console.warn('[upload-image] moderation pass failed:', err);
+      }
+    }
+
+    if (blocked) {
+      await sb.storage.from('store-media').remove([path]).catch(() => undefined);
+      return apiError(422, 'inappropriate_image', 'That photo is not allowed on Naijavend — use a photo of the product itself.');
+    }
+    if (labels.length > 0) {
+      const store = await getOwnStore<{ id: string }>(sb, 'id');
+      await recordFlag(sb, {
+        storeId: store?.id ?? null,
+        kind: 'listing',
+        labels,
+        excerpt: `Photo flagged on upload: ${labels.join(', ')}`,
+        source: 'model',
+      });
+    }
+
+    return apiOk({ url: publicUrl.publicUrl, kind: isVideo ? 'video' : 'image', ...(labels.length ? { moderation: labels } : {}) }, 201);
   } catch (err) {
     return internalError('listing-media-upload', err);
   }

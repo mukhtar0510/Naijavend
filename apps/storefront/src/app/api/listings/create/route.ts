@@ -3,7 +3,9 @@ import { NextRequest } from 'next/server';
 import { getSellerClient, getOwnStore } from '@/lib/auth';
 import { revalidateStore } from '@/lib/revalidate';
 import { apiError, apiOk, internalError } from '@/lib/api';
-import { sanitizeText, parsePriceKobo, isListingType } from '@idevtenancy/shared';
+import { sanitizeText, parsePriceKobo, isListingType, STORE_CATEGORIES, isDuplicateTitle, duplicateSimilarity, containment } from '@idevtenancy/shared';
+import { recordFlag } from '@/lib/moderation';
+import { isMissingColumn } from '@/lib/supabase';
 
 export async function POST(req: NextRequest) {
   const sb = await getSellerClient();
@@ -48,6 +50,16 @@ export async function POST(req: NextRequest) {
   if (!/^[0-9a-f-]{36}$/i.test(storeId)) return apiError(400, 'invalid_store', 'Invalid store.');
   if (!isListingType(type)) return apiError(422, 'invalid_type', 'Type must be product, service or digital.');
   if (title.length < 2) return apiError(422, 'invalid_title', 'Give the listing a title.');
+
+  // Smart-search fields (migration 20261017): a product-level category and up
+  // to 6 buyer-facing search tags. Both are whitelisted/length-capped here —
+  // a model-written tag never reaches the DB unchecked.
+  const rawCategory = sanitizeText(b.category, 40).toLowerCase();
+  const category = (STORE_CATEGORIES as readonly string[]).includes(rawCategory) ? rawCategory : 'general';
+  const tagList = (Array.isArray(b.tags) ? b.tags : [])
+    .map((t) => sanitizeText(t, 40).toLowerCase())
+    .filter((t) => t.length >= 2)
+    .slice(0, 6);
   if (priceKobo === null) return apiError(422, 'invalid_price', 'Enter a valid price.');
   if (compareKobo !== null && (!Number.isFinite(compareKobo) || compareKobo < 0)) {
     return apiError(422, 'invalid_compare_at', 'Compare-at price must be a positive number.');
@@ -64,7 +76,18 @@ export async function POST(req: NextRequest) {
     const store = await getOwnStore<{ id: string; slug: string }>(sb, 'id, slug');
     if (!store || store.id !== storeId) return apiError(403, 'not_your_store', 'You can only add listings to your own store.');
 
-    const { error } = await sb.from('listings').insert({
+    // Duplicate-listing screen — a seller pasting the same item twice makes
+    // the search results and their own catalogue worse. FLAG it (and carry on):
+    // the seller may deliberately have a colour/size variant.
+    const { data: existingRows } = await sb.from('listings').select('id, title').eq('store_id', storeId).limit(500);
+    const existing = (existingRows ?? []).map((r) => String(r.title));
+    const duplicateMatch = isDuplicateTitle(title, existing)
+      ? existing.find(
+          (t) => duplicateSimilarity(title, t) >= 0.7 || containment(title, t) >= 0.8,
+        ) ?? null
+      : null;
+
+    const insertPayload: Record<string, unknown> = {
       store_id: storeId,
       type,
       title,
@@ -76,15 +99,35 @@ export async function POST(req: NextRequest) {
       // Digital listings start empty; the file is attached via /api/listings/digital-upload.
       ...(type === 'digital' ? { digital_file_path: null, digital_file_name: null, digital_file_size: null } : {}),
       ai_generated_description: b.aiDescription === true,
+      category,
+      tags: tagList,
       image_urls: imageUrls,
       video_url: videoUrl,
-    });
+    };
+    let { data: created, error } = await sb.from('listings').insert(insertPayload).select('id').maybeSingle();
+    if (isMissingColumn(error)) {
+      // Migration 20261017 has not been pushed yet — losing search tags is bad;
+      // refusing to create a listing at all would be far worse.
+      delete insertPayload.category;
+      delete insertPayload.tags;
+      ({ data: created, error } = await sb.from('listings').insert(insertPayload).select('id').maybeSingle());
+    }
     if (error) throw error;
+
+    if (duplicateMatch) {
+      await recordFlag(sb, {
+        storeId,
+        kind: 'listing',
+        refId: created?.id ?? null,
+        labels: ['duplicate_listing'],
+        excerpt: `${title} ↔ ${duplicateMatch}`,
+      });
+    }
 
     // New listing — refresh the store page, catalogue and marketplace caches now.
     revalidateStore(store.slug);
 
-    return apiOk({ created: true }, 201);
+    return apiOk({ created: true, duplicateOf: duplicateMatch }, 201);
   } catch (err) {
     return internalError('listings-create', err);
   }

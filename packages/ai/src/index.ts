@@ -7,17 +7,25 @@
 
 import type {
   AiFeature, AiStoreDraft, AiListingDraft, AiStyleDraft, AiAssistantDraft, AiSocialPostDraft, AiImageDraft,
+  AiSuggestRepliesDraft, AiTranslationDraft, AiInsightDraft, AiModerationDraft, LanguageCode,
 } from '@idevtenancy/shared';
+// Valued (not type-only) import: the rules-based moderation fallback lives in
+// shared, so fraud checks behave identically with and without a model key.
+import { assessReview, detectScamPhrases } from '@idevtenancy/shared';
 import { readableTextOn, isDarkHex } from './color';
 import { GeminiProvider, GEMINI_DEFAULT_MODEL } from './gemini';
 
 export interface AiRequest {
   feature: AiFeature;
   input: string;
+  /** Optional photo for vision-backed drafts (listing_draft from a seller's camera roll). */
+  image?: { mimeType: string; base64: string };
 }
 
 export interface AiResponse {
-  draft: AiStoreDraft | AiListingDraft | AiStyleDraft | AiAssistantDraft | AiSocialPostDraft | AiImageDraft;
+  draft:
+    | AiStoreDraft | AiListingDraft | AiStyleDraft | AiAssistantDraft | AiSocialPostDraft | AiImageDraft
+    | AiSuggestRepliesDraft | AiTranslationDraft | AiInsightDraft | AiModerationDraft;
   tokensUsed: number;
   provider: string;
 }
@@ -540,6 +548,125 @@ function lastSellerMessage(input: string): string {
   return matches.length ? matches[matches.length - 1][1].trim() : input;
 }
 
+/** Single `[Tag] value` line — the shared input contract for every new feature. */
+function tagged(input: string, tag: string): string {
+  const m = input.match(new RegExp(`\\[${tag}\\]\\s*(.+)`));
+  return m ? m[1].trim() : '';
+}
+
+/** Best-effort number pairing used by the weekly-insight dummy: `views 42 vs 30`. */
+function statPair(stats: string, key: string): [number, number] | null {
+  const m = stats.match(new RegExp(`${key}\\s+(\\d+)\\s+vs\\s+(\\d+)`, 'i'));
+  if (!m) return null;
+  return [Number(m[1]), Number(m[2])];
+}
+
+/** Keyless suggested replies: pattern-match the buyer's question from a small
+ * set of questions Nigerian buyers actually ask, then ground the answer in the
+ * catalogue/policy line the route supplied. */
+function dummySuggestReplies(input: string): string[] {
+  const catalog = tagged(input, 'Catalog');
+  const policy = tagged(input, 'Policy');
+  const q = tagged(input, 'Customer').toLowerCase();
+  const firstItem = catalog.split(';')[0]?.split('|')[0]?.trim() || '';
+  const has = (re: RegExp) => re.test(q);
+  const out: string[] = [];
+
+  if (has(/how much|price|cost|₦|naira|how much?s|rate|cheap|discount/)) {
+    out.push(
+      firstItem
+        ? `Yes — ${firstItem} is available at the price on the listing. Tap Order to check out and the total (including delivery) shows before you pay.`
+        : 'The current price is on the listing — tap Order and the total, including delivery, shows before you pay anything.'
+    );
+    out.push('If you need more than one I can work on the price — tell me the quantity and I will send a quote.');
+  }
+  if (has(/deliver|shipping|dispatch|reach|come to|pickup|pick up|waybill|location.*deliver/)) {
+    out.push(
+      policy
+        ? `We deliver — ${policy}. Share your area or landmark and I will confirm the fee and the day it lands.`
+        : 'We deliver — send your area or nearest landmark and I will confirm the fee and the delivery day.'
+    );
+    out.push('You can also pick up from the store; I will send the address and the best time to come.');
+  }
+  if (has(/available|in stock|have|restock|left|size|colour|color|colour don.?t finish/)) {
+    out.push(
+      firstItem
+        ? `${firstItem} is in stock right now. Which size and colour do you want? I will reserve it for you.`
+        : 'It is in stock right now — tell me the size and colour you want and I will hold it for you.'
+    );
+    out.push('Stock moves fast, but I can keep one aside today if you confirm now.');
+  }
+  if (has(/when|time|open|close|hour|day|available.*today|today/)) {
+    out.push(
+      policy
+        ? `Our hours: ${policy}. Order today and it moves out this week.`
+        : 'We are open daily — order today and it moves out this week.'
+    );
+  }
+
+  while (out.length < 2) {
+    out.push('Thanks for reaching out — confirm the exact item, size and colour and I will start processing it now.');
+  }
+  return [...new Set(out)].slice(0, 3);
+}
+
+/** Keyless weekly insight: read the `key N vs N` pairs the route computed and
+ * say it in plain language. Never invents numbers it was not given. */
+function dummyWeeklyInsight(input: string): AiInsightDraft {
+  const store = tagged(input, 'Store').split('|')[0].trim() || 'Your store';
+  const stats = tagged(input, 'Stats');
+  const top = tagged(input, 'Top');
+  const views = statPair(stats, 'views');
+  const orders = statPair(stats, 'orders');
+  const revenue = statPair(stats, 'revenue');
+
+  const change = (p: [number, number] | null): number | null => {
+    if (!p || p[1] === 0) return null;
+    return Math.round(((p[0] - p[1]) / p[1]) * 100);
+  };
+  const viewsCh = change(views);
+  const ordersCh = change(orders);
+
+  const lines: string[] = [];
+  if (viewsCh !== null) {
+    lines.push(
+      viewsCh >= 15
+        ? `Store visits are up ${viewsCh}% week on week — more people are finding you.`
+        : viewsCh <= -15
+          ? `Store visits fell ${Math.abs(viewsCh)}% this week. Share your link again on WhatsApp status.`
+          : 'Store visits held steady this week.'
+    );
+  }
+  if (ordersCh !== null && orders) {
+    lines.push(
+      ordersCh > 0
+        ? `You took ${orders[0]} order${orders[0] === 1 ? '' : 's'} this week versus ${orders[1]} last week.`
+        : ordersCh < 0
+          ? `You took ${orders[0]} order${orders[0] === 1 ? '' : 's'} this week, down from ${orders[1]}.`
+          : `You took ${orders[0]} order${orders[0] === 1 ? '' : 's'} this week, same as last week.`
+    );
+  }
+  if (revenue && revenue[0] !== revenue[1]) {
+    lines.push(`Takings: ₦${revenue[0].toLocaleString('en-NG')} this week vs ₦${revenue[1].toLocaleString('en-NG')} last week.`);
+  }
+  if (top) lines.push(`Bestseller: ${top}.`);
+
+  let action = 'Refresh the photos and description on your two busiest listings — fresh listings get pushed more often.';
+  if (ordersCh !== null && ordersCh > 0 && viewsCh !== null && viewsCh >= 10 && top) {
+    action = `Demand for ${top.split('|')[0].trim()} is climbing — restock it before it runs out.`;
+  } else if (viewsCh !== null && viewsCh > 10 && ordersCh !== null && ordersCh <= 0) {
+    action = 'Visitors are up but sales are flat: put your prices and delivery fees directly in each listing.';
+  } else if (viewsCh !== null && viewsCh < -10) {
+    action = 'Fewer people saw your store this week — post your link to WhatsApp status twice in the next few days.';
+  }
+
+  return {
+    summary: `${store} — this week at a glance. ${lines[0] ?? 'Not enough activity yet to compare against last week.'}`,
+    points: lines.slice(1, 4),
+    action,
+  };
+}
+
 /** Keyless assistant: practical, deterministic advice keyed off the question. */
 function dummyAssistantReply(input: string): string {
   const store = parseContextLine(input, 'Store').split('|')[0].trim() || 'your store';
@@ -667,6 +794,63 @@ class DummyProvider implements AiProvider {
       return { draft, tokensUsed, provider: this.name };
     }
 
+    if (req.feature === 'listing_draft') {
+      const hint = tagged(req.input, 'Hint') || req.input.slice(0, 200);
+      const category = inferCategory(hint);
+      const words = hint.replace(/[^A-Za-z0-9₦\s]/g, ' ').split(/\s+/).filter((w) => w.length > 1);
+      const titleWords = words.slice(0, 7).join(' ');
+      const title = titleWords.charAt(0).toUpperCase() + titleWords.slice(1);
+      const keywords = [...new Set(words.map((w) => w.toLowerCase()))]
+        .filter((w) => w.length > 3 && !['with', 'that', 'this', 'have', 'from', 'very'].includes(w))
+        .slice(0, 5);
+      const draft: AiListingDraft = {
+        title: (title.slice(0, 60) || 'New listing').trim(),
+        description:
+          `${title}. Quality you can rely on, clear photos and honest pricing from a Nigerian seller you can trust. ` +
+          `Message us on WhatsApp to confirm availability, sizes and delivery before you order.`,
+        category,
+        tags: keywords.length ? keywords : ['quality', 'fast delivery'],
+      };
+      return { draft, tokensUsed, provider: this.name };
+    }
+
+    if (req.feature === 'suggest_reply') {
+      const draft: AiSuggestRepliesDraft = { suggestions: dummySuggestReplies(req.input) };
+      return { draft, tokensUsed, provider: this.name };
+    }
+
+    if (req.feature === 'translation') {
+      // Deliberate identity fallback: a template can never honestly translate
+      // Yoruba/Hausa/Igbo. Return the original text and let the route report
+      // `provider: dummy` so the UI never claims a translation that did not happen.
+      const lang = (tagged(req.input, 'Lang') || 'en') as LanguageCode;
+      const text = tagged(req.input, 'Text') || req.input;
+      const draft: AiTranslationDraft = { text, lang };
+      return { draft, tokensUsed, provider: this.name };
+    }
+
+    if (req.feature === 'weekly_insight') {
+      const draft: AiInsightDraft = dummyWeeklyInsight(req.input);
+      return { draft, tokensUsed, provider: this.name };
+    }
+
+    if (req.feature === 'moderation') {
+      // Rules first, always — this is the path every keyless deployment takes.
+      const text = tagged(req.input, 'Text');
+      const kind = tagged(req.input, 'Kind') || 'chat';
+      const labels: string[] = [...detectScamPhrases(text)];
+      if (kind === 'review') labels.push(...assessReview(text, null).labels);
+      const unique = [...new Set(labels)];
+      const draft: AiModerationDraft = {
+        flagged: unique.length > 0,
+        labels: unique,
+        note: unique.length
+          ? `Flagged by content rules (${unique.length} signal${unique.length === 1 ? '' : 's'}).`
+          : 'No signals found.',
+      };
+      return { draft, tokensUsed, provider: 'rules' };
+    }
+
     // listing_description
     const draft: AiListingDraft = {
       description:
@@ -734,6 +918,45 @@ export function createImageProviderFromEnv(
 export function getProvider(): AiProvider {
   if (!provider) provider = createProviderFromEnv();
   return provider;
+}
+
+/**
+ * Search embedding (768 dims, matching migration 20261017's vector(768)
+ * columns). Returns null — never throws — when there is no key, no model
+ * support, or any network failure, so search degrades to structured keyword
+ * recall instead of ever failing the buyer's query.
+ */
+export async function embedText(text: string): Promise<number[] | null> {
+  const key = process.env.GEMINI_API_KEY?.trim();
+  const model = process.env.GEMINI_EMBEDDING_MODEL?.trim() || 'gemini-embedding-001';
+  const input = text.trim().slice(0, 2000);
+  if (!key || !input) return null;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 6000);
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:embedContent`,
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
+        signal: controller.signal,
+        body: JSON.stringify({
+          model: `models/${model}`,
+          content: { parts: [{ text: input }] },
+          outputDimensionality: 768,
+        }),
+      },
+    );
+    if (!res.ok) return null;
+    const data = (await res.json()) as { embedding?: { values?: number[] } };
+    const values = data.embedding?.values;
+    return Array.isArray(values) && values.length >= 600 ? values : null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 // Minimal timer typing — this package targets a pure ES2022 lib (no DOM/Node types).
