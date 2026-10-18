@@ -135,6 +135,62 @@ interface StoreRow {
   avg_stars: number | null;
 }
 
+// One row per trust/safety signal the storefront's content paths captured
+// (chat, reviews, listings, stores). Flags are evidence for review — nothing
+// is auto-removed, so staff move them between open → reviewed / dismissed.
+interface FlagRow {
+  id: string;
+  store_id: string | null;
+  store_name: string | null;
+  store_slug: string | null;
+  kind: 'chat' | 'review' | 'listing' | 'store';
+  ref_id: string | null;
+  labels: string[];
+  excerpt: string;
+  source: string;
+  status: 'open' | 'reviewed' | 'dismissed';
+  created_at: string;
+}
+
+// Human sentences for every label the rule set and the moderation model can
+// emit — mirrors packages/shared/src/fraud.ts, which the standalone console
+// deliberately does not import (zero workspace dependencies by design).
+const FLAG_LABEL_TEXT: Record<string, string> = {
+  off_platform_payment: 'Asks to pay outside Naijavend',
+  credentials_request: 'Asks for an OTP, PIN or bank details',
+  advance_fee: 'Up-front fee or gift-card request',
+  impersonation: 'Claims to be staff, police or a delivery agent',
+  urgency_threat: 'Uses threats or a countdown to pressure you',
+  contact_harvest: 'Tries to move the chat off the platform',
+  external_link: 'Sends an external or shortened link',
+  promotion: 'Promotes another page, store or giveaway',
+  link: 'Contains a link',
+  contact_offplatform: 'Tries to move the conversation off platform',
+  irrelevant: 'Adds nothing about the product',
+  repetition: 'Repetitive / generated filler text',
+  near_duplicate_review: 'Near-duplicate of another review',
+  duplicate_listing: 'Duplicates an existing listing title',
+  guaranteed_returns: 'Promises guaranteed returns or a fixed percentage of profit',
+  investment_scam: 'Investment/crypto earnings claim',
+  fake_official: 'Claims official Naijavend status',
+  fake_review: 'Looks like a fake review',
+  harassment: 'Harassment or abuse',
+  spam: 'Spam',
+  nsfw_image: 'Inappropriate image',
+};
+
+const FLAG_KIND_TEXT: Record<FlagRow['kind'], string> = {
+  chat: 'Chat',
+  review: 'Review',
+  listing: 'Listing',
+  store: 'Store',
+};
+
+/** Stable label code → sentence, with a readable fallback for new codes. */
+function labelTitle(code: string): string {
+  return FLAG_LABEL_TEXT[code] ?? code.replace(/_/g, ' ');
+}
+
 const MARKETPLACE_URL = process.env.NEXT_PUBLIC_MARKETPLACE_URL || 'https://naijacart-roan.vercel.app';
 
 const SECTIONS = [
@@ -251,6 +307,10 @@ export function AdminConsole({ adminEmail }: { adminEmail: string }) {
   const [discounts, setDiscounts] = useState<DiscountRow[]>([]);
   const [modQ, setModQ] = useState('');
   const [modBusy, setModBusy] = useState<string | null>(null);
+  const [flags, setFlags] = useState<FlagRow[]>([]);
+  const [flagCounts, setFlagCounts] = useState({ open: 0, reviewed: 0, dismissed: 0 });
+  const [flagStatus, setFlagStatus] = useState<'open' | 'reviewed' | 'dismissed'>('open');
+  const [flagKind, setFlagKind] = useState<'all' | FlagRow['kind']>('all');
   const [searchQ, setSearchQ] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchBusy, setSearchBusy] = useState(false);
@@ -304,6 +364,33 @@ export function AdminConsole({ adminEmail }: { adminEmail: string }) {
     load();
   }, [load]);
 
+  // The flag queue is the only dataset keyed by its own filters, so it loads
+  // and refreshes independently of `load()` (which refires on q/role changes).
+  const loadFlags = useCallback(
+    async (status: 'open' | 'reviewed' | 'dismissed', kind: 'all' | FlagRow['kind']) => {
+      const params = new URLSearchParams({ status });
+      if (kind !== 'all') params.set('kind', kind);
+      try {
+        const body = await fetch(`/api/admin/flags?${params}`).then((r) => r.json());
+        if (body && !body.error) {
+          setFlags((body.data?.flags ?? body.flags) ?? []);
+          const counts = body.data?.counts ?? body.counts;
+          if (counts) setFlagCounts(counts);
+        } else {
+          setFlags([]);
+          if (body?.error?.message) setNotice({ kind: 'err', msg: body.error.message });
+        }
+      } catch {
+        setNotice({ kind: 'err', msg: 'Could not load the flag queue.' });
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    loadFlags(flagStatus, flagKind);
+  }, [loadFlags, flagStatus, flagKind]);
+
   async function act(user: UserRow, action: 'ban' | 'unban' | 'delete' | 'force_logout') {
     setBusyId(user.id);
     setNotice(null);
@@ -341,6 +428,27 @@ export function AdminConsole({ adminEmail }: { adminEmail: string }) {
       } else {
         setNotice({ kind: 'ok', msg: `${kind} ${id.slice(0, 8)} removed` });
         await load();
+      }
+    } finally {
+      setModBusy(null);
+    }
+  }
+
+  async function flagAction(action: 'reviewed' | 'dismissed' | 'reopen', id: string) {
+    setModBusy(id);
+    setNotice(null);
+    try {
+      const res = await fetch('/api/admin/flags', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, id, reason: `${action} by ${adminEmail}` }),
+      });
+      const body = await res.json();
+      if (!res.ok || !body.ok) {
+        setNotice({ kind: 'err', msg: body?.error?.message ?? 'Action failed.' });
+      } else {
+        setNotice({ kind: 'ok', msg: action === 'reopen' ? 'Flag re-opened' : `Flag marked ${action}` });
+        await loadFlags(flagStatus, flagKind);
       }
     } finally {
       setModBusy(null);
@@ -408,6 +516,14 @@ export function AdminConsole({ adminEmail }: { adminEmail: string }) {
   const filteredListings = modQ
     ? listings.filter((l) => l.title.toLowerCase().includes(modQ.toLowerCase()) || (l.store_name ?? '').toLowerCase().includes(modQ.toLowerCase()))
     : listings;
+  const filteredFlags = modQ
+    ? flags.filter(
+        (f) =>
+          f.excerpt.toLowerCase().includes(modQ.toLowerCase()) ||
+          (f.store_name ?? '').toLowerCase().includes(modQ.toLowerCase()) ||
+          f.labels.some((l) => l.includes(modQ.toLowerCase())),
+      )
+    : flags;
 
   async function signOut() {
     await fetch('/api/auth/signout', { method: 'POST' });
@@ -473,6 +589,11 @@ export function AdminConsole({ adminEmail }: { adminEmail: string }) {
               >
                 <span className="admin-sidebar-ico" aria-hidden>{s.ico}</span>
                 {s.label}
+                {s.key === 'moderation' && flagCounts.open > 0 && (
+                  <span className="badge badge-danger" style={{ marginLeft: 'auto' }} title={`${flagCounts.open} open flags`}>
+                    {flagCounts.open}
+                  </span>
+                )}
               </button>
             ))}
           </nav>
@@ -894,7 +1015,7 @@ export function AdminConsole({ adminEmail }: { adminEmail: string }) {
             <section className="admin-users" aria-label="Moderation queues">
               <div className="admin-section-head">
                 <h2>Moderation</h2>
-                <p className="admin-section-sub">Trust &amp; safety — reviews and listings across all stores.</p>
+                <p className="admin-section-sub">Trust &amp; safety — flag queue, then reviews and listings across all stores.</p>
               </div>
               <div className="admin-filters">
                 <input
@@ -906,7 +1027,130 @@ export function AdminConsole({ adminEmail }: { adminEmail: string }) {
                 />
               </div>
 
+              {/* Flag queue: everything the trust rules and the moderation model
+                  caught, in one triage list. Status changes only — nothing here
+                  deletes content. */}
+              <div className="admin-section-head" style={{ marginTop: 4 }}>
+                <h2 style={{ fontSize: 17 }}>Flag queue</h2>
+                <p className="admin-section-sub">
+                  Signals from chat, reviews, listings and stores. Flags are evidence for review — nothing is removed automatically.
+                </p>
+              </div>
+              <div className="admin-filters">
+                {(['open', 'reviewed', 'dismissed'] as const).map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    className={`btn btn-sm ${flagStatus === s ? 'btn-primary' : 'btn-outline'}`}
+                    aria-pressed={flagStatus === s}
+                    onClick={() => setFlagStatus(s)}
+                  >
+                    {s === 'open' ? 'Open' : s === 'reviewed' ? 'Reviewed' : 'Dismissed'} ({flagCounts[s]})
+                  </button>
+                ))}
+                <select
+                  value={flagKind}
+                  onChange={(e) => setFlagKind(e.target.value as 'all' | FlagRow['kind'])}
+                  aria-label="Filter flags by kind"
+                >
+                  <option value="all">All kinds</option>
+                  <option value="chat">Chat messages</option>
+                  <option value="review">Reviews</option>
+                  <option value="listing">Listings</option>
+                  <option value="store">Stores</option>
+                </select>
+              </div>
               <div className="admin-table-wrap">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Signal</th>
+                      <th>Why</th>
+                      <th>Evidence</th>
+                      <th>Store</th>
+                      <th>When</th>
+                      <th aria-label="Actions" />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredFlags.map((f) => (
+                      <tr key={f.id}>
+                        <td style={{ whiteSpace: 'nowrap' }}>
+                          <span className="badge badge-blue">{FLAG_KIND_TEXT[f.kind]}</span>{' '}
+                          <span className="badge badge-black" title={f.source === 'model' ? 'Moderation model' : 'Offline rules'}>
+                            {f.source}
+                          </span>
+                        </td>
+                        <td style={{ maxWidth: 260 }}>
+                          {f.labels.length === 0 ? (
+                            <span className="muted">—</span>
+                          ) : (
+                            f.labels.map((l) => (
+                              <span key={l} className="badge badge-danger" style={{ marginRight: 4, marginBottom: 2 }} title={labelTitle(l)}>
+                                {labelTitle(l)}
+                              </span>
+                            ))
+                          )}
+                        </td>
+                        <td style={{ maxWidth: 340 }}>
+                          <span className="muted">
+                            {f.excerpt ? (f.excerpt.length > 120 ? `${f.excerpt.slice(0, 120)}…` : f.excerpt) : '(no excerpt)'}
+                          </span>
+                          {f.ref_id && (
+                            <div style={{ fontSize: 11, opacity: 0.55 }} className="muted">ref {f.ref_id.slice(0, 8)}</div>
+                          )}
+                        </td>
+                        <td>
+                          {f.store_slug ? (
+                            <a href={`${MARKETPLACE_URL}/s/${f.store_slug}`} target="_blank" rel="noreferrer">
+                              {f.store_name ?? f.store_id?.slice(0, 8) ?? '—'}
+                            </a>
+                          ) : (
+                            <span className="muted">{f.store_id?.slice(0, 8) ?? '—'}</span>
+                          )}
+                        </td>
+                        <td>{timeAgo(f.created_at)}</td>
+                        <td className="admin-actions" style={{ whiteSpace: 'nowrap' }}>
+                          {f.status === 'open' ? (
+                            <>
+                              <button
+                                type="button"
+                                className="btn btn-outline btn-sm"
+                                disabled={modBusy === f.id}
+                                onClick={() => flagAction('reviewed', f.id)}
+                              >
+                                ✓ Reviewed
+                              </button>
+                              <button
+                                type="button"
+                                className="btn btn-outline btn-sm"
+                                disabled={modBusy === f.id}
+                                onClick={() => flagAction('dismissed', f.id)}
+                              >
+                                Dismiss
+                              </button>
+                            </>
+                          ) : (
+                            <button
+                              type="button"
+                              className="btn btn-outline btn-sm"
+                              disabled={modBusy === f.id}
+                              onClick={() => flagAction('reopen', f.id)}
+                            >
+                              Reopen
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                    {filteredFlags.length === 0 && (
+                      <tr><td colSpan={6} className="admin-empty">No {flagStatus} flags.</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="admin-table-wrap" style={{ marginTop: 24 }}>
                 <table className="admin-table">
                   <thead>
                     <tr>

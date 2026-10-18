@@ -83,33 +83,36 @@ begin
 
     -- Nearest-neighbour search over catalogue text. Only rows that have been
     -- embedded participate; the app decides which query vector to send.
+    -- NOTE: the inner function bodies use the $fn$ delimiter, never the
+    -- outer DO delimiter — repeating the outer delimiter inside the block
+    -- closes the DO body early and the whole migration fails to parse.
     create or replace function public.match_listings(
       query_embedding vector(768),
       p_limit integer default 12
     )
     returns table (id uuid, title text, price_kobo bigint, store_id uuid, similarity double precision)
-    language sql stable as $$
+    language sql stable as $fn$
       select l.id, l.title, l.price_kobo, l.store_id,
              1 - (l.embedding <=> query_embedding) as similarity
       from public.listings l
       where l.embedding is not null
       order by l.embedding <=> query_embedding
       limit least(coalesce(p_limit, 12), 50);
-    $$;
+    $fn$;
 
     create or replace function public.match_stores(
       query_embedding vector(768),
       p_limit integer default 8
     )
     returns table (id uuid, name text, slug text, similarity double precision)
-    language sql stable as $$
+    language sql stable as $fn$
       select s.id, s.name, s.slug,
              1 - (s.embedding <=> query_embedding) as similarity
       from public.stores s
       where s.embedding is not null
       order by s.embedding <=> query_embedding
       limit least(coalesce(p_limit, 8), 30);
-    $$;
+    $fn$;
 
     execute 'grant execute on function public.match_listings(vector, integer) to anon, authenticated';
     execute 'grant execute on function public.match_stores(vector, integer) to anon, authenticated';

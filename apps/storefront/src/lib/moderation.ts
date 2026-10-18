@@ -24,11 +24,23 @@ export interface FlagInput {
  * Best-effort write. A flag must never break the flow that produced it — the
  * table is also introduced by a migration that may not have run yet — so any
  * failure is logged and swallowed.
+ *
+ * `moderation_flags` is RLS-enabled with NO policies (service-role only), so a
+ * seller-scoped `sb` insert is rejected with "new row violates row-level
+ * security policy" and the flag is silently lost. The writer is therefore the
+ * service-role client whenever it is configured; the caller's client is only a
+ * fallback for local setups that run without the service key at all.
  */
 export async function recordFlag(sb: SupabaseClient | null, input: FlagInput): Promise<void> {
-  if (!sb || !input.storeId || input.labels.length === 0) return;
+  if (!input.storeId || input.labels.length === 0) return;
   try {
-    const { error } = await sb.from('moderation_flags').insert({
+    const { supabaseServiceOptional } = await import('./supabase');
+    const writer = supabaseServiceOptional() ?? sb;
+    if (!writer) {
+      console.warn('[moderation] flag dropped — no service-role client and no caller client.');
+      return;
+    }
+    const { error } = await writer.from('moderation_flags').insert({
       store_id: input.storeId,
       kind: input.kind,
       ref_id: input.refId ?? null,
