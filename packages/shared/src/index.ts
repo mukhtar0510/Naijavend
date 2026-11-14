@@ -12,4 +12,5 @@ export * from './hours';
 export * from './store';
 export * from './traffic';
 export * from './fraud';
+export * from './phrasebook';
 export * from './password';

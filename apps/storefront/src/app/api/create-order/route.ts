@@ -132,34 +132,25 @@ export async function POST(req: NextRequest) {
       .single();
     if (orderErr) throw orderErr;
 
-    // Decrement stock ATOMICALLY (check + decrement in one statement) — the
-    // old read-modify-write let two concurrent buyers oversell the same item.
-    // Service client runs the RPC as postgres, bypassing RLS by design.
-    for (const l of dbListings) {
-      if (l.stock != null) {
-        const wanted = lines.filter((ln) => ln.listingId === l.id).reduce((s, ln) => s + ln.quantity, 0);
-        const { error: stockErr } = await sb.rpc('decrement_listing_stock', {
-          p_listing_id: l.id,
-          p_quantity: wanted,
-        });
-        if (stockErr) {
-          if (String(stockErr.message).includes('INSUFFICIENT_STOCK')) {
-            return apiError(422, 'insufficient_stock', `Only a few of "${l.title}" left — someone just bought the last ones.`);
-          }
-          throw stockErr;
-        }
-      }
-    }
-    if (appliedCode) {
-      // Count promo usage (read-modify-write; single-store promos are low-contention).
-      const { data: row } = await sb.from('discount_codes').select('usage_count').eq('store_id', store.id).eq('code', appliedCode).maybeSingle();
-      await sb.from('discount_codes').update({ usage_count: ((row?.usage_count as number | undefined) ?? 0) + 1 }).eq('store_id', store.id).eq('code', appliedCode);
-    }
-
-    const { error: itemsErr } = await sb.from('order_items').insert(
-      lines.map((l) => ({ order_id: order.id, listing_id: l.listingId, quantity: l.quantity, unit_price_kobo: priceById.get(l.listingId)! }))
-    );
-    if (itemsErr) throw itemsErr;
+    // Use the atomic order RPC to create order + items + stock decrement + promo increment in one transaction.
+    // This prevents half-written state (order without items, stock decremented but no order, promo counted but no order) that
+    // the old separate-write approach could leave on failure.
+    const listingsJson = JSON.stringify(dbListings.map((l) => l.id));
+    const quantitiesJson = JSON.stringify(lines.map((l) => l.quantity));
+    const { data: result, error: atomicErr } = await sb.rpc('create_order_atomic', {
+      p_store_id: store.id,
+      p_customer_name: customerName,
+      p_customer_phone: customerPhone,
+      p_listing_ids: listingsJson,
+      p_quantities: quantitiesJson,
+      p_discount_code: appliedCode,
+      p_delivery_method: deliveryMethod,
+      p_total_kobo: totalKobo,
+    });
+    if (atomicErr) throw atomicErr;
+    // result contains { order_id, status } from the RPC.
+    // The checkout page expects orderId; the returned field is also order_id.
+    const atomicOrderId = (result as { order_id: string }).order_id;
 
     if (cacheKey) {
       if (idempotencyCache.size >= IDEMPOTENCY_MAX_ENTRIES) {
@@ -174,14 +165,14 @@ export async function POST(req: NextRequest) {
           idempotencyCache.delete(oldest);
         }
       }
-      idempotencyCache.set(cacheKey, { orderId: order.id, expires: Date.now() + IDEMPOTENCY_TTL_MS });
+      idempotencyCache.set(cacheKey, { orderId: atomicOrderId, expires: Date.now() + IDEMPOTENCY_TTL_MS });
     }
 
     // Mint a single-purpose payment token: mock-pay refuses to mark this order
     // paid without it, so a random orderId is not enough to complete payment.
-    const payToken = mintPayToken(order.id);
+    const payToken = mintPayToken(atomicOrderId);
 
-    return apiOk({ orderId: order.id, totalKobo, discountKobo, discountCode: appliedCode, deliveryMethod, deliveryFeeKobo, payToken }, 201);
+    return apiOk({ orderId: atomicOrderId, totalKobo, discountKobo, discountCode: appliedCode, deliveryMethod, deliveryFeeKobo, payToken }, 201);
   } catch (err) {
     return internalError('create-order', err);
   }

@@ -74,48 +74,25 @@ export async function POST(req: NextRequest) {
     const priceById = new Map(dbListings.map((l) => [l.id, l.price_kobo as number]));
     const totalKobo = lines.reduce((sum, l) => sum + priceById.get(l.listingId)! * l.quantity, 0);
 
-    // Paid immediately: in-person money already changed hands.
-    const { data: order, error: orderErr } = await sb
-      .from('orders')
-      .insert({
-        store_id: ctx.storeId,
-        customer_id: null,
-        customer_name: 'Walk-in customer',
-        customer_phone: '0000000000', // placeholder: POS sales have no buyer phone (DB check needs digits)
-        total_kobo: totalKobo,
-        status: 'paid',
-        channel: 'pos',
-        pos_staff_id: ctx.staffId,
-      })
-      .select('id')
-      .single();
-    if (orderErr) throw orderErr;
+    // Use the atomic order RPC to create order + items + stock decrement + promo increment in one transaction.
+    // This prevents half-written state that the old separate-write approach could leave on failure.
+    const listingsJson = JSON.stringify(dbListings.map((l) => l.id));
+    const quantitiesJson = JSON.stringify(lines.map((l) => l.quantity));
+    const { data: result, error: atomicErr } = await sb.rpc('create_order_atomic', {
+      p_store_id: ctx.storeId,
+      p_customer_name: 'Walk-in customer',
+      p_customer_phone: '0000000000',
+      p_listing_ids: listingsJson,
+      p_quantities: quantitiesJson,
+      p_discount_code: null,
+      p_delivery_method: 'cash',
+      p_total_kobo: totalKobo,
+    });
+    if (atomicErr) throw atomicErr;
+    // result contains { order_id, status } from the RPC.
+    const atomicOrderId = (result as { order_id: string }).order_id;
 
-    const { error: itemsErr } = await sb.from('order_items').insert(
-      lines.map((l) => ({ order_id: order.id, listing_id: l.listingId, quantity: l.quantity, unit_price_kobo: priceById.get(l.listingId)! }))
-    );
-    if (itemsErr) throw itemsErr;
-
-    // Stock stays truthful across online + in-person sales. Atomic RPC: the
-    // check-and-decrement is one statement, so two terminals selling the last
-    // unit can't both succeed (RLS still scopes the write to this store).
-    for (const l of dbListings) {
-      if (l.stock != null) {
-        const wanted = lines.filter((ln) => ln.listingId === l.id).reduce((s, ln) => s + ln.quantity, 0);
-        const { error: stockErr } = await sb.rpc('decrement_listing_stock', {
-          p_listing_id: l.id,
-          p_quantity: wanted,
-        });
-        if (stockErr) {
-          if (String(stockErr.message).includes('INSUFFICIENT_STOCK')) {
-            return apiError(422, 'insufficient_stock', `Only a few of "${l.title}" left — someone just bought the last ones.`);
-          }
-          throw stockErr;
-        }
-      }
-    }
-
-    return apiOk({ orderId: order.id, totalKobo }, 201);
+    return apiOk({ orderId: atomicOrderId, totalKobo }, 201);
   } catch (err) {
     return internalError('pos/charge', err);
   }

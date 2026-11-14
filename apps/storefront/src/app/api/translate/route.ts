@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
   const raw = Array.isArray(b.texts) ? b.texts : [];
   const texts = raw
     .map((t) => sanitizeText(t, MAX_LEN))
-    .filter((t) => t.length > 1)
+    .filter((t) => t.length > 0)
     .slice(0, MAX_TEXTS);
   if (texts.length === 0) return apiOk({ texts: [] as string[], provider: 'noop' });
 
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     // page costs one request rather than one per string. Newlines inside an
     // item would break the numbering, so the batch is joined with explicit
     // `#n` markers and split back apart afterwards.
-    const payload = texts.map((t, i) => `${i + 1}. ${t}`).join('\n');
+    const payload = texts.map((t, i) => `${i + 1}. ${t.replace(/\n/g, ' ')}`).join('\n');
     const result = await aiComplete({
       feature: 'translation',
       input: `[Lang] ${lang}\n[Text] ${payload.slice(0, 12000)}`,
