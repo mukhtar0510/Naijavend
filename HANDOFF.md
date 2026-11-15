@@ -90,7 +90,7 @@ absent. Production values are encrypted — `vercel env pull` returns
 | --- | --- | --- |
 | Seller demo | `amaka@demo.test` | `demo1234` |
 | Buyer demo | `demo@demo.test` | `demo1234` |
-| Platform admin | `naijavend2026@gmail.com` | **not in the repo** — Supabase Auth password |
+| Platform admin | `naijavend2026@gmail.com` | **not in the repo** — Supabase Auth password, reset 15 Nov 2026 (value held by the owner, not committed here) |
 
 The admin password is **not stored anywhere in this codebase** (checked the
 whole tree and git history: no `.env` was ever committed except a Vercel build
@@ -98,7 +98,8 @@ metadata dump with no credentials). Auth is
 `signInWithPassword()` against Supabase, then the `ADMIN_EMAILS` allow-list.
 To regain access, reset that user's password in Supabase → Authentication →
 Users (or `auth.admin.updateUserById(id, { password })` with the service-role
-key). The admin allow-list email was confirmed from `admin_audit_log`
+key; that is what was done on 15 Nov 2026). Deliberately **not** recorded in
+this file — never commit a live credential. The admin allow-list email was confirmed from `admin_audit_log`
 (`actor_email`), which is the only record of an admin action.
 
 ---
