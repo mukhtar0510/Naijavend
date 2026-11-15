@@ -9,7 +9,7 @@ const LINKS = [
   { href: '/discover', label: 'Discover stores' },
   { href: '/rankings', label: 'Rankings' },
   { href: '/search', label: 'Search' },
-  { href: '/about', label: 'About' },
+  { href: '/faq', label: 'FAQ' },
 ];
 
 // Marketplace header: glassy sticky bar with pill navigation, active-page
