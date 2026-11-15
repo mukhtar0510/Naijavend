@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getCustomerUser, getCustomerClient } from '@/lib/auth';
 import { ProfileEditor } from './ProfileEditor';
+import { ThemeSetting } from '@/components/ThemeSetting';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Profile' };
@@ -11,7 +12,7 @@ export default async function ProfilePage() {
   if (!customer) {
     return (
       <main className="container-narrow" style={{ padding: '48px 20px' }}>
-        <h1>Profile</h1>
+        <h1>Profile &amp; settings</h1>
         <p className="muted">Sign in to manage your customer profile.</p>
         <div style={{ display: 'flex', gap: 12 }}>
           <Link href="/account/signin" className="btn btn-primary">Sign in</Link>
@@ -36,7 +37,7 @@ export default async function ProfilePage() {
 
   return (
     <main className="container-narrow" style={{ padding: '24px 20px' }}>
-      <h1>Profile</h1>
+      <h1>Profile &amp; settings</h1>
       <ProfileEditor
         email={customer.email}
         initialName={(profile?.full_name as string) || ''}
@@ -44,6 +45,15 @@ export default async function ProfilePage() {
         initialAvatarUrl={(profile?.avatar_url as string | null) || null}
         memberSince={memberSince}
       />
+
+      {/* Account-wide preference: the same choice the seller studio exposes. */}
+      <section aria-label="Appearance" style={{ marginTop: 28 }}>
+        <h2 style={{ fontSize: 17, margin: '0 0 4px' }}>Appearance</h2>
+        <p className="muted" style={{ margin: '0 0 12px', fontSize: 13 }}>
+          Choose how Naijavend looks on this device. Store pages keep the seller&apos;s own branding.
+        </p>
+        <ThemeSetting />
+      </section>
 
       <div className="prof-links">
         <Link href="/account" className="prof-link-card">

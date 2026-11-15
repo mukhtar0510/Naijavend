@@ -61,6 +61,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
               Naija<span>vend</span>
             </Link>
             <span className="dash-sidebar-role">Staff · {membership.displayName}</span>
+            {/* Staff have no settings page, so they keep the quick switch here. */}
             <div className="dash-sidebar-tools"><ThemeToggleCompact /></div>
           </div>
           <DashNav items={STAFF_NAV} />
@@ -93,7 +94,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
             Naija<span>vend</span>
           </Link>
           <span className="dash-sidebar-role">Seller studio</span>
-          <div className="dash-sidebar-tools"><ThemeToggleCompact /></div>
         </div>
         <DashNav items={NAV} />
         <div className="dash-sidebar-foot">

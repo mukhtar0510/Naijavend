@@ -1,9 +1,11 @@
 import { redirect } from 'next/navigation';
 import { getSellerClient, getOwnStore } from '@/lib/auth';
+import { redirectStaffToPos } from '@/lib/staff';
 import { SettingsForm } from './SettingsForm';
 import { AppearanceCard } from './AppearanceCard';
 import { AnnouncementCard } from './AnnouncementCard';
 import { SettingsTabs } from './SettingsTabs';
+import { ThemeSetting } from '@/components/ThemeSetting';
 import { LocationsCard, type LocationRow } from './LocationsCard';
 import { GalleryCard } from './GalleryCard';
 import type { Store, StoreSocialLinks, StoreTheme, WhatsAppSettings } from '@idevtenancy/shared';
@@ -19,6 +21,7 @@ function one<T>(v: T | T[] | null | undefined): T | null {
 export default async function SettingsPage() {
   const sb = await getSellerClient();
   if (!sb) redirect('/dashboard/signin'); // layout redirect races this page — guard here too
+  await redirectStaffToPos(sb); // R4: settings are owner-only
   const store = await getOwnStore<
     Store & {
       whatsapp_settings: WhatsAppSettings[] | WhatsAppSettings | null;
@@ -102,6 +105,14 @@ export default async function SettingsPage() {
             <div className="dash-section-head">
               <h2>Look &amp; feel</h2>
               <span className="muted">Colours, fonts, layout, images, favicon</span>
+            </div>
+            {/* App UI theme — separate from the storefront branding below. */}
+            <div className="dash-subsection" style={{ marginBottom: 20 }}>
+              <h3 style={{ margin: '0 0 4px', fontSize: 15 }}>Your dashboard theme</h3>
+              <p className="muted" style={{ margin: '0 0 10px', fontSize: 13 }}>
+                Only changes how Naijavend looks while you&apos;re signed in — your storefront keeps its own colours.
+              </p>
+              <ThemeSetting />
             </div>
             <GalleryCard initialGallery={gallery} />
             <AppearanceCard

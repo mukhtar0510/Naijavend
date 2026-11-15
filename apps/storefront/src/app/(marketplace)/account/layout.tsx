@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { Suspense } from 'react';
 import { getCustomerUser, getCustomerClient } from '@/lib/auth';
 import { AccountNav } from './AccountNav';
-import { ThemeToggleCompact } from '@/components/ThemeToggleCompact';
 
 const NAV = [
   { href: '/account', label: 'Orders' },
@@ -10,7 +9,7 @@ const NAV = [
   { href: '/account/chats', label: 'Chats' },
   { href: '/account/alerts', label: 'Alerts' },
   { href: '/account/ai', label: 'Ask AI' },
-  { href: '/account/profile', label: 'Profile' },
+  { href: '/account/profile', label: 'Profile & settings' },
 ];
 
 // Not a hard gate: /account renders a friendly sign-in prompt when logged out.
@@ -64,7 +63,6 @@ async function AccountWho({ customerId, email }: { customerId: string; email: st
 
   return (
     <>
-      <ThemeToggleCompact />
       <Link href="/account/profile" className="acct-who" title="Edit your profile">
         {avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element

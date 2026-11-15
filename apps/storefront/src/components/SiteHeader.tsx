@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import { NaijavendLogoMark } from '@/components/NaijavendLogo';
 
 const LINKS = [
@@ -39,7 +38,6 @@ export function SiteHeader() {
           ))}
         </div>
         <div className="topnav-actions">
-          <ThemeToggle />
           <Link href="/account" className={`topnav-account${pathname.startsWith('/account') ? ' is-active' : ''}`}>
             <span className="topnav-avatar" aria-hidden>👤</span>
             <span className="topnav-account-label">My account</span>
