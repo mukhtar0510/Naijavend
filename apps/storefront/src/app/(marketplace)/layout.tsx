@@ -48,6 +48,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
               <Link href="/discover">Discover stores</Link>
               <Link href="/rankings">Rankings</Link>
               <Link href="/search">Search</Link>
+              <Link href="/about">About Naijavend</Link>
             </nav>
             <nav className="footer-col" aria-label="Sellers">
               <h4>For sellers</h4>

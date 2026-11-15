@@ -241,7 +241,7 @@ export default async function HomePage() {
         </section>
 
         <div style={{ marginTop: 40, textAlign: 'center' }}>
-          <Link href="/faq" className="btn btn-black btn-lg">Questions? Read the FAQ →</Link>
+          <Link href="/about" className="btn btn-black btn-lg">What is Naijavend? Take the tour →</Link>
         </div>
       </div>
     </main>

@@ -7,8 +7,11 @@ import { DiscoverTabs } from '@/components/DiscoverTabs';
 import { AiPickRow } from '@/components/AiPickRow';
 import { VerifiedTick } from '@/components/VerifiedTick';
 import { SavedHeart } from '@/components/SavedHeart';
-import { isOpenNow, STORE_CATEGORIES, categoryLabel, categoryEmoji, categoryClass } from '@idevtenancy/shared';
+import { isOpenNow, STORE_CATEGORIES, categoryLabel, categoryEmoji } from '@idevtenancy/shared';
 import type { Store, StoreRatingStats, StoreTheme } from '@idevtenancy/shared';
+import { ArrowRight, MapPin, Search, Sparkles, Store as StoreIcon } from 'lucide-react';
+
+import { Reveal, Stagger, StaggerItem } from '@/components/brand/Motion';
 
 export const revalidate = 60; // ISR — static-fast, invalidated on seller writes via revalidatePath
 export const metadata = { title: 'Discover stores' };
@@ -68,123 +71,265 @@ export default async function DiscoverPage({
       hours: s.business_hours ?? null,
     }));
 
+  const withCoords = (s: Store) => s.latitude != null && s.longitude != null;
+  const querySuffix = [category ? `category=${category}` : '', q ? `q=${encodeURIComponent(q)}` : '', openOnly ? 'open=1' : '']
+    .filter(Boolean)
+    .join('&');
+
   return (
-    <main>
-      <div className="page-intro">
-        <div className="container">
-          <h1>Discover stores</h1>
-          <p>Every store is a real Nigerian business with its own website, real location and verified reviews.</p>
+    <main className="brand">
+      {/* ================================ HERO ================================ */}
+      <section className="brand-hero">
+        <div className="brand-hero-grid" aria-hidden />
+        <div className="relative mx-auto w-full max-w-6xl px-5 pb-14 pt-12 sm:px-7 lg:pb-16 lg:pt-16">
+          <Reveal>
+            <span className="brand-eyebrow">
+              <span className="brand-eyebrow-dot" aria-hidden>
+                <StoreIcon size={11} />
+              </span>
+              Marketplace · {finalStores.length} {finalStores.length === 1 ? 'store' : 'stores'}
+            </span>
+          </Reveal>
+
+          <Reveal delay={0.06}>
+            <h1 className="mb-4 mt-5 max-w-[22ch] font-heading text-[clamp(34px,5.2vw,56px)] font-extrabold leading-[1.0] tracking-[-0.045em] text-foreground">
+              Real businesses. <span className="brand-grad">Real addresses.</span>
+            </h1>
+          </Reveal>
+
+          <Reveal delay={0.12}>
+            <p className="mb-7 max-w-[56ch] text-[16px] leading-relaxed text-muted-foreground">
+              Every Naijavend store is a Nigerian business with its own website, a pinned location on the map and
+              reviews that come from real orders. Search by name, filter by trade, or switch to the map.
+            </p>
+          </Reveal>
+
+          <Reveal delay={0.18}>
+            <form action="/discover" role="search" className="brand-search max-w-[620px]">
+              {category ? <input type="hidden" name="category" value={category} /> : null}
+              {openOnly ? <input type="hidden" name="open" value="1" /> : null}
+              <Search className="brand-search-icon" size={17} aria-hidden />
+              <input
+                type="text"
+                name="q"
+                defaultValue={q}
+                placeholder="Search store names…"
+                aria-label="Search store names"
+                style={{ flex: 1, minWidth: 0 }}
+              />
+              <button className="btn btn-primary" type="submit">
+                Search
+              </button>
+            </form>
+          </Reveal>
         </div>
-      </div>
-      <div className="container" style={{ padding: '24px 20px' }}>
+        <div className="brand-hero-fade" aria-hidden />
+      </section>
 
-      <DiscoverTabs
-        list={
-          <>
-      <AiPickRow />
-      <NearbyStores stores={nearbyStores} />
-
-      <form style={{ display: 'flex', gap: 8, margin: '18px 0 14px', flexWrap: 'wrap' }} action="/discover">
-        <input
-          type="text"
-          name="q"
-          defaultValue={q}
-          placeholder="Search store names…"
-          style={{ flex: 1, minWidth: 220 }}
-          aria-label="Search store names"
-        />
-        <button className="btn btn-primary" type="submit">Search</button>
-      </form>
-
-      <div className="filter-row" style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 28 }}>
-        <Link
-          href={`/discover?${[category ? `category=${category}` : '', q ? `q=${encodeURIComponent(q)}` : '', openOnly ? '' : 'open=1'].filter(Boolean).join('&')}`}
-          className={`filter-chip ${openOnly ? 'is-on' : ''}`}
-        >
-          <span aria-hidden>🟢</span> Open now
-        </Link>
-        <Link href={`/discover${q ? `?q=${encodeURIComponent(q)}` : ''}`} className={`filter-chip ${!category ? 'is-active' : ''}`}>
-          All
-        </Link>
-        {CATEGORIES.map((c) => (
-          <Link
-            key={c}
-            href={`/discover?category=${c}${q ? `&q=${encodeURIComponent(q)}` : ''}`}
-            className={`filter-chip ${category === c ? 'is-active' : ''}`}
-          >
-            <span aria-hidden>{categoryEmoji(c)}</span> {categoryLabel(c)}
-          </Link>
-        ))}
-      </div>
-
-      {finalStores.length === 0 ? (
-        <div className="empty-state">No stores match. Try a different search or category.</div>
-      ) : (
-        <div className="store-cards">
-          {finalStores.map((store) => {
-            const logo = store.theme?.logo_url ?? store.theme?.favicon_url ?? null;
-            const banner = store.theme?.banner_url ?? store.theme?.subheader_url ?? null;
-            const catClass = categoryClass(store.category);
-            return (
-              <div key={store.id} className="store-card-wrap">
-              <Link href={`/s/${store.slug}`} className="store-card">
-                <div
-                  className="store-card-banner"
-                  style={
-                    banner
-                      ? { backgroundImage: `url('${banner}')` }
-                      : {
-                          background:
-                            'radial-gradient(320px 130px at 80% -30%, var(--blue-tint-2), transparent 70%), radial-gradient(260px 120px at 10% 130%, #fdeef4, transparent 70%), var(--elevated-2)',
-                        }
-                  }
-                />
-                <div className="store-card-body">
-                  {logo ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- seller-supplied remote URL
-                    <img className="store-card-logo" src={logo} alt={`${store.name} logo`} />
-                  ) : (
-                    <div className="store-card-logo-fallback" style={{ background: 'var(--blue)' }}>
-                      {store.name.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                    <h3 style={{ display: 'inline-flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                    {store.name}
-                    {store.verification_status === 'verified' && <VerifiedTick size={15} />}
-                  </h3>
-                    <span className={`badge ${catClass}`}>{categoryEmoji(store.category)} {categoryLabel(store.category)}</span>
-                    {store.is_dropshipper && <span className="badge badge-dropship" title="Ships from a supplier">🚚 Dropshipper</span>}
-                  </div>
-                  {store.stats && store.stats.review_count > 0 ? (
-                    <span style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                      <Stars value={Number(store.stats.avg_stars)} showNumeric={false} />
-                      <span className="muted" style={{ fontSize: 13.5 }}>
-                        {Number(store.stats.avg_stars).toFixed(1)} · {store.stats.review_count} review{store.stats.review_count === 1 ? '' : 's'}
-                      </span>
-                    </span>
-                  ) : (
-                    <span className="badge">New — be the first to review</span>
-                  )}
-                  <p className="store-card-desc">
-                    {store.description.slice(0, 110)}
-                    {store.description.length > 110 ? '…' : ''}
-                  </p>
-                  {store.address && <p className="store-card-addr">📍 {store.address}</p>}
-                  <span className="store-card-visit">Visit store site →</span>
-                </div>
+      {/* ============================== FILTER RAIL =========================== */}
+      <section className="border-b border-border bg-surface" aria-label="Filter stores">
+        <div className="mx-auto w-full max-w-6xl px-5 py-4 sm:px-7">
+          <div className="brand-chip-row">
+            <Link href={`/discover${q ? `?q=${encodeURIComponent(q)}` : ''}`} className={`brand-chip no-underline ${!category && !openOnly ? 'is-active' : ''}`}>
+              All stores
+            </Link>
+            <Link
+              href={`/discover?${[openOnly ? '' : 'open=1', q ? `q=${encodeURIComponent(q)}` : ''].filter(Boolean).join('&')}`}
+              className={`brand-chip no-underline ${openOnly ? 'is-active' : ''}`}
+            >
+              <span aria-hidden>🟢</span> Open now
+            </Link>
+            {CATEGORIES.map((c) => (
+              <Link
+                key={c}
+                href={`/discover?category=${c}${q ? `&q=${encodeURIComponent(q)}` : ''}${openOnly ? '&open=1' : ''}`}
+                className={`brand-chip no-underline ${category === c ? 'is-active' : ''}`}
+              >
+                <span aria-hidden>{categoryEmoji(c)}</span> {categoryLabel(c)}
               </Link>
-              <SavedHeart slug={store.slug} name={store.name} />
-            </div>
-            );
-          })}
+            ))}
+          </div>
         </div>
-      )}
-          </>
-        }
-        map={<StoreMap stores={mapStores} />}
-      />
-      </div>
+      </section>
+
+      {/* ================================ CONTENT ============================= */}
+      <section className="mx-auto w-full max-w-6xl px-5 py-9 sm:px-7 lg:py-12">
+        <DiscoverTabs
+          list={
+            <>
+              <AiPickRow />
+              <NearbyStores stores={nearbyStores} />
+
+              {finalStores.length === 0 ? (
+                <div
+                  className="mt-8 rounded-[22px] border border-dashed border-border px-6 py-16 text-center"
+                  style={{ background: 'var(--elevated)' }}
+                >
+                  <div className="mb-3 text-3xl" aria-hidden>
+                    🔍
+                  </div>
+                  <h2 className="mb-1.5 font-heading text-[19px] font-extrabold tracking-[-0.02em] text-foreground">
+                    No stores match that search
+                  </h2>
+                  <p className="mx-auto mb-5 max-w-[44ch] text-[14px] leading-relaxed text-muted-foreground">
+                    Try a different name or clear the filters — new businesses join every week.
+                  </p>
+                  <Link href="/discover" className="btn btn-outline">
+                    Clear filters
+                  </Link>
+                </div>
+              ) : (
+                <>
+                  <div className="mb-4 mt-9 flex flex-wrap items-end justify-between gap-3">
+                    <h2 className="m-0 font-heading text-[clamp(20px,2.6vw,26px)] font-extrabold tracking-[-0.03em] text-foreground">
+                      {category ? categoryLabel(category) : 'All stores'}
+                      {q ? <span className="text-muted-foreground"> · “{q}”</span> : null}
+                    </h2>
+                    <span className="text-[12.5px] font-semibold text-muted-foreground">
+                      {finalStores.length} found · {finalStores.filter(withCoords).length} on the map
+                    </span>
+                  </div>
+
+                  <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {finalStores.map((store) => {
+                      const logo = store.theme?.logo_url ?? store.theme?.favicon_url ?? null;
+                      const banner = store.theme?.banner_url ?? store.theme?.subheader_url ?? null;
+                      const verified = store.verification_status === 'verified';
+                      return (
+                        <StaggerItem key={store.id} className="h-full">
+                          <div className="store-card-wrap h-full">
+                            <Link
+                              href={`/s/${store.slug}`}
+                              className="brand-card-lift flex h-full flex-col overflow-hidden rounded-[22px] border border-border bg-surface no-underline"
+                            >
+                              <div
+                                className="relative h-[104px] shrink-0"
+                                style={
+                                  banner
+                                    ? { backgroundImage: `url('${banner}')`, backgroundSize: 'cover', backgroundPosition: 'center' }
+                                    : {
+                                        background:
+                                          'radial-gradient(320px 130px at 82% -30%, var(--blue-tint-2), transparent 70%), radial-gradient(260px 120px at 12% 130%, #fdeef4, transparent 70%), var(--elevated-2)',
+                                      }
+                                }
+                              >
+                                <span className="absolute right-3 top-3 rounded-full border border-border px-2.5 py-1 text-[11px] font-bold text-foreground backdrop-blur">
+                                  <span aria-hidden style={{ marginRight: 4 }}>{categoryEmoji(store.category)}</span>
+                                  {categoryLabel(store.category)}
+                                </span>
+                                {store.is_dropshipper ? (
+                                  <span className="absolute left-3 top-3 rounded-full border border-border px-2.5 py-1 text-[11px] font-bold text-foreground backdrop-blur">
+                                    🚚 Dropshipper
+                                  </span>
+                                ) : null}
+                              </div>
+
+                              <div className="flex flex-1 flex-col gap-2.5 p-4">
+                                <div className="flex items-center gap-2.5">
+                                  {logo ? (
+                                    // eslint-disable-next-line @next/next/no-img-element -- seller-supplied remote URL
+                                    <img
+                                      src={logo}
+                                      alt={`${store.name} logo`}
+                                      className="h-11 w-11 shrink-0 rounded-[13px] border border-border object-cover"
+                                    />
+                                  ) : (
+                                    <div
+                                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[13px] font-heading text-[17px] font-extrabold text-white"
+                                      style={{ background: 'var(--blue)' }}
+                                      aria-hidden
+                                    >
+                                      {store.name.charAt(0).toUpperCase()}
+                                    </div>
+                                  )}
+                                  <div className="min-w-0">
+                                    <h3 className="m-0 flex items-center gap-1.5 text-[15.5px] font-extrabold leading-tight tracking-[-0.02em] text-foreground">
+                                      <span className="truncate">{store.name}</span>
+                                      {verified ? <VerifiedTick size={15} /> : null}
+                                    </h3>
+                                    {store.stats && store.stats.review_count > 0 ? (
+                                      <span className="mt-1 flex items-center gap-1.5">
+                                        <Stars value={Number(store.stats.avg_stars)} showNumeric={false} />
+                                        <span className="text-[12px] font-semibold text-muted-foreground">
+                                          {Number(store.stats.avg_stars).toFixed(1)} · {store.stats.review_count} review
+                                          {store.stats.review_count === 1 ? '' : 's'}
+                                        </span>
+                                      </span>
+                                    ) : (
+                                      <span className="mt-1 block text-[12px] font-semibold" style={{ color: 'var(--blue)' }}>
+                                        New — be the first to review
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <p
+                                  className="m-0 text-[13.5px] leading-relaxed text-muted-foreground"
+                                  style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+                                >
+                                  {store.description}
+                                </p>
+
+                                {store.address ? (
+                                  <p className="m-0 flex items-center gap-1.5 text-[12.5px] text-muted-foreground">
+                                    <MapPin size={13} className="shrink-0" aria-hidden />
+                                    <span className="truncate">{store.address}</span>
+                                  </p>
+                                ) : null}
+
+                                <span
+                                  className="mt-auto inline-flex items-center gap-1.5 pt-1 text-[13px] font-bold"
+                                  style={{ color: 'var(--blue)' }}
+                                >
+                                  Visit store <ArrowRight size={14} />
+                                </span>
+                              </div>
+                            </Link>
+                            <SavedHeart slug={store.slug} name={store.name} />
+                          </div>
+                        </StaggerItem>
+                      );
+                    })}
+                  </Stagger>
+                </>
+              )}
+
+              <div className="mt-12 flex flex-wrap items-center justify-center gap-3 rounded-[22px] border border-border px-6 py-7 text-center" style={{ background: 'var(--elevated)' }}>
+                <div className="w-full">
+                  <h2 className="mb-1.5 font-heading text-[19px] font-extrabold tracking-[-0.02em] text-foreground">
+                    Running a business of your own?
+                  </h2>
+                  <p className="mx-auto mb-4 max-w-[46ch] text-[14px] leading-relaxed text-muted-foreground">
+                    Get a free storefront, catalogue, bookings and POS — then show up here for buyers to find.
+                  </p>
+                </div>
+                <Link href="/dashboard" className="btn btn-primary">
+                  Open your store — free <ArrowRight size={16} />
+                </Link>
+                <Link href="/about" className="btn btn-outline">
+                  How it works
+                </Link>
+              </div>
+            </>
+          }
+          map={
+            <div className="mt-6">
+              <div className="mb-4 flex flex-wrap items-center gap-2 text-[13px] font-semibold text-muted-foreground">
+                <Sparkles size={14} style={{ color: 'var(--blue)' }} />
+                {mapStores.length > 0
+                  ? `${mapStores.length} ${mapStores.length === 1 ? 'store' : 'stores'} pinned on the map`
+                  : 'No stores have a location yet'}
+                {querySuffix ? (
+                  <Link href="/discover" className="brand-chip no-underline" style={{ marginLeft: 'auto' }}>
+                    Clear filters
+                  </Link>
+                ) : null}
+              </div>
+              <StoreMap stores={mapStores} />
+            </div>
+          }
+        />
+      </section>
     </main>
   );
 }

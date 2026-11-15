@@ -15,7 +15,7 @@ import { NaijavendLogoMark } from '@/components/NaijavendLogo';
  * Hidden automatically on marketplace routes (/, /discover, /rankings…)
  * where the header already provides navigation.
  */
-const MARKET_PREFIXES = ['/home', '/discover', '/rankings', '/search', '/faq', '/legal', '/account', '/offline'];
+const MARKET_PREFIXES = ['/home', '/discover', '/rankings', '/search', '/about', '/faq', '/legal', '/account', '/offline'];
 
 export function BackToMarket({ label = 'Naijavend home' }: { label?: string }) {
   const pathname = usePathname();

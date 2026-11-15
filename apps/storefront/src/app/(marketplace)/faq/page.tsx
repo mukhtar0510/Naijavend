@@ -37,10 +37,10 @@ export default function FaqPage() {
               Help centre
             </span>
             <Link
-              href="/home"
+              href="/about"
               className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold no-underline"
             >
-              New here? Browse the stores <ArrowRight size={13} />
+              New here? Start with the story <ArrowRight size={13} />
             </Link>
           </div>
 
@@ -88,15 +88,16 @@ export default function FaqPage() {
           <div className="grid items-center gap-6 sm:grid-cols-[minmax(0,1fr)_auto]">
             <div>
               <h2 className="mb-2 font-heading text-[clamp(22px,3.2vw,30px)] font-extrabold leading-[1.1] tracking-[-0.035em] text-foreground">
-                Still deciding? See it in action.
+                Still deciding? Read how it works.
               </h2>
               <p className="m-0 max-w-[52ch] text-[14.5px] leading-relaxed text-muted-foreground">
-                Browse real storefronts from Nigerian sellers — catalogue, bookings, chat and reviews all in one place.
+                The About page walks through the five layers of a storefront, the live components buyers use, and the
+                rules behind the blue tick.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Link href="/home" className="btn btn-primary">
-                Browse the stores <ArrowRight size={16} />
+              <Link href="/about" className="btn btn-primary">
+                Read the story <ArrowRight size={16} />
               </Link>
               <Link href="/dashboard" className="btn btn-outline">
                 Open a store
