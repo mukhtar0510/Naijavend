@@ -81,7 +81,7 @@ export default async function DiscoverPage({
       {/* ================================ HERO ================================ */}
       <section className="brand-hero">
         <div className="brand-hero-grid" aria-hidden />
-        <div className="relative mx-auto w-full max-w-6xl px-5 pb-14 pt-12 sm:px-7 lg:pb-16 lg:pt-16">
+        <div className="relative mx-auto w-full max-w-6xl px-4 pb-10 pt-9 sm:px-7 sm:pb-14 sm:pt-12 lg:pb-16 lg:pt-16">
           <Reveal>
             <span className="brand-eyebrow">
               <span className="brand-eyebrow-dot" aria-hidden>
@@ -128,7 +128,7 @@ export default async function DiscoverPage({
 
       {/* ============================== FILTER RAIL =========================== */}
       <section className="border-b border-border bg-surface" aria-label="Filter stores">
-        <div className="mx-auto w-full max-w-6xl px-5 py-4 sm:px-7">
+        <div className="mx-auto w-full max-w-6xl px-4 py-3 sm:px-7 sm:py-4">
           <div className="brand-chip-row">
             <Link href={`/discover${q ? `?q=${encodeURIComponent(q)}` : ''}`} className={`brand-chip no-underline ${!category && !openOnly ? 'is-active' : ''}`}>
               All stores
@@ -153,7 +153,7 @@ export default async function DiscoverPage({
       </section>
 
       {/* ================================ CONTENT ============================= */}
-      <section className="mx-auto w-full max-w-6xl px-5 py-9 sm:px-7 lg:py-12">
+      <section className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-7 sm:py-9 lg:py-12">
         <DiscoverTabs
           list={
             <>
@@ -213,13 +213,14 @@ export default async function DiscoverPage({
                                       }
                                 }
                               >
-                                <span className="absolute right-3 top-3 rounded-full border border-border px-2.5 py-1 text-[11px] font-bold text-foreground backdrop-blur">
+                                {/* Top-right stays clear for the SavedHeart button. */}
+                                <span className="absolute bottom-2.5 left-2.5 rounded-full border border-border px-2.5 py-1 text-[11px] font-bold text-foreground backdrop-blur">
                                   <span aria-hidden style={{ marginRight: 4 }}>{categoryEmoji(store.category)}</span>
                                   {categoryLabel(store.category)}
                                 </span>
                                 {store.is_dropshipper ? (
-                                  <span className="absolute left-3 top-3 rounded-full border border-border px-2.5 py-1 text-[11px] font-bold text-foreground backdrop-blur">
-                                    🚚 Dropshipper
+                                  <span className="absolute bottom-2.5 right-2.5 rounded-full border border-border px-2.5 py-1 text-[11px] font-bold text-foreground backdrop-blur">
+                                    🚚 Dropship
                                   </span>
                                 ) : null}
                               </div>
