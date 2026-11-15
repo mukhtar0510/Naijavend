@@ -44,10 +44,10 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
             </div>
             <nav className="footer-col" aria-label="Marketplace">
               <h4>Marketplace</h4>
+              <Link href="/home">Home</Link>
               <Link href="/discover">Discover stores</Link>
               <Link href="/rankings">Rankings</Link>
               <Link href="/search">Search</Link>
-              <Link href="/about">About Naijavend</Link>
             </nav>
             <nav className="footer-col" aria-label="Sellers">
               <h4>For sellers</h4>

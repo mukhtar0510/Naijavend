@@ -6,10 +6,11 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { NaijavendLogoMark } from '@/components/NaijavendLogo';
 
 const LINKS = [
+  { href: '/home', label: 'Home' },
   { href: '/discover', label: 'Discover stores' },
   { href: '/rankings', label: 'Rankings' },
   { href: '/search', label: 'Search' },
-  { href: '/about', label: 'About' },
+  { href: '/faq', label: 'FAQ' },
 ];
 
 // Marketplace header: glassy sticky bar with pill navigation, active-page
@@ -21,7 +22,7 @@ export function SiteHeader() {
   return (
     <nav className="topnav">
       <div className="container topnav-inner">
-        <Link href="/" className="logo" aria-label="Naijavend home" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+        <Link href="/home" className="logo" aria-label="Naijavend home" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
           <NaijavendLogoMark size={28} />
           Naija<span>vend</span>
         </Link>
