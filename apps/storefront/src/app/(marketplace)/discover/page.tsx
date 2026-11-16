@@ -21,7 +21,7 @@ const CATEGORIES = STORE_CATEGORIES;
 export default async function DiscoverPage({
   searchParams,
 }: {
-  searchParams: { category?: string; q?: string; open?: string };
+  searchParams: { category?: string; q?: string; open?: string; view?: string };
 }) {
   const rawCat = searchParams.category ?? '';
   const category = CATEGORIES.includes(rawCat as never) ? rawCat : undefined;
@@ -155,6 +155,7 @@ export default async function DiscoverPage({
       {/* ================================ CONTENT ============================= */}
       <section className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-7 sm:py-9 lg:py-12">
         <DiscoverTabs
+          initial={searchParams.view === 'map' ? 'map' : 'list'}
           list={
             <>
               <AiPickRow />

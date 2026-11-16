@@ -5,6 +5,19 @@ import Link from 'next/link';
 import 'leaflet/dist/leaflet.css';
 import type { LayerGroup, Map as LeafletMap, Marker } from 'leaflet';
 import {
+  ArrowUpRight,
+  Car,
+  Crosshair,
+  Footprints,
+  LocateFixed,
+  MapPin,
+  Maximize2,
+  Minimize2,
+  Search,
+  Star,
+  X,
+} from 'lucide-react';
+import {
   directionsUrl,
   formatDistance,
   haversineKm,
@@ -45,9 +58,9 @@ interface RouteInfo {
 /**
  * Street-level map tab (OpenStreetMap tiles — real roads, buildings and
  * landmarks). The viewer is a pulsing blue dot; every store is a bubble pin
- * with an open-now dot. Advanced layout: map and a synced side list sit
- * side-by-side on desktop (stacked on phones) — clicking either selects the
- * store, draws the route on the map and shows the detail card.
+ * with an open-now dot. Desktop is a map + synced side panel; phones stack the
+ * panel under the map. Selecting a store from either side draws the route and
+ * opens the detail card.
  */
 export function StoreMap({ stores }: { stores: MapStore[] }) {
   const { origin, label, state, locate, pickCity, reset } = useViewerLocation();
@@ -94,8 +107,6 @@ export function StoreMap({ stores }: { stores: MapStore[] }) {
 
   const sel = plotted.find((p) => p.slug === selected) ?? null;
 
-  // Selecting a store from the list highlights its pin, pans the map and keeps
-  // the list entry in view — one state drives both sides of the split view.
   function select(slug: string | null) {
     setSelected(slug);
   }
@@ -320,79 +331,87 @@ export function StoreMap({ stores }: { stores: MapStore[] }) {
     else locate();
   }
 
+  const cats = categoriesOf(stores);
+  const located = state === 'ready';
+
   return (
-    <section className={`storemap${fullscreen ? ' storemap-fs' : ''}`} aria-label="Street map of stores">
-      <div className="radar-head">
-        <h2>🗺️ Map view {origin ? '' : ''}<span className="map-count">{plotted.length}</span></h2>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button type="button" className="btn btn-outline btn-sm" onClick={recenter} title="Centre on my location">
-            ⌖ Me
+    <section className={`nv-map${fullscreen ? ' is-fullscreen' : ''}`} aria-label="Street map of stores">
+      {/* -------------------------------- header -------------------------------- */}
+      <div className="nv-map-head">
+        <div className="nv-map-head-id">
+          <span className="nv-map-head-ico" aria-hidden>
+            <MapPin size={18} />
+          </span>
+          <div>
+            <h2>Map view</h2>
+            <p>
+              {plotted.length} store{plotted.length === 1 ? '' : 's'}
+              {label ? ` around ${label}` : ' across the marketplace'}
+              {!located ? ' · turn on location for distances' : ''}
+            </p>
+          </div>
+        </div>
+        <div className="nv-map-head-actions">
+          <button type="button" className="nv-map-btn" onClick={recenter} title="Centre on my location">
+            <Crosshair size={15} aria-hidden />
+            <span>Me</span>
           </button>
           <button
             type="button"
-            className="btn btn-outline btn-sm"
+            className="nv-map-btn"
             onClick={() => setFullscreen((v) => !v)}
             title={fullscreen ? 'Exit fullscreen' : 'Fullscreen map'}
           >
-            {fullscreen ? '⤡ Exit' : '⛶ Full'}
+            {fullscreen ? <Minimize2 size={15} aria-hidden /> : <Maximize2 size={15} aria-hidden />}
+            <span>{fullscreen ? 'Exit' : 'Full'}</span>
           </button>
-          {state === 'ready' && (
-            <button type="button" className="btn btn-outline btn-sm" onClick={reset}>
-              Change
+          {located && (
+            <button type="button" className="nv-map-btn" onClick={reset}>
+              Change area
             </button>
           )}
         </div>
       </div>
 
-      {categoriesOf(plotted).length > 1 && (
-        <div className="radar-cats" role="group" aria-label="Filter map by category">
-          <button type="button" className={`radar-cat${cat === null ? ' on' : ''}`} onClick={() => { setCat(null); setSelected(null); }}>
-            All
-          </button>
-          {categoriesOf(plotted).map((c) => (
-            <button key={c} type="button" className={`radar-cat${cat === c ? ' on' : ''}`} onClick={() => { setCat(c); setSelected(null); }}>
-              {categoryEmoji(c)} {c}
-            </button>
-          ))}
-          <input
-            type="search"
-            className="map-search"
-            placeholder="Filter by name or area…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            aria-label="Filter map stores"
-          />
-        </div>
-      )}
-
+      {/* --------------------------- location prompts --------------------------- */}
       {state === 'idle' && (
-        <div className="card radar-cta">
-          <p style={{ margin: '0 0 12px' }}>
-            Turn on your location to see yourself on the map, real distances to every store, and one-tap directions.
-            Your location stays in this browser.
-          </p>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-            <button type="button" className="btn btn-primary" onClick={locate}>
-              Show my location
-            </button>
-            <span className="nearby-cities">
-              or jump to:{' '}
-              {QUICK_CITIES.map((c) => (
-                <button key={c.label} type="button" className="nearby-city" onClick={() => pickCity(c.label, c.lat, c.lng)}>
-                  {c.label}
-                </button>
-              ))}
-            </span>
+        <div className="nv-map-banner">
+          <LocateFixed size={18} aria-hidden />
+          <div>
+            <strong>See real distances and routes</strong>
+            <p>Share your location once — it stays in this browser, never on our servers.</p>
+          </div>
+          <button type="button" className="btn btn-primary btn-sm" onClick={locate}>
+            Use my location
+          </button>
+          <div className="nv-map-banner-cities">
+            {QUICK_CITIES.map((c) => (
+              <button key={c.label} type="button" className="nv-map-city" onClick={() => pickCity(c.label, c.lat, c.lng)}>
+                {c.label}
+              </button>
+            ))}
           </div>
         </div>
       )}
-      {state === 'locating' && <div className="card radar-cta"><p style={{ margin: 0 }}>Locating you…</p></div>}
+      {state === 'locating' && (
+        <div className="nv-map-banner">
+          <LocateFixed size={18} aria-hidden className="nv-spin" />
+          <div>
+            <strong>Locating you…</strong>
+            <p>This only takes a moment.</p>
+          </div>
+        </div>
+      )}
       {state === 'denied' && (
-        <div className="card radar-cta">
-          <p style={{ margin: '0 0 10px' }}>Location is blocked — pick a base area to centre the map:</p>
-          <div className="nearby-cities">
+        <div className="nv-map-banner">
+          <MapPin size={18} aria-hidden />
+          <div>
+            <strong>Location is blocked — that&apos;s fine</strong>
+            <p>Pick a base area to centre the map and unlock distances.</p>
+          </div>
+          <div className="nv-map-banner-cities">
             {QUICK_CITIES.map((c) => (
-              <button key={c.label} type="button" className="nearby-city" onClick={() => pickCity(c.label, c.lat, c.lng)}>
+              <button key={c.label} type="button" className="nv-map-city" onClick={() => pickCity(c.label, c.lat, c.lng)}>
                 {c.label}
               </button>
             ))}
@@ -400,11 +419,15 @@ export function StoreMap({ stores }: { stores: MapStore[] }) {
         </div>
       )}
       {state === 'error' && (
-        <div className="card radar-cta">
-          <p style={{ margin: 0 }}>This browser can&apos;t share location — pick a base area:</p>
-          <div className="nearby-cities" style={{ marginTop: 10 }}>
+        <div className="nv-map-banner">
+          <MapPin size={18} aria-hidden />
+          <div>
+            <strong>This browser can&apos;t share location</strong>
+            <p>Pick a base area and every store still sorts by distance from it.</p>
+          </div>
+          <div className="nv-map-banner-cities">
             {QUICK_CITIES.map((c) => (
-              <button key={c.label} type="button" className="nearby-city" onClick={() => pickCity(c.label, c.lat, c.lng)}>
+              <button key={c.label} type="button" className="nv-map-city" onClick={() => pickCity(c.label, c.lat, c.lng)}>
                 {c.label}
               </button>
             ))}
@@ -412,127 +435,213 @@ export function StoreMap({ stores }: { stores: MapStore[] }) {
         </div>
       )}
 
-      <div className="map-split">
-        <div className="map-frame">
-          <div ref={containerRef} className="map-canvas" role="application" aria-label="Interactive map of stores" />
-          <div className="map-legend" aria-hidden="true">
-            <span><i className="lg-open" /> open now</span>
-            <span><i className="lg-closed" /> closed</span>
-            <span><i className="lg-pin" /> store pin</span>
-          </div>
-        </div>
-
-        <aside className="map-list" aria-label="Stores on the map">
-          {plotted.length === 0 && <div className="muted map-list-empty">No stores match your filters.</div>}
-          {plotted.slice(0, 30).map((s) => (
+      {/* -------------------------------- filters ------------------------------- */}
+      <div className="nv-map-filters">
+        <label className="nv-map-search">
+          <Search size={15} aria-hidden />
+          <input
+            type="search"
+            placeholder="Filter by name or area…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            aria-label="Filter map stores by name or area"
+          />
+        </label>
+        <div className="nv-map-cats" role="group" aria-label="Filter map by category">
+          <button
+            type="button"
+            className={`nv-map-cat${cat === null ? ' is-active' : ''}`}
+            onClick={() => {
+              setCat(null);
+              setSelected(null);
+            }}
+          >
+            All
+          </button>
+          {cats.map((c) => (
             <button
-              key={s.slug}
+              key={c}
               type="button"
-              className={`map-row${selected === s.slug ? ' on' : ''}`}
-              onClick={() => select(s.slug)}
+              className={`nv-map-cat${cat === c ? ' is-active' : ''}`}
+              onClick={() => {
+                setCat(c);
+                setSelected(null);
+              }}
             >
-              {s.logo ? (
-                // eslint-disable-next-line @next/next/no-img-element -- seller-supplied remote URL
-                <img className="map-row-logo" src={s.logo} alt="" loading="lazy" />
-              ) : (
-                <span className="map-row-logo map-row-logo-fallback" aria-hidden>{categoryEmoji(s.category)}</span>
-              )}
-              <span className="map-row-body">
-                <strong>
-                  {s.name}
-                  {s.verified && <VerifiedTick size={13} />}
-                </strong>
-                <em className="muted">{s.address ?? s.category}</em>
-              </span>
-              <span className="map-row-side">
-                <i className={`map-row-dot${s.open ? ' open' : ''}`} title={s.open ? 'Open now' : 'Closed'} />
-                {s.km != null && <strong className="map-row-km">{formatDistance(s.km)}</strong>}
-                <em className="muted map-row-eta">{periodLabel === 'walk' ? travelEstimates(s.km ?? 0).walk : travelEstimates(s.km ?? 0).drive}</em>
-              </span>
+              <span aria-hidden>{categoryEmoji(c)}</span>
+              {c.replace(/-/g, ' ')}
             </button>
           ))}
+        </div>
+      </div>
+
+      {/* --------------------------------- split -------------------------------- */}
+      <div className="nv-map-layout">
+        <div className="nv-map-stage">
+          <div ref={containerRef} className="map-canvas nv-map-canvas" role="application" aria-label="Interactive map of stores" />
+          <div className="nv-map-legend" aria-hidden>
+            <span>
+              <i className="is-open" /> open now
+            </span>
+            <span>
+              <i className="is-closed" /> closed
+            </span>
+            <span>
+              <i className="is-pin" /> store
+            </span>
+          </div>
+          {plotted.length === 0 && (
+            <div className="nv-map-overlay">
+              <strong>No stores match those filters</strong>
+              <button
+                type="button"
+                className="btn btn-outline btn-sm"
+                onClick={() => {
+                  setCat(null);
+                  setQuery('');
+                }}
+              >
+                Clear filters
+              </button>
+            </div>
+          )}
+        </div>
+
+        <aside className="nv-map-panel" aria-label="Stores on the map">
+          <div className="nv-map-panel-head">
+            <strong>On the map</strong>
+            <span>{plotted.length}</span>
+          </div>
+          <div className="nv-map-list">
+            {plotted.slice(0, 40).map((s) => (
+              <button
+                key={s.slug}
+                type="button"
+                className={`nv-map-store${selected === s.slug ? ' is-active' : ''}`}
+                onClick={() => select(s.slug)}
+              >
+                {s.logo ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- seller-supplied remote URL
+                  <img className="nv-map-store-logo" src={s.logo} alt="" loading="lazy" />
+                ) : (
+                  <span className="nv-map-store-logo is-fallback" aria-hidden>
+                    {categoryEmoji(s.category)}
+                  </span>
+                )}
+                <span className="nv-map-store-body">
+                  <strong>
+                    {s.name}
+                    {s.verified && <VerifiedTick size={13} />}
+                  </strong>
+                  <em>{s.address ?? s.category.replace(/-/g, ' ')}</em>
+                  <span className="nv-map-store-meta">
+                    <i className={`nv-map-dot${s.open ? ' is-open' : ''}`} />
+                    {s.open ? 'Open now' : 'Closed'}
+                    {s.km != null && <> · {formatDistance(s.km)}</>}
+                  </span>
+                </span>
+                <ArrowUpRight size={15} className="nv-map-store-go" aria-hidden />
+              </button>
+            ))}
+            {plotted.length === 0 && <p className="nv-map-empty">Nothing here yet.</p>}
+          </div>
         </aside>
       </div>
 
-      {sel && origin && sel.km != null && (
-        <div className="card radar-card">
-          <div className="radar-card-top">
+      {/* -------------------------------- detail -------------------------------- */}
+      {sel && (
+        <div className="nv-map-detail">
+          <div className="nv-map-detail-id">
             {sel.logo ? (
               // eslint-disable-next-line @next/next/no-img-element -- seller-supplied remote URL
-              <img className="radar-card-logo" src={sel.logo} alt={`${sel.name} logo`} />
+              <img className="nv-map-detail-logo" src={sel.logo} alt={`${sel.name} logo`} />
             ) : (
-              <span className="radar-card-logo radar-card-logo-fallback" aria-hidden>{sel.name.charAt(0).toUpperCase()}</span>
+              <span className="nv-map-detail-logo is-fallback" aria-hidden>
+                {sel.name.charAt(0).toUpperCase()}
+              </span>
             )}
-            <div style={{ minWidth: 0 }}>
-              <strong style={{ fontSize: 17, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <div>
+              <strong>
                 {sel.name}
-                {sel.verified && <VerifiedTick size={16} />}
+                {sel.verified && <VerifiedTick size={15} />}
               </strong>
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
-                <span className="badge">{categoryEmoji(sel.category)} {sel.category}</span>
-                {sel.isDropshipper && <span className="badge badge-dropship">🚚 Dropshipper</span>}
-                <span className={`badge ${sel.open ? 'badge-success' : ''}`}>
-                  {sel.open ? 'Open now' : sel.hours ? 'Closed today' : 'Hours not set'}
-                </span>
-              </div>
+              <p>
+                {categoryEmoji(sel.category)} {sel.category.replace(/-/g, ' ')}
+                {sel.isDropshipper ? ' · 🚚 dropshipper' : ''}
+                {sel.hoursToday ? ` · today ${sel.hoursToday}` : ''}
+              </p>
             </div>
-            <button type="button" className="radar-card-close" onClick={() => setSelected(null)} aria-label="Close">×</button>
+            <button type="button" className="nv-map-detail-close" onClick={() => select(null)} aria-label="Close details">
+              <X size={17} />
+            </button>
           </div>
-          <p className="muted" style={{ margin: '8px 0 0', fontSize: 13.5 }}>
-            {sel.address ?? 'Address on the store page'}
-            {sel.hoursToday ? ` · Today ${sel.hoursToday}` : ''}
-          </p>
-          <div className="radar-card-stats">
-            <span><strong>{formatDistance(sel.km)}</strong><em className="muted">away</em></span>
+
+          <div className="nv-map-detail-stats">
+            <span>
+              <strong>{sel.km != null ? formatDistance(sel.km) : '—'}</strong>
+              <em>away</em>
+            </span>
             <span>
               <strong>
-                {profile === 'foot' ? '🚶' : '🚗'} {route ? `${formatDistance(route.km)} · ${route.min} min` : travelEstimates(sel.km).walk}
+                {profile === 'foot' ? <Footprints size={14} /> : <Car size={14} />}{' '}
+                {route ? `${formatDistance(route.km)} · ${route.min} min` : sel.km != null ? (profile === 'foot' ? travelEstimates(sel.km).walk : travelEstimates(sel.km).drive) : '—'}
               </strong>
-              <em className="muted">
-                {route ? (route.real ? `${periodLabel} route` : `${periodLabel} (direct)`) : `${periodLabel} (est.)`}
-              </em>
+              <em>{route ? (route.real ? `${periodLabel} route` : `${periodLabel} direct`) : `${periodLabel} estimate`}</em>
             </span>
             <span>
-              <strong>{profile === 'foot' ? `🚗 ${travelEstimates(sel.km).drive}` : `🚶 ${travelEstimates(sel.km).walk}`}</strong>
-              <em className="muted">{profile === 'foot' ? 'drive' : 'walk'} (est.)</em>
+              <strong>{sel.open ? 'Open now' : sel.hours ? 'Closed today' : 'Hours not set'}</strong>
+              <em>{sel.address ?? 'Address on the store page'}</em>
             </span>
             {sel.rating != null && sel.reviewCount ? (
-              <span><strong>⭐ {sel.rating.toFixed(1)}</strong><em className="muted">{sel.reviewCount} review{sel.reviewCount === 1 ? '' : 's'}</em></span>
+              <span>
+                <strong>
+                  <Star size={13} /> {sel.rating.toFixed(1)}
+                </strong>
+                <em>
+                  {sel.reviewCount} review{sel.reviewCount === 1 ? '' : 's'}
+                </em>
+              </span>
             ) : null}
           </div>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
-            <Link className="btn btn-primary btn-sm" href={`/s/${sel.slug}`}>Visit store</Link>
-            <a
-              className="btn btn-outline btn-sm"
-              href={directionsUrl(origin, { lat: sel.lat, lng: sel.lng }, sel.name)}
-              target="_blank"
-              rel="noreferrer"
-            >
-              How to get there ↗
-            </a>
-            <div className="map-profile-toggle" role="group" aria-label="Route mode">
+
+          <div className="nv-map-detail-actions">
+            <Link className="btn btn-primary btn-sm" href={`/s/${sel.slug}`}>
+              Visit store
+            </Link>
+            {origin && (
+              <a
+                className="btn btn-outline btn-sm"
+                href={directionsUrl(origin, { lat: sel.lat, lng: sel.lng }, sel.name)}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Directions <ArrowUpRight size={14} />
+              </a>
+            )}
+            <div className="nv-map-toggle" role="group" aria-label="Route mode">
               <button
                 type="button"
-                className={`map-profile-btn${profile === 'foot' ? ' on' : ''}`}
+                className={`nv-map-toggle-btn${profile === 'foot' ? ' is-active' : ''}`}
                 onClick={() => setProfile('foot')}
               >
-                🚶 Walk
+                <Footprints size={14} /> Walk
               </button>
               <button
                 type="button"
-                className={`map-profile-btn${profile === 'driving' ? ' on' : ''}`}
+                className={`nv-map-toggle-btn${profile === 'driving' ? ' is-active' : ''}`}
                 onClick={() => setProfile('driving')}
               >
-                🚗 Drive
+                <Car size={14} /> Drive
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {state === 'ready' && (
-        <p className="muted radar-hint">
-          Centred on <strong>{label ?? 'your location'}</strong> — click a pin or a side-list row to see the store, the {periodLabel} route and how to get there.
+      {located && (
+        <p className="nv-map-hint">
+          Centred on <strong>{label ?? 'your location'}</strong> — tap a pin or a store in the list to
+          see the {periodLabel} route.
         </p>
       )}
     </section>

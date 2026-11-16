@@ -10,6 +10,16 @@ import { ProductCard, type ProductCardItem } from '@/components/ProductCard';
 import { OrderShare } from '@/components/OrderShare';
 import { OrderDispute } from './OrderDispute';
 import { siteUrl } from '@/lib/site';
+import {
+  ArrowRight,
+  Bell,
+  CalendarDays,
+  Compass,
+  MessageSquare,
+  Package,
+  Sparkles,
+  UserRound,
+} from 'lucide-react';
 
 const STATUS_BADGE: Record<string, string> = {
   pending: 'badge-black',
@@ -64,18 +74,42 @@ export default async function MyOrdersPage() {
 
   if (!session || !sb) {
     return (
-      <main>
-        <div className="page-intro">
-          <div className="container">
-            <h1>My account</h1>
-            <p>Sign in to see the orders you&apos;ve placed across every store.</p>
+      <main className="nv-acc">
+        <section className="nv-acc-hero">
+          <div className="nv-acc-hero-copy">
+            <span className="nv-pill nv-pill-invert">My account</span>
+            <h1>Your orders and bookings, in one place.</h1>
+            <p>
+              Sign in once to track every order across every store, manage appointments, message
+              sellers and keep your saved stores on every device.
+            </p>
+            <div className="nv-acc-hero-actions">
+              <Link href="/account/signin" className="btn btn-white btn-lg">
+                Sign in <ArrowRight size={16} />
+              </Link>
+              <Link href="/account/signin?mode=create" className="btn btn-ghost-light btn-lg">
+                Create a free account
+              </Link>
+            </div>
           </div>
-        </div>
-        <div className="container-narrow" style={{ padding: '32px 20px' }}>
-          <div style={{ display: 'flex', gap: 12 }}>
-            <Link href="/account/signin" className="btn btn-primary">Sign in</Link>
-            <Link href="/account/signin" className="btn btn-outline">Create an account</Link>
-          </div>
+          <ul className="nv-acc-hero-points">
+            <li>
+              <Package size={16} aria-hidden /> Track orders from checkout to delivery
+            </li>
+            <li>
+              <CalendarDays size={16} aria-hidden /> Reschedule or cancel bookings yourself
+            </li>
+            <li>
+              <MessageSquare size={16} aria-hidden /> Chat with any seller you&apos;ve bought from
+            </li>
+          </ul>
+        </section>
+        <div className="nv-acc-empty">
+          <h2>Nothing to show yet</h2>
+          <p>Your orders will appear here the moment you sign in.</p>
+          <Link href="/discover" className="btn btn-outline btn-sm">
+            Browse stores <ArrowRight size={14} />
+          </Link>
         </div>
       </main>
     );
@@ -95,49 +129,54 @@ export default async function MyOrdersPage() {
   const referralP = loadReferral(sb, customer.id);
 
   return (
-    <main className="account-page">
-      <div className="account-page-hero">
-        <div className="container">
-          <h1>My account</h1>
-          <p>Your orders, saved stores and favourites — in one place, at a glance.</p>
-          <div className="account-hero-actions">
-            <Link href="/discover" className="btn btn-primary">Discover stores</Link>
-            <Link href="/account/ai" className="btn btn-outline">Ask the AI 🤖</Link>
+    <main className="nv-acc">
+      <section className="nv-acc-hero nv-acc-hero-compact">
+        <div className="nv-acc-hero-copy">
+          <span className="nv-pill nv-pill-invert">My account</span>
+          <h1>Welcome back — here&apos;s your marketplace at a glance.</h1>
+          <p>Orders, bookings, chats and saved stores, all in one place.</p>
+          <div className="nv-acc-hero-actions">
+            <Link href="/discover" className="btn btn-white btn-sm">
+              <Compass size={15} /> Discover stores
+            </Link>
+            <Link href="/account/ai" className="btn btn-ghost-light btn-sm">
+              <Sparkles size={15} /> Ask the AI
+            </Link>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="container account-speed-dial" aria-label="Quick actions">
-        <Link href="/discover" className="acct-tile">
-          <span className="acct-tile-ico">🧭</span>
+      <nav className="nv-acc-tiles" aria-label="Quick actions">
+        <Link href="/discover" className="nv-acc-tile">
+          <span className="nv-acc-tile-ico"><Compass size={18} /></span>
           <strong>Discover</strong>
-          <span className="muted">Find new stores</span>
+          <span>Find new stores</span>
         </Link>
-        <Link href="/account/bookings" className="acct-tile">
-          <span className="acct-tile-ico">📅</span>
+        <Link href="/account/bookings" className="nv-acc-tile">
+          <span className="nv-acc-tile-ico"><CalendarDays size={18} /></span>
           <strong>Bookings</strong>
-          <span className="muted">Your appointments</span>
+          <span>Your appointments</span>
         </Link>
-        <Link href="/account/chats" className="acct-tile">
-          <span className="acct-tile-ico">💬</span>
+        <Link href="/account/chats" className="nv-acc-tile">
+          <span className="nv-acc-tile-ico"><MessageSquare size={18} /></span>
           <strong>Chats</strong>
-          <span className="muted">Message sellers</span>
+          <span>Message sellers</span>
         </Link>
-        <Link href="/account/alerts" className="acct-tile">
-          <span className="acct-tile-ico">🔔</span>
+        <Link href="/account/alerts" className="nv-acc-tile">
+          <span className="nv-acc-tile-ico"><Bell size={18} /></span>
           <strong>Alerts</strong>
-          <span className="muted">Orders, drops, chats</span>
+          <span>Orders, drops, chats</span>
         </Link>
-        <Link href="/account/profile" className="acct-tile">
-          <span className="acct-tile-ico">👤</span>
+        <Link href="/account/profile" className="nv-acc-tile">
+          <span className="nv-acc-tile-ico"><UserRound size={18} /></span>
           <strong>Profile</strong>
-          <span className="muted">Name &amp; avatar</span>
+          <span>Name &amp; avatar</span>
         </Link>
-      </div>
+      </nav>
 
-      <div className="container" style={{ padding: '24px 20px 0' }}>
-        <div className="account-grid">
-          <div className="account-grid-main">
+      <div className="nv-acc-content">
+        <div className="nv-acc-grid">
+          <div className="nv-acc-main">
             <Suspense fallback={<StatsSkeleton />}>
               <OrdersSummarySection promise={summaryP} />
             </Suspense>
@@ -154,12 +193,12 @@ export default async function MyOrdersPage() {
             <SellerUpsellCard />
           </div>
 
-          <div className="account-grid-side">
+          <aside className="nv-acc-side">
             <AskAiCard />
             <Suspense fallback={<WideCardSkeleton lines={1} block={210} />}>
               <BuyAgainSection promise={ordersP} />
             </Suspense>
-          </div>
+          </aside>
         </div>
       </div>
     </main>
@@ -309,7 +348,7 @@ function WideCardSkeleton({ lines, block }: { lines: number; block: number }) {
 
 function SellerUpsellCard() {
   return (
-    <section className="card card-elevated seller-upsell" aria-label="Sell on Naijavend">
+    <section className="nv-acc-card nv-acc-selling" aria-label="Sell on Naijavend">
       <div className="seller-upsell-head">
         <div>
           <h2>💼 Turn shopping into selling</h2>
@@ -335,8 +374,8 @@ function BuyAgainCard({ buyAgain }: { buyAgain: ProductCardItem[] }) {
   if (buyAgain.length === 0) return null;
 
   return (
-    <section className="card card-elevated buy-again-card" aria-label="Buy again">
-      <div className="buy-again-head">
+    <section className="nv-acc-card" aria-label="Buy again">
+      <div className="nv-acc-card-head">
         <h2>🔁 Buy again</h2>
         <span className="muted" style={{ fontSize: 12.5 }}>
           Items you bought before, most recent first
@@ -357,8 +396,8 @@ function AskAiCard() {
     { label: 'Recommend something', q: 'Recommend products I might like' },
   ];
   return (
-    <section className="card card-elevated ask-ai-card" aria-label="Ask Naijavend">
-      <div className="ask-ai-head">
+    <section className="nv-acc-card nv-acc-ai" aria-label="Ask Naijavend">
+      <div className="nv-acc-ai-head">
         <div className="ask-ai-icon">🤖</div>
         <div className="ask-ai-title">
           <h2>Ask Naijavend</h2>
@@ -398,12 +437,12 @@ function OrdersSummary({ rows }: { rows: SummaryRow[] }) {
     { label: 'Delivered', value: Number(delivered), ico: '✅' },
   ];
   return (
-    <div className="account-stats" aria-label="Order summary">
+    <div className="nv-acc-stats" aria-label="Order summary">
       {stats.map((s) => (
-        <div key={s.label} className="account-stat">
-          <span className="account-stat-ico" aria-hidden>{s.ico}</span>
-          <strong className="account-stat-value">{s.value}</strong>
-          <span className="muted account-stat-label">{s.label}</span>
+        <div key={s.label} className="nv-acc-stat">
+          <span className="nv-acc-stat-ico" aria-hidden>{s.ico}</span>
+          <strong>{s.value}</strong>
+          <span>{s.label}</span>
         </div>
       ))}
     </div>
@@ -419,72 +458,109 @@ function OrdersList({ orders, loadError }: { orders: OrderRow[]; loadError: bool
 
   if (orders.length === 0) {
     return (
-      <section className="card card-elevated" aria-label="Your orders">
-        <div className="section-head"><h2>🧾 Your orders</h2></div>
-        <div className="empty-state">
+      <section className="nv-acc-card" aria-label="Your orders">
+        <header className="nv-acc-card-head">
+          <h2>
+            <Package size={17} aria-hidden /> Your orders
+          </h2>
+        </header>
+        <div className="nv-acc-blank">
+          <span aria-hidden>🧾</span>
           <h3>No orders yet</h3>
           <p>Browse stores to see your first order here.</p>
-          <div style={{ marginTop: 10 }}>
-            <Link href="/discover" className="btn btn-outline btn-sm">Browse stores →</Link>
-          </div>
+          <Link href="/discover" className="btn btn-outline btn-sm">
+            Browse stores <ArrowRight size={14} />
+          </Link>
         </div>
       </section>
     );
   }
 
   return (
-    <section className="card card-elevated" aria-label="Your orders">
-      <div className="section-head"><h2>🧾 Your orders</h2></div>
-      <div className="orders-list">
+    <section className="nv-acc-card" aria-label="Your orders">
+      <header className="nv-acc-card-head">
+        <h2>
+          <Package size={17} aria-hidden /> Your orders
+        </h2>
+        <span className="nv-acc-card-count">{orders.length}</span>
+      </header>
+      <div className="nv-acc-orders">
         {orders.map((o) => {
           const store = Array.isArray(o.stores) ? o.stores[0] : o.stores;
           const items = o.order_items ?? [];
           const titles = items.map((it) => it.listings?.title).filter(Boolean) as string[];
+          const thumbs = items
+            .map((it) => it.listings?.image_urls?.[0])
+            .filter(Boolean)
+            .slice(0, 3) as string[];
           const count = titles.length;
           const summary = count > 0 ? (count <= 2 ? titles.join(' · ') : `${titles[0]} + ${count - 1} more`) : null;
           const steps = ['pending', 'paid', 'fulfilled'] as const;
           const stepIndex = steps.indexOf(o.status as (typeof steps)[number]);
           const cancelled = o.status === 'cancelled' || o.status === 'refunded';
           return (
-            <div key={o.id} className="card order-card">
-              <div className="order-card-head">
-                <div className="order-card-tags">
-                  <span className={`badge ${STATUS_BADGE[o.status] ?? ''}`}>{o.status}</span>
+            <article key={o.id} className="nv-acc-order">
+              <div className="nv-acc-order-top">
+                <div className="nv-acc-order-media">
+                  {thumbs.length > 0 ? (
+                    thumbs.map((src, i) => (
+                      // eslint-disable-next-line @next/next/no-img-element -- seller-supplied remote URL
+                      <img key={i} src={src} alt="" loading="lazy" />
+                    ))
+                  ) : (
+                    <span className="nv-acc-order-ph" aria-hidden>
+                      {o.status === 'fulfilled' ? '📦' : '🛍️'}
+                    </span>
+                  )}
+                </div>
+
+                <div className="nv-acc-order-info">
+                  <div className="nv-acc-order-tags">
+                    <span className={`badge ${STATUS_BADGE[o.status] ?? ''}`}>{o.status}</span>
+                    <span className="nv-acc-order-id">#{String(o.id).slice(0, 8)}</span>
+                  </div>
+                  <strong className="nv-acc-order-title">{summary ?? 'Order'}</strong>
+                  <div className="nv-acc-order-meta">
+                    {store && (
+                      <Link href={`/s/${store.slug}`} className="nv-acc-order-store">
+                        🏪 {store.name}
+                      </Link>
+                    )}
+                    <span>
+                      {new Date(o.created_at).toLocaleDateString('en-NG', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                      })}
+                      {count > 0 && ` · ${count} item${count === 1 ? '' : 's'}`}
+                    </span>
+                  </div>
+                  {!cancelled && (
+                    <div className="nv-acc-steps" aria-label="Order progress">
+                      {steps.map((s, i) => (
+                        <span
+                          key={s}
+                          className={`nv-acc-step ${stepIndex >= i ? 'is-done' : ''} ${stepIndex === i ? 'is-current' : ''}`}
+                          title={s}
+                        />
+                      ))}
+                      <em>{cancelled ? 'Cancelled' : steps[Math.max(0, stepIndex)]}</em>
+                    </div>
+                  )}
+                  {(o.discount_kobo ?? 0) > 0 && (
+                    <span className="nv-acc-order-discount">
+                      🎟️ {o.discount_code} — saved {formatNaira(o.discount_kobo as number)}
+                    </span>
+                  )}
+                </div>
+
+                <div className="nv-acc-order-side">
+                  <strong className="nv-acc-order-total">{formatNaira(o.total_kobo as number)}</strong>
                   {store && <OrderShare storeName={store.name} storeSlug={store.slug} orderId={String(o.id)} total={formatNaira(o.total_kobo as number)} status={String(o.status)} />}
+                  <OrderDispute orderId={String(o.id)} orderStatus={String(o.status)} />
                 </div>
-                {summary && <span className="muted" style={{ fontSize: 13 }}>{summary}</span>}
               </div>
-              {store && (
-                <div className="order-card-meta">
-                  <Link href={`/s/${store.slug}`} className="order-card-store">🏪 {store.name}</Link>
-                  <span className="muted" style={{ fontSize: 12.5 }}>
-                    {new Date(o.created_at).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}
-                    {count > 0 && ` · ${count} item${count === 1 ? '' : 's'}`}
-                  </span>
-                </div>
-              )}
-              {!cancelled && (
-                <div className="order-steps" aria-label="Order progress">
-                  {steps.map((s, i) => (
-                    <div
-                      key={s}
-                      className={`order-step ${stepIndex >= i ? 'is-done' : ''} ${stepIndex === i ? 'is-current' : ''}`}
-                      title={s}
-                    />
-                  ))}
-                </div>
-              )}
-              {(o.discount_kobo ?? 0) > 0 && (
-                <span className="order-card-discount">
-                  🎟️ {o.discount_code} — saved {formatNaira(o.discount_kobo as number)}
-                </span>
-              )}
-              <OrderDispute orderId={String(o.id)} orderStatus={String(o.status)} />
-              <div className="order-card-footer">
-                <span className="price">{formatNaira(o.total_kobo as number)}</span>
-                <span className="mono muted" style={{ fontSize: 12 }}>#{String(o.id).slice(0, 8)}</span>
-              </div>
-            </div>
+            </article>
           );
         })}
       </div>

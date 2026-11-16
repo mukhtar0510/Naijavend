@@ -193,15 +193,97 @@ function labelTitle(code: string): string {
 
 const MARKETPLACE_URL = process.env.NEXT_PUBLIC_MARKETPLACE_URL || 'https://naijacart-roan.vercel.app';
 
+/* ------------------------------- Icons ---------------------------------- */
+// Inline 1.7px stroke icons keep the console dependency-free while giving the
+// sidebar the crisp, consistent look of a real admin product.
+function Svg({ children }: { children: React.ReactNode }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="17"
+      height="17"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      {children}
+    </svg>
+  );
+}
+
+const ICONS = {
+  overview: () => (
+    <Svg>
+      <rect x="3" y="3" width="7.5" height="7.5" rx="1.6" />
+      <rect x="13.5" y="3" width="7.5" height="7.5" rx="1.6" />
+      <rect x="3" y="13.5" width="7.5" height="7.5" rx="1.6" />
+      <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.6" />
+    </Svg>
+  ),
+  analytics: () => (
+    <Svg>
+      <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
+    </Svg>
+  ),
+  accounts: () => (
+    <Svg>
+      <circle cx="9" cy="8" r="3.4" />
+      <path d="M2.6 20.2a6.6 6.6 0 0 1 12.8 0M16.5 5.2a3.2 3.2 0 0 1 0 6M18.4 20.2a6.4 6.4 0 0 0-2.1-4.7" />
+    </Svg>
+  ),
+  stores: () => (
+    <Svg>
+      <path d="M4 9.5V20h16V9.5M2.5 9.5 5 4h14l2.5 5.5a3 3 0 0 1-5.4 1.4 3 3 0 0 1-5.1 0 3 3 0 0 1-5.4-1.4ZM9.5 20v-5h5v5" />
+    </Svg>
+  ),
+  moderation: () => (
+    <Svg>
+      <path d="M12 3 4.5 6v6c0 4.4 3.1 7.7 7.5 9 4.4-1.3 7.5-4.6 7.5-9V6L12 3Z" />
+      <path d="m9 12 2.2 2.2L15.5 10" />
+    </Svg>
+  ),
+  discounts: () => (
+    <Svg>
+      <path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0l-7.2-7.2A2 2 0 0 1 2.8 12V4.8A2 2 0 0 1 4.8 2.8H12a2 2 0 0 1 1.4.6l7.2 7.2a2 2 0 0 1 0 2.8Z" />
+      <circle cx="7.6" cy="7.6" r="1.3" />
+    </Svg>
+  ),
+  search: () => (
+    <Svg>
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-3.6-3.6" />
+    </Svg>
+  ),
+  audit: () => (
+    <Svg>
+      <path d="M6 3h9l4 4v14H6z" />
+      <path d="M9 11h6M9 15h6M9 7h2" />
+    </Svg>
+  ),
+  menu: () => (
+    <Svg>
+      <path d="M3.5 7h17M3.5 12h17M3.5 17h17" />
+    </Svg>
+  ),
+  close: () => (
+    <Svg>
+      <path d="m6 6 12 12M18 6 6 18" />
+    </Svg>
+  ),
+};
+
 const SECTIONS = [
-  { key: 'overview', label: 'Overview', ico: '◧' },
-  { key: 'analytics', label: 'Analytics', ico: '◔' },
-  { key: 'accounts', label: 'Accounts', ico: '◉' },
-  { key: 'stores', label: 'Stores', ico: '🏪' },
-  { key: 'moderation', label: 'Moderation', ico: '⚖' },
-  { key: 'discounts', label: 'Discounts', ico: '%' },
-  { key: 'search', label: 'Search', ico: '⌕' },
-  { key: 'audit', label: 'Audit log', ico: '≡' },
+  { key: 'overview', label: 'Overview', icon: ICONS.overview, group: 'Workspace' },
+  { key: 'analytics', label: 'Analytics', icon: ICONS.analytics, group: 'Workspace' },
+  { key: 'accounts', label: 'Accounts', icon: ICONS.accounts, group: 'People' },
+  { key: 'stores', label: 'Stores', icon: ICONS.stores, group: 'People' },
+  { key: 'moderation', label: 'Moderation', icon: ICONS.moderation, group: 'Trust & safety' },
+  { key: 'discounts', label: 'Discounts', icon: ICONS.discounts, group: 'Operations' },
+  { key: 'search', label: 'Global search', icon: ICONS.search, group: 'Operations' },
+  { key: 'audit', label: 'Audit log', icon: ICONS.audit, group: 'Operations' },
 ] as const;
 
 type SectionKey = (typeof SECTIONS)[number]['key'];
@@ -314,6 +396,7 @@ export function AdminConsole({ adminEmail }: { adminEmail: string }) {
   const [searchQ, setSearchQ] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchBusy, setSearchBusy] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
   const [newCode, setNewCode] = useState('');
   const [newPercent, setNewPercent] = useState('10');
   const [newStoreId, setNewStoreId] = useState('');
@@ -551,56 +634,112 @@ export function AdminConsole({ adminEmail }: { adminEmail: string }) {
     }
   }
 
+  const current = SECTIONS.find((s) => s.key === section) ?? SECTIONS[0];
+  const groups = Array.from(new Set(SECTIONS.map((s) => s.group)));
+
+  function go(next: SectionKey) {
+    setSection(next);
+    setNavOpen(false);
+  }
+
   return (
     <div className="admin-shell">
-      {/* Top navbar: brand + identity + refresh */}
+      {/* ---------------- Top bar: identity + global utilities ---------------- */}
       <header className="admin-topbar">
         <div className="admin-topbar-brand">
+          <button
+            type="button"
+            className="admin-burger"
+            aria-label={navOpen ? 'Close navigation' : 'Open navigation'}
+            aria-expanded={navOpen}
+            onClick={() => setNavOpen((v) => !v)}
+          >
+            {navOpen ? <ICONS.close /> : <ICONS.menu />}
+          </button>
           <span className="admin-topbar-logo">Naija<span>vend</span></span>
           <span className="admin-topbar-divider" aria-hidden />
           <span className="admin-topbar-title">Control</span>
+          <span className="admin-topbar-crumb" aria-hidden>
+            <i>/</i>
+            {current.label}
+          </span>
         </div>
         <div className="admin-topbar-actions">
           <span className="admin-topbar-identity" title={adminEmail}>{adminEmail}</span>
           <ThemeToggle />
-          <button type="button" className="btn btn-outline btn-sm" onClick={() => load()} disabled={loading}>
-            {loading ? 'Loading…' : 'Refresh'}
+          <button
+            type="button"
+            className="admin-icon-btn"
+            onClick={() => load()}
+            disabled={loading}
+            title="Refresh data"
+            aria-label="Refresh data"
+          >
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5" />
+            </svg>
           </button>
-          <a className="btn btn-outline btn-sm" href="/api/admin/export" download>
-            Export CSV
+          <a className="admin-icon-btn" href="/api/admin/export" download title="Export CSV" aria-label="Export CSV">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M12 3v12M7.5 10.5 12 15l4.5-4.5M4 20h16" />
+            </svg>
           </a>
-          <button type="button" className="btn btn-outline btn-sm" onClick={signOut}>
+          <button type="button" className="admin-signout" onClick={signOut}>
             Sign out
           </button>
         </div>
       </header>
 
-      <div className="admin-body">
-        {/* Sidebar: section switcher (horizontal tab bar on phones) */}
+      <div className={`admin-body${navOpen ? ' is-nav-open' : ''}`}>
+        {navOpen && <button type="button" className="admin-nav-scrim" aria-label="Close navigation" onClick={() => setNavOpen(false)} />}
+
+        {/* ---------------- Sidebar: grouped section switcher ---------------- */}
         <aside className="admin-sidebar">
+          <div className="admin-workspace">
+            <span className="admin-workspace-avatar" aria-hidden>NV</span>
+            <div>
+              <strong>Naijavend</strong>
+              <span>Platform workspace</span>
+            </div>
+          </div>
+
           <nav className="admin-sidebar-nav" aria-label="Admin sections">
-            {SECTIONS.map((s) => (
-              <button
-                key={s.key}
-                type="button"
-                className={`admin-sidebar-link ${section === s.key ? 'is-active' : ''}`}
-                aria-current={section === s.key ? 'page' : undefined}
-                onClick={() => setSection(s.key)}
-              >
-                <span className="admin-sidebar-ico" aria-hidden>{s.ico}</span>
-                {s.label}
-                {s.key === 'moderation' && flagCounts.open > 0 && (
-                  <span className="badge badge-danger" style={{ marginLeft: 'auto' }} title={`${flagCounts.open} open flags`}>
-                    {flagCounts.open}
-                  </span>
-                )}
-              </button>
+            {groups.map((group) => (
+              <div key={group} className="admin-sidebar-group">
+                <span className="admin-sidebar-grouplabel">{group}</span>
+                {SECTIONS.filter((s) => s.group === group).map((s) => {
+                  const Icon = s.icon;
+                  return (
+                    <button
+                      key={s.key}
+                      type="button"
+                      className={`admin-sidebar-link ${section === s.key ? 'is-active' : ''}`}
+                      aria-current={section === s.key ? 'page' : undefined}
+                      onClick={() => go(s.key)}
+                    >
+                      <span className="admin-sidebar-ico" aria-hidden>
+                        <Icon />
+                      </span>
+                      {s.label}
+                      {s.key === 'moderation' && flagCounts.open > 0 && (
+                        <span className="admin-sidebar-count" title={`${flagCounts.open} open flags`}>
+                          {flagCounts.open}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             ))}
           </nav>
-          <div className="admin-sidebar-foot">Superadmin</div>
+
+          <div className="admin-sidebar-foot">
+            <span className="admin-sidebar-dot" aria-hidden />
+            Superadmin access
+          </div>
         </aside>
 
-        {/* Active section */}
+        {/* ---------------- Active section ---------------- */}
         <main className="admin-main">
           {notice && (
             <div className={`alert ${notice.kind === 'ok' ? 'alert-success' : 'alert-error'}`} role="status">
@@ -611,83 +750,115 @@ export function AdminConsole({ adminEmail }: { adminEmail: string }) {
           {section === 'overview' && (
             <section aria-label="Platform overview">
               <div className="admin-section-head">
-                <h2>Overview</h2>
-                <p className="admin-section-sub">Platform health at a glance — updated {new Date().toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' })}.</p>
+                <div>
+                  <span className="admin-eyebrow">Live platform</span>
+                  <h2>Overview</h2>
+                  <p className="admin-section-sub">
+                    Money, people and trust across Naijavend — updated{' '}
+                    {new Date().toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' })}.
+                  </p>
+                </div>
+                <button type="button" className="admin-head-action" onClick={() => go('analytics')}>
+                  Full analytics →
+                </button>
               </div>
+
               {!metrics ? (
-                <div className="admin-metrics">
-                  {Array.from({ length: 9 }).map((_, i) => (
-                    <div key={i} className="admin-metric skeleton" style={{ height: 92 }} />
+                <div className="ac-kpis">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="ac-kpi skeleton" style={{ height: 118 }} />
                   ))}
                 </div>
               ) : (
                 <>
-                  {/* Hero band: money first — GMV, paid orders, MRR, conversion */}
-                  <div className="ov-hero">
-                    <div className="ov-hero-main">
-                      <span className="ov-hero-label">Paid GMV — lifetime</span>
-                      <span className="ov-hero-value">{formatNaira(metrics.gmvKobo)}</span>
-                      <span className="ov-hero-sub">
+                  {/* The four numbers a platform operator checks first. */}
+                  <div className="ac-kpis">
+                    <article className="ac-kpi is-primary">
+                      <div className="ac-kpi-top">
+                        <span className="ac-kpi-label">Paid GMV</span>
+                        <span className="ac-kpi-chip">lifetime</span>
+                      </div>
+                      <strong className="ac-kpi-value">{formatNaira(metrics.gmvKobo)}</strong>
+                      <span className="ac-kpi-foot">
                         {metrics.paidOrders.toLocaleString()} paid order{metrics.paidOrders === 1 ? '' : 's'}
-                        {metrics.orders > 0 ? ` · ${Math.round((metrics.paidOrders / metrics.orders) * 100)}% of all orders` : ''}
+                        {metrics.orders > 0
+                          ? ` · ${Math.round((metrics.paidOrders / metrics.orders) * 100)}% of all orders`
+                          : ''}
                       </span>
-                    </div>
-                    <div className="ov-hero-side">
-                      <div className="ov-hero-cell">
-                        <span className="ov-hero-cell-value">{formatNaira(metrics.mrr?.currentKobo ?? 0)}</span>
-                        <span className="ov-hero-cell-label">MRR · {metrics.mrr?.growthStores ?? 0} growth stores</span>
+                    </article>
+
+                    <article className="ac-kpi">
+                      <div className="ac-kpi-top">
+                        <span className="ac-kpi-label">MRR</span>
+                        <span className="ac-kpi-chip">{metrics.mrr?.growthStores ?? 0} growth stores</span>
                       </div>
-                      <div className="ov-hero-cell">
-                        <span className="ov-hero-cell-value">{metrics.stores.toLocaleString()}</span>
-                        <span className="ov-hero-cell-label">stores · +{metrics.newStores7d} this week</span>
+                      <strong className="ac-kpi-value">{formatNaira(metrics.mrr?.currentKobo ?? 0)}</strong>
+                      <span className="ac-kpi-foot">Growth-plan subscriptions this month</span>
+                    </article>
+
+                    <article className="ac-kpi">
+                      <div className="ac-kpi-top">
+                        <span className="ac-kpi-label">Stores</span>
+                        <span className="ac-kpi-chip is-up">+{metrics.newStores7d} this week</span>
                       </div>
-                      <div className="ov-hero-cell">
-                        <span className="ov-hero-cell-value">{metrics.users.toLocaleString()}</span>
-                        <span className="ov-hero-cell-label">accounts · +{metrics.newUsers24h} today</span>
+                      <strong className="ac-kpi-value">{metrics.stores.toLocaleString()}</strong>
+                      <span className="ac-kpi-foot">{metrics.newStores7d} new storefronts in the last 7 days</span>
+                    </article>
+
+                    <article className="ac-kpi">
+                      <div className="ac-kpi-top">
+                        <span className="ac-kpi-label">Accounts</span>
+                        <span className="ac-kpi-chip is-up">+{metrics.newUsers24h} today</span>
                       </div>
-                    </div>
+                      <strong className="ac-kpi-value">{metrics.users.toLocaleString()}</strong>
+                      <span className="ac-kpi-foot">Sellers and buyers combined</span>
+                    </article>
                   </div>
 
-                  {/* Revenue trend inline under the hero */}
-                  <div className="chart-card" style={{ marginBottom: 18 }}>
-                    <h3>Paid revenue — last 30 days</h3>
-                    <p className="chart-sub">Daily GMV from paid + fulfilled orders</p>
-                    <AreaChart
-                      points={metrics.revenue30d.map((d) => ({ day: d.day, value: d.kobo }))}
-                      money
-                      label="Paid revenue per day"
-                    />
-                  </div>
-
-                  {/* Remaining KPIs in a compact strip */}
-                  <div className="admin-metrics" style={{ marginBottom: 18 }}>
-                    {METRIC_META.filter((m) => !['gmvKobo', 'paidOrders', 'stores', 'users'].includes(m.key)).map((m) => (
-                      <div key={m.key} className={`admin-metric tone-${m.tone}`}>
-                        <span className="admin-metric-ico" aria-hidden>{m.ico}</span>
-                        <span className="admin-metric-value">
+                  {/* Secondary signals stay dense and scannable. */}
+                  <div className="ac-strip">
+                    {METRIC_META.filter((m) => !['gmvKobo', 'stores', 'users'].includes(m.key)).map((m) => (
+                      <div key={m.key} className={`ac-strip-item tone-${m.tone}`}>
+                        <span className="ac-strip-label">{m.label}</span>
+                        <strong className="ac-strip-value">
                           {m.money ? formatNaira(metrics[m.key]) : metrics[m.key].toLocaleString()}
-                        </span>
-                        <span className="admin-metric-label">{m.label}</span>
-                        <span className="admin-metric-hint">{m.hint}</span>
+                        </strong>
+                        <span className="ac-strip-hint">{m.hint}</span>
                       </div>
                     ))}
                   </div>
 
-                  {/* Glanceable charts + jump-off points */}
-                  <div className="chart-grid-2">
-                    <div className="chart-card">
-                      <h3>Stores by category</h3>
-                      <p className="chart-sub">All storefronts on the platform</p>
-                      <DonutChart slices={metrics.categories} />
+                  <div className="ac-chart-grid">
+                    <div className="chart-card ac-span-8">
+                      <div className="ac-chart-head">
+                        <div>
+                          <h3>Paid revenue</h3>
+                          <p className="chart-sub">Daily GMV from paid and fulfilled orders · last 30 days</p>
+                        </div>
+                        <span className="ac-chart-chip">{formatNaira(metrics.gmvKobo)} lifetime</span>
+                      </div>
+                      <AreaChart
+                        points={metrics.revenue30d.map((d) => ({ day: d.day, value: d.kobo }))}
+                        money
+                        label="Paid revenue per day"
+                      />
                     </div>
-                    <div className="chart-card">
+
+                    <div className="chart-card ac-span-4">
                       <h3>Orders by status</h3>
                       <p className="chart-sub">Lifetime order pipeline</p>
                       <DonutChart slices={metrics.ordersByStatus} />
                     </div>
-                    <div className="chart-card" style={{ gridColumn: '1 / -1' }}>
-                      <h3>Signups — last 14 days</h3>
-                      <p className="chart-sub">Daily new seller vs customer accounts</p>
+
+                    <div className="chart-card ac-span-5">
+                      <h3>Stores by category</h3>
+                      <p className="chart-sub">All storefronts on the platform</p>
+                      <DonutChart slices={metrics.categories} />
+                    </div>
+
+                    <div className="chart-card ac-span-7">
+                      <h3>Signups</h3>
+                      <p className="chart-sub">Daily new seller vs customer accounts · last 14 days</p>
                       <TrendBars days={metrics.signups14d} />
                     </div>
                   </div>
@@ -699,8 +870,11 @@ export function AdminConsole({ adminEmail }: { adminEmail: string }) {
           {section === 'analytics' && metrics && (
             <section aria-label="Platform analytics">
               <div className="admin-section-head">
-                <h2>Analytics</h2>
-                <p className="admin-section-sub">Where the platform's activity comes from.</p>
+                <div>
+                  <span className="admin-eyebrow">Analytics</span>
+                  <h2>Platform performance</h2>
+                  <p className="admin-section-sub">Where the platform&apos;s activity, revenue and drop-off come from.</p>
+                </div>
               </div>
               <div className="chart-grid-2">
                 <div className="chart-card chart-hero" style={{ gridColumn: '1 / -1' }}>
@@ -807,8 +981,13 @@ export function AdminConsole({ adminEmail }: { adminEmail: string }) {
           {section === 'accounts' && (
             <section className="admin-users" aria-label="Accounts directory">
               <div className="admin-section-head">
-                <h2>Accounts</h2>
-                <p className="admin-section-sub">{users.length} shown — search, ban or delete.</p>
+                <div>
+                  <span className="admin-eyebrow">People</span>
+                  <h2>Accounts</h2>
+                  <p className="admin-section-sub">
+                    {users.length} shown — search by email, switch roles, then ban, revoke sessions or delete.
+                  </p>
+                </div>
               </div>
               <div className="admin-filters">
                 <input
@@ -918,8 +1097,13 @@ export function AdminConsole({ adminEmail }: { adminEmail: string }) {
           {section === 'stores' && (
             <section className="admin-users" aria-label="Stores directory">
               <div className="admin-section-head">
-                <h2>Stores</h2>
-                <p className="admin-section-sub">{filteredStores.length} of {stores.length} stores — click a row for full analytics.</p>
+                <div>
+                  <span className="admin-eyebrow">People</span>
+                  <h2>Stores</h2>
+                  <p className="admin-section-sub">
+                    {filteredStores.length} of {stores.length} storefronts — verify a blue tick or open a store&apos;s full analytics.
+                  </p>
+                </div>
               </div>
               <div className="admin-filters">
                 <input
@@ -1014,8 +1198,11 @@ export function AdminConsole({ adminEmail }: { adminEmail: string }) {
           {section === 'moderation' && (
             <section className="admin-users" aria-label="Moderation queues">
               <div className="admin-section-head">
-                <h2>Moderation</h2>
-                <p className="admin-section-sub">Trust &amp; safety — flag queue, then reviews and listings across all stores.</p>
+                <div>
+                  <span className="admin-eyebrow">Trust &amp; safety</span>
+                  <h2>Moderation</h2>
+                  <p className="admin-section-sub">Flag queue first, then reviews and listings across every store.</p>
+                </div>
               </div>
               <div className="admin-filters">
                 <input
@@ -1031,10 +1218,12 @@ export function AdminConsole({ adminEmail }: { adminEmail: string }) {
                   caught, in one triage list. Status changes only — nothing here
                   deletes content. */}
               <div className="admin-section-head" style={{ marginTop: 4 }}>
-                <h2 style={{ fontSize: 17 }}>Flag queue</h2>
-                <p className="admin-section-sub">
-                  Signals from chat, reviews, listings and stores. Flags are evidence for review — nothing is removed automatically.
-                </p>
+                <div>
+                  <h2 style={{ fontSize: 18 }}>Flag queue</h2>
+                  <p className="admin-section-sub">
+                    Signals from chat, reviews, listings and stores. Flags are evidence for review — nothing is removed automatically.
+                  </p>
+                </div>
               </div>
               <div className="admin-filters">
                 {(['open', 'reviewed', 'dismissed'] as const).map((s) => (
@@ -1227,8 +1416,11 @@ export function AdminConsole({ adminEmail }: { adminEmail: string }) {
           {section === 'discounts' && (
             <section className="admin-users" aria-label="Discount codes">
               <div className="admin-section-head">
-                <h2>Discounts &amp; coupons</h2>
-                <p className="admin-section-sub">Platform-wide coupon directory — create, pause or resume.</p>
+                <div>
+                  <span className="admin-eyebrow">Operations</span>
+                  <h2>Discounts &amp; coupons</h2>
+                  <p className="admin-section-sub">Platform-wide coupon directory — create, pause or resume a code.</p>
+                </div>
               </div>
 
               <div className="admin-filters" style={{ alignItems: 'flex-end', gap: 8, flexWrap: 'wrap' }}>
@@ -1303,8 +1495,11 @@ export function AdminConsole({ adminEmail }: { adminEmail: string }) {
           {section === 'search' && (
             <section className="admin-users" aria-label="Global search">
               <div className="admin-section-head">
-                <h2>Global search</h2>
-                <p className="admin-section-sub">Accounts, stores, listings and orders — all in one place.</p>
+                <div>
+                  <span className="admin-eyebrow">Operations</span>
+                  <h2>Global search</h2>
+                  <p className="admin-section-sub">Accounts, stores, listings and orders — one query, one result list.</p>
+                </div>
               </div>
               <div className="admin-filters">
                 <input
@@ -1345,8 +1540,11 @@ export function AdminConsole({ adminEmail }: { adminEmail: string }) {
           {section === 'audit' && (
             <section className="admin-audit" aria-label="Audit log">
               <div className="admin-section-head">
-                <h2>Audit log</h2>
-                <p className="admin-section-sub">Every admin action, newest first.</p>
+                <div>
+                  <span className="admin-eyebrow">Operations</span>
+                  <h2>Audit log</h2>
+                  <p className="admin-section-sub">Every admin action, newest first — the permanent record.</p>
+                </div>
               </div>
               {auditLog.length === 0 ? (
                 <p className="muted">No admin actions recorded yet.</p>

@@ -1,0 +1,7 @@
+/* Tailwind entry — compiled for the shadcn/ui components only.
+   Imported last in app/layout.tsx so utilities win ties against the
+   hand-written design system, while the design system still owns base
+   typography, forms and every page that doesn't use ui/*. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

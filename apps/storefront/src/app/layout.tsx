@@ -8,6 +8,13 @@ import '../styles/interactions.css';
 import '../styles/admin.css';
 import '../styles/mobile.css';
 import '../styles/locations-lightbox.css';
+// Brand experience layer (About / FAQ): gradient canvases, isometric stacks, mockups.
+import '../styles/brand.css';
+// Marketplace refresh: header, home, store map, buyer account and buyer auth.
+import '../styles/marketplace-v2.css';
+// Tailwind utilities for the shadcn/ui components (src/components/ui) — imported
+// last so component utilities win ties against the hand-written design system.
+import '../styles/tailwind.css';
 import { PwaRegister } from '@/components/PwaRegister';
 import { LanguageDock } from '@/components/LanguageDock';
 

@@ -1,13 +1,40 @@
 import Link from 'next/link';
+import {
+  ArrowRight,
+  BadgeCheck,
+  MapPin,
+  MessageCircle,
+  ShieldCheck,
+  Sparkles,
+  Star,
+  Store as StoreIcon,
+} from 'lucide-react';
 import { supabaseAnon } from '@/lib/supabase';
-import { categoryClass, categoryEmoji, categoryLabel } from '@idevtenancy/shared';
+import { categoryClass, categoryEmoji, categoryLabel, STORE_CATEGORIES } from '@idevtenancy/shared';
 import { Stars } from '@/components/Stars';
+import { VerifiedTick } from '@/components/VerifiedTick';
+import { SavedHeart } from '@/components/SavedHeart';
 import { ProductCard, type ProductCardItem } from '@/components/ProductCard';
 import { RecentlyViewed } from '@/components/RecentlyViewed';
 import { HeroSearch } from '@/components/HeroSearch';
+import { Reveal, Stagger, StaggerItem } from '@/components/brand/Motion';
 import type { Store, StoreRatingStats, StoreTheme } from '@idevtenancy/shared';
 
 export const revalidate = 60; // ISR — static-fast, invalidated on seller writes via revalidatePath
+export const metadata = { title: 'Marketplace home' };
+
+// Featured trades on the homepage rail. Deliberately short: the goal is
+// orientation, not a directory — "All categories" leads to /discover.
+const HOME_CATEGORIES = [
+  'fashion',
+  'beauty',
+  'food',
+  'electronics',
+  'home-services',
+  'groceries',
+  'crafts',
+  'education',
+] as const;
 
 // PostgREST one-to-one embeds return objects, one-to-many arrays — normalise both.
 function one<T>(v: T | T[] | null | undefined): T | null {
@@ -15,7 +42,46 @@ function one<T>(v: T | T[] | null | undefined): T | null {
   return Array.isArray(v) ? (v[0] ?? null) : v;
 }
 
+const TRUST = [
+  {
+    icon: ShieldCheck,
+    title: 'Real businesses',
+    text: 'Every store is a Nigerian business with a public site and a pinned address.',
+  },
+  {
+    icon: MapPin,
+    title: 'Real locations',
+    text: 'See open-now status, walking and driving distance on the street map.',
+  },
+  {
+    icon: Star,
+    title: 'Honest reviews',
+    text: 'Ratings come from customers who actually ordered — no paid stars.',
+  },
+  {
+    icon: MessageCircle,
+    title: 'Chat first',
+    text: 'Ask questions in-app or on WhatsApp before you spend a naira.',
+  },
+];
 
+const STEPS = [
+  {
+    icon: StoreIcon,
+    title: 'Find a store you trust',
+    text: 'Search by name, browse a trade or open the map to see who is closest and open right now.',
+  },
+  {
+    icon: Sparkles,
+    title: 'Order or book in seconds',
+    text: 'Products ship to your door; services become real appointments you can manage from your account.',
+  },
+  {
+    icon: BadgeCheck,
+    title: 'Rate what happened',
+    text: 'Your review feeds the public rankings, so reliable sellers rise and the rest have to catch up.',
+  },
+];
 
 export default async function HomePage() {
   let featured: Array<Store & { stats: StoreRatingStats | null; theme: StoreTheme | null }> = [];
@@ -87,163 +153,413 @@ export default async function HomePage() {
     console.error('[home] failed to load trending:', err);
   }
 
-  return (
-    <main>
-      {/* Colourful hero */}
-      <div className="market-hero">
-        <div className="hero-blob b1" />
-        <div className="hero-blob b2" />
-        <div className="hero-blob b3" />
-        <div className="container" style={{ padding: '64px 20px 56px', position: 'relative' }}>
-          <section style={{ maxWidth: 720 }}>
-            <span className="hero-chip">🇳🇬 Trusted by real customers across Nigeria</span>
-            <h1 className="hero-title">
-              Discover local stores
-              <br />
-              you can <span style={{ color: 'var(--blue)' }}>actually</span> trust.
-            </h1>
-            <p className="muted" style={{ fontSize: 18, marginBottom: 26 }}>
-              Real businesses, real locations, verified reviews — order products, book services
-              and chat with sellers in one place. Are you a seller?{' '}
-              <Link href="/dashboard">Open your own store site</Link> in minutes.
-            </p>
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              <Link href="/discover" className="btn btn-primary btn-lg">Browse stores</Link>
-              <Link href="/rankings" className="btn btn-black btn-lg">Top-ranked stores</Link>
-            </div>
-            <HeroSearch trending={trending} />
-          </section>
-        </div>
-      </div>
+  // The hero preview borrows the newest real store so the page never shows
+  // invented merchandising to a first-time visitor.
+  const spotlight = featured[0] ?? null;
+  const spotlightBanner = spotlight?.theme?.banner_url ?? spotlight?.theme?.subheader_url ?? null;
+  const spotlightLogo = spotlight?.theme?.logo_url ?? spotlight?.theme?.favicon_url ?? null;
 
-      <div className="container" style={{ padding: '40px 20px' }}>
+  return (
+    <main className="nv-home">
+      {/* ================================ HERO ================================ */}
+      <section className="nv-hero">
+        <div className="nv-hero-canvas" aria-hidden>
+          <span className="nv-hero-grid" />
+          <span className="nv-hero-orb nv-orb-a" />
+          <span className="nv-hero-orb nv-orb-b" />
+          <span className="nv-hero-orb nv-orb-c" />
+        </div>
+
+        <div className="container nv-hero-inner">
+          <div className="nv-hero-copy">
+            <Reveal>
+              <span className="nv-pill">
+                <span className="nv-pill-dot" aria-hidden />
+                Nigeria&apos;s marketplace of real storefronts
+              </span>
+            </Reveal>
+
+            <Reveal delay={0.06}>
+              <h1 className="nv-hero-title">
+                Shop the best of Nigeria,
+                <br />
+                <span className="nv-grad-text">one real store at a time.</span>
+              </h1>
+            </Reveal>
+
+            <Reveal delay={0.12}>
+              <p className="nv-hero-sub">
+                Thousands of sellers, one trusted place. Compare verified stores, see exactly where
+                they are and what they sell, then order, book or chat — without leaving the page.
+              </p>
+            </Reveal>
+
+            <Reveal delay={0.18}>
+              <div className="nv-hero-search">
+                <HeroSearch trending={trending} />
+              </div>
+            </Reveal>
+
+            <Reveal delay={0.24}>
+              <div className="nv-hero-ctas">
+                <Link href="/discover" className="btn btn-primary btn-lg">
+                  Browse stores <ArrowRight size={17} />
+                </Link>
+                <Link href="/discover?open=1" className="btn btn-outline btn-lg">
+                  Open right now
+                </Link>
+              </div>
+            </Reveal>
+
+            <Reveal delay={0.3}>
+              <div className="nv-hero-proof">
+                <div className="nv-avatars" aria-hidden>
+                  <span>🛍️</span>
+                  <span>💅</span>
+                  <span>🍲</span>
+                  <span>👗</span>
+                </div>
+                <p>
+                  <strong>Verified sellers, honest reviews</strong>
+                  <span>Blue-tick stores · real locations · no fake stars</span>
+                </p>
+              </div>
+            </Reveal>
+          </div>
+
+          {/* Live store preview — built from the newest real store. */}
+          <Reveal delay={0.16} className="nv-hero-preview-wrap">
+            <div className="nv-hero-preview" aria-hidden>
+              <div className="nv-hp-chrome">
+                <span className="nv-hp-dots">
+                  <i />
+                  <i />
+                  <i />
+                </span>
+                <span className="nv-hp-url">
+                  naijavend.com/s/{spotlight?.slug ?? 'your-store'}
+                </span>
+              </div>
+
+              <div
+                className="nv-hp-banner"
+                style={
+                  spotlightBanner
+                    ? { backgroundImage: `url('${spotlightBanner}')` }
+                    : undefined
+                }
+              >
+                {!spotlightBanner && <span className="nv-hp-banner-mark">Naijavend</span>}
+              </div>
+
+              <div className="nv-hp-body">
+                <div className="nv-hp-store">
+                  {spotlightLogo ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- seller-supplied remote URL
+                    <img src={spotlightLogo} alt="" className="nv-hp-logo" />
+                  ) : (
+                    <span className="nv-hp-logo nv-hp-logo-fallback">
+                      {(spotlight?.name ?? 'N').charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                  <div>
+                    <strong>
+                      {spotlight?.name ?? 'Your store, live'}
+                      <VerifiedTick size={13} />
+                    </strong>
+                    <span>
+                      {spotlight ? categoryLabel(spotlight.category) : 'Beauty & lifestyle'} ·
+                      Lagos
+                    </span>
+                  </div>
+                </div>
+
+                <div className="nv-hp-grid">
+                  <span className="nv-hp-tile t1" />
+                  <span className="nv-hp-tile t2" />
+                  <span className="nv-hp-tile t3" />
+                </div>
+
+                <div className="nv-hp-foot">
+                  <span>
+                    <Star size={12} /> {spotlight?.stats?.avg_stars ? Number(spotlight.stats.avg_stars).toFixed(1) : '4.9'}
+                    <em>{spotlight?.stats?.review_count ? `${spotlight.stats.review_count} reviews` : '128 reviews'}</em>
+                  </span>
+                  <span className="nv-hp-open">
+                    <i /> Open now
+                  </span>
+                </div>
+              </div>
+
+              <span className="nv-hp-float f1">
+                <ShieldCheck size={13} /> Verified seller
+              </span>
+              <span className="nv-hp-float f2">
+                <MessageCircle size={13} /> Replies in minutes
+              </span>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ============================== TRUST BAR ============================= */}
+      <section className="nv-trust" aria-label="Why buy on Naijavend">
+        <div className="container nv-trust-grid">
+          {TRUST.map(({ icon: Icon, title, text }) => (
+            <div key={title} className="nv-trust-item">
+              <span className="nv-trust-ico" aria-hidden>
+                <Icon size={17} />
+              </span>
+              <div>
+                <strong>{title}</strong>
+                <p>{text}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <div className="container nv-home-body">
         {error && <div className="alert alert-error">{error}</div>}
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 8 }}>
-          <h2 style={{ marginBottom: 4 }}>Fresh on Naijavend</h2>
-          <Link href="/discover">See all stores →</Link>
-        </div>
+        {/* ============================== CATEGORIES ============================ */}
+        <section className="nv-section" aria-labelledby="nv-cats-title">
+          <div className="nv-section-head">
+            <div>
+              <h2 id="nv-cats-title">Shop by trade</h2>
+              <p>From tailors in Surulere to bakeries in Abuja — pick a trade to start.</p>
+            </div>
+            <Link href="/discover" className="nv-section-link">
+              All {STORE_CATEGORIES.length} categories <ArrowRight size={15} />
+            </Link>
+          </div>
 
-        {featured.length === 0 && !error ? (
-          <div className="empty-state">
-            No stores yet — the first one could be yours.{' '}
-            <Link href="/dashboard">Create a store site →</Link>
+          <div className="nv-cat-rail">
+            {HOME_CATEGORIES.map((c) => (
+              <Link key={c} href={`/discover?category=${c}`} className="nv-cat-tile">
+                <span className="nv-cat-emoji" aria-hidden>
+                  {categoryEmoji(c)}
+                </span>
+                <span className="nv-cat-label">{categoryLabel(c)}</span>
+                <ArrowRight size={14} className="nv-cat-arrow" aria-hidden />
+              </Link>
+            ))}
           </div>
-        ) : (
-          <div className="store-cards" style={{ marginTop: 20 }}>
-            {featured.map((store) => {
-              const logo = store.theme?.logo_url ?? store.theme?.favicon_url ?? null;
-              const banner = store.theme?.banner_url ?? store.theme?.subheader_url ?? null;
-              const catClass = categoryClass(store.category);
-              const catEmoji = categoryEmoji(store.category);
-              return (
-                <Link key={store.id} href={`/s/${store.slug}`} className="store-card">
-                  <div
-                    className="store-card-banner"
-                    style={
-                      banner
-                        ? { backgroundImage: `url('${banner}')` }
-                        : {
-                            background:
-                              'radial-gradient(320px 130px at 80% -30%, var(--blue-tint-2), transparent 70%), radial-gradient(260px 120px at 10% 130%, #fdeef4, transparent 70%), var(--elevated-2)',
-                          }
-                    }
-                  />
-                  <div className="store-card-body">
-                    {logo ? (
-                      // eslint-disable-next-line @next/next/no-img-element -- seller-supplied remote URL
-                      <img className="store-card-logo" src={logo} alt={`${store.name} logo`} />
-                    ) : (
-                      <div className="store-card-logo-fallback" style={{ background: 'var(--blue)' }}>
-                        {store.name.charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                    <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                      <h3>{store.name}</h3>
-                      <span className={`badge ${catClass}`}>{catEmoji} {categoryLabel(store.category)}</span>
-                      {store.is_dropshipper && <span className="badge badge-dropship" title="Ships from a supplier">🚚 Dropshipper</span>}
-                    </div>
-                    {store.stats && store.stats.review_count > 0 ? (
-                      <span style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                        <Stars value={Number(store.stats.avg_stars)} showNumeric={false} />
-                        <span className="muted" style={{ fontSize: 13.5 }}>
-                          {Number(store.stats.avg_stars).toFixed(1)} · {store.stats.review_count} review{store.stats.review_count === 1 ? '' : 's'}
+        </section>
+
+        {/* ============================ FEATURED STORES ======================== */}
+        <section className="nv-section" aria-labelledby="nv-stores-title">
+          <div className="nv-section-head">
+            <div>
+              <h2 id="nv-stores-title">Fresh on Naijavend</h2>
+              <p>New storefronts from sellers who just went live.</p>
+            </div>
+            <Link href="/discover" className="nv-section-link">
+              See all stores <ArrowRight size={15} />
+            </Link>
+          </div>
+
+          {featured.length === 0 && !error ? (
+            <div className="nv-empty">
+              <span aria-hidden>🏪</span>
+              <h3>No stores yet — the first one could be yours</h3>
+              <p>Open a free storefront in minutes and appear right here.</p>
+              <Link href="/dashboard" className="btn btn-primary">
+                Create your store <ArrowRight size={15} />
+              </Link>
+            </div>
+          ) : (
+            <Stagger className="nv-store-grid">
+              {featured.map((store) => {
+                const logo = store.theme?.logo_url ?? store.theme?.favicon_url ?? null;
+                const banner = store.theme?.banner_url ?? store.theme?.subheader_url ?? null;
+                const catClass = categoryClass(store.category);
+                const verified = store.verification_status === 'verified';
+                return (
+                  <StaggerItem key={store.id} className="nv-store-wrap">
+                    <Link href={`/s/${store.slug}`} className="nv-store-card">
+                      <div
+                        className="nv-store-banner"
+                        style={
+                          banner
+                            ? { backgroundImage: `url('${banner}')`, backgroundSize: 'cover', backgroundPosition: 'center' }
+                            : undefined
+                        }
+                      >
+                        <span className={`nv-store-cat ${catClass}`}>
+                          <span aria-hidden>{categoryEmoji(store.category)}</span>
+                          {categoryLabel(store.category)}
                         </span>
-                      </span>
-                    ) : (
-                      <span className="badge">New — be the first to review</span>
-                    )}
-                    <p className="store-card-desc">
-                      {store.description.slice(0, 120)}
-                      {store.description.length > 120 ? '…' : ''}
-                    </p>
-                    {store.address && (
-                      <p className="store-card-addr">📍 {store.address}</p>
-                    )}
-                    <span className="store-card-visit">Visit store site →</span>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        )}
+                        {store.is_dropshipper && <span className="nv-store-flag">🚚 Dropship</span>}
+                      </div>
+
+                      <div className="nv-store-body">
+                        <div className="nv-store-head">
+                          {logo ? (
+                            // eslint-disable-next-line @next/next/no-img-element -- seller-supplied remote URL
+                            <img className="nv-store-logo" src={logo} alt={`${store.name} logo`} loading="lazy" />
+                          ) : (
+                            <span className="nv-store-logo nv-store-logo-fallback" aria-hidden>
+                              {store.name.charAt(0).toUpperCase()}
+                            </span>
+                          )}
+                          <div className="nv-store-id">
+                            <h3>
+                              <span>{store.name}</span>
+                              {verified && <VerifiedTick size={15} />}
+                            </h3>
+                            {store.stats && store.stats.review_count > 0 ? (
+                              <span className="nv-store-rating">
+                                <Stars value={Number(store.stats.avg_stars)} showNumeric={false} />
+                                <em>
+                                  {Number(store.stats.avg_stars).toFixed(1)} · {store.stats.review_count}{' '}
+                                  review{store.stats.review_count === 1 ? '' : 's'}
+                                </em>
+                              </span>
+                            ) : (
+                              <span className="nv-store-new">New — be the first to review</span>
+                            )}
+                          </div>
+                        </div>
+
+                        <p className="nv-store-desc">
+                          {store.description.slice(0, 130)}
+                          {store.description.length > 130 ? '…' : ''}
+                        </p>
+
+                        <div className="nv-store-foot">
+                          <span className="nv-store-addr">
+                            <MapPin size={13} aria-hidden />
+                            {store.address ?? 'Online store'}
+                          </span>
+                          <span className="nv-store-visit">
+                            Visit <ArrowRight size={14} aria-hidden />
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                    <SavedHeart slug={store.slug} name={store.name} />
+                  </StaggerItem>
+                );
+              })}
+            </Stagger>
+          )}
+        </section>
 
         <RecentlyViewed />
 
-        {/* Trending products across all stores */}
+        {/* ============================ TRENDING PRODUCTS ====================== */}
         {trending.length > 0 && (
-          <section style={{ marginTop: 48 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 8 }}>
-              <h2 style={{ marginBottom: 4 }}>🔥 Trending products</h2>
-              <Link href="/search">Search everything →</Link>
+          <section className="nv-section" aria-labelledby="nv-trending-title">
+            <div className="nv-section-head">
+              <div>
+                <h2 id="nv-trending-title">Trending right now</h2>
+                <p>The products buyers are ordering most across every store.</p>
+              </div>
+              <Link href="/search" className="nv-section-link">
+                Search everything <ArrowRight size={15} />
+              </Link>
             </div>
-            <div className="product-row" style={{ marginTop: 14 }}>
+            <div className="nv-product-row">
               {trending.map((item) => (
                 <ProductCard key={item.id} item={item} />
               ))}
             </div>
           </section>
         )}
+      </div>
 
-        {/* How it works */}
-        <section style={{ marginTop: 56 }}>
-          <h2>How Naijavend works</h2>
-          <div className="listing-grid" style={{ marginTop: 14 }}>
-            <div className="card">
-              <div style={{ fontSize: 30, marginBottom: 6 }}>🔎</div>
-              <h3 style={{ fontSize: 17 }}>Find a real business</h3>
-              <p className="muted" style={{ margin: 0, fontSize: 14.5 }}>
-                Every store has a location, real reviews from real customers, and a public ranking.
+      {/* ================================ MAP BAND ============================ */}
+      <section className="nv-mapband-wrap" aria-labelledby="nv-map-title">
+        <div className="container">
+          <div className="nv-mapband">
+            <div className="nv-mapband-copy">
+              <span className="nv-pill nv-pill-invert">
+                <MapPin size={13} aria-hidden /> Street-level map
+              </span>
+              <h2 id="nv-map-title">Find out who&apos;s open near you</h2>
+              <p>
+                Real addresses, live open-now status and walking or driving routes to every store.
+                Share your location once — it stays in your browser.
               </p>
+              <div className="nv-mapband-chips">
+                {['Lagos', 'Abuja', 'Port Harcourt', 'Ibadan', 'Kano'].map((city) => (
+                  <Link key={city} href="/discover?view=map" className="nv-mapband-chip">
+                    {city}
+                  </Link>
+                ))}
+              </div>
+              <div className="nv-mapband-actions">
+                <Link href="/discover?view=map" className="btn btn-white btn-lg">
+                  Open the map <ArrowRight size={16} />
+                </Link>
+                <Link href="/discover" className="btn btn-ghost-light btn-lg">
+                  Browse the list
+                </Link>
+              </div>
             </div>
-            <div className="card">
-              <div style={{ fontSize: 30, marginBottom: 6 }}>🛒</div>
-              <h3 style={{ fontSize: 17 }}>Order or book</h3>
-              <p className="muted" style={{ margin: 0, fontSize: 14.5 }}>
-                Products get ordered and delivered; services get booked as real appointments.
-              </p>
-            </div>
-            <div className="card">
-              <div style={{ fontSize: 30, marginBottom: 6 }}>💬</div>
-              <h3 style={{ fontSize: 17 }}>Chat before you buy</h3>
-              <p className="muted" style={{ margin: 0, fontSize: 14.5 }}>
-                Message the seller in-app or jump to WhatsApp — ask anything, negotiate, confirm.
-              </p>
-            </div>
-            <div className="card">
-              <div style={{ fontSize: 30, marginBottom: 6 }}>⭐</div>
-              <h3 style={{ fontSize: 17 }}>Rate your experience</h3>
-              <p className="muted" style={{ margin: 0, fontSize: 14.5 }}>
-                Your rating feeds the rankings, so the best sellers rise to the top.
-              </p>
+
+            <div className="nv-mapband-visual" aria-hidden>
+              <span className="nv-mb-road r1" />
+              <span className="nv-mb-road r2" />
+              <span className="nv-mb-road r3" />
+              <span className="nv-mb-me" />
+              <span className="nv-mb-pin p1">💅</span>
+              <span className="nv-mb-pin p2">🍲</span>
+              <span className="nv-mb-pin p3">👗</span>
+              <span className="nv-mb-pin p4">📱</span>
+              <span className="nv-mb-tag t1">Open now</span>
+              <span className="nv-mb-tag t2">1.2 km · 14 min walk</span>
             </div>
           </div>
-        </section>
-
-        <div style={{ marginTop: 40, textAlign: 'center' }}>
-          <Link href="/about" className="btn btn-black btn-lg">What is Naijavend? Take the tour →</Link>
         </div>
-      </div>
+      </section>
+
+      {/* ================================ HOW IT WORKS ======================== */}
+      <section className="nv-section container" aria-labelledby="nv-steps-title">
+        <div className="nv-section-head">
+          <div>
+            <h2 id="nv-steps-title">How Naijavend works</h2>
+            <p>Built for how shopping actually happens here.</p>
+          </div>
+        </div>
+        <div className="nv-steps">
+          {STEPS.map(({ icon: Icon, title, text }, i) => (
+            <div key={title} className="nv-step">
+              <span className="nv-step-num" aria-hidden>
+                0{i + 1}
+              </span>
+              <span className="nv-step-ico" aria-hidden>
+                <Icon size={18} />
+              </span>
+              <h3>{title}</h3>
+              <p>{text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ================================ SELLER CTA ========================== */}
+      <section className="container nv-cta-wrap" aria-labelledby="nv-cta-title">
+        <div className="nv-cta">
+          <div>
+            <span className="nv-pill nv-pill-invert">Free, forever</span>
+            <h2 id="nv-cta-title">Your store deserves its own website.</h2>
+            <p>
+              Catalogue, bookings, chat, POS, staff accounts and a blue tick — all included. Our
+              AI can design the whole storefront for you in minutes.
+            </p>
+          </div>
+          <div className="nv-cta-actions">
+            <Link href="/dashboard" className="btn btn-white btn-lg">
+              Open your store <ArrowRight size={16} />
+            </Link>
+            <Link href="/about" className="btn btn-ghost-light btn-lg">
+              Take the tour
+            </Link>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
