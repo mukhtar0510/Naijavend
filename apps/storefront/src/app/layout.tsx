@@ -51,7 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const themeScript = `(function(){try{var t=localStorage.getItem('sf-theme');if(!t){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en-NG" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         {/* Fonts: preconnect + parallel stylesheet (replaces render-blocking @import).

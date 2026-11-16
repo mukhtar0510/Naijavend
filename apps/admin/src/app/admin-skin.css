@@ -70,6 +70,45 @@ html[data-theme='dark'] {
   --ac-grad-soft: linear-gradient(180deg, rgba(125, 171, 245, 0.09), transparent 68%);
 }
 
+/* The admin imports the shared base/components tokens as well as the skin.
+   Flip those too, or only the skin goes dark and every shared surface (.btn,
+   .card, .badge, inputs, tables, empty states) stays white. */
+html[data-theme='dark'] {
+  color-scheme: dark;
+
+  --blue: #7dabf5;
+  --blue-deep: #4a7fd4;
+  --blue-soft: #9cc4f7;
+  --blue-tint: #16233d;
+  --blue-tint-2: #1c2c4c;
+  --black: #e9eef7;
+  --ink-2: #c7d0e0;
+
+  --surface: #131820;
+  --elevated: #171d27;
+  --elevated-2: #1d2531;
+
+  --text: #e9eef7;
+  --text-muted: #9aa7bd;
+
+  --border: #263040;
+  --border-strong: #33415a;
+
+  --success: #58bd8f;
+  --success-tint: #12291f;
+  --danger: #e38383;
+  --danger-tint: #2b1719;
+  --warning: #e0ad68;
+  --amber: #e0ad68;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.6);
+}
+
+html[data-theme='light'] { color-scheme: light; }
+
 /* ---------------------------- Base ---------------------------- */
 body.ac-shell {
   background:
@@ -886,6 +925,19 @@ body.ac-shell .signin-admin {
   grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
   min-height: 100vh;
 }
+/* The sign-in page has no top bar, so the theme switch floats over the aside. */
+body.ac-shell .signin-theme-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 20;
+}
+body.ac-shell .signin-theme-toggle .theme-toggle-compact {
+  background: rgba(9, 14, 26, 0.55);
+  border-color: rgba(255, 255, 255, 0.24);
+  color: #fff;
+  backdrop-filter: blur(10px);
+}
 body.ac-shell .signin-admin-aside {
   position: relative;
   overflow: hidden;
@@ -1037,6 +1089,18 @@ body.ac-shell .signin-admin-note {
   body.ac-shell .admin-table { min-width: 720px; }
   body.ac-shell .admin-modal { padding: 18px; }
   body.ac-shell .admin-signout { display: none; }
+}
+
+@media (max-width: 480px) {
+  body.ac-shell .admin-topbar { padding: 0 10px; gap: 6px; }
+  body.ac-shell .admin-topbar-logo { font-size: 16px; }
+  body.ac-shell .admin-topbar-title,
+  body.ac-shell .admin-topbar-divider { display: none; }
+  body.ac-shell .admin-topbar-actions { gap: 4px; }
+  body.ac-shell .admin-icon-btn,
+  body.ac-shell .theme-toggle-compact { width: 32px; height: 32px; }
+  body.ac-shell .ac-kpi-value { font-size: 24px; }
+  body.ac-shell .rank-bars li { grid-template-columns: minmax(0, 1.2fr) minmax(60px, 1fr) auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {

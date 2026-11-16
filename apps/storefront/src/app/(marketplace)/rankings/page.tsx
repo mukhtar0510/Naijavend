@@ -1,16 +1,28 @@
 import Link from 'next/link';
+import {
+  ArrowRight,
+  BadgeCheck,
+  MessageSquareQuote,
+  ShieldCheck,
+  Sparkles,
+  Star,
+  Store as StoreIcon,
+  TrendingUp,
+  Trophy,
+} from 'lucide-react';
 import { supabaseAnon } from '@/lib/supabase';
 import { Stars } from '@/components/Stars';
-import { STORE_CATEGORIES, categoryLabel } from '@idevtenancy/shared';
-import type { Store, StoreRatingStats, StoreTheme } from '@idevtenancy/shared';
+import { VerifiedTick } from '@/components/VerifiedTick';
+import { Reveal, Stagger, StaggerItem } from '@/components/brand/Motion';
+import { STORE_CATEGORIES, categoryEmoji, categoryLabel } from '@idevtenancy/shared';
+import type { Store, StoreRatingStats } from '@idevtenancy/shared';
 
 export const revalidate = 60; // ISR — static-fast, invalidated on seller writes via revalidatePath
 export const metadata = {
   title: 'Store rankings',
-  description: 'The top-rated Nigerian stores and service providers on Naijavend, ranked by verified customer reviews.',
+  description:
+    'The top-rated Nigerian stores and service providers on Naijavend, ranked by verified customer reviews. Browse overall or by trade.',
 };
-
-const CATEGORIES = STORE_CATEGORIES;
 
 interface RankedStore {
   store: Store;
@@ -48,102 +60,297 @@ async function getRanked(category?: string, limit = 10): Promise<RankedStore[]> 
 
 const MEDALS = ['🥇', '🥈', '🥉'];
 
-function RankLogo({ store, theme, size = 46 }: { store: Store; theme: RankedStore['theme']; size?: number }) {
+function RankLogo({
+  store,
+  theme,
+  size = 46,
+  className = '',
+}: {
+  store: Store;
+  theme: RankedStore['theme'];
+  size?: number;
+  className?: string;
+}) {
   const logo = theme?.logo_url ?? theme?.favicon_url ?? null;
   if (logo) {
     return (
       // eslint-disable-next-line @next/next/no-img-element -- seller-supplied remote URL
-      <img className="rank-logo" src={logo} alt="" loading="lazy" decoding="async" style={{ width: size, height: size }} />
+      <img
+        className={`nv-rank-logo ${className}`}
+        src={logo}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        style={{ width: size, height: size }}
+      />
     );
   }
   return (
-    <div className="rank-logo-fallback" style={{ width: size, height: size, fontSize: size * 0.42 }}>
+    <span
+      className={`nv-rank-logo is-fallback ${className}`}
+      style={{ width: size, height: size, fontSize: Math.round(size * 0.4) }}
+      aria-hidden
+    >
       {store.name.charAt(0).toUpperCase()}
-    </div>
+    </span>
   );
 }
 
-function Leaderboard({ title, entries }: { title: string; entries: RankedStore[] }) {
-  return (
-    <section style={{ marginBottom: 44 }}>
-      <h2>{title}</h2>
-      {entries.length === 0 ? (
-        <div className="empty-state">Not enough reviews yet — be the first to rate a store.</div>
-      ) : (
-        <>
-          {entries.length >= 3 && (
-            <div className="podium">
-              {entries.slice(0, 3).map((entry, i) => (
-                <Link key={entry.store.id} href={`/s/${entry.store.slug}`} className={`podium-step p${i + 1}`} style={{ textDecoration: 'none' }}>
-                  <div className="podium-medal">{MEDALS[i]}</div>
-                  <RankLogo store={entry.store} theme={entry.theme} size={56} />
-                  <h3 style={{ fontSize: 17, margin: '8px 0 2px' }}>{entry.store.name}</h3>
-                  {entry.store.is_dropshipper && (
-                    <span className="badge badge-dropship" style={{ marginBottom: 6 }}>🚚 Dropshipper</span>
-                  )}
-                  <Stars value={Number(entry.stats.avg_stars)} showNumeric={false} />
-                  <div className="muted" style={{ fontSize: 13 }}>
-                    {Number(entry.stats.avg_stars).toFixed(1)} · {entry.stats.review_count} review{entry.stats.review_count === 1 ? '' : 's'}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-          <ol style={{ listStyle: 'none', padding: 0, display: 'grid', gap: 10, margin: 0 }}>
-            {entries.slice(entries.length >= 3 ? 3 : 0).map((entry) => {
-              const displayNum = entries.indexOf(entry) + 1;
-              return (
-                <li key={entry.store.id}>
-                  <Link href={`/s/${entry.store.slug}`} className="card rank-row">
-                    <span className="rank-num">{displayNum}</span>
-                    <RankLogo store={entry.store} theme={entry.theme} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <strong style={{ display: 'inline-flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                        {entry.store.name}
-                        {entry.store.is_dropshipper && <span className="badge badge-dropship">🚚 Dropshipper</span>}
-                      </strong>
-                      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                        <Stars value={Number(entry.stats.avg_stars)} />
-                        <span className="muted" style={{ fontSize: 13 }}>
-                          {entry.stats.review_count} review{entry.stats.review_count === 1 ? '' : 's'}
-                        </span>
-                      </div>
-                    </div>
-                    <span className="muted" style={{ fontSize: 13.5 }}>Visit →</span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ol>
-        </>
-      )}
-    </section>
-  );
-}
+const RULES = [
+  {
+    Icon: ShieldCheck,
+    title: 'Purchases only',
+    text: 'Only a buyer with a real order or booking can rate a store. No drive-by stars.',
+  },
+  {
+    Icon: TrendingUp,
+    title: 'Weighted, not averaged',
+    text: 'The rank score balances the average, how many reviews back it up, and how recent they are.',
+  },
+  {
+    Icon: BadgeCheck,
+    title: 'A tick with a rule',
+    text: 'The blue tick needs 30+ reviews averaging four stars, and is revoked if review integrity breaks.',
+  },
+];
 
-export default async function RankingsPage() {
-  const overall = await getRanked();
-  const categoryBoards = await Promise.all(
-    CATEGORIES.map(async (c) => ({ category: c, entries: await getRanked(c, 5) }))
-  );
-  const withEntries = categoryBoards.filter((b) => b.entries.length > 0);
+export default async function RankingsPage({
+  searchParams,
+}: {
+  searchParams: { category?: string };
+}) {
+  const rawCategory = searchParams.category ?? '';
+  const category = STORE_CATEGORIES.includes(rawCategory as never) ? rawCategory : undefined;
+  const entries = await getRanked(category, 10);
+
+  const podium = entries.slice(0, 3);
+  const rest = entries.slice(3);
+  const reviewsCounted = entries.reduce((sum, e) => sum + e.stats.review_count, 0);
+  const bestScore = entries.reduce((max, e) => Math.max(max, Number(e.stats.weighted_score) || 0), 0);
+  const title = category ? `Best in ${categoryLabel(category)}` : 'Overall rankings';
+  const href = (value?: string) => (value ? `/rankings?category=${value}` : '/rankings');
 
   return (
-    <main>
-      <div className="page-intro page-intro-gold">
-        <div className="container">
-          <h1>🏆 Top-rated stores</h1>
-          <p>
-            Rankings use verified customer reviews weighted so that many consistent reviews count for more than one
-            perfect score. Only stores with at least one review appear.
-          </p>
+    <main className="nv-rank">
+      {/* ================================ HERO ================================ */}
+      <section className="nv-rank-hero">
+        <div className="nv-rank-hero-canvas" aria-hidden>
+          <span className="nv-rank-hero-grid" />
+          <span className="nv-rank-orb a" />
+          <span className="nv-rank-orb b" />
         </div>
-      </div>
-      <div className="container" style={{ padding: '28px 20px' }}>
-      <Leaderboard title="Overall" entries={overall} />
-      {withEntries.map((board) => (
-        <Leaderboard key={board.category} title={`Best in ${categoryLabel(board.category)}`} entries={board.entries} />
-      ))}
+
+        <div className="container nv-rank-hero-inner">
+          <div>
+            <Reveal>
+              <span className="nv-pill">
+                <span className="nv-pill-dot" aria-hidden />
+                Public rankings · updated continuously
+              </span>
+            </Reveal>
+            <Reveal delay={0.06}>
+              <h1 className="nv-rank-title">
+                The stores doing the work,
+                <br />
+                <span className="nv-grad-text">ranked in the open.</span>
+              </h1>
+            </Reveal>
+            <Reveal delay={0.12}>
+              <p className="nv-rank-sub">
+                Every score here comes from buyers who actually ordered or booked. No paid placement,
+                no sponsored slots — just a weighted record of how sellers treat their customers.
+              </p>
+            </Reveal>
+          </div>
+
+          <Reveal delay={0.18} className="nv-rank-hero-stats">
+            <div className="nv-rank-stat">
+              <span className="nv-rank-stat-ico" aria-hidden>
+                <StoreIcon size={16} />
+              </span>
+              <strong>{entries.length}</strong>
+              <span>stores on this board</span>
+            </div>
+            <div className="nv-rank-stat">
+              <span className="nv-rank-stat-ico" aria-hidden>
+                <MessageSquareQuote size={16} />
+              </span>
+              <strong>{reviewsCounted.toLocaleString()}</strong>
+              <span>verified reviews counted</span>
+            </div>
+            <div className="nv-rank-stat">
+              <span className="nv-rank-stat-ico" aria-hidden>
+                <Trophy size={16} />
+              </span>
+              <strong>{bestScore > 0 ? bestScore.toFixed(2) : '—'}</strong>
+              <span>top rank score</span>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      <div className="container nv-rank-body">
+        {/* ============================== FILTERS ============================== */}
+        <nav className="nv-rank-cats" aria-label="Ranking category">
+          <Link href={href()} className={`nv-rank-cat${!category ? ' is-active' : ''}`}>
+            <span aria-hidden>🏆</span> All trades
+          </Link>
+          {STORE_CATEGORIES.map((c) => (
+            <Link
+              key={c}
+              href={href(c)}
+              className={`nv-rank-cat${category === c ? ' is-active' : ''}`}
+            >
+              <span aria-hidden>{categoryEmoji(c)}</span>
+              {categoryLabel(c)}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="nv-rank-layout">
+          <div className="nv-rank-main">
+            <div className="nv-rank-board-head">
+              <div>
+                <h2>{title}</h2>
+                <p>
+                  {category
+                    ? `Top ${entries.length} in ${categoryLabel(category)} by weighted review score.`
+                    : `The top ${entries.length} stores across every trade on Naijavend.`}
+                </p>
+              </div>
+              <Link href="/faq" className="nv-section-link">
+                How ranking works <ArrowRight size={15} />
+              </Link>
+            </div>
+
+            {entries.length === 0 ? (
+              <div className="nv-rank-empty">
+                <span aria-hidden>🏅</span>
+                <h3>Not enough reviews yet</h3>
+                <p>
+                  {category
+                    ? `No ${categoryLabel(category)} store has a review yet. Be the first to rate one.`
+                    : 'The first reviewed store will take this board. Be the first to rate a store.'}
+                </p>
+                <Link href="/discover" className="btn btn-primary btn-sm">
+                  Find a store to rate <ArrowRight size={14} />
+                </Link>
+              </div>
+            ) : (
+              <>
+                {/* ------------------------------ PODIUM ------------------------------ */}
+                <Stagger className="nv-rank-podium">
+                  {podium.map((entry, i) => (
+                    <StaggerItem key={entry.store.id} className={`nv-rank-pod is-p${i + 1}`}>
+                      <Link href={`/s/${entry.store.slug}`} className="nv-rank-pod-link">
+                        <span className="nv-rank-pod-medal" aria-label={`Rank ${i + 1}`}>
+                          {MEDALS[i]}
+                        </span>
+                        <RankLogo store={entry.store} theme={entry.theme} size={58} className="nv-rank-pod-logo" />
+                        <h3>
+                          <span>{entry.store.name}</span>
+                          {entry.store.verification_status === 'verified' && <VerifiedTick size={14} />}
+                        </h3>
+                        <p className="nv-rank-pod-cat">
+                          {categoryEmoji(entry.store.category)} {categoryLabel(entry.store.category)}
+                        </p>
+                        <Stars value={Number(entry.stats.avg_stars)} showNumeric={false} />
+                        <p className="nv-rank-pod-meta">
+                          <strong>{Number(entry.stats.avg_stars).toFixed(1)}</strong>
+                          <span>· {entry.stats.review_count} review{entry.stats.review_count === 1 ? '' : 's'}</span>
+                        </p>
+                        <span className="nv-rank-pod-cta">
+                          Visit store <ArrowRight size={13} />
+                        </span>
+                      </Link>
+                    </StaggerItem>
+                  ))}
+                </Stagger>
+
+                {/* ------------------------------- LIST ------------------------------- */}
+                {rest.length > 0 && (
+                  <ol className="nv-rank-list">
+                    {rest.map((entry, i) => {
+                      const place = i + 4;
+                      return (
+                        <li key={entry.store.id}>
+                          <Link href={`/s/${entry.store.slug}`} className="nv-rank-row">
+                            <span className="nv-rank-num">{place}</span>
+                            <RankLogo store={entry.store} theme={entry.theme} size={44} />
+                            <span className="nv-rank-info">
+                              <strong>
+                                <span>{entry.store.name}</span>
+                                {entry.store.verification_status === 'verified' && <VerifiedTick size={13} />}
+                              </strong>
+                              <em>
+                                {categoryEmoji(entry.store.category)} {categoryLabel(entry.store.category)}
+                                {entry.store.is_dropshipper ? ' · 🚚 dropshipper' : ''}
+                              </em>
+                            </span>
+                            <span className="nv-rank-rating">
+                              <Stars value={Number(entry.stats.avg_stars)} showNumeric={false} />
+                              <em>
+                                {Number(entry.stats.avg_stars).toFixed(1)} · {entry.stats.review_count}
+                              </em>
+                            </span>
+                            <span className="nv-rank-score" title="Weighted rank score">
+                              {Number(entry.stats.weighted_score).toFixed(2)}
+                            </span>
+                            <ArrowRight size={15} className="nv-rank-go" aria-hidden />
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* ------------------------------- SIDEBAR ------------------------------ */}
+          <aside className="nv-rank-side">
+            <section className="nv-rank-card">
+              <h2>
+                <Sparkles size={15} aria-hidden /> How ranking works
+              </h2>
+              <ul className="nv-rank-rules">
+                {RULES.map(({ Icon, title: ruleTitle, text }) => (
+                  <li key={ruleTitle}>
+                    <span className="nv-rank-rule-ico" aria-hidden>
+                      <Icon size={15} />
+                    </span>
+                    <div>
+                      <strong>{ruleTitle}</strong>
+                      <p>{text}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              <Link href="/faq" className="nv-rank-card-link">
+                Read the ranking FAQ <ArrowRight size={14} />
+              </Link>
+            </section>
+
+            <section className="nv-rank-card nv-rank-card-accent">
+              <span className="nv-rank-card-eyebrow">
+                <Star size={13} aria-hidden /> For sellers
+              </span>
+              <h2>Rankings are earned, not bought.</h2>
+              <p>
+                Deliver well, keep your hours current and ask buyers to rate the order. The score
+                does the rest.
+              </p>
+              <div className="nv-rank-card-actions">
+                <Link href="/dashboard" className="btn btn-primary btn-sm">
+                  Open your store
+                </Link>
+                <Link href="/discover" className="btn btn-outline btn-sm">
+                  See the map
+                </Link>
+              </div>
+            </section>
+          </aside>
+        </div>
       </div>
     </main>
   );

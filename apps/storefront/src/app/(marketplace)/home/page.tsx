@@ -189,8 +189,8 @@ export default async function HomePage() {
 
             <Reveal delay={0.12}>
               <p className="nv-hero-sub">
-                Thousands of sellers, one trusted place. Compare verified stores, see exactly where
-                they are and what they sell, then order, book or chat — without leaving the page.
+                Compare verified stores across Nigeria, see exactly where they are and what they
+                sell in naira, then order, book or chat on WhatsApp — without leaving the page.
               </p>
             </Reveal>
 
@@ -221,7 +221,7 @@ export default async function HomePage() {
                 </div>
                 <p>
                   <strong>Verified sellers, honest reviews</strong>
-                  <span>Blue-tick stores · real locations · no fake stars</span>
+                  <span>Naira prices · street-level map · no fake stars</span>
                 </p>
               </div>
             </Reveal>

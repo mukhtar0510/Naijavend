@@ -31,8 +31,8 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
             <div className="footer-brandcol">
               <span className="footer-wordmark">Naijavend</span>
               <p className="footer-tagline">
-                Storefronts for Nigerian sellers — every store gets its own real website,
-                catalogue, bookings and chat, free.
+                Storefronts for Nigerian sellers — turn a WhatsApp catalogue into a real website
+                with naira prices, bookings and chat, free.
               </p>
               <div className="footer-social">
                 {SOCIALS.map(({ label, href, Icon }) => (

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { currentAdmin } from '@/lib/admin';
 import { LoginForm } from './LoginForm';
+import { ThemeToggle } from '../ThemeToggle';
 
 export const metadata: Metadata = { title: 'Sign in' };
 
@@ -20,6 +21,9 @@ export default async function AdminSignInPage() {
 
   return (
     <main className="signin-admin">
+      <div className="signin-theme-toggle">
+        <ThemeToggle />
+      </div>
       <aside className="signin-admin-aside">
         <span className="signin-admin-logo">
           Naija<span>vend</span>
