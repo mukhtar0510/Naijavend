@@ -3,6 +3,7 @@
 // the store is on the growth (tier-2) plan. One query path, used by every
 // staff-aware API so the rules can't drift between endpoints.
 
+import { redirect } from 'next/navigation';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 export interface StaffContext {
@@ -17,6 +18,16 @@ export interface StaffContext {
   /** Kept for call-site compatibility. POS & staff are now on EVERY plan,
    * so this is always true — the old growth-plan gate was removed. */
   isGrowth: boolean;
+}
+
+/**
+ * Server-side owner-page guard (R4). Staff share the seller sign-in but only
+ * get POS + Orders; every owner-only dashboard page calls this right after its
+ * session check so the redirect happens before any store row is read, rather
+ * than relying on the client-side StaffGuard after the shell has rendered.
+ */
+export async function redirectStaffToPos(sb: SupabaseClient): Promise<void> {
+  if (await getStaffMembership(sb)) redirect('/dashboard/pos');
 }
 
 export async function getStaffContext(sb: SupabaseClient, slug: string): Promise<StaffContext | null> {

@@ -1723,7 +1723,22 @@
   .nv-trust-grid { grid-template-columns: minmax(0, 1fr); }
   .nv-trust-item { border-left: 0; padding-left: 0; border-top: 1px solid var(--border); }
   .nv-trust-item:first-child { border-top: 0; }
-  .nv-cat-rail { grid-template-columns: minmax(0, 1fr); }
+  /* Keep the eight trades on one swipeable row instead of eight stacked tiles. */
+  .nv-cat-rail {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+  .nv-cat-rail::-webkit-scrollbar { display: none; }
+  .nv-cat-tile {
+    flex: 0 0 200px;
+    padding: 13px;
+    scroll-snap-align: start;
+  }
   .nv-product-row { grid-template-columns: minmax(0, 1fr); }
   .nv-hp-float { display: none; }
   .nv-mapband-visual { height: 200px; }

@@ -65,6 +65,22 @@ const PIDGIN: PhraseTable = {
   Available: 'E dey',
   Today: 'Today',
   Tomorrow: 'Tomorrow',
+  // Seller dashboard
+  'Your storefront': 'Your shop page',
+  'Share kit': 'Share kit',
+  Snapshot: 'Quick look',
+  'Pending orders': 'Orders wey never ready',
+  'Booking requests': 'Booking wey people ask',
+  'Your rank': 'Your position',
+  'Total reviews': 'All the talk',
+  'Store visits 👀': 'People wey visit your shop 👀',
+  Verification: 'Verification',
+  'View live site ↗': 'See your shop ↗',
+  'Customise appearance →': 'Change how e look →',
+  'Set up my store': 'Set up my shop',
+  'Welcome!': 'Welcome!',
+  'This month': 'Dis month',
+  'Last 30 days': 'Last 30 days',
 };
 
 const YORUBA: PhraseTable = {
@@ -121,6 +137,22 @@ const YORUBA: PhraseTable = {
   Available: 'Ó wà',
   Today: 'Òní',
   Tomorrow: 'Ọ̀la',
+  // Seller dashboard
+  'Your storefront': 'Ṣọ́ọ̀bù rẹ',
+  'Share kit': 'Ohun èlò ìpín',
+  Snapshot: 'Àkópọ̀',
+  'Pending orders': 'Àwọn àṣẹ tó ń dúró',
+  'Booking requests': 'Àwọn ìbéèrè ìforúkọsílẹ̀',
+  'Your rank': 'Ipò rẹ',
+  'Total reviews': 'Àpapọ̀ àgbéléwò',
+  'Store visits 👀': 'Àwọn ìbẹ̀wò ṣọ́ọ̀bù 👀',
+  Verification: 'Ìjẹ́rìí',
+  'View live site ↗': 'Wo ojúlé rẹ ↗',
+  'Customise appearance →': 'Ṣàtúnṣe ìrísí →',
+  'Set up my store': 'Ṣètò ṣọ́ọ̀bù mi',
+  'Welcome!': 'Ẹ káàbọ̀!',
+  'This month': 'Oṣù yìí',
+  'Last 30 days': 'Ọjọ́ 30 sẹ́yìn',
 };
 
 const HAUSA: PhraseTable = {
@@ -177,6 +209,22 @@ const HAUSA: PhraseTable = {
   Available: 'Akwai',
   Today: 'Yau',
   Tomorrow: 'Gobe',
+  // Seller dashboard
+  'Your storefront': 'Shagon ku',
+  'Share kit': 'Kayan rabawa',
+  Snapshot: 'Takaitaccen bayani',
+  'Pending orders': 'Oda da ke jira',
+  'Booking requests': 'Buƙatun ajiya',
+  'Your rank': 'Matsayin ku',
+  'Total reviews': 'Jimillar sharhi',
+  'Store visits 👀': 'Ziyarar shago 👀',
+  Verification: 'Tabbatarwa',
+  'View live site ↗': 'Duba shagon ku ↗',
+  'Customise appearance →': 'Gyara kamanni →',
+  'Set up my store': 'Saita shagona',
+  'Welcome!': 'Barka da zuwa!',
+  'This month': 'Wannan watan',
+  'Last 30 days': 'Kwanaki 30 da suka wuce',
 };
 
 const IGBO: PhraseTable = {
@@ -233,6 +281,22 @@ const IGBO: PhraseTable = {
   Available: 'Ọ dị',
   Today: 'Taa',
   Tomorrow: 'Echi',
+  // Seller dashboard
+  'Your storefront': 'Ụlọ ahịa gị',
+  'Share kit': 'Ngwa ịkọrọ',
+  Snapshot: 'Nchịkọta',
+  'Pending orders': 'Iwu na-eche',
+  'Booking requests': 'Arịrịọ ndebanye oge',
+  'Your rank': 'Ọkwa gị',
+  'Total reviews': 'Mkpokọta nyocha',
+  'Store visits 👀': 'Nleta ụlọ ahịa 👀',
+  Verification: 'Nkwenye',
+  'View live site ↗': 'Lee ụlọ ahịa gị ↗',
+  'Customise appearance →': 'Gbanwee ọdịdị →',
+  'Set up my store': 'Hazie ụlọ ahịa m',
+  'Welcome!': 'Nnọọ!',
+  'This month': 'Ọnwa a',
+  'Last 30 days': 'Ụbọchị 30 gara aga',
 };
 
 /** phrase → translation for each supported language (English maps to itself). */

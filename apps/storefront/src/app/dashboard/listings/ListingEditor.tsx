@@ -341,7 +341,7 @@ export function ListingEditor({ storeId, listing }: { storeId: string; listing?:
       <div className="field">
         <label htmlFor={editing ? `lprice-${listing!.id}` : 'lprice'}>Price (₦)</label>
         <input id={editing ? `lprice-${listing!.id}` : 'lprice'} type="number" min={0} step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} required placeholder="15000" />
-        <p className="hint">Stored as {priceKobo.toLocaleString()} kobo — never float currency.</p>
+        <p className="hint">Stored as {priceKobo.toLocaleString('en-NG')} kobo — never float currency.</p>
       </div>
       {type === 'product' && (
         <>
@@ -350,7 +350,7 @@ export function ListingEditor({ storeId, listing }: { storeId: string; listing?:
             <input id={editing ? `lcompare-${listing!.id}` : 'lcompare'} type="number" min={0} step="0.01" value={compareAt} onChange={(e) => setCompareAt(e.target.value)} placeholder="20000" />
             <p className="hint">
               {compareKobo && compareKobo > priceKobo
-                ? `Shoppers see a strikethrough ₦${(compareKobo / 100).toLocaleString()} and a Sale badge (${Math.round((1 - priceKobo / compareKobo) * 100)}% off).`
+                ? `Shoppers see a strikethrough ₦${(compareKobo / 100).toLocaleString('en-NG')} and a Sale badge (${Math.round((1 - priceKobo / compareKobo) * 100)}% off).`
                 : 'Leave empty, or set higher than the price to show a strikethrough + Sale badge.'}
             </p>
           </div>

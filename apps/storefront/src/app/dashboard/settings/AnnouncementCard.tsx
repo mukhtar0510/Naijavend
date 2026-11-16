@@ -100,7 +100,7 @@ export function AnnouncementCard({
 
       {start && (
         <p className="muted" style={{ fontSize: 12.5, margin: '4px 0 0' }}>
-          Shows from {new Date(start).toLocaleString()} {end ? `until ${new Date(end).toLocaleString()}` : 'with no end date'}
+          Shows from {new Date(start).toLocaleString('en-NG')} {end ? `until ${new Date(end).toLocaleString('en-NG')}` : 'with no end date'}
           {end ? '' : ' — set an end time so expired promos disappear automatically.'}
         </p>
       )}

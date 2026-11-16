@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getSellerClient, getOwnStore } from '@/lib/auth';
+import { redirectStaffToPos } from '@/lib/staff';
 import { siteUrl } from '@/lib/site';
 import { Stars } from '@/components/Stars';
 import { VerifyCard } from './VerifyCard';
@@ -22,6 +23,7 @@ export default async function DashboardHome({
 }) {
   const sb = await getSellerClient();
   if (!sb) redirect('/dashboard/signin'); // layout redirect races this page — guard here too
+  await redirectStaffToPos(sb); // R4: staff never render owner pages
   const store = await getOwnStore<
     Store & { store_rating_stats: StoreRatingStats[] | StoreRatingStats | null; store_themes: StoreTheme[] | StoreTheme | null }
   >(sb, '*, store_rating_stats(review_count, avg_stars, overall_rank, category_rank), store_themes(*)');
@@ -145,7 +147,7 @@ export default async function DashboardHome({
       <section className="dash-section" aria-labelledby="sec-qr">
         <div className="dash-section-head">
           <h2 id="sec-qr">Share kit</h2>
-          <span className="muted">Your store, one scan away</span>
+          <span className="muted">Your shop, one QR sticker away</span>
         </div>
         <StoreQrCode
           url={`${siteUrl()}/s/${s.slug}`}
