@@ -617,3 +617,21 @@
   .brand-search .btn { padding: 0 12px; font-size: 13px; }
   .store-card-wrap > a > div:first-child { height: 92px; }
 }
+
+/* Floating install/language controls: compact corners on phones so they do
+   not sit on top of page copy. */
+@media (max-width: 640px) {
+  .pwa-install-btn {
+    right: 10px;
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    padding: 7px 12px;
+    font-size: 12px;
+    z-index: 60;
+  }
+  body:has(.back-to-market) .pwa-install-btn {
+    bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+  }
+  .lang-dock { z-index: 60; }
+  .lang-dock-toggle { padding: 6px 10px; font-size: 12px; }
+  .lang-dock-label { display: none; }
+}

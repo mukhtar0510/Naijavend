@@ -90,6 +90,7 @@
 .nv-header-search-btn:active { transform: scale(0.98); }
 
 .nv-header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.nv-header-links { display: flex; align-items: center; gap: 2px; }
 .nv-header-top-link {
   padding: 8px 10px;
   border-radius: 999px;
@@ -1655,7 +1656,7 @@
 /* ============================== RESPONSIVE ============================== */
 @media (max-width: 1080px) {
   .nv-header-main { gap: 14px; }
-  .nv-header-top-link { display: none; }
+  .nv-header-links .nv-header-top-link { padding: 8px 7px; font-size: 13px; }
   .nv-trust-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .nv-trust-item:nth-child(3) { border-left: 0; padding-left: 0; border-top: 1px solid var(--border); }
   .nv-trust-item:nth-child(4) { border-top: 1px solid var(--border); }
@@ -1695,6 +1696,7 @@
   }
   .nv-header-logo { order: 1; }
   .nv-header-actions { order: 2; margin-left: auto; }
+  .nv-header-links { display: none; }
   .nv-header-search { order: 3; flex: 0 0 100%; max-width: none; }
   .nv-header-nav { display: none; }
   .nv-header-account { padding: 8px; }
@@ -2055,7 +2057,7 @@
 .nv-rank-row:hover .nv-rank-go { color: var(--blue); }
 
 /* Sidebar */
-.nv-rank-side { display: grid; gap: 14px; position: sticky; top: 132px; }
+.nv-rank-side { display: grid; gap: 14px; position: sticky; top: 84px; }
 .nv-rank-card {
   padding: 18px;
   border: 1px solid var(--border);

@@ -5,7 +5,6 @@
 // pointer-driven 3D tilt. Purely decorative: the same story is told in the copy.
 
 import { motion, useMotionValue, useSpring } from 'framer-motion';
-import { BadgeCheck, MapPin, Star } from 'lucide-react';
 import { VerifiedTick } from '@/components/VerifiedTick';
 import { usePrefersReducedMotion } from '@/lib/usePrefersReducedMotion';
 
@@ -38,6 +37,8 @@ export function HeroScene() {
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
       >
+        <span className="brand-demo-badge">Demo storefront</span>
+
         {/* Browser mockup — a Naijavend store site */}
         <div className="brand-browser">
           <div className="brand-browser-bar">
@@ -218,31 +219,6 @@ export function HeroScene() {
           </div>
         </div>
 
-        {/* Floating proof chips */}
-        <motion.span
-          className="brand-float-chip"
-          style={{ left: '-9%', top: '16%' }}
-          animate={reduce ? undefined : { y: [0, -9, 0] }}
-          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          <Star size={12} style={{ color: 'var(--amber)' }} fill="currentColor" /> 4.9 · 38 reviews
-        </motion.span>
-        <motion.span
-          className="brand-float-chip"
-          style={{ right: '-8%', top: '44%' }}
-          animate={reduce ? undefined : { y: [0, 10, 0] }}
-          transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 0.6 }}
-        >
-          <BadgeCheck size={12} style={{ color: '#1d9bf0' }} /> Blue tick verified
-        </motion.span>
-        <motion.span
-          className="brand-float-chip"
-          style={{ left: '6%', bottom: '-6%' }}
-          animate={reduce ? undefined : { y: [0, -8, 0] }}
-          transition={{ duration: 5.4, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }}
-        >
-          <MapPin size={12} style={{ color: 'var(--brand-pink)' }} /> 2.1 km away
-        </motion.span>
       </motion.div>
     </div>
   );

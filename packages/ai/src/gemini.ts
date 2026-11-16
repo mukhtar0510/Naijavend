@@ -606,7 +606,10 @@ export class GeminiProvider implements AiProvider {
     }
 
     if (!res.ok) {
-      throw new Error(`gemini http ${res.status}`);
+      // Include the API's own reason (quota vs rate limit vs bad model) without
+      // ever logging the key — this is the difference between "wait" and "fix".
+      const detail = await res.text().catch(() => '');
+      throw new Error(`gemini http ${res.status}: ${detail.slice(0, 300)}`);
     }
     const data = (await res.json()) as GeminiApiResponse;
     const text = (data.candidates?.[0]?.content?.parts ?? [])

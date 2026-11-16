@@ -576,8 +576,13 @@
 .lang-dock-reset { color: var(--blue); font-weight: 600; }
 .lang-dock-note { margin: 4px 6px 2px; color: var(--muted); font-size: 12px; line-height: 1.4; }
 @media (max-width: 640px) {
+  /* Compact floating controls so they sit in the corner instead of over copy. */
   .lang-dock { left: 10px; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
+  .lang-dock-toggle { padding: 6px 10px; font-size: 12px; }
+  .lang-dock-label { display: none; }
   .lang-dock-menu { min-width: 190px; }
+  .pwa-install-btn { right: 10px; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); padding: 7px 12px; font-size: 12px; }
+  .back-to-market ~ .pwa-install-btn, body:has(.back-to-market) .pwa-install-btn { bottom: calc(56px + env(safe-area-inset-bottom, 0px)); }
 }
 @media (max-width: 640px) {
   .chat-log { padding: 12px; }

@@ -42,7 +42,9 @@ const TRUST_ICONS = {
 } as const;
 
 export const metadata: Metadata = {
-  title: 'Naijavend — the storefront layer for Nigerian business',
+  // Absolute: the layout template would otherwise append "· Naijavend" twice
+  // and browsers cut the tab title off.
+  title: { absolute: 'Naijavend — storefronts for Nigerian business' },
   description:
     'Every Nigerian seller deserves a storefront as good as their hustle. Naijavend gives each business a real website — catalogue, orders, bookings, free POS, staff, branches, a live map — then puts it in front of buyers. Open a free store or shop the marketplace.',
 };
@@ -105,28 +107,25 @@ export default function BrandLandingPage() {
             </Reveal>
 
             <Reveal delay={0.06}>
-              <h1 className="mb-4 mt-5 font-heading text-[clamp(34px,5.4vw,60px)] font-extrabold leading-[0.98] tracking-[-0.045em] text-foreground">
+              <h1 className="mb-4 mt-5 font-heading text-[clamp(34px,5.4vw,60px)] font-extrabold leading-[1.08] tracking-[-0.04em] text-foreground">
                 Every Nigerian business deserves a storefront as good as its{' '}
                 <span className="brand-grad">hustle.</span>
               </h1>
             </Reveal>
 
             <Reveal delay={0.12}>
-              <p className="mb-7 max-w-[54ch] text-[16.5px] leading-relaxed text-muted-foreground">
-                A braiding chair in Surulere. A phone counter in Computer Village. A cake kitchen in Port
-                Harcourt. Naijavend turns that WhatsApp catalogue into a real website — orders, bookings, a
-                free POS, staff, branches and a live map — then puts it in front of buyers who are already
-                looking. One link. No commission.
+              <p className="brand-hero-lede mb-7">
+                Turn your WhatsApp catalogue into a real store. Orders, bookings, free POS. 0% commission.
               </p>
             </Reveal>
 
             <Reveal delay={0.18}>
               <div className="flex flex-wrap gap-3">
-                <Link href="/home" className="btn btn-primary btn-lg">
-                  Enter the marketplace <ArrowRight size={17} />
+                <Link href="/dashboard" className="btn btn-primary btn-lg">
+                  Open your store — free <ArrowRight size={17} />
                 </Link>
-                <Link href="/dashboard" className="btn btn-outline btn-lg">
-                  Open your store — free
+                <Link href="/home" className="btn btn-outline btn-lg">
+                  Enter the marketplace
                 </Link>
               </div>
               <Link
@@ -138,15 +137,15 @@ export default function BrandLandingPage() {
             </Reveal>
 
             <Reveal delay={0.24}>
-              <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-[12.5px] font-semibold text-muted-foreground">
-                <span className="inline-flex items-center gap-2">
-                  <Check size={14} style={{ color: 'var(--success)' }} /> No card to start
+              <div className="brand-trust-cards">
+                <span className="brand-trust-card">
+                  <Check size={14} /> No card to start
                 </span>
-                <span className="inline-flex items-center gap-2">
-                  <Check size={14} style={{ color: 'var(--success)' }} /> 0% commission
+                <span className="brand-trust-card">
+                  <Check size={14} /> 0% commission
                 </span>
-                <span className="inline-flex items-center gap-2">
-                  <Check size={14} style={{ color: 'var(--success)' }} /> POS &amp; staff included
+                <span className="brand-trust-card">
+                  <Check size={14} /> POS &amp; staff included
                 </span>
               </div>
             </Reveal>
@@ -157,6 +156,46 @@ export default function BrandLandingPage() {
           </div>
         </div>
         <div className="brand-hero-fade" aria-hidden />
+      </section>
+
+      {/* ============================ HOW IT WORKS =========================== */}
+      <section className="mx-auto w-full max-w-6xl px-5 py-12 sm:px-7 lg:py-14" aria-labelledby="how-title">
+        <div className="mb-6 max-w-[560px]">
+          <span className="badge mb-3">How it works</span>
+          <h2
+            id="how-title"
+            className="m-0 font-heading text-[clamp(22px,3.2vw,30px)] font-extrabold leading-[1.1] tracking-[-0.03em] text-foreground"
+          >
+            From a WhatsApp catalogue to a real store in three steps.
+          </h2>
+        </div>
+        <div className="brand-steps">
+          {[
+            {
+              Icon: Store,
+              title: 'Open your store',
+              text: 'Add your logo, hours, WhatsApp number and first listings. Free, no card.',
+            },
+            {
+              Icon: MessageCircle,
+              title: 'Share one link',
+              text: 'Post it on WhatsApp, Instagram or a QR sticker. Buyers see prices, hours and your address.',
+            },
+            {
+              Icon: BadgeCheck,
+              title: 'Get paid and reviewed',
+              text: 'Take orders or bookings, then let real customers build your public ranking.',
+            },
+          ].map(({ Icon, title, text }) => (
+            <div key={title} className="brand-step">
+              <span className="brand-step-ico" aria-hidden>
+                <Icon size={17} />
+              </span>
+              <h3>{title}</h3>
+              <p>{text}</p>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* ============================== MARQUEE ============================== */}

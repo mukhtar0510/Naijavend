@@ -277,7 +277,7 @@ export function LanguageDock() {
         aria-haspopup="menu"
         title="Change language — English, Pidgin, Yoruba, Hausa, Igbo"
       >
-        🌐 {current?.native}
+        🌐 <span className="lang-dock-label">{current?.native}</span>
         {busy && <span className="lang-dock-busy" aria-label="Translating" />}
       </button>
 

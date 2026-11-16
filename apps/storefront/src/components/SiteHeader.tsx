@@ -15,12 +15,12 @@ import {
 import { NaijavendLogoMark } from '@/components/NaijavendLogo';
 import { categoryEmoji, categoryLabel } from '@idevtenancy/shared';
 
+// One row of navigation. Everything else lives where it belongs: categories on
+// the home page, help/legal in the footer, selling in the primary button.
 const LINKS = [
-  { href: '/home', label: 'Home' },
   { href: '/discover', label: 'Discover' },
   { href: '/rankings', label: 'Rankings' },
   { href: '/about', label: 'About' },
-  { href: '/faq', label: 'FAQ' },
 ];
 
 // Header category rail — the highest-traffic trades only. The full list lives
@@ -38,10 +38,9 @@ const QUICK_CATEGORIES = [
 /**
  * Marketplace header.
  *
- * Search is the primary navigation layer (the pattern every large marketplace
- * uses): logo left, a wide search field in the middle, account/sell on the
- * right, and a second rail for browsing by trade. Phones get a compact bar
- * plus a full menu drawer instead of a squeezed two-row header.
+ * Search is the primary navigation layer: logo left, a wide search field in the
+ * middle, three links plus account/sell on the right. There is no second header
+ * row — the trade list lives on the home page and in the mobile drawer.
  */
 export function SiteHeader() {
   const pathname = usePathname();
@@ -89,9 +88,18 @@ export function SiteHeader() {
         </form>
 
         <div className="nv-header-actions">
-          <Link href="/rankings" className={`nv-header-top-link${isActive('/rankings') ? ' is-active' : ''}`}>
-            Top rated
-          </Link>
+          <nav className="nv-header-links" aria-label="Primary">
+            {LINKS.map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                className={`nv-header-top-link${isActive(l.href) ? ' is-active' : ''}`}
+                aria-current={isActive(l.href) ? 'page' : undefined}
+              >
+                {l.label}
+              </Link>
+            ))}
+          </nav>
           <Link href="/account" className={`nv-header-account${isActive('/account') ? ' is-active' : ''}`}>
             <UserRound size={17} aria-hidden />
             <span>Account</span>
@@ -110,37 +118,6 @@ export function SiteHeader() {
           >
             {open ? <X size={20} /> : <Menu size={20} />}
           </button>
-        </div>
-      </div>
-
-      <div className="nv-header-nav">
-        <div className="container nv-header-nav-inner">
-          <nav className="nv-header-pills" aria-label="Primary">
-            {LINKS.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                className={`nv-header-pill${isActive(l.href) ? ' is-active' : ''}`}
-                aria-current={isActive(l.href) ? 'page' : undefined}
-              >
-                {l.label}
-              </Link>
-            ))}
-          </nav>
-          <div className="nv-header-cats" aria-label="Browse by category">
-            <Link href="/discover" className="nv-header-cat is-all">
-              All stores
-            </Link>
-            {QUICK_CATEGORIES.map((c) => (
-              <Link key={c} href={`/discover?category=${c}`} className="nv-header-cat">
-                <span aria-hidden>{categoryEmoji(c)}</span>
-                {categoryLabel(c)}
-              </Link>
-            ))}
-            <Link href="/discover?open=1" className="nv-header-cat is-open">
-              <span className="nv-open-dot" aria-hidden /> Open now
-            </Link>
-          </div>
         </div>
       </div>
 

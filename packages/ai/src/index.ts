@@ -983,6 +983,11 @@ export async function aiComplete(req: AiRequest): Promise<AiResponse> {
     // Real provider failed (network, quota, bad output) — degrade to the
     // deterministic dummy so seller flows never break on a bad AI day.
     if (primary.name === 'dummy') throw err;
+    console.error('[ai] primary provider failed; using dummy fallback', {
+      provider: primary.name,
+      feature: req.feature,
+      error: err instanceof Error ? err.message : String(err),
+    });
     return await withTimeout(new DummyProvider().complete(req));
   }
 }
