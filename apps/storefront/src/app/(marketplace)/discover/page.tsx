@@ -4,6 +4,7 @@ import { Stars } from '@/components/Stars';
 import { NearbyStores } from '@/components/NearbyStores';
 import { StoreMap, type MapStore } from '@/components/StoreMap';
 import { DiscoverTabs } from '@/components/DiscoverTabs';
+import { DiscoverCategories } from './DiscoverCategories';
 import { AiPickRow } from '@/components/AiPickRow';
 import { VerifiedTick } from '@/components/VerifiedTick';
 import { SavedHeart } from '@/components/SavedHeart';
@@ -129,26 +130,7 @@ export default async function DiscoverPage({
       {/* ============================== FILTER RAIL =========================== */}
       <section className="border-b border-border bg-surface" aria-label="Filter stores">
         <div className="mx-auto w-full max-w-6xl px-4 py-3 sm:px-7 sm:py-4">
-          <div className="brand-chip-row">
-            <Link href={`/discover${q ? `?q=${encodeURIComponent(q)}` : ''}`} className={`brand-chip no-underline ${!category && !openOnly ? 'is-active' : ''}`}>
-              All stores
-            </Link>
-            <Link
-              href={`/discover?${[openOnly ? '' : 'open=1', q ? `q=${encodeURIComponent(q)}` : ''].filter(Boolean).join('&')}`}
-              className={`brand-chip no-underline ${openOnly ? 'is-active' : ''}`}
-            >
-              <span aria-hidden>🟢</span> Open now
-            </Link>
-            {CATEGORIES.map((c) => (
-              <Link
-                key={c}
-                href={`/discover?category=${c}${q ? `&q=${encodeURIComponent(q)}` : ''}${openOnly ? '&open=1' : ''}`}
-                className={`brand-chip no-underline ${category === c ? 'is-active' : ''}`}
-              >
-                <span aria-hidden>{categoryEmoji(c)}</span> {categoryLabel(c)}
-              </Link>
-            ))}
-          </div>
+          <DiscoverCategories current={category} q={q} openOnly={openOnly} />
         </div>
       </section>
 
