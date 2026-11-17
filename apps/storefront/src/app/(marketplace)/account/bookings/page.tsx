@@ -31,7 +31,7 @@ export default async function MyBookingsPage() {
   return (
     <main className="container" style={{ padding: '24px 20px' }}>
       <h1>My bookings</h1>
-      <BookingsList customerId={customer.id} />
+      {await BookingsList({ customerId: customer.id })}
     </main>
   );
 }
