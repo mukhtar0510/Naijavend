@@ -808,6 +808,9 @@
 }
 .metric-card:nth-child(3n + 2) { border-top-color: var(--naija); }
 .metric-card:nth-child(3n) { border-top-color: var(--gold); }
+/* Money-in stats read green even when their grid position would pick another accent. */
+.metric-card.metric-card-money { border-top-color: var(--naija); }
+.metric-card.metric-card-money .metric-value { color: var(--naija); }
 .metric-card .metric-value {
   font-family: var(--font-mono);
   font-size: 30px;

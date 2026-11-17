@@ -31,15 +31,17 @@ const BG_OVERLAY_LABELS: Record<string, string> = {
   none: 'None', dim: 'Dim', dark: 'Dark',
 };
 
+// Named so the choice is obvious, and so gold/Naija green are first-class
+// options rather than something sellers have to hunt for in the colour picker.
 const PRESET_ACCENTS = [
-  '#1D4ED8', // Naijavend blue
-  '#0B0C0E', // black
-  '#BE1E6B', // rose
-  '#B4430C', // terracotta
-  '#166534', // green
-  '#0E7490', // teal
-  '#7C3AED', // violet
-  '#8A6A1F', // gold
+  { value: '#1D4ED8', label: 'Naijavend blue' },
+  { value: '#007A4A', label: 'Naija green' },
+  { value: '#A16207', label: 'Gold' },
+  { value: '#0B0C0E', label: 'Black' },
+  { value: '#BE1E6B', label: 'Rose' },
+  { value: '#B4430C', label: 'Terracotta' },
+  { value: '#0E7490', label: 'Teal' },
+  { value: '#7C3AED', label: 'Violet' },
 ];
 
 // Upload-backed image field: pick a file → upload to the seller's own RLS folder in
@@ -418,14 +420,16 @@ export function AppearanceCard({
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
           {PRESET_ACCENTS.map((c) => (
             <button
-              key={c}
+              key={c.value}
               type="button"
-              aria-label={`Accent ${c}`}
-              onClick={() => set('accent_color', c)}
+              title={c.label}
+              aria-label={c.label}
+              aria-pressed={state.accent_color.toLowerCase() === c.value.toLowerCase()}
+              onClick={() => set('accent_color', c.value)}
               style={{
                 width: 34, height: 34, borderRadius: 999, border:
-                  state.accent_color.toLowerCase() === c.toLowerCase() ? '3px solid var(--text)' : '1px solid var(--border)',
-                background: c, cursor: 'pointer', padding: 0,
+                  state.accent_color.toLowerCase() === c.value.toLowerCase() ? '3px solid var(--text)' : '1px solid var(--border)',
+                background: c.value, cursor: 'pointer', padding: 0,
               }}
             />
           ))}

@@ -112,6 +112,8 @@ a:hover { color: var(--blue-deep); text-decoration: underline; }
 
 .mono { font-family: var(--font-mono); font-size: 14px; }
 .muted { color: var(--text-muted); }
+/* Money that has landed: paid orders, completed bookings, revenue totals. */
+.money-value { color: var(--naija); font-family: var(--font-mono); font-weight: 600; }
 
 /* Layout */
 .container { max-width: 1080px; margin: 0 auto; padding: 0 20px; }

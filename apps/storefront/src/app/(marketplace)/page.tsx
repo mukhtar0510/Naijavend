@@ -428,7 +428,7 @@ export default function BrandLandingPage() {
       {/* ============================== AUDIENCE ============================== */}
       <section className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-7 lg:py-20">
         <SectionHead
-          eyebrow={<span className="badge">Built for both sides</span>}
+          eyebrow={<span className="badge badge-gold">Built for both sides</span>}
           title={
             <>
               A shopfront for sellers. A shortlist for <span className="brand-grad">buyers.</span>
@@ -569,7 +569,7 @@ export default function BrandLandingPage() {
       {/* ============================== TIMELINE ============================== */}
       <section className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-7 lg:py-20">
         <SectionHead
-          eyebrow={<span className="badge">The journey</span>}
+          eyebrow={<span className="badge badge-gold">The journey</span>}
           title="From a DM to a dashboard"
         >
           How the product grew — each chapter is something you can use on a store today.

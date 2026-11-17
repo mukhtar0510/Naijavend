@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getSellerClient, getOwnStore } from '@/lib/auth';
+import { redirectStaffToPos } from '@/lib/staff';
 import { BookingActions } from './BookingActions';
 import type { Booking, Listing } from '@idevtenancy/shared';
 
@@ -8,6 +9,7 @@ export const dynamic = 'force-dynamic';
 export default async function BookingsPage() {
   const sb = await getSellerClient();
   if (!sb) redirect('/dashboard/signin'); // layout redirect races this page — guard here too
+  await redirectStaffToPos(sb); // R4: bookings are owner-only
   const store = await getOwnStore<{ id: string }>(sb, 'id');
   if (!store) {
     return <main><h1>Bookings</h1><p className="muted">Create your store first.</p></main>;
@@ -39,7 +41,7 @@ export default async function BookingsPage() {
           {bookings.map((b) => (
             <div key={b.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
               <div>
-                <span className={`badge ${b.status === 'pending' ? 'badge-black' : b.status === 'confirmed' ? 'badge-blue' : b.status === 'completed' ? 'badge-success' : 'badge-danger'}`}>
+                <span className={`badge ${b.status === 'pending' ? 'badge-black' : b.status === 'confirmed' ? 'badge-blue' : b.status === 'completed' ? 'badge-naija' : 'badge-danger'}`}>
                   {b.status}
                 </span>{' '}
                 <strong>{b.customer_name}</strong>

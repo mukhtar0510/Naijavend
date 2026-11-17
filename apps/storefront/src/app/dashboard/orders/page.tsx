@@ -9,8 +9,9 @@ export const dynamic = 'force-dynamic';
 
 const STATUS_BADGE: Record<string, string> = {
   pending: 'badge-black',
-  paid: 'badge-blue',
-  fulfilled: 'badge-success',
+  // Money is in: paid and fulfilled read Naija green, not generic blue/green.
+  paid: 'badge-naija',
+  fulfilled: 'badge-naija',
   cancelled: 'badge-danger',
 };
 
@@ -46,7 +47,7 @@ export default async function OrdersPage() {
                 <span className={`badge ${STATUS_BADGE[o.status] ?? ''}`}>{o.status}</span>{' '}
                 <strong className="mono">{o.id.slice(0, 8)}</strong>
                 <p className="muted" style={{ margin: '4px 0 0', fontSize: 14 }}>
-                  {o.customer_name} · {formatNaira(o.total_kobo)} ·{' '}
+                  {o.customer_name} · <span style={{ color: 'var(--naija)', fontWeight: 600 }}>{formatNaira(o.total_kobo)}</span> ·{' '}
                   {new Date(o.created_at).toLocaleDateString('en-NG', { month: 'short', day: 'numeric' })}
                 </p>
               </div>

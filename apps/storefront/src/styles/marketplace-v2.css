@@ -39,7 +39,7 @@
   font-weight: 800;
   letter-spacing: -0.035em;
 }
-.nv-header-wordmark em { font-style: normal; color: var(--blue); }
+.nv-header-wordmark em { font-style: normal; color: var(--gold); }
 
 /* Search is the primary navigation layer — full-width, high contrast. */
 .nv-header-search {

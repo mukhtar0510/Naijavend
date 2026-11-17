@@ -23,10 +23,10 @@ import {
 
 const STATUS_BADGE: Record<string, string> = {
   pending: 'badge-black',
-  paid: 'badge-blue',
-  fulfilled: 'badge-success',
+  paid: 'badge-naija',
+  fulfilled: 'badge-naija',
   cancelled: 'badge-danger',
-  refunded: 'badge-blue',
+  refunded: 'badge-gold',
 };
 
 const BUY_AGAIN_MAX = 8;

@@ -8,7 +8,7 @@ export const metadata = { title: 'My bookings' };
 const STATUS_BADGE: Record<string, string> = {
   pending: 'badge-black',
   confirmed: 'badge-blue',
-  completed: 'badge-success',
+  completed: 'badge-naija',
   cancelled: 'badge-danger',
 };
 

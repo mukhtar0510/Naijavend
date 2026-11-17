@@ -6,6 +6,7 @@ import { siteUrl } from '@/lib/site';
 import { Stars } from '@/components/Stars';
 import { VerifyCard } from './VerifyCard';
 import { StoreQrCode } from '@/components/StoreQrCode';
+import { formatNaira } from '@idevtenancy/shared';
 import type { Store, StoreRatingStats, StoreTheme } from '@idevtenancy/shared';
 
 export const dynamic = 'force-dynamic';
@@ -51,7 +52,7 @@ export default async function DashboardHome({
   const banner = theme?.banner_url ?? theme?.subheader_url ?? null;
 
   const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-  const [{ count: pendingOrders }, { count: pendingBookings }, { count: reviewCount }, { count: visitsAll }, { count: visits30 }] = await Promise.all([
+  const [{ count: pendingOrders }, { count: pendingBookings }, { count: reviewCount }, { count: visitsAll }, { count: visits30 }, salesRes] = await Promise.all([
     sb.from('orders').select('*', { count: 'exact', head: true }).eq('store_id', s.id).eq('status', 'pending'),
     sb.from('bookings').select('*', { count: 'exact', head: true })
       .in('listing_id', (await sb.from('listings').select('id').eq('store_id', s.id)).data?.map((l) => l.id) ?? [])
@@ -59,7 +60,9 @@ export default async function DashboardHome({
     sb.from('store_ratings').select('*', { count: 'exact', head: true }).eq('store_id', s.id),
     sb.from('store_events').select('*', { count: 'exact', head: true }).eq('store_id', s.id).eq('event_type', 'view'),
     sb.from('store_events').select('*', { count: 'exact', head: true }).eq('store_id', s.id).eq('event_type', 'view').gte('created_at', since30),
+    sb.from('store_sales_daily').select('revenue_kobo').eq('store_id', s.id).gte('day', since30.slice(0, 10)),
   ]);
+  const revenueKobo = (salesRes.data ?? []).reduce((sum, r) => sum + Number(r.revenue_kobo ?? 0), 0);
 
   return (
     <main>
@@ -166,6 +169,11 @@ export default async function DashboardHome({
           <span className="muted">Things that need you first</span>
         </div>
         <div className="listing-grid" style={{ margin: 0 }}>
+          <div className="card card-elevated">
+            <p className="muted" style={{ margin: 0, fontSize: 14 }}>Paid in last 30 days</p>
+            <p className="money-value" style={{ fontSize: 32, margin: 0 }}>{formatNaira(revenueKobo)}</p>
+            <Link href="/dashboard/analytics">See analytics →</Link>
+          </div>
           <div className="card card-elevated">
             <p className="muted" style={{ margin: 0, fontSize: 14 }}>Pending orders</p>
             <p style={{ fontSize: 32, margin: 0, fontFamily: 'var(--font-mono)' }}>{pendingOrders ?? 0}</p>
