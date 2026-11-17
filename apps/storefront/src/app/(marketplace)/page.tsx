@@ -161,7 +161,7 @@ export default function BrandLandingPage() {
       {/* ============================ HOW IT WORKS =========================== */}
       <section className="mx-auto w-full max-w-6xl px-5 py-12 sm:px-7 lg:py-14" aria-labelledby="how-title">
         <div className="mb-6 max-w-[560px]">
-          <span className="badge mb-3">How it works</span>
+          <span className="badge badge-gold mb-3">How it works</span>
           <h2
             id="how-title"
             className="m-0 font-heading text-[clamp(22px,3.2vw,30px)] font-extrabold leading-[1.1] tracking-[-0.03em] text-foreground"
@@ -247,8 +247,7 @@ export default function BrandLandingPage() {
       <section className="border-y border-border bg-[var(--elevated)]">
         <div className="mx-auto grid w-full max-w-6xl gap-10 px-5 py-16 sm:px-7 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center lg:py-20">
           <div>
-            <Reveal>
-              <span className="badge badge-blue mb-4">
+            <Reveal>                  <span className="badge badge-gold mb-4">
                 <Layers size={13} /> What we believe
               </span>
               <h2 className="mb-4 font-heading text-[clamp(26px,4vw,42px)] font-extrabold leading-[1.03] tracking-[-0.04em] text-foreground">
@@ -277,10 +276,7 @@ export default function BrandLandingPage() {
                     className="font-heading text-[22px] font-extrabold leading-none"
                     style={{
                       letterSpacing: '-0.04em',
-                      background: 'linear-gradient(160deg, var(--blue), var(--brand-violet))',
-                      WebkitBackgroundClip: 'text',
-                      backgroundClip: 'text',
-                      color: 'transparent',
+                      color: ['var(--blue)', 'var(--gold)', 'var(--naija)'][index % 3],
                     }}
                   >
                     {principle.k}
@@ -305,7 +301,7 @@ export default function BrandLandingPage() {
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.85fr)] lg:items-center lg:gap-16">
           <div>
             <Reveal>
-              <span className="badge mb-4">Our story</span>
+              <span className="badge badge-naija mb-4">Our story</span>
               <h2 className="mb-5 font-heading text-[clamp(24px,3.4vw,34px)] font-extrabold leading-[1.08] tracking-[-0.035em] text-foreground">
                 It started with a price list pasted into fifty DMs.
               </h2>

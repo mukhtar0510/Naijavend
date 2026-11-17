@@ -109,8 +109,8 @@
   white-space: nowrap;
 }
 .open-badge-dot { width: 7px; height: 7px; border-radius: 999px; }
-.open-badge-open { background: var(--success-tint); color: var(--success); border-color: color-mix(in srgb, var(--success) 30%, transparent); }
-.open-badge-open .open-badge-dot { background: var(--success); }
+.open-badge-open { background: var(--naija-tint); color: var(--naija); border-color: color-mix(in srgb, var(--naija) 30%, transparent); }
+.open-badge-open .open-badge-dot { background: var(--naija-bright); }
 .open-badge-closed { background: var(--danger-tint); color: var(--danger); border-color: color-mix(in srgb, var(--danger) 30%, transparent); }
 .open-badge-closed .open-badge-dot { background: var(--danger); }
 .reach-grid {

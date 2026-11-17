@@ -187,6 +187,13 @@
   --blue-tint: #1c2a4a;
   --blue-tint-2: #23345c;
   --success-tint: #14301f;
+  --gold: #eabf5e;
+  --gold-bright: #f2c14e;
+  --gold-tint: #2b2515;
+  --naija: #45cf96;
+  --naija-deep: #7fe3b5;
+  --naija-bright: #35c98c;
+  --naija-tint: #123024;
   --danger-tint: #381717;
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.45);

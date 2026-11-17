@@ -70,7 +70,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  background: var(--blue);
+  background: var(--naija);
   color: #fff;
   font-size: 10px;
 }
@@ -102,7 +102,9 @@
   color: var(--text-muted);
   white-space: nowrap;
 }
-.brand-marquee-dot { width: 5px; height: 5px; border-radius: 999px; background: var(--brand-pink); }
+.brand-marquee-dot { width: 5px; height: 5px; border-radius: 999px; background: var(--gold); }
+.brand-marquee-item:nth-child(2n) .brand-marquee-dot { background: var(--naija); }
+.brand-marquee-item:nth-child(3n) .brand-marquee-dot { background: var(--blue); }
 
 /* ------------------------------ Hero device art --------------------------- */
 .brand-scene {
@@ -268,8 +270,9 @@
   z-index: 3;
   padding: 3px 9px;
   border-radius: 999px;
-  background: var(--text);
-  color: var(--surface);
+  background: var(--gold-tint);
+  color: var(--gold);
+  border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
   font-size: 9.5px;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -305,7 +308,8 @@
   font-weight: 600;
   line-height: 1.35;
 }
-.brand-trust-card svg { flex-shrink: 0; margin-top: 1px; color: var(--success); }
+.brand-trust-card svg { flex-shrink: 0; margin-top: 1px; color: var(--naija); }
+.brand-trust-card:nth-child(2) svg { color: var(--gold); }
 .brand-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .brand-step {
   display: grid;
@@ -324,6 +328,8 @@
   background: var(--blue-tint);
   color: var(--blue);
 }
+.brand-step:nth-child(2) .brand-step-ico { background: var(--gold-tint); color: var(--gold); }
+.brand-step:nth-child(3) .brand-step-ico { background: var(--naija-tint); color: var(--naija); }
 .brand-step h3 { margin: 0; font-family: var(--font-heading); font-size: 15.5px; font-weight: 700; letter-spacing: -0.01em; }
 .brand-step p { margin: 0; color: var(--text-muted); font-size: 13px; line-height: 1.5; }
 @media (max-width: 820px) {

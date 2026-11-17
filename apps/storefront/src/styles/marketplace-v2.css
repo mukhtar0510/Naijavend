@@ -102,6 +102,9 @@
 }
 .nv-header-top-link:hover { color: var(--blue); text-decoration: none; }
 .nv-header-top-link.is-active { color: var(--blue); background: var(--blue-tint); }
+/* Seller CTA in Naija green so it reads as the commercial action, not chrome. */
+.nv-header-sell { background: var(--naija); border-color: var(--naija); color: #fff; }
+.nv-header-sell:hover { background: var(--naija-deep); border-color: var(--naija-deep); color: #fff; }
 .nv-header-account {
   display: inline-flex;
   align-items: center;
@@ -545,6 +548,8 @@
   border: 1px solid var(--border);
   color: var(--blue);
 }
+.nv-trust-item:nth-child(2) .nv-trust-ico { background: var(--naija-tint); border-color: color-mix(in srgb, var(--naija) 24%, transparent); color: var(--naija); }
+.nv-trust-item:nth-child(3) .nv-trust-ico { background: var(--gold-tint); border-color: color-mix(in srgb, var(--gold) 24%, transparent); color: var(--gold); }
 .nv-trust-item strong { display: block; font-size: 13.5px; letter-spacing: -0.01em; }
 .nv-trust-item p { margin: 4px 0 0; color: var(--text-muted); font-size: 12.5px; line-height: 1.45; }
 
@@ -584,6 +589,9 @@
   font-size: 20px;
   flex-shrink: 0;
 }
+.nv-cat-tile:nth-child(3n + 1) .nv-cat-emoji { background: var(--gold-tint); }
+.nv-cat-tile:nth-child(3n + 2) .nv-cat-emoji { background: var(--naija-tint); }
+.nv-cat-tile:nth-child(3n) .nv-cat-emoji { background: var(--blue-tint); }
 .nv-cat-label { flex: 1; min-width: 0; font-size: 13.5px; font-weight: 700; letter-spacing: -0.01em; }
 .nv-cat-arrow { color: var(--text-muted); flex-shrink: 0; transition: transform 180ms var(--ease); }
 .nv-cat-tile:hover .nv-cat-arrow { transform: translateX(3px); color: var(--blue); }

@@ -43,8 +43,19 @@
   --danger: #dc2626;
   --danger-tint: #fdecec;
   --warning: #b45309;
-  --amber: #b45309;
+  --amber: #a16207;
   --whatsapp: #25d366;
+
+  /* Warm accents (4th + 5th colours).
+     Gold = ratings, rewards, featured; Naija green = local trust, verified,
+     growth and money-in. Used as accents so the blue primary stays dominant. */
+  --gold: #a16207;
+  --gold-bright: #e0a106;
+  --gold-tint: #fdf4df;
+  --naija: #007a4a;
+  --naija-deep: #00633c;
+  --naija-bright: #00a860;
+  --naija-tint: #e7f6ee;
 
   /* Radii */
   --radius-xs: 6px;
@@ -206,10 +217,12 @@ textarea { resize: vertical; min-height: 96px; }
 .badge-blue { color: var(--blue); border-color: rgba(29, 78, 216, 0.35); background: var(--blue-tint); }
 .badge-black { color: var(--black); border-color: rgba(11, 12, 14, 0.3); background: var(--elevated-2); }
 .badge-success { color: var(--success); border-color: rgba(21, 128, 61, 0.35); background: var(--success-tint); }
+.badge-gold { color: var(--gold); border-color: color-mix(in srgb, var(--gold) 35%, transparent); background: var(--gold-tint); }
+.badge-naija { color: var(--naija); border-color: color-mix(in srgb, var(--naija) 35%, transparent); background: var(--naija-tint); }
 .badge-danger { color: var(--danger); border-color: rgba(220, 38, 38, 0.35); background: var(--danger-tint); }
 
 /* Stars */
-.stars { color: var(--amber); letter-spacing: 2px; font-size: 15px; }
+.stars { color: var(--gold-bright); letter-spacing: 2px; font-size: 15px; }
 .stars .off { color: var(--border-strong); }
 
 /* Skeletons shaped like real content */
