@@ -27,6 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const { data: stores, error } = await supabaseAnon()
       .from('stores')
       .select('slug, updated_at')
+      .eq('is_example', false) // sample data is never indexed
       .order('created_at', { ascending: false })
       .limit(5000);
     if (error) throw error;

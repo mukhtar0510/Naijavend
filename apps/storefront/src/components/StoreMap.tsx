@@ -36,6 +36,7 @@ import {
 import { QUICK_CITIES, useViewerLocation } from '@/lib/useViewerLocation';
 import { circlePolygon, createThemedMap, ll, type BaseLayerId, type ThemedMap } from '@/lib/mapFactory';
 import { VerifiedTick } from '@/components/VerifiedTick';
+import { ExampleTag } from '@/components/ExampleStoreBanner';
 import { ILORIN_BOUNDS, ILORIN_CENTER, ILORIN_MIN_ZOOM, inIlorin } from '@/lib/ilorin';
 
 export interface MapStore {
@@ -48,6 +49,8 @@ export interface MapStore {
   logo: string | null;
   isDropshipper: boolean;
   verified: boolean;
+  /** Sample-data store (labelled; cannot take orders). */
+  isExample?: boolean;
   rating: number | null;
   reviewCount: number | null;
   hours: Record<string, [string, string] | null | undefined> | null;
@@ -397,7 +400,7 @@ export function StoreMap({ stores }: { stores: MapStore[] }) {
       el.innerHTML = `<span class="map-pin">${logo}<i data-open="${s.open ? '1' : '0'}"></i>${
         s.verified ? '<b class="map-pin-tick" aria-hidden="true">✓</b>' : ''
       }</span>`;
-      const tipHtml = `<strong>${esc(s.name)}</strong><br/><span>${s.open ? 'Open now' : 'Closed'}${
+      const tipHtml = `<strong>${esc(s.name)}</strong>${s.isExample ? ' <em class="map-tip-ex">Example</em>' : ''}<br/><span>${s.open ? 'Open now' : 'Closed'}${
         s.km != null ? ` · ${formatDistance(s.km)}` : ''
       }${s.rating != null && s.reviewCount ? ` · ★ ${s.rating.toFixed(1)}` : ''}</span>`;
       el.addEventListener('click', (e) => {
@@ -916,6 +919,7 @@ export function StoreMap({ stores }: { stores: MapStore[] }) {
                   <strong>
                     {s.name}
                     {s.verified && <VerifiedTick size={13} />}
+                    {s.isExample && <ExampleTag />}
                   </strong>
                   <em>{s.address ?? s.category.replace(/-/g, ' ')}</em>
                   <span className="nv-map-store-meta">
@@ -959,6 +963,7 @@ export function StoreMap({ stores }: { stores: MapStore[] }) {
               <strong>
                 {selPlotted.name}
                 {selPlotted.verified && <VerifiedTick size={15} />}
+                {selPlotted.isExample && <ExampleTag />}
               </strong>
               <p>
                 {categoryEmoji(selPlotted.category)} {selPlotted.category.replace(/-/g, ' ')}

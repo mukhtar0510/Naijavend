@@ -2575,3 +2575,38 @@
 
 /* Admin accounts section */
 .admin-users { display: grid; gap: 16px; }
+
+/* ===== Example (sample-data) stores ===== */
+.example-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 12px max(16px, calc((100vw - 1200px) / 2));
+  background: var(--gold-tint);
+  color: var(--text);
+  border-bottom: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+.example-banner svg { flex-shrink: 0; margin-top: 1px; color: var(--gold); }
+.example-banner p { margin: 0; }
+[data-theme='dark'] .example-banner { background: color-mix(in srgb, var(--gold) 16%, var(--surface)); }
+.example-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--gold-tint);
+  color: var(--gold);
+  border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+[data-theme='dark'] .example-tag { background: color-mix(in srgb, var(--gold) 18%, transparent); color: var(--gold-bright); }
+.map-tip-ex { font-style: normal; font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--gold); margin-left: 4px; }

@@ -8,12 +8,14 @@ import { DiscoverTabs } from '@/components/DiscoverTabs';
 import { DiscoverCategories } from './DiscoverCategories';
 import { AiPickRow } from '@/components/AiPickRow';
 import { VerifiedTick } from '@/components/VerifiedTick';
+import { ExampleTag } from '@/components/ExampleStoreBanner';
 import { SavedHeart } from '@/components/SavedHeart';
 import { isOpenNow, STORE_CATEGORIES, categoryLabel, categoryEmoji } from '@idevtenancy/shared';
 import type { Store, StoreRatingStats, StoreTheme } from '@idevtenancy/shared';
 import { ArrowRight, MapPin, Search, Sparkles, Store as StoreIcon } from 'lucide-react';
 
 import { Reveal, Stagger, StaggerItem } from '@/components/brand/Motion';
+import { LISTED_EXAMPLE_VALUES } from '@/lib/flags';
 
 export const revalidate = 60; // ISR — static-fast, invalidated on seller writes via revalidatePath
 export const metadata = { title: 'Discover stores' };
@@ -34,6 +36,7 @@ export default async function DiscoverPage({
   let query = sb
     .from('stores')
     .select('*, store_rating_stats(review_count, avg_stars, overall_rank, category_rank), store_themes(logo_url, favicon_url, banner_url, subheader_url)')
+    .in('is_example', LISTED_EXAMPLE_VALUES)
     .order('created_at', { ascending: false })
     .limit(60);
   if (category) query = query.eq('category', category);
@@ -69,6 +72,7 @@ export default async function DiscoverPage({
       logo: s.theme?.logo_url ?? s.theme?.favicon_url ?? null,
       isDropshipper: !!s.is_dropshipper,
       verified: s.verification_status === 'verified',
+      isExample: !!s.is_example,
       rating: s.stats && s.stats.avg_stars != null ? Number(s.stats.avg_stars) : null,
       reviewCount: s.stats?.review_count ?? null,
       hours: s.business_hours ?? null,
@@ -232,6 +236,7 @@ export default async function DiscoverPage({
                                     <h3 className="m-0 flex items-center gap-1.5 text-[15.5px] font-extrabold leading-tight tracking-[-0.02em] text-foreground">
                                       <span className="truncate">{store.name}</span>
                                       {verified ? <VerifiedTick size={15} /> : null}
+                                      {store.is_example ? <ExampleTag /> : null}
                                     </h3>
                                     {store.stats && store.stats.review_count > 0 ? (
                                       <span className="mt-1 flex items-center gap-1.5">

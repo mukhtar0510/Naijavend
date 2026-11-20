@@ -21,6 +21,7 @@ import { StoreCart } from '@/components/StoreCart';
 import { formatHours } from '@/lib/hours';
 import { siteUrl, schemaTypeForCategory } from '@/lib/site';
 import { FEATURES } from '@/lib/flags';
+import { ExampleStoreBanner } from '@/components/ExampleStoreBanner';
 import type { Listing, Store, StoreRating, StoreRatingStats, StoreTheme } from '@idevtenancy/shared';
 
 export const revalidate = 60; // ISR — static-fast, invalidated on seller writes via revalidatePath
@@ -60,6 +61,8 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     const store = await getStore(params.slug);
     if (!store) return { title: 'Store not found' };
     return {
+      // Sample-data stores are never indexed by search engines.
+      ...(store.is_example ? { robots: { index: false, follow: false } } : {}),
       description: store.description || `${store.name} — a local business on Kwaravend.`,
       alternates: { canonical: `${siteUrl()}/s/${store.slug}` },
       openGraph: {
@@ -131,6 +134,7 @@ function LocalBusinessJsonLd({
 export default async function StorePage({ params }: { params: { slug: string } }) {
   const store = await getStore(params.slug);
   if (!store) notFound();
+  if (store.is_example && !FEATURES.exampleStores) notFound();
 
   const sb = supabaseAnon();
   const [{ data: listings }, { data: ratings }] = await Promise.all([
@@ -156,7 +160,7 @@ export default async function StorePage({ params }: { params: { slug: string } }
     <main>
       <TrackStoreView storeId={store.id} />
       <RecordRecentView slug={store.slug} name={store.name} logo={brandLogo ?? null} />
-      <LocalBusinessJsonLd store={store} waNumber={waNumber} stats={stats} />
+      {store.is_example ? <ExampleStoreBanner /> : <LocalBusinessJsonLd store={store} waNumber={waNumber} stats={stats} />}
       {/* Hero band — optionally skinned with the seller's banner image */}
       <div
         className={`page-hero${heroImage ? ' hero-image' : ''}`}

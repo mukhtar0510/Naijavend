@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
 
     const { data: listing, error: listingErr } = await sb
       .from('listings')
-      .select('id, is_bookable, store_id, stores!inner(slug)')
+      .select('id, is_bookable, store_id, stores!inner(slug, is_example)')
       .eq('id', listingId)
       .maybeSingle();
     if (listingErr) throw listingErr;
@@ -56,6 +56,10 @@ export async function POST(req: NextRequest) {
       return apiError(422, 'listing_mismatch', 'That service does not belong to this store.');
     }
     if (!listing.is_bookable) return apiError(422, 'not_bookable', 'This service does not take appointments.');
+    // Example stores are sample data: never let a real buyer book a slot.
+    if ((listing.stores as unknown as { is_example?: boolean }).is_example) {
+      return apiError(403, 'example_store', 'This is an example store with sample data. It cannot take bookings.');
+    }
 
     // Availability check: any non-cancelled booking overlapping the slot.
     const { data: conflicts, error: conflictErr } = await sb

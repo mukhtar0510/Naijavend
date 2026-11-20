@@ -17,6 +17,7 @@ import { supabaseAnon } from '@/lib/supabase';
 import { categoryClass, categoryEmoji, categoryLabel, STORE_CATEGORIES } from '@idevtenancy/shared';
 import { Stars } from '@/components/Stars';
 import { VerifiedTick } from '@/components/VerifiedTick';
+import { ExampleTag } from '@/components/ExampleStoreBanner';
 import { SavedHeart } from '@/components/SavedHeart';
 import { ProductCard, type ProductCardItem } from '@/components/ProductCard';
 import { RecentlyViewed } from '@/components/RecentlyViewed';
@@ -24,6 +25,7 @@ import { HeroSearch } from '@/components/HeroSearch';
 import { Reveal, Stagger, StaggerItem } from '@/components/brand/Motion';
 import { StoreDesigner } from '@/components/brand/StoreDesigner';
 import type { Store, StoreRatingStats, StoreTheme } from '@idevtenancy/shared';
+import { LISTED_EXAMPLE_VALUES } from '@/lib/flags';
 
 export const revalidate = 60; // ISR — static-fast, invalidated on seller writes via revalidatePath
 export const metadata: Metadata = {
@@ -105,6 +107,7 @@ export default async function HomePage() {
     const { data, error: dbError } = await sb
       .from('stores')
       .select('*, store_rating_stats(review_count, avg_stars, weighted_score, overall_rank, category_rank), store_themes(*)')
+      .in('is_example', LISTED_EXAMPLE_VALUES)
       .order('created_at', { ascending: false })
       .limit(6);
     if (dbError) throw dbError;
@@ -412,6 +415,7 @@ export default async function HomePage() {
                             <h3>
                               <span>{store.name}</span>
                               {verified && <VerifiedTick size={15} />}
+                              {store.is_example ? <ExampleTag /> : null}
                             </h3>
                             {store.stats && store.stats.review_count > 0 ? (
                               <span className="nv-store-rating">

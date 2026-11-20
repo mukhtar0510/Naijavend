@@ -26,7 +26,17 @@ export const FEATURES = {
   multiBranchTools: flag('MULTI_BRANCH'),
   /** Heavy storefront customisation (layout picker, section colours, fonts). */
   storefrontCustomisation: flag('STOREFRONT_CUSTOMISATION'),
+  /**
+   * Labelled example stores (is_example) on Discover, Home, Search and the map.
+   * ON by default so the marketplace isn't empty before real sellers join;
+   * set NEXT_PUBLIC_FLAG_EXAMPLE_STORES=off to hide every one of them at once.
+   * Example stores never take orders either way (create-order rejects them).
+   */
+  exampleStores: flag('EXAMPLE_STORES', true),
 } as const;
+
+/** `is_example` values a public store list may include (for `.in('is_example', …)`). */
+export const LISTED_EXAMPLE_VALUES: boolean[] = FEATURES.exampleStores ? [false, true] : [false];
 
 export type FeatureKey = keyof typeof FEATURES;
 

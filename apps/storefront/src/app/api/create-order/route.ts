@@ -66,9 +66,11 @@ export async function POST(req: NextRequest) {
   try {
     const sb = supabaseService();
 
-    const { data: store, error: storeErr } = await sb.from('stores').select('id, delivery_options').eq('slug', slug).maybeSingle();
+    const { data: store, error: storeErr } = await sb.from('stores').select('id, delivery_options, is_example').eq('slug', slug).maybeSingle();
     if (storeErr) throw storeErr;
     if (!store) return apiError(404, 'store_not_found', 'That store does not exist.');
+    // Example stores are sample data: never let a real buyer place an order.
+    if (store.is_example) return apiError(403, 'example_store', 'This is an example store with sample data. It cannot take orders.');
 
     // Price validation happens here, server-side.
     const listingIds = lines.map((l) => l.listingId);

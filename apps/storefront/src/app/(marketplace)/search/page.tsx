@@ -5,7 +5,7 @@ import { Stars } from '@/components/Stars';
 import { embedText } from '@idevtenancy/ai';
 import { parseSearchQuery } from '@/lib/search-terms';
 import { isMissingColumn } from '@/lib/supabase';
-import { FEATURES } from '@/lib/flags';
+import { FEATURES, LISTED_EXAMPLE_VALUES } from '@/lib/flags';
 import type { Store, StoreRatingStats, StoreTheme } from '@idevtenancy/shared';
 
 export const dynamic = 'force-dynamic';
@@ -197,6 +197,7 @@ export default async function SearchPage({
           recallTerms.slice(0, 2).map((t) =>
             sb.from('stores').select('*, store_rating_stats(review_count, avg_stars), store_themes(*)')
               .or(`name.ilike.%${esc(t)}%,description.ilike.%${esc(t)}%`)
+              .in('is_example', LISTED_EXAMPLE_VALUES)
               .limit(20)
           )
         );

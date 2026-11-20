@@ -142,6 +142,8 @@ export interface Store {
   dropship_info: string | null;
   verification_status: 'unverified' | 'verified';
   verified_at: string | null;
+  /** Sample-data store for demos: labelled in the UI, cannot take orders. */
+  is_example?: boolean;
   created_at: string;
   updated_at: string;
 }
