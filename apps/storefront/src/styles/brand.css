@@ -71,7 +71,7 @@
   justify-content: center;
   border-radius: 999px;
   background: var(--gold);
-  color: #fff;
+  color: var(--on-accent);
   font-size: 10px;
 }
 
@@ -408,7 +408,7 @@
 .brand-chip.is-active {
   background: var(--blue);
   border-color: var(--blue);
-  color: #fff;
+  color: var(--on-primary);
   box-shadow: var(--shadow-sm);
 }
 /* Category rail: one scrolling row on small screens, a column from lg up. */

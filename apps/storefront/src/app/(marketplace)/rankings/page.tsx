@@ -14,8 +14,9 @@ import { supabaseAnon } from '@/lib/supabase';
 import { Stars } from '@/components/Stars';
 import { VerifiedTick } from '@/components/VerifiedTick';
 import { Reveal, Stagger, StaggerItem } from '@/components/brand/Motion';
-import { STORE_CATEGORIES, categoryEmoji, categoryLabel } from '@idevtenancy/shared';
+import { STORE_CATEGORIES, categoryLabel } from '@idevtenancy/shared';
 import type { Store, StoreRatingStats } from '@idevtenancy/shared';
+import { CategoryIcon } from '@/lib/categories';
 
 // Rankings launch scoped to one state, so a small board is still a useful one.
 // Stores are filtered by their pinned coordinates, with the address as a
@@ -222,7 +223,7 @@ export default async function RankingsPage({
               href={href(c)}
               className={`nv-rank-cat${category === c ? ' is-active' : ''}`}
             >
-              <span aria-hidden>{categoryEmoji(c)}</span>
+              <span aria-hidden><CategoryIcon category={c} /></span>
               {categoryLabel(c)}
             </Link>
           ))}
@@ -273,7 +274,7 @@ export default async function RankingsPage({
                           {entry.store.verification_status === 'verified' && <VerifiedTick size={14} />}
                         </h3>
                         <p className="nv-rank-pod-cat">
-                          {categoryEmoji(entry.store.category)} {categoryLabel(entry.store.category)}
+                          <CategoryIcon category={entry.store.category} /> {categoryLabel(entry.store.category)}
                         </p>
                         <Stars value={Number(entry.stats.avg_stars)} showNumeric={false} />
                         <p className="nv-rank-pod-meta">
@@ -304,7 +305,7 @@ export default async function RankingsPage({
                                 {entry.store.verification_status === 'verified' && <VerifiedTick size={13} />}
                               </strong>
                               <em>
-                                {categoryEmoji(entry.store.category)} {categoryLabel(entry.store.category)}
+                                <CategoryIcon category={entry.store.category} /> {categoryLabel(entry.store.category)}
                                 {entry.store.is_dropshipper ? ' · 🚚 dropshipper' : ''}
                               </em>
                             </span>

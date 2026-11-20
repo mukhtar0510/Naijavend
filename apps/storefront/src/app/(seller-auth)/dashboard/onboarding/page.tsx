@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { STORE_CATEGORIES, categoryEmoji, categoryLabel } from '@idevtenancy/shared';
+import { STORE_CATEGORIES, categoryLabel } from '@idevtenancy/shared';
 import { aiComplete } from '@idevtenancy/ai';
 import { CategoryPicker } from '@/components/CategoryPicker';
 import { trackStepView, trackStepComplete, trackChip, trackPreviewShown, trackAbandon } from '@/lib/funnel';
+import { CategoryIcon } from '@/lib/categories';
 
 interface AiPreview {
   name: string;
@@ -358,7 +359,7 @@ export default function OnboardingPage() {
                   </div>
                   <p className="ob-live-desc">{liveDraft.description}</p>
                   <div>
-                    <span className="badge">{categoryEmoji(liveDraft.category)} {categoryLabel(liveDraft.category)}</span>
+                    <span className="badge"><CategoryIcon category={liveDraft.category} /> {categoryLabel(liveDraft.category)}</span>
                   </div>
                   <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
                     <button type="button" className="btn btn-primary btn-sm" onClick={useDraftNow}>

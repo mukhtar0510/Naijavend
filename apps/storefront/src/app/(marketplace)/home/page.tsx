@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { BRAND, STARTER_TEMPLATE_COUNT } from '@idevtenancy/shared';
 import { supabaseAnon } from '@/lib/supabase';
-import { categoryClass, categoryEmoji, categoryLabel, STORE_CATEGORIES } from '@idevtenancy/shared';
+import { categoryClass, categoryLabel, STORE_CATEGORIES } from '@idevtenancy/shared';
 import { Stars } from '@/components/Stars';
 import { VerifiedTick } from '@/components/VerifiedTick';
 import { ExampleTag } from '@/components/ExampleStoreBanner';
@@ -26,6 +26,7 @@ import { Reveal, Stagger, StaggerItem } from '@/components/brand/Motion';
 import { StoreDesigner } from '@/components/brand/StoreDesigner';
 import type { Store, StoreRatingStats, StoreTheme } from '@idevtenancy/shared';
 import { LISTED_EXAMPLE_VALUES } from '@/lib/flags';
+import { CategoryIcon } from '@/lib/categories';
 
 export const revalidate = 60; // ISR — static-fast, invalidated on seller writes via revalidatePath
 export const metadata: Metadata = {
@@ -346,7 +347,7 @@ export default async function HomePage() {
             {HOME_CATEGORIES.map((c) => (
               <Link key={c} href={`/discover?category=${c}`} className="nv-cat-tile">
                 <span className="nv-cat-emoji" aria-hidden>
-                  {categoryEmoji(c)}
+                  <CategoryIcon category={c} />
                 </span>
                 <span className="nv-cat-label">{categoryLabel(c)}</span>
                 <ArrowRight size={14} className="nv-cat-arrow" aria-hidden />
@@ -395,7 +396,7 @@ export default async function HomePage() {
                         }
                       >
                         <span className={`nv-store-cat ${catClass}`}>
-                          <span aria-hidden>{categoryEmoji(store.category)}</span>
+                          <span aria-hidden><CategoryIcon category={store.category} /></span>
                           {categoryLabel(store.category)}
                         </span>
                         {store.is_dropshipper && <span className="nv-store-flag">🚚 Dropship</span>}

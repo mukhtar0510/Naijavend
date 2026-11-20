@@ -9,7 +9,8 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
-import { STORE_CATEGORIES, categoryEmoji, categoryLabel } from '@idevtenancy/shared';
+import { STORE_CATEGORIES, categoryLabel } from '@idevtenancy/shared';
+import { CategoryIcon } from '@/lib/categories';
 
 const INLINE_COUNT = 5;
 
@@ -75,7 +76,7 @@ export function DiscoverCategories({
             href={hrefFor(c)}
             className={`brand-chip no-underline${i >= INLINE_COUNT ? ' cat-extra' : ''} ${current === c ? 'is-active' : ''}`}
           >
-            <span aria-hidden>{categoryEmoji(c)}</span> {categoryLabel(c)}
+            <span aria-hidden><CategoryIcon category={c} /></span> {categoryLabel(c)}
           </Link>
         ))}
       </div>
@@ -100,7 +101,7 @@ export function DiscoverCategories({
                 onClick={() => setOpen(false)}
                 className={`cat-more-item${current === c ? ' is-active' : ''}`}
               >
-                <span aria-hidden>{categoryEmoji(c)}</span>
+                <span aria-hidden><CategoryIcon category={c} /></span>
                 {categoryLabel(c)}
               </Link>
             ))}

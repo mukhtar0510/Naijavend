@@ -185,35 +185,8 @@
 /* ================= Dark mode ================= */
 /* Token overrides on [data-theme='dark']; applied pre-paint by the inline script
    in app/layout.tsx, toggled by ThemeToggle in the marketplace header. */
-[data-theme='dark'] {
-  --surface: #12141a;
-  --elevated: #1a1d25;
-  --elevated-2: #232734;
-  --text: #edeff4;
-  --text-muted: #9aa3b2;
-  --border: #2c3140;
-  --border-strong: #3c4354;
-  --border-inset: #232734;
-  --surface-2: #1a1d23;
-  --elevated-1: #262b36;
-  --blue-tint: #1c2a4a;
-  --blue-tint-2: #23345c;
-  --success-tint: #14301f;
-  --gold: #eabf5e;
-  --gold-bright: #f2c14e;
-  --gold-tint: #2b2515;
-  --naija: #45cf96;
-  --naija-deep: #7fe3b5;
-  --naija-bright: #35c98c;
-  --naija-tint: #123024;
-  --danger-tint: #381717;
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.45);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.55);
-  color-scheme: dark;
-}
-[data-theme='dark'] body { background: var(--surface); color: var(--text); }
+/* Dark token values live in tokens.css. */
+[data-theme='dark'] body { background: var(--surface); color: var(--text); } /* dark page = --surface (#0C1A17) */
 
 /* Header glass re-tint */
 [data-theme='dark'] .topnav {

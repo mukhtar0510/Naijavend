@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { MapEmbed } from '@/components/MapEmbed';
 import { CategoryPicker } from '@/components/CategoryPicker';
 import { FEATURES } from '@/lib/flags';
-import { BUSINESS_DAYS, categoryEmoji, categoryLabel, type BusinessHours } from '@idevtenancy/shared';
+import { BUSINESS_DAYS, categoryLabel, type BusinessHours } from '@idevtenancy/shared';
+import { CategoryIcon } from '@/lib/categories';
 
 interface StoreSettings {
   name: string;
@@ -149,7 +150,7 @@ export function SettingsForm({ store, whatsapp }: { store: StoreSettings; whatsa
         <h2 style={{ fontSize: 18 }}>Store category</h2>
         <p className="hint" style={{ marginTop: 0 }}>
           Where you show up on the marketplace — discover filters, rankings and the map.
-          Currently: <span className="badge">{categoryEmoji(category)} {categoryLabel(category)}</span>
+          Currently: <span className="badge"><CategoryIcon category={category} /> {categoryLabel(category)}</span>
         </p>
         <CategoryPicker value={category} onChange={setCategory} />
       </div>

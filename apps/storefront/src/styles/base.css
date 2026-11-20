@@ -1,5 +1,4 @@
-/* Kwaravend — design system (light).
-   White surfaces, blue #1D4ED8 primary + black accents. Store pages render as
+/* Kwaravend — base styles. Colour tokens: tokens.css (light + dark). Store pages render as
    independent sites inside /s/*: their own masthead/footer, no marketplace chrome.
    Fonts: Sora (display) / Inter (body) / JetBrains Mono (prices, order IDs). */
 
@@ -7,55 +6,7 @@
    display=swap keeps text visible while webfonts arrive. */
 
 :root {
-  /* Brand */
-  --blue: #1d4ed8;
-  --blue-deep: #1e3fa8;
-  --blue-soft: #3b82f6;
-  --blue-tint: #eaf1fe;
-  --blue-tint-2: #dbe7fd;
-  --black: #0b0c0e;
-  --ink-2: #26282e;
-
-  /* Surfaces (light theme) */
-  --surface: #ffffff;
-  --elevated: #f6f8fb;
-  --elevated-2: #eef1f6;
-
-  /* Text */
-  --text: #0b0c0e;
-  --text-muted: #5b6472;
-
-  /* Lines */
-  --border: #dfe4ec;
-  --border-strong: #c6cedb;
-  /* Aliases for tokens used across components but previously never defined
-     (rules referencing them were dropped entirely by the browser). */
-  --line: var(--border);
-  --border-inset: #e8ecf3;
-  --muted: var(--text-muted);
-  --bg: var(--surface);
-  --surface-2: #eef1f6;
-  --elevated-1: #f1f3f7;
-
-  /* Semantic */
-  --success: #15803d;
-  --success-tint: #e8f6ee;
-  --danger: #dc2626;
-  --danger-tint: #fdecec;
-  --warning: #b45309;
-  --amber: #a16207;
-  --whatsapp: #25d366;
-
-  /* Warm accents (4th + 5th colours).
-     Gold = ratings, rewards, featured; Naija green = local trust, verified,
-     growth and money-in. Used as accents so the blue primary stays dominant. */
-  --gold: #a16207;
-  --gold-bright: #e0a106;
-  --gold-tint: #fdf4df;
-  --naija: #007a4a;
-  --naija-deep: #00633c;
-  --naija-bright: #00a860;
-  --naija-tint: #e7f6ee;
+  /* Colours, motion, z-index and depth live in tokens.css (imported first). */
 
   /* Radii */
   --radius-xs: 6px;
@@ -64,12 +15,6 @@
   --radius-lg: 20px;
   --radius-xl: 28px;
 
-  /* Elevation */
-  --shadow-xs: 0 1px 2px rgba(11, 12, 14, 0.05);
-  --shadow-sm: 0 2px 8px rgba(11, 12, 14, 0.07);
-  --shadow-md: 0 8px 24px rgba(11, 12, 14, 0.09);
-  --shadow-lg: 0 16px 48px rgba(11, 12, 14, 0.14);
-
   /* Type. The --font-* trio is injected by next/font on <html> (self-hosted,
      metric-matched fallbacks); the literal names stay as a safety net for any
      stylesheet loaded outside the root layout. */
@@ -77,9 +22,6 @@
   --font-body: var(--font-inter, 'Inter'), system-ui, sans-serif;
   --font-mono: var(--font-jetbrains, 'JetBrains Mono'), ui-monospace, monospace;
 
-  --ease: cubic-bezier(0.2, 0, 0.4, 1);
-  --dur-fast: 140ms;
-  --dur-slow: 320ms;
 }
 
 * { box-sizing: border-box; }
@@ -88,7 +30,7 @@ html { color-scheme: light; }
 
 body {
   margin: 0;
-  background: var(--surface);
+  background: var(--bg-0);
   color: var(--text);
   font-family: var(--font-body);
   font-size: 16px;
@@ -152,9 +94,9 @@ a:hover { color: var(--blue-deep); text-decoration: underline; }
   min-height: 44px; /* touch target floor */
   text-decoration: none !important;
 }
-.btn-primary { background: var(--blue); color: #ffffff; box-shadow: var(--shadow-xs); }
+.btn-primary { background: var(--primary); color: var(--on-primary); box-shadow: var(--shadow-xs); }
 .btn-primary:hover { background: var(--blue-deep); box-shadow: var(--shadow-sm); transform: translateY(-1px); }
-.btn-black { background: var(--black); color: #ffffff; box-shadow: var(--shadow-xs); }
+.btn-black { background: var(--black); color: var(--surface); box-shadow: var(--shadow-xs); }
 .btn-black:hover { background: var(--ink-2); box-shadow: var(--shadow-sm); transform: translateY(-1px); }
 .btn-outline { background: var(--surface); color: var(--text); border-color: var(--border-strong); }
 .btn-outline:hover { border-color: var(--blue); color: var(--blue); box-shadow: var(--shadow-xs); }

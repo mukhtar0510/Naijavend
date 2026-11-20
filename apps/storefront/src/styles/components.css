@@ -90,7 +90,7 @@
 /* === Store features: announcement bar, open badge, hours + delivery cards === */
 .store-announcement {
   background: var(--blue);
-  color: #fff;
+  color: var(--on-primary);
   font-size: 13.5px;
   font-weight: 600;
   text-align: center;
@@ -305,7 +305,7 @@
 .filter-chip.is-active {
   background: var(--blue);
   border-color: var(--blue);
-  color: #fff;
+  color: var(--on-primary);
 }
 .filter-chip.is-on {
   border-color: var(--success);
@@ -335,7 +335,7 @@
 .account-tab.is-active {
   background: var(--blue);
   border-color: var(--blue);
-  color: #fff;
+  color: var(--on-primary);
 }
 
 /* ================= NEW: Buyer account page card-first layout ================= */
@@ -410,7 +410,7 @@
   border-color: var(--border);
 }
 .saved-card-logo { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); }
-.saved-card-initial { width: 52px; height: 52px; border-radius: 50%; background: var(--blue); color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.saved-card-initial { width: 52px; height: 52px; border-radius: 50%; background: var(--blue); color: var(--on-primary); font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 20px; }
 .saved-card-name { font-weight: 600; font-size: 14px; }
 
 /* Recently viewed — horizontal scrolling card row */
@@ -420,7 +420,7 @@
 .recent-row::-webkit-scrollbar { display: none; }
 .recent-card { flex: 0 0 150px; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 12px; text-align: center; text-decoration: none; color: var(--text); border-color: var(--border); }
 .recent-card img { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); }
-.recent-card .recent-initial { width: 52px; height: 52px; border-radius: 50%; background: var(--blue); color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.recent-card .recent-initial { width: 52px; height: 52px; border-radius: 50%; background: var(--blue); color: var(--on-primary); font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 20px; }
 .recent-name { font-size: 13px; font-weight: 600; }
 .recent-visit { font-size: 11.5px; color: var(--text-muted); }
 
@@ -508,7 +508,7 @@
   padding: 0 6px;
   border-radius: 999px;
   background: var(--blue);
-  color: #fff;
+  color: var(--on-primary);
   font-size: 11.5px;
   font-weight: 700;
   display: grid;
@@ -624,7 +624,7 @@
   background: var(--blue);
   border-color: var(--blue-soft);
   box-shadow: 0 0 0 5px rgba(59, 130, 246, 0.25);
-  color: #ffffff;
+  color: var(--on-primary);
 }
 .ob-step.is-done .ob-step-dot { background: rgba(74, 222, 128, 0.2); border-color: rgba(74, 222, 128, 0.5); color: #86efac; }
 .ob-step-label { display: grid; line-height: 1.25; }
@@ -1340,7 +1340,7 @@
 .saved-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
 .saved-card { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 12px; text-align: center; text-decoration: none; color: var(--text); }
 .saved-card img { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); }
-.saved-card-initial { width: 52px; height: 52px; border-radius: 50%; background: var(--blue); color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.saved-card-initial { width: 52px; height: 52px; border-radius: 50%; background: var(--blue); color: var(--on-primary); font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 20px; }
 .saved-card-name { font-weight: 600; font-size: 14px; }
 
 /* ===== Store radar — Snap-Map-style locator ===== */
@@ -1350,7 +1350,7 @@
 .radar-cta { padding: 18px; }
 .radar-cats { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0 4px; }
 .radar-cat { border: 1px solid var(--border); background: var(--surface); color: var(--text); border-radius: 999px; padding: 5px 12px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
-.radar-cat.on { background: var(--blue); border-color: var(--blue); color: #fff; }
+.radar-cat.on { background: var(--blue); border-color: var(--blue); color: var(--on-primary); }
 .radar-stage { position: relative; width: 100%; max-width: 560px; margin: 16px auto; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 50% 50%, var(--blue-tint-2), transparent 72%), var(--elevated-2); border: 1px solid var(--border); box-shadow: var(--shadow-md), inset 0 0 70px rgba(29, 78, 216, 0.07); overflow: hidden; }
 .radar-ring { position: absolute; border-radius: 50%; border: 1px dashed color-mix(in srgb, var(--blue) 26%, transparent); pointer-events: none; }
 .radar-ring.r1 { inset: 33.4%; }
@@ -1374,7 +1374,7 @@
 .radar-card { padding: 16px 18px; max-width: 620px; margin: 0 auto 14px; }
 .radar-card-top { display: flex; align-items: center; gap: 12px; }
 .radar-card-logo { width: 54px; height: 54px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); flex-shrink: 0; }
-.radar-card-logo-fallback { display: flex; align-items: center; justify-content: center; background: var(--blue); color: #fff; font-weight: 700; font-size: 20px; }
+.radar-card-logo-fallback { display: flex; align-items: center; justify-content: center; background: var(--blue); color: var(--on-primary); font-weight: 700; font-size: 20px; }
 .radar-card-close { margin-left: auto; border: none; background: transparent; font-size: 22px; color: var(--text-muted); cursor: pointer; padding: 4px 8px; }
 .radar-card-stats { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
 .radar-card-stats span { display: flex; flex-direction: column; gap: 2px; }
@@ -1473,7 +1473,7 @@
 .map-pin-wrap, .map-me-wrap { background: transparent; border: none; padding: 0; cursor: pointer; }
 .map-pin-wrap:focus-visible { outline: none; }
 .map-pin-wrap:focus-visible .map-pin, .map-pin-wrap:focus-visible .map-cluster { box-shadow: 0 0 0 4px var(--blue); }
-.map-pin { position: relative; width: 44px; height: 44px; border-radius: 50%; border: 3px solid var(--blue); background: var(--surface); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-md); font-size: 20px; cursor: pointer; }
+.map-pin { position: relative; width: 44px; height: 44px; border-radius: 50%; border: 3px solid var(--pin-ring, var(--primary)); color: var(--pin-ring, var(--primary)); background: var(--surface); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-md); font-size: 20px; cursor: pointer; }
 /* Selected pin pops: blue glow ring like the list row highlight. */
 .map-pin-wrap.map-pin-hl .map-pin { box-shadow: 0 0 0 5px color-mix(in srgb, var(--blue) 30%, transparent), var(--shadow-lg); transform: scale(1.1); z-index: 5; }
 .map-pin img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
@@ -1486,7 +1486,7 @@
 @media (prefers-reduced-motion: reduce) { .map-me::after { animation: none; } }
 .map-pin.map-pin-sm { width: 34px; height: 34px; font-size: 16px; border-width: 2.5px; }
 .map-pin-wrap .map-pin { transition: transform 0.15s ease, box-shadow 0.15s ease; }
-.map-pin-tick { position: absolute; left: -4px; bottom: -4px; display: grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; background: var(--blue); color: #fff; font-size: 10px; font-weight: 900; border: 2px solid #fff; }
+.map-pin-tick { position: absolute; left: -4px; bottom: -4px; display: grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; background: var(--blue); color: var(--on-primary); font-size: 10px; font-weight: 900; border: 2px solid #fff; }
 .map-cluster { position: relative; display: grid; place-items: center; border-radius: 50%; background: var(--gold, #d4a017); color: #fff; font-weight: 800; font-size: 14px; border: 3px solid #fff; box-shadow: 0 0 0 5px color-mix(in srgb, var(--gold, #d4a017) 30%, transparent), var(--shadow-md); cursor: pointer; transition: transform 0.15s ease; }
 .map-cluster:hover { transform: scale(1.08); }
 .map-cluster i { position: absolute; bottom: -9px; left: 50%; transform: translateX(-50%); padding: 1px 6px; border-radius: 999px; background: #16a34a; color: #fff; font-style: normal; font-size: 9.5px; font-weight: 800; white-space: nowrap; border: 1.5px solid #fff; }
@@ -1501,7 +1501,7 @@
 /* Streets / Satellite switch on store-page maps */
 .nv-ml-switch { display: flex; padding: 3px; border-radius: 999px; background: var(--surface); box-shadow: var(--shadow-sm); border: 1px solid var(--border); }
 .nv-ml-switch button { height: 26px; padding: 0 10px; border: 0; border-radius: 999px; background: transparent; color: var(--text-muted); font-size: 11.5px; font-weight: 700; cursor: pointer; }
-.nv-ml-switch button[aria-pressed='true'] { background: var(--blue); color: #fff; }
+.nv-ml-switch button[aria-pressed='true'] { background: var(--blue); color: var(--on-primary); }
 
 /* ===== AI picks (buyer recommendations) ===== */
 .ai-picks { margin: 0 0 22px; }
@@ -1544,7 +1544,7 @@
 .map-legend .lg-open { background: #16a34a; }
 .map-legend .lg-closed { background: #9ca3af; }
 .map-legend .lg-pin { background: var(--blue); }
-.map-count { display: inline-grid; place-items: center; min-width: 24px; height: 24px; padding: 0 8px; margin-left: 8px; border-radius: 999px; background: var(--blue); color: #fff; font-size: 12.5px; vertical-align: 2px; }
+.map-count { display: inline-grid; place-items: center; min-width: 24px; height: 24px; padding: 0 8px; margin-left: 8px; border-radius: 999px; background: var(--blue); color: var(--on-primary); font-size: 12.5px; vertical-align: 2px; }
 .map-search { flex: 1; min-width: 180px; max-width: 260px; padding: 5px 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--text); font-size: 12.5px; }
 .map-search:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-tint); }
 .map-list { display: grid; gap: 8px; max-height: 480px; overflow: auto; padding-right: 2px; }
@@ -1565,7 +1565,7 @@
 .map-list-empty { padding: 14px; text-align: center; }
 .map-profile-toggle { display: inline-flex; border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
 .map-profile-btn { border: none; background: transparent; padding: 6px 12px; font-size: 12.5px; font-weight: 700; color: var(--text-muted); cursor: pointer; }
-.map-profile-btn.on { background: var(--blue); color: #fff; }
+.map-profile-btn.on { background: var(--blue); color: var(--on-primary); }
 @media (max-width: 640px) {
   .map-list { max-height: 300px; }
   .map-legend { gap: 8px; padding: 5px 8px; font-size: 11px; }
@@ -1612,7 +1612,7 @@
 .recent-row { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px; }
 .recent-card { flex: 0 0 150px; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 12px; text-align: center; text-decoration: none; color: var(--text); }
 .recent-card img { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); }
-.recent-initial { width: 52px; height: 52px; border-radius: 50%; background: var(--blue); color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.recent-initial { width: 52px; height: 52px; border-radius: 50%; background: var(--blue); color: var(--on-primary); font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 20px; }
 .recent-name { font-weight: 600; font-size: 13.5px; line-height: 1.25; }
 .recent-visit { font-size: 12px; color: var(--blue); font-weight: 600; }
 
@@ -2005,7 +2005,7 @@
   box-shadow: 2.5px 2.5px 0 rgba(15, 23, 42, 0.08);
 }
 .nv-bubble-buyer { align-self: flex-start; background: var(--surface); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
-.nv-bubble-seller { align-self: flex-end; background: var(--blue); color: #fff; border-bottom-right-radius: 4px; }
+.nv-bubble-seller { align-self: flex-end; background: var(--blue); color: var(--on-primary); border-bottom-right-radius: 4px; }
 
 .nv-bars {
   display: flex;

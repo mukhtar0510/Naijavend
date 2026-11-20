@@ -10,12 +10,13 @@ import { AiPickRow } from '@/components/AiPickRow';
 import { VerifiedTick } from '@/components/VerifiedTick';
 import { ExampleTag } from '@/components/ExampleStoreBanner';
 import { SavedHeart } from '@/components/SavedHeart';
-import { isOpenNow, STORE_CATEGORIES, categoryLabel, categoryEmoji } from '@idevtenancy/shared';
+import { isOpenNow, STORE_CATEGORIES, categoryLabel } from '@idevtenancy/shared';
 import type { Store, StoreRatingStats, StoreTheme } from '@idevtenancy/shared';
 import { ArrowRight, MapPin, Search, Sparkles, Store as StoreIcon } from 'lucide-react';
 
 import { Reveal, Stagger, StaggerItem } from '@/components/brand/Motion';
 import { LISTED_EXAMPLE_VALUES } from '@/lib/flags';
+import { CategoryIcon } from '@/lib/categories';
 
 export const revalidate = 60; // ISR — static-fast, invalidated on seller writes via revalidatePath
 export const metadata = { title: 'Discover stores' };
@@ -204,7 +205,7 @@ export default async function DiscoverPage({
                               >
                                 {/* Top-right stays clear for the SavedHeart button. */}
                                 <span className="absolute bottom-2.5 left-2.5 rounded-full border border-border px-2.5 py-1 text-[11px] font-bold text-foreground backdrop-blur">
-                                  <span aria-hidden style={{ marginRight: 4 }}>{categoryEmoji(store.category)}</span>
+                                  <span aria-hidden style={{ marginRight: 4 }}><CategoryIcon category={store.category} /></span>
                                   {categoryLabel(store.category)}
                                 </span>
                                 {store.is_dropshipper ? (

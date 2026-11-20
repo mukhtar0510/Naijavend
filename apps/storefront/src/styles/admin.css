@@ -143,7 +143,7 @@
   padding: 7px 14px; border-radius: 999px; font-size: 13.5px; font-weight: 600; color: var(--text-muted);
   transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
 }
-.admin-role-tabs button.is-active { background: var(--blue); color: #fff; }
+.admin-role-tabs button.is-active { background: var(--blue); color: var(--on-primary); }
 
 .admin-table-wrap {
   border: 1px solid var(--border);

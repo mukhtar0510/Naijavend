@@ -416,7 +416,7 @@
   background: var(--blue);
   background: linear-gradient(160deg, var(--blue), color-mix(in srgb, var(--blue) 82%, #000));
   border-color: transparent;
-  color: #ffffff;
+  color: var(--on-primary);
   border-bottom-right-radius: 6px;
 }
 .chat-row.mine.is-grouped .chat-bubble { border-radius: var(--radius-md); border-bottom-right-radius: var(--radius-md); }

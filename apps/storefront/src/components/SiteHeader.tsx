@@ -14,7 +14,8 @@ import {
 } from 'lucide-react';
 import { KwaravendLogoMark } from '@/components/KwaravendLogo';
 import { FEATURES } from '@/lib/flags';
-import { categoryEmoji, categoryLabel } from '@idevtenancy/shared';
+import { categoryLabel } from '@idevtenancy/shared';
+import { CategoryIcon } from '@/lib/categories';
 
 // One row of navigation. Everything else lives where it belongs: categories on
 // the home page, help/legal in the footer, selling in the primary button.
@@ -148,7 +149,7 @@ export function SiteHeader() {
             <div className="nv-mobile-cats">
               {QUICK_CATEGORIES.map((c) => (
                 <Link key={c} href={`/discover?category=${c}`} className="nv-header-cat">
-                  <span aria-hidden>{categoryEmoji(c)}</span>
+                  <span aria-hidden><CategoryIcon category={c} /></span>
                   {categoryLabel(c)}
                 </Link>
               ))}

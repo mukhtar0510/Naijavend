@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Sora, Inter, JetBrains_Mono } from 'next/font/google';
 // Design system split into modules — imported once at the root, in cascade order:
 // tokens/base → chrome (headers/footers) → components (forms/cards) → interactions (responsive + dark).
+import '../styles/tokens.css';
 import '../styles/base.css';
 import '../styles/chrome.css';
 import '../styles/components.css';

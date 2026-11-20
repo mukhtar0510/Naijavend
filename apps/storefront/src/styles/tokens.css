@@ -1,0 +1,203 @@
+/* Kwaravend design tokens — the ONE place colours, motion, z-index and depth
+   are defined. Components reference these variables, never hex values.
+   Documented in docs/DESIGN.md (palette, contrast table, legacy aliases).
+
+   Palette: a blend of REDESIGN.md 2.6 (emerald + sun amber, dark-first,
+   green-tinted surfaces) with the original Kwaravend colours (Naija green,
+   gold, blue). Brand = green, accent = gold/amber, info = blue.
+   Every text pair passes WCAG 2.2 AA (4.5:1) — see docs/DESIGN.md before
+   changing a value, and re-check the ratios if you do.
+
+   Theme: [data-theme] is set pre-paint by the inline script in app/layout.tsx
+   (saved choice, else the system setting). */
+
+:root {
+  /* ---- Surfaces & text (light) ---- */
+  --bg-0: #f4faf7;            /* page background */
+  --bg-1: #ffffff;            /* large panels */
+  --surface: #ffffff;         /* cards, sheets */
+  --surface-raised: #eef6f2;  /* popovers, hovered cards */
+  --elevated: #f4faf7;
+  --elevated-1: #eef6f2;
+  --elevated-2: #e6f0eb;
+  --surface-2: #e6f0eb;
+  --text: #0b1f1a;
+  --text-muted: #4a635b;
+  --border: #dbe7e1;
+  --border-strong: #c2d4cb;
+  --border-inset: #e6efea;
+
+  /* ---- Brand ---- */
+  --primary: #007a4a;         /* Naija green — brand, links, main buttons (5.4:1 on white) */
+  --primary-hover: #00633c;
+  --primary-tint: #e7f6ee;
+  --primary-tint-2: #d3eee0;
+  --on-primary: #ffffff;
+  --accent: #a16207;          /* gold — highlights, open-now, ratings (4.9:1 on white) */
+  --accent-bright: #e0a106;   /* decorative only, never small text */
+  --accent-tint: #fdf4df;
+  --on-accent: #ffffff;
+  --info: #1d4ed8;            /* blue — neutral info, in transit (6.7:1) */
+  --info-tint: #eaf1fe;
+
+  /* ---- Status ---- */
+  --success: #15803d;
+  --success-tint: #e8f6ee;
+  --warning: #8a5a00;
+  --warning-tint: #fdf4df;
+  --danger: #c62828;
+  --danger-tint: #fdecec;
+  --whatsapp: #25d366;
+
+  /* ---- Category colours (REDESIGN 2.6; each 4.5:1+ on its surface) ---- */
+  --cat-food: #b45309;
+  --cat-cakes: #be185d;
+  --cat-beauty: #7e22ce;
+  --cat-hair: #5b3fd1;
+  --cat-fashion: #1d5fd1;
+  --cat-accessories: #0e7490;
+  --cat-gadgets: #15803d;
+  --cat-groceries: #4d7c0f;
+  --cat-home: #8a5a00;
+  --cat-tutors: #c62828;
+  --cat-other: #4a635b;
+
+  /* ---- Glass ---- */
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(11, 31, 26, 0.08);
+  --glass-blur: blur(16px) saturate(140%);
+
+  /* ---- Gradients (decorative only; never behind light text) ---- */
+  --grad-sun: linear-gradient(135deg, #2bd9a0, #ffb629);
+  --hero-glow: radial-gradient(60% 60% at 50% 0%, rgba(0, 122, 74, 0.1), transparent 70%);
+
+  /* ---- Elevation ---- */
+  --shadow-xs: 0 1px 2px rgba(11, 31, 26, 0.05);
+  --shadow-sm: 0 2px 8px rgba(11, 31, 26, 0.07);
+  --shadow-md: 0 8px 24px rgba(11, 31, 26, 0.09);
+  --shadow-lg: 0 16px 48px rgba(11, 31, 26, 0.14);
+
+  /* ---- Motion ---- */
+  --dur-1: 120ms;
+  --dur-2: 200ms;
+  --dur-3: 320ms;
+  --dur-4: 500ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasised: cubic-bezier(0.3, 0, 0, 1.2);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --press-scale: 0.97;
+
+  /* ---- Focus ---- */
+  --focus-ring: 0 0 0 3px color-mix(in srgb, var(--primary) 45%, transparent);
+
+  /* ---- Z-index scale ---- */
+  --z-base: 0;
+  --z-raised: 10;
+  --z-sticky: 100;
+  --z-header: 200;
+  --z-overlay: 900;
+  --z-modal: 950;
+  --z-toast: 1000;
+
+  /* ---- Depth scale (landing scene, far → near) ---- */
+  --depth-sky: -1000;
+  --depth-far: -600;
+  --depth-mid: -300;
+  --depth-hero: 0;
+  --depth-ui: 200;
+  --depth-fore: 400;
+
+  /* ---- Legacy aliases (kept so existing CSS re-skins; migrate to the
+         semantic names above, then delete). ---- */
+  --blue: var(--primary);
+  --blue-deep: var(--primary-hover);
+  --blue-soft: var(--primary);
+  --blue-tint: var(--primary-tint);
+  --blue-tint-2: var(--primary-tint-2);
+  --naija: var(--primary);
+  --naija-deep: var(--primary-hover);
+  --naija-bright: #00a860;
+  --naija-tint: var(--primary-tint);
+  --gold: var(--accent);
+  --gold-bright: var(--accent-bright);
+  --gold-tint: var(--accent-tint);
+  --amber: var(--accent);
+  --black: #0b1f1a;
+  --ink-2: #1d332c;
+  --line: var(--border);
+  --muted: var(--text-muted);
+  --bg: var(--surface);
+  --ease: var(--ease-standard);
+  --dur-fast: 140ms;
+  --dur-slow: var(--dur-3);
+}
+
+/* ---- Dark theme (default when the system prefers dark) ---- */
+[data-theme='dark'] {
+  --bg-0: #07110f;
+  --bg-1: #0c1a17;
+  --surface: #0c1a17;         /* page / map land */
+  --surface-raised: #17302a;
+  --elevated: #112420;        /* cards, sheets */
+  --elevated-1: #17302a;
+  --elevated-2: #17302a;
+  --surface-2: #112420;
+  --text: #eaf5f1;
+  --text-muted: #9db5ad;
+  --border: #1f3a33;
+  --border-strong: #2d4b43;
+  --border-inset: #17302a;
+
+  --primary: #2bd9a0;         /* emerald (9.8:1 on page) */
+  --primary-hover: #5be6b6;
+  --primary-tint: #0f3328;
+  --primary-tint-2: #144235;
+  --on-primary: #04130e;      /* dark text on emerald (10.4:1) */
+  --accent: #ffb629;          /* sun amber (10.2:1) */
+  --accent-bright: #ffc247;
+  --accent-tint: #2b2410;
+  --on-accent: #1a1100;
+  --info: #5aa9ff;
+  --info-tint: #13284a;
+
+  --success: #3ddc84;
+  --success-tint: #12301f;
+  --warning: #ffc247;
+  --warning-tint: #2b2410;
+  --danger: #ff6b6b;
+  --danger-tint: #381717;
+
+  --cat-food: #ff8a4c;
+  --cat-cakes: #ff7eb6;
+  --cat-beauty: #c58bff;
+  --cat-hair: #9b8cff;
+  --cat-fashion: #5aa9ff;
+  --cat-accessories: #37d6e0;
+  --cat-gadgets: #4ade80;
+  --cat-groceries: #b6e04a;
+  --cat-home: #ffb629;
+  --cat-tutors: #ff6b6b;
+  --cat-other: #9db5ad;
+
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --hero-glow: radial-gradient(60% 60% at 50% 0%, rgba(43, 217, 160, 0.18), transparent 70%);
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.55);
+
+  --naija-bright: #3ddc84;
+  --black: #eaf5f1;           /* "black" buttons invert in dark mode */
+  --ink-2: #c9ddd5;
+
+  color-scheme: dark;
+}
+
+/* No glass where it can't run well: unsupported, or the visitor asked for
+   reduced effects (html.reduce-effects is set by the Reduce effects toggle). */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root, [data-theme='dark'] { --glass-blur: none; --glass-bg: var(--surface-raised); }
+}
+html.reduce-effects { --glass-blur: none; --glass-bg: var(--surface-raised); }

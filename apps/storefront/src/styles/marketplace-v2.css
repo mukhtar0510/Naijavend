@@ -79,7 +79,7 @@
   border: 0;
   border-radius: 999px;
   background: var(--blue);
-  color: #fff;
+  color: var(--on-primary);
   font: inherit;
   font-size: 13.5px;
   font-weight: 700;
@@ -103,8 +103,8 @@
 .nv-header-top-link:hover { color: var(--blue); text-decoration: none; }
 .nv-header-top-link.is-active { color: var(--blue); background: var(--blue-tint); }
 /* Seller CTA in Naija green so it reads as the commercial action, not chrome. */
-.nv-header-sell { background: var(--naija); border-color: var(--naija); color: #fff; }
-.nv-header-sell:hover { background: var(--naija-deep); border-color: var(--naija-deep); color: #fff; }
+.nv-header-sell { background: var(--naija); border-color: var(--naija); color: var(--on-primary); }
+.nv-header-sell:hover { background: var(--naija-deep); border-color: var(--naija-deep); color: var(--on-primary); }
 .nv-header-account {
   display: inline-flex;
   align-items: center;
@@ -475,7 +475,7 @@
   display: grid;
   place-items: center;
   background: var(--blue);
-  color: #fff;
+  color: var(--on-primary);
   font-family: var(--font-heading);
   font-size: 19px;
   font-weight: 800;
@@ -669,7 +669,7 @@
   display: grid;
   place-items: center;
   background: var(--blue);
-  color: #fff;
+  color: var(--on-primary);
   font-family: var(--font-heading);
   font-size: 19px;
   font-weight: 800;
@@ -1049,7 +1049,7 @@
 .nv-map-cat.is-active {
   background: var(--blue);
   border-color: var(--blue);
-  color: #fff;
+  color: var(--on-primary);
 }
 
 .nv-map-layout {
@@ -1206,7 +1206,7 @@
   background: var(--elevated-2);
   flex-shrink: 0;
 }
-.nv-map-detail-logo.is-fallback { display: grid; place-items: center; background: var(--blue); color: #fff; font-weight: 800; font-size: 20px; }
+.nv-map-detail-logo.is-fallback { display: grid; place-items: center; background: var(--blue); color: var(--on-primary); font-weight: 800; font-size: 20px; }
 .nv-map-detail-id > div { flex: 1; min-width: 0; }
 .nv-map-detail-id strong { display: flex; align-items: center; gap: 5px; font-size: 16px; letter-spacing: -0.02em; }
 .nv-map-detail-id p { margin: 2px 0 0; color: var(--text-muted); font-size: 12.5px; }
@@ -1318,7 +1318,7 @@
   font-size: 12px; font-weight: 700; cursor: pointer;
 }
 .nv-map-chipbtn { height: 36px; padding: 0 13px; }
-.nv-map-seg button.is-active { background: var(--blue); color: #fff; }
+.nv-map-seg button.is-active { background: var(--blue); color: var(--on-primary); }
 .nv-map-seg button:not(.is-active):hover, .nv-map-chipbtn:hover { color: var(--text); }
 .nv-map-legend .is-cluster { background: var(--gold, #d4a017); }
 .nv-map-routing {
@@ -1347,7 +1347,7 @@
   position: absolute; left: 4px; top: 4px; z-index: 1;
   display: grid; place-items: center;
   width: 17px; height: 17px; border-radius: 50%;
-  background: var(--blue); color: #fff;
+  background: var(--blue); color: var(--on-primary);
   font-size: 10px; font-weight: 800;
 }
 
@@ -1991,7 +1991,7 @@
   flex-shrink: 0;
 }
 .nv-rank-cat:hover { border-color: var(--blue); color: var(--blue); text-decoration: none; }
-.nv-rank-cat.is-active { background: var(--blue); border-color: var(--blue); color: #fff; }
+.nv-rank-cat.is-active { background: var(--blue); border-color: var(--blue); color: var(--on-primary); }
 
 .nv-rank-layout {
   display: grid;
@@ -2061,7 +2061,7 @@
 }
 .nv-rank-logo.is-fallback {
   background: var(--blue);
-  color: #fff;
+  color: var(--on-primary);
   font-family: var(--font-heading);
   font-weight: 800;
 }

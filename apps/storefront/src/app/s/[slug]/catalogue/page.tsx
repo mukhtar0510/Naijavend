@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { supabaseAnon } from '@/lib/supabase';
-import { formatNaira, categoryEmoji } from '@idevtenancy/shared';
+import { formatNaira } from '@idevtenancy/shared';
 import type { Listing, Store } from '@idevtenancy/shared';
+import { CategoryIcon } from '@/lib/categories';
 
 export const revalidate = 60; // ISR — static-fast, invalidated on seller writes via revalidatePath
 
@@ -76,7 +77,7 @@ export default async function CataloguePage({
                     <img className="catalogue-cover" src={cover} alt={listing.title} loading="lazy" decoding="async" />
                   ) : (
                     <div className="catalogue-cover-fallback" aria-hidden>
-                      {categoryEmoji('general')}
+                      <CategoryIcon category={'general'} />
                     </div>
                   )}
                   <span className={`badge ${listing.type === 'service' ? '' : 'badge-blue'}`}>

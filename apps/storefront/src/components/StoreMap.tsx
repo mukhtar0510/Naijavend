@@ -31,13 +31,13 @@ import {
   isOpenNow,
   todayHoursLabel,
   travelEstimates,
-  categoryEmoji,
-} from '@idevtenancy/shared';
+  } from '@idevtenancy/shared';
 import { QUICK_CITIES, useViewerLocation } from '@/lib/useViewerLocation';
 import { circlePolygon, createThemedMap, ll, type BaseLayerId, type ThemedMap } from '@/lib/mapFactory';
 import { VerifiedTick } from '@/components/VerifiedTick';
 import { ExampleTag } from '@/components/ExampleStoreBanner';
 import { ILORIN_BOUNDS, ILORIN_CENTER, ILORIN_MIN_ZOOM, inIlorin } from '@/lib/ilorin';
+import { CategoryIcon, categoryColor } from '@/lib/categories';
 
 export interface MapStore {
   slug: string;
@@ -141,6 +141,10 @@ export function StoreMap({ stores }: { stores: MapStore[] }) {
   const hoveredRef = useRef<string | null>(null);
   hoveredRef.current = hovered;
   const listRef = useRef<HTMLDivElement | null>(null);
+  // Hidden sprite of category icons; pins (plain HTML) copy their SVG from it.
+  const spriteRef = useRef<HTMLDivElement | null>(null);
+  const pinIconSvg = (category: string) =>
+    spriteRef.current?.querySelector(`[data-cat="${CSS.escape(category)}"]`)?.innerHTML ?? '';
 
   const prof = PROFILES[profile];
 
@@ -392,12 +396,13 @@ export function StoreMap({ stores }: { stores: MapStore[] }) {
     }
 
     for (const s of solo) {
-      const logo = s.logo ? `<img src="${esc(s.logo)}" alt="" />` : categoryEmoji(s.category);
+      // No emoji pins: the store logo, else its category icon (SVG from the hidden sprite).
+      const logo = s.logo ? `<img src="${esc(s.logo)}" alt="" />` : pinIconSvg(s.category);
       const el = document.createElement('button');
       el.type = 'button';
       el.className = 'map-pin-wrap';
       el.setAttribute('aria-label', `${s.name}${s.km != null ? `, ${formatDistance(s.km)} away` : ''}`);
-      el.innerHTML = `<span class="map-pin">${logo}<i data-open="${s.open ? '1' : '0'}"></i>${
+      el.innerHTML = `<span class="map-pin" style="--pin-ring:${categoryColor(s.category)}">${logo}<i data-open="${s.open ? '1' : '0'}"></i>${
         s.verified ? '<b class="map-pin-tick" aria-hidden="true">✓</b>' : ''
       }</span>`;
       const tipHtml = `<strong>${esc(s.name)}</strong>${s.isExample ? ' <em class="map-tip-ex">Example</em>' : ''}<br/><span>${s.open ? 'Open now' : 'Closed'}${
@@ -675,6 +680,13 @@ export function StoreMap({ stores }: { stores: MapStore[] }) {
 
   return (
     <section className={`nv-map${fullscreen ? ' is-fullscreen' : ''}`} aria-label="Street map of stores">
+      <div ref={spriteRef} hidden aria-hidden>
+        {cats.map((c) => (
+          <span key={c} data-cat={c}>
+            <CategoryIcon category={c} size={20} />
+          </span>
+        ))}
+      </div>
       {/* -------------------------------- header -------------------------------- */}
       <div className="nv-map-head">
         <div className="nv-map-head-id">
@@ -790,7 +802,7 @@ export function StoreMap({ stores }: { stores: MapStore[] }) {
               aria-pressed={cat === c}
               onClick={() => setCat(cat === c ? null : c)}
             >
-              <span aria-hidden>{categoryEmoji(c)}</span>
+              <span aria-hidden><CategoryIcon category={c} /></span>
               {c.replace(/-/g, ' ')}
             </button>
           ))}
@@ -912,7 +924,7 @@ export function StoreMap({ stores }: { stores: MapStore[] }) {
                   <img className="nv-map-store-logo" src={s.logo} alt="" loading="lazy" />
                 ) : (
                   <span className="nv-map-store-logo is-fallback" aria-hidden>
-                    {categoryEmoji(s.category)}
+                    <CategoryIcon category={s.category} />
                   </span>
                 )}
                 <span className="nv-map-store-body">
@@ -966,7 +978,7 @@ export function StoreMap({ stores }: { stores: MapStore[] }) {
                 {selPlotted.isExample && <ExampleTag />}
               </strong>
               <p>
-                {categoryEmoji(selPlotted.category)} {selPlotted.category.replace(/-/g, ' ')}
+                <CategoryIcon category={selPlotted.category} /> {selPlotted.category.replace(/-/g, ' ')}
                 {selPlotted.isDropshipper ? ' · 🚚 dropshipper' : ''}
                 {selPlotted.hoursToday ? ` · today ${selPlotted.hoursToday}` : ''}
               </p>

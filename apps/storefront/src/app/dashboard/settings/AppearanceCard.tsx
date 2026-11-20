@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Stars } from '@/components/Stars';
-import { STORE_TEMPLATES, STORE_FONTS, LISTING_STYLES, HOVER_ANIMS, BACKGROUND_GRADIENTS, isBackgroundGradient, BACKGROUND_OVERLAYS, CONTENT_WIDTHS, categoryEmoji, categoryLabel } from '@idevtenancy/shared';
+import { STORE_TEMPLATES, STORE_FONTS, LISTING_STYLES, HOVER_ANIMS, BACKGROUND_GRADIENTS, isBackgroundGradient, BACKGROUND_OVERLAYS, CONTENT_WIDTHS, categoryLabel } from '@idevtenancy/shared';
 import type { AiStyleDraft, StoreTheme } from '@idevtenancy/shared';
+import { CategoryIcon } from '@/lib/categories';
 
 const FONTS = STORE_FONTS;
 const HERO_STYLES = ['gradient', 'image', 'solid'] as const;
@@ -388,7 +389,7 @@ export function AppearanceCard({
                   <div><Stars value={4.5} showNumeric={false} /></div>
                 </div>
               </div>
-              <span className="badge badge-blue">{categoryEmoji(category)} {categoryLabel(category)}</span>{' '}
+              <span className="badge badge-blue"><CategoryIcon category={category} /> {categoryLabel(category)}</span>{' '}
               <span className="badge">{businessType}</span>
               <p className="muted" style={{ margin: '10px 0 0', fontSize: 14 }}>
                 Preview — this is how your hero and buttons will look.
