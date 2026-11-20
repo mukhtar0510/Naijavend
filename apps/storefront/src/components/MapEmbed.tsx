@@ -6,6 +6,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { createThemedMap, ll } from '@/lib/mapFactory';
+import { ILORIN_BOUNDS, ILORIN_MIN_ZOOM, inIlorin } from '@/lib/ilorin';
 
 export interface MapPin {
   lat: number;
@@ -15,6 +16,8 @@ export interface MapPin {
   address?: string | null;
   /** Optional Google-Maps directions deep link for this pin. */
   directionsUrl?: string;
+  /** The store's main location (vs. a branch). Set internally. */
+  main?: boolean;
 }
 
 interface InnerProps {
@@ -47,6 +50,9 @@ function MapPins({ pins, height = 220 }: InnerProps) {
         zoomControl: true,
         scrollWheelZoom: false,
         layerSwitch: true,
+        // Ilorin-only, like the Discover map: no panning or zooming out past the city.
+        maxBounds: ILORIN_BOUNDS,
+        minZoom: ILORIN_MIN_ZOOM,
       });
       if (cancelled) {
         map.remove();
@@ -78,7 +84,7 @@ function MapPins({ pins, height = 220 }: InnerProps) {
         el.type = 'button';
         el.className = 'map-pin-wrap';
         el.setAttribute('aria-label', group.map((p) => p.label).join(' + '));
-        el.innerHTML = `<span class="map-pin map-pin-sm">${group.includes(pins[0]) ? '🏪' : '📍'}</span>`;
+        el.innerHTML = `<span class="map-pin map-pin-sm">${group.some((p) => p.main) ? '🏪' : '📍'}</span>`;
         new lib.Marker({ element: el, anchor: 'center' })
           .setLngLat(ll(first.lat, first.lng))
           .setPopup(new lib.Popup({ offset: 20, className: 'map-tip' }).setHTML(`<strong>${title}</strong>${body}`))
@@ -128,10 +134,23 @@ export function MapEmbed({
 
   // Stable identity so the map isn't torn down and rebuilt on every render.
   const extraKey = JSON.stringify(extraPins);
+  // Only pins inside Ilorin are shown — the map is Ilorin-only.
   const pins: MapPin[] = useMemo(
-    () => [{ lat: latitude, lng: longitude, label: name }, ...(JSON.parse(extraKey) as MapPin[])],
+    () =>
+      [{ lat: latitude, lng: longitude, label: name, main: true }, ...(JSON.parse(extraKey) as MapPin[])].filter((p) =>
+        inIlorin(p.lat, p.lng),
+      ),
     [latitude, longitude, name, extraKey],
   );
+
+  if (pins.length === 0) {
+    return (
+      <div className="map-embed map-embed-outside" role="note">
+        <strong>Location outside Ilorin</strong>
+        <span>Kwaravend maps cover Ilorin only. This store&apos;s pin isn&apos;t inside the city.</span>
+      </div>
+    );
+  }
 
   return (
     <div className="map-embed" style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)' }}>
