@@ -1,0 +1,892 @@
+'use client';
+
+// Full-screen store map (REDESIGN R4 §6). Layout feeling of a social map app —
+// full-bleed map, floating search pill + chips, right-edge floating buttons,
+// a draggable bottom sheet (peek / half / full) — with original Kwaravend
+// styling. Stores only, Ilorin only, no live people. The buyer's position
+// (if shared) never leaves the browser.
+//
+// Desktop (≥1024px): the sheet becomes a 400px left panel; the store detail
+// slides over the list. Keys: "/" search, ↑/↓ results, Esc closes.
+
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import type { GeoJSONSource, Marker } from 'maplibre-gl';
+import {
+  ArrowLeft,
+  Box,
+  Clock,
+  Flame,
+  Layers,
+  LocateFixed,
+  MapPin,
+  MessageCircle,
+  Navigation,
+  RotateCcw,
+  Search,
+  Star,
+  Store as StoreIcon,
+  X,
+} from 'lucide-react';
+import { directionsUrl, formatDistance, haversineKm, isOpenNow, todayHoursLabel } from '@idevtenancy/shared';
+import { useViewerLocation } from '@/lib/useViewerLocation';
+import { applyKwaraStyle, canShow3D, createThemedMap, ll, prefersDarkMap, setBuildings3D, type ThemedMap } from '@/lib/mapFactory';
+import { ILORIN_AREAS, ILORIN_BOUNDS, ILORIN_CENTER, ILORIN_MIN_ZOOM, inIlorin, nearestArea } from '@/lib/ilorin';
+import { CategoryIcon, categoryColor, categoryMeta } from '@/lib/categories';
+import { Chip, SegmentedControl } from '@/components/ui/chip';
+import { ButtonLink, FAB } from '@/components/ui/button';
+import { VerifiedTick } from '@/components/VerifiedTick';
+import { ExampleTag } from '@/components/ExampleStoreBanner';
+
+export interface FullMapStore {
+  id: string;
+  slug: string;
+  name: string;
+  category: string;
+  lat: number;
+  lng: number;
+  address: string | null;
+  logo: string | null;
+  verified: boolean;
+  isExample: boolean;
+  rating: number | null;
+  reviewCount: number | null;
+  whatsapp: string | null;
+  hours: Record<string, [string, string] | null | undefined> | null;
+}
+
+type Sheet = 'peek' | 'half' | 'full';
+type Row = FullMapStore & { km: number | null; open: boolean; hoursToday: string | null; area: string };
+
+const CLUSTER_PX = 50;
+const CLUSTER_OFF_ZOOM = 16;
+const LABEL_ZOOM = 15;
+const HEAT_KEY = 'nv-map-heat';
+const PEEK_PX = 176; // visible sheet height at "peek"
+const TRENDING_MIN_REAL_STORES = 12; // hide "Trending" until there's enough real data
+
+const esc = (s: string) =>
+  s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+
+function track(event: string, storeId?: string) {
+  try {
+    void fetch('/api/map/event', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event, storeId }),
+      keepalive: true,
+    }).catch(() => undefined);
+  } catch {
+    /* analytics never breaks the page */
+  }
+}
+
+function readStore(key: string): string | null {
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+function writeStore(key: string, v: string) {
+  try {
+    window.localStorage.setItem(key, v);
+  } catch {
+    /* private mode */
+  }
+}
+
+function waLink(num: string, store: string) {
+  const digits = num.replace(/[^0-9]/g, '');
+  const text = encodeURIComponent(`Hello ${store}, I found your store on the Kwaravend map.`);
+  return `https://wa.me/${digits}?text=${text}`;
+}
+
+export function FullMap({ stores }: { stores: FullMapStore[] }) {
+  const { origin, label: originLabel, state: locState, locate } = useViewerLocation();
+  const [ready, setReady] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const [query, setQuery] = useState('');
+  const [cat, setCat] = useState<string | null>(null);
+  const [openOnly, setOpenOnly] = useState(false);
+  const [heatOn, setHeatOn] = useState(false);
+  const [heatCount, setHeatCount] = useState<number | null>(null);
+  const [b3d, setB3d] = useState(false);
+  const [can3d, setCan3d] = useState(false);
+  const [base, setBase] = useState<'streets' | 'satellite'>('streets');
+  const [layersOpen, setLayersOpen] = useState(false);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [sheet, setSheet] = useState<Sheet>('peek');
+  const [zoom, setZoom] = useState(13);
+  const [desktop, setDesktop] = useState(false);
+  const [sort, setSort] = useState<'near' | 'rating' | 'name'>('near');
+
+  const mapEl = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<ThemedMap | null>(null);
+  const libRef = useRef<typeof import('maplibre-gl') | null>(null);
+  const initRef = useRef<Promise<ThemedMap> | null>(null);
+  const markersRef = useRef<Marker[]>([]);
+  const markerBySlug = useRef<Map<string, Marker>>(new Map());
+  const meRef = useRef<Marker | null>(null);
+  const spriteRef = useRef<HTMLDivElement | null>(null);
+  const searchRef = useRef<HTMLInputElement | null>(null);
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const sheetRef = useRef<HTMLElement | null>(null);
+  const selectedRef = useRef<string | null>(null);
+  selectedRef.current = selected;
+
+  // ---------------------------------------------------------------- data
+  const outside = !!origin && !inIlorin(origin.lat, origin.lng);
+  const distOrigin = origin && !outside ? origin : null;
+
+  const rows: Row[] = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const out = stores
+      .filter((s) => inIlorin(s.lat, s.lng))
+      .filter((s) => (cat ? s.category === cat : true))
+      .filter((s) =>
+        q
+          ? s.name.toLowerCase().includes(q) ||
+            (s.address ?? '').toLowerCase().includes(q) ||
+            categoryMeta(s.category).label.toLowerCase().includes(q) ||
+            nearestArea(s.lat, s.lng).label.toLowerCase().includes(q)
+          : true,
+      )
+      .map((s) => ({
+        ...s,
+        km: distOrigin ? haversineKm(distOrigin, { lat: s.lat, lng: s.lng }) : null,
+        open: isOpenNow(s.hours),
+        hoursToday: todayHoursLabel(s.hours),
+        area: nearestArea(s.lat, s.lng).label,
+      }))
+      .filter((s) => (openOnly ? s.open : true));
+    const byName = (a: Row, b: Row) => a.name.localeCompare(b.name);
+    if (sort === 'rating') out.sort((a, b) => (b.rating ?? -1) - (a.rating ?? -1) || byName(a, b));
+    else if (sort === 'name') out.sort(byName);
+    else out.sort((a, b) => (a.km ?? 1e9) - (b.km ?? 1e9) || byName(a, b));
+    return out;
+  }, [stores, query, cat, openOnly, sort, distOrigin]);
+
+  const cats = useMemo(
+    () => Array.from(new Set(stores.filter((s) => inIlorin(s.lat, s.lng)).map((s) => s.category))).sort(),
+    [stores],
+  );
+  const sel = rows.find((r) => r.slug === selected) ?? null;
+  const realCount = stores.filter((s) => !s.isExample).length;
+  const trending = realCount >= TRENDING_MIN_REAL_STORES
+    ? rows.filter((r) => !r.isExample && (r.reviewCount ?? 0) > 0).sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)).slice(0, 8)
+    : [];
+
+  // ------------------------------------------------------ prefs + URL sync
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)');
+    const on = () => setDesktop(mq.matches);
+    on();
+    mq.addEventListener('change', on);
+    setCan3d(canShow3D());
+    setHeatOn(readStore(HEAT_KEY) === '1'); // off for first-time visitors
+    const p = new URLSearchParams(window.location.search);
+    const s = p.get('store');
+    if (s && stores.some((x) => x.slug === s)) setSelected(s);
+    const sh = p.get('sheet');
+    if (sh === 'half' || sh === 'full' || sh === 'peek') setSheet(sh);
+    track('map_opened');
+    return () => mq.removeEventListener('change', on);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once
+  }, []);
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (selected) url.searchParams.set('store', selected);
+    else url.searchParams.delete('store');
+    if (!desktop && sheet !== 'peek') url.searchParams.set('sheet', sheet);
+    else url.searchParams.delete('sheet');
+    if (url.href !== window.location.href) window.history.replaceState(window.history.state, '', url);
+  }, [selected, sheet, desktop]);
+
+  // -------------------------------------------------------------- map init
+  useEffect(() => {
+    let cancelled = false;
+    let cleanup: (() => void) | null = null;
+    // Slow mobile data is normal: only fall back after a long wait, or at once
+    // when the browser says it's offline. The map keeps loading underneath and
+    // the fallback disappears as soon as it's ready.
+    const failTimer = window.setTimeout(() => {
+      if (!mapRef.current) setFailed(true);
+    }, 25000);
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) setFailed(true);
+    void (async () => {
+      if (!mapEl.current) return;
+      try {
+        initRef.current ??= createThemedMap(mapEl.current, {
+          center: ILORIN_CENTER,
+          zoom: 13,
+          zoomControl: false,
+          scrollWheelZoom: true,
+          maxBounds: ILORIN_BOUNDS,
+          minZoom: ILORIN_MIN_ZOOM,
+        });
+        const [map, lib] = await Promise.all([initRef.current, import('maplibre-gl')]);
+        if (cancelled) return;
+        window.clearTimeout(failTimer);
+        libRef.current = lib;
+        mapRef.current = map;
+        map.dragRotate.disable();
+        map.touchZoomRotate.disableRotation();
+
+        // Heat layer: aggregated, anonymised activity (see /api/map/heat).
+        map.addSource('nv-heat', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+        map.addLayer(
+          {
+            id: 'nv-heat',
+            type: 'heatmap',
+            source: 'nv-heat',
+            layout: { visibility: 'none' },
+            paint: {
+              'heatmap-weight': ['interpolate', ['linear'], ['get', 'count'], 5, 0.3, 60, 1],
+              'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 11, 0.8, 16, 2],
+              'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 11, 22, 16, 60],
+              'heatmap-opacity': 0.75,
+              'heatmap-color': [
+                'interpolate', ['linear'], ['heatmap-density'],
+                0, 'rgba(43,217,160,0)',
+                0.25, 'rgba(43,217,160,0.35)',
+                0.6, '#FFB629',
+                1, '#FF6B6B',
+              ],
+            },
+          },
+          map.getStyle().layers?.find((l) => l.type === 'symbol')?.id,
+        );
+
+        const sync = () => setZoom(Math.round(map.getZoom() * 2) / 2);
+        map.on('moveend', sync);
+        map.on('click', () => setLayersOpen(false));
+        sync();
+
+        // Follow the app theme live (the toggle can flip it while open).
+        const obs = new MutationObserver(() => applyKwaraStyle(map, prefersDarkMap()));
+        obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+        cleanup = () => {
+          obs.disconnect();
+          for (const m of markersRef.current) m.remove();
+          markersRef.current = [];
+          markerBySlug.current.clear();
+          meRef.current?.remove();
+          meRef.current = null;
+          map.remove();
+          initRef.current = null;
+          mapRef.current = null;
+        };
+        setReady(true);
+        setFailed(false);
+      } catch {
+        if (!cancelled) setFailed(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+      window.clearTimeout(failTimer);
+      cleanup?.();
+    };
+  }, []);
+
+  useEffect(() => {
+    mapRef.current?.setBaseLayer(base);
+  }, [base, ready]);
+
+  useEffect(() => {
+    if (ready && mapRef.current) setBuildings3D(mapRef.current, b3d);
+  }, [b3d, ready]);
+
+  // Heat data (fetched once, only when the layer is on).
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!ready || !map) return;
+    if (map.getLayer('nv-heat')) map.setLayoutProperty('nv-heat', 'visibility', heatOn ? 'visible' : 'none');
+    if (!heatOn || heatCount !== null) return;
+    void fetch('/api/map/heat')
+      .then((r) => r.json())
+      .then((body) => {
+        const cells: Array<{ lat: number; lng: number; count: number }> = body?.data?.cells ?? body?.cells ?? [];
+        setHeatCount(cells.length);
+        (map.getSource('nv-heat') as GeoJSONSource | undefined)?.setData({
+          type: 'FeatureCollection',
+          features: cells.map((c) => ({
+            type: 'Feature',
+            properties: { count: c.count },
+            geometry: { type: 'Point', coordinates: ll(c.lat, c.lng) },
+          })),
+        });
+      })
+      .catch(() => setHeatCount(0));
+  }, [heatOn, ready, heatCount]);
+
+  // ------------------------------------------------------- pins + clusters
+  const pinSvg = (category: string) =>
+    spriteRef.current?.querySelector(`[data-cat="${CSS.escape(category)}"]`)?.innerHTML ?? '';
+
+  useEffect(() => {
+    const map = mapRef.current;
+    const lib = libRef.current;
+    if (!ready || !map || !lib) return;
+    for (const m of markersRef.current) m.remove();
+    markersRef.current = [];
+    markerBySlug.current.clear();
+
+    const z = map.getZoom();
+    type Bucket = { items: Row[]; x: number; y: number };
+    const buckets: Bucket[] = [];
+    const solo: Row[] = [];
+    for (const s of rows) {
+      if (z >= CLUSTER_OFF_ZOOM || s.slug === selectedRef.current) {
+        solo.push(s);
+        continue;
+      }
+      const p = map.project(ll(s.lat, s.lng));
+      const hit = buckets.find((b) => Math.abs(b.x - p.x) < CLUSTER_PX && Math.abs(b.y - p.y) < CLUSTER_PX);
+      if (hit) hit.items.push(s);
+      else buckets.push({ items: [s], x: p.x, y: p.y });
+    }
+    const add = (el: HTMLElement, lat: number, lng: number) => {
+      const m = new lib.Marker({ element: el, anchor: 'center' }).setLngLat(ll(lat, lng)).addTo(map);
+      markersRef.current.push(m);
+      return m;
+    };
+    for (const b of buckets) {
+      if (b.items.length === 1) {
+        solo.push(b.items[0]);
+        continue;
+      }
+      const n = b.items.length;
+      const size = n < 10 ? 42 : n < 50 ? 50 : 58;
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'fm-cluster';
+      el.style.width = el.style.height = `${size}px`;
+      el.setAttribute('aria-label', `${n} stores here, zoom in`);
+      el.textContent = String(n);
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const bounds = new lib.LngLatBounds();
+        for (const i of b.items) bounds.extend(ll(i.lat, i.lng));
+        map.fitBounds(bounds, { padding: 80, maxZoom: CLUSTER_OFF_ZOOM, duration: 650 });
+      });
+      add(el, b.items.reduce((a, i) => a + i.lat, 0) / n, b.items.reduce((a, i) => a + i.lng, 0) / n);
+    }
+    for (const s of solo) {
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.className = `fm-pin${s.open ? ' is-open' : ''}${s.slug === selectedRef.current ? ' is-selected' : ''}`;
+      el.style.setProperty('--ring', categoryColor(s.category));
+      el.setAttribute('aria-label', `${s.name}, ${categoryMeta(s.category).label}${s.open ? ', open now' : ''}`);
+      const face = s.logo ? `<img src="${esc(s.logo)}" alt="" />` : pinSvg(s.category);
+      el.innerHTML = `<span class="fm-pin-face">${face}</span><span class="fm-pin-label">${esc(s.name)}</span>`;
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setSelected(s.slug);
+        setSheet((cur) => (cur === 'full' ? 'full' : 'half'));
+        track('pin_tapped', s.id);
+      });
+      markerBySlug.current.set(s.slug, add(el, s.lat, s.lng));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- pinSvg reads a ref
+  }, [ready, rows, zoom, selected]);
+
+  // Fly to a selected store (spring-grown pin is handled in CSS).
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!ready || !map || !sel) return;
+    const offsetY = desktop ? 0 : -Math.round(window.innerHeight * 0.18);
+    map.flyTo({
+      center: ll(sel.lat, sel.lng),
+      zoom: Math.max(map.getZoom(), 15.5),
+      offset: [desktop ? 200 : 0, offsetY],
+      duration: 800,
+      essential: true,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- on selection only
+  }, [selected, ready]);
+
+  // Viewer dot (only inside Ilorin; outside we stay on Ilorin).
+  useEffect(() => {
+    const map = mapRef.current;
+    const lib = libRef.current;
+    if (!ready || !map || !lib) return;
+    meRef.current?.remove();
+    meRef.current = null;
+    if (!distOrigin) return;
+    const el = document.createElement('span');
+    el.className = 'map-me-wrap';
+    el.innerHTML = '<span class="map-me"><i></i></span>';
+    el.style.pointerEvents = 'none';
+    meRef.current = new lib.Marker({ element: el, anchor: 'center' }).setLngLat(ll(distOrigin.lat, distOrigin.lng)).addTo(map);
+  }, [ready, distOrigin]);
+
+  // ------------------------------------------------------------ controls
+  const flyArea = useCallback((lat: number, lng: number, z = 15) => {
+    mapRef.current?.flyTo({ center: ll(lat, lng), zoom: z, duration: 800, essential: true });
+  }, []);
+  const resetIlorin = () => {
+    setSelected(null);
+    flyArea(ILORIN_CENTER[0], ILORIN_CENTER[1], 13);
+  };
+  const locateMe = () => {
+    if (distOrigin) flyArea(distOrigin.lat, distOrigin.lng, 15);
+    else locate();
+  };
+  useEffect(() => {
+    if (locState === 'ready' && distOrigin) flyArea(distOrigin.lat, distOrigin.lng, 15);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- when location arrives
+  }, [locState]);
+
+  const toggleHeat = () => {
+    setHeatOn((v) => {
+      writeStore(HEAT_KEY, v ? '0' : '1');
+      return !v;
+    });
+    track('heat_toggled');
+  };
+
+  // Keyboard: "/" search, arrows through results, Esc closes.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const typing = (e.target as HTMLElement | null)?.closest('input, textarea, select');
+      if (e.key === '/' && !typing) {
+        e.preventDefault();
+        searchRef.current?.focus();
+        if (!desktop) setSheet('half');
+      } else if (e.key === 'Escape') {
+        if (layersOpen) setLayersOpen(false);
+        else if (selectedRef.current) setSelected(null);
+        else if (!desktop) setSheet('peek');
+        (document.activeElement as HTMLElement | null)?.blur?.();
+      } else if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && !typing && rows.length) {
+        e.preventDefault();
+        const idx = rows.findIndex((r) => r.slug === selectedRef.current);
+        const next = rows[Math.min(rows.length - 1, Math.max(0, idx + (e.key === 'ArrowDown' ? 1 : -1)))];
+        setSelected(next.slug);
+        listRef.current?.querySelector<HTMLElement>(`[data-slug="${CSS.escape(next.slug)}"]`)?.scrollIntoView({ block: 'nearest' });
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [rows, desktop, layersOpen]);
+
+  // ------------------------------------------------------- bottom sheet drag
+  const drag = useRef<{ startY: number; startT: number; lastY: number; lastT: number; base: number } | null>(null);
+  const snapY = useCallback(
+    (s: Sheet) => {
+      const h = typeof window === 'undefined' ? 800 : window.innerHeight;
+      if (s === 'full') return 64;
+      if (s === 'half') return Math.round(h * 0.48);
+      return h - PEEK_PX;
+    },
+    [],
+  );
+  const onDragStart = (e: React.PointerEvent) => {
+    if (desktop) return;
+    const el = sheetRef.current;
+    if (!el) return;
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    drag.current = { startY: e.clientY, startT: performance.now(), lastY: e.clientY, lastT: performance.now(), base: snapY(sheet) };
+    el.style.transition = 'none';
+  };
+  const onDragMove = (e: React.PointerEvent) => {
+    const d = drag.current;
+    const el = sheetRef.current;
+    if (!d || !el) return;
+    const y = Math.max(snapY('full'), d.base + (e.clientY - d.startY));
+    el.style.transform = `translateY(${y}px)`;
+    d.lastY = e.clientY;
+    d.lastT = performance.now();
+  };
+  const onDragEnd = (e: React.PointerEvent) => {
+    const d = drag.current;
+    const el = sheetRef.current;
+    drag.current = null;
+    if (!d || !el) return;
+    el.style.transition = '';
+    const moved = e.clientY - d.startY;
+    if (Math.abs(moved) < 6) {
+      // a tap on the handle cycles up
+      setSheet((s) => (s === 'peek' ? 'half' : s === 'half' ? 'full' : 'half'));
+      el.style.transform = '';
+      return;
+    }
+    const v = (e.clientY - d.lastY) / Math.max(1, performance.now() - d.lastT) + moved / Math.max(1, performance.now() - d.startT);
+    const projected = d.base + moved + v * 220; // momentum
+    const opts: Sheet[] = ['full', 'half', 'peek'];
+    const best = opts.reduce((a, b) => (Math.abs(snapY(b) - projected) < Math.abs(snapY(a) - projected) ? b : a));
+    el.style.transform = '';
+    setSheet(best);
+  };
+
+  // ----------------------------------------------------------------- render
+  const sheetStyle = desktop ? undefined : { transform: `translateY(${snapY(sheet)}px)` };
+  const hasStores = stores.some((s) => inIlorin(s.lat, s.lng));
+
+  const card = (s: Row, compact = false) => (
+    <button
+      key={s.slug}
+      type="button"
+      data-slug={s.slug}
+      className={`fm-card${compact ? ' is-compact' : ''}${selected === s.slug ? ' is-active' : ''}`}
+      onClick={() => {
+        setSelected(s.slug);
+        if (!desktop && sheet === 'peek') setSheet('half');
+      }}
+    >
+      <span className="fm-card-logo" style={{ ['--ring' as string]: categoryColor(s.category) }}>
+        {s.logo ? (
+          // eslint-disable-next-line @next/next/no-img-element -- seller-supplied remote URL
+          <img src={s.logo} alt="" loading="lazy" />
+        ) : (
+          <CategoryIcon category={s.category} size={20} />
+        )}
+      </span>
+      <span className="fm-card-body">
+        <strong>
+          <span className="fm-card-name">{s.name}</span>
+          {s.verified && <VerifiedTick size={13} />}
+          {s.isExample && <ExampleTag />}
+        </strong>
+        <em>
+          {categoryMeta(s.category).label} · {s.area}
+        </em>
+        <span className="fm-card-meta">
+          <i className={`fm-dot${s.open ? ' is-open' : ''}`} aria-hidden />
+          {s.open ? 'Open now' : 'Closed'}
+          {s.km != null && <> · {formatDistance(s.km)}</>}
+          {s.rating != null && (s.reviewCount ?? 0) > 0 && (
+            <>
+              {' '}· <Star size={11} aria-hidden className="fm-star" /> {s.rating.toFixed(1)}
+            </>
+          )}
+        </span>
+      </span>
+    </button>
+  );
+
+  const detail = sel && (
+    <div className="fm-detail" role="region" aria-label={`${sel.name} details`}>
+      <div className="fm-detail-head">
+        <span className="fm-card-logo is-lg" style={{ ['--ring' as string]: categoryColor(sel.category) }}>
+          {sel.logo ? (
+            // eslint-disable-next-line @next/next/no-img-element -- seller-supplied remote URL
+            <img src={sel.logo} alt="" />
+          ) : (
+            <CategoryIcon category={sel.category} size={24} />
+          )}
+        </span>
+        <div className="fm-detail-id">
+          <h2>
+            {sel.name}
+            {sel.verified && <VerifiedTick size={15} />}
+          </h2>
+          <p>
+            <CategoryIcon category={sel.category} size={14} /> {categoryMeta(sel.category).label} · {sel.area}
+          </p>
+          {sel.isExample && (
+            <p className="fm-detail-example">
+              <ExampleTag /> Sample data. This store can&apos;t take orders.
+            </p>
+          )}
+        </div>
+        <button type="button" className="fm-close" aria-label="Close store details" onClick={() => setSelected(null)}>
+          <X size={18} aria-hidden />
+        </button>
+      </div>
+      <dl className="fm-facts">
+        <div>
+          <dt>
+            <Clock size={14} aria-hidden /> Today
+          </dt>
+          <dd>
+            <span className={`fm-status${sel.open ? ' is-open' : ''}`}>{sel.open ? 'Open now' : sel.hours ? 'Closed' : 'Hours not set'}</span>
+            {sel.hoursToday ? ` · ${sel.hoursToday}` : ''}
+          </dd>
+        </div>
+        <div>
+          <dt>
+            <MapPin size={14} aria-hidden /> Where
+          </dt>
+          <dd>
+            {sel.address ?? sel.area}
+            {sel.km != null && ` · ${formatDistance(sel.km)} away`}
+          </dd>
+        </div>
+        <div>
+          <dt>
+            <Star size={14} aria-hidden /> Rating
+          </dt>
+          <dd>
+            {sel.rating != null && (sel.reviewCount ?? 0) > 0
+              ? `${sel.rating.toFixed(1)} from ${sel.reviewCount} review${sel.reviewCount === 1 ? '' : 's'}`
+              : 'No reviews yet'}
+          </dd>
+        </div>
+      </dl>
+      <div className="fm-actions">
+        <ButtonLink
+          href={`/s/${sel.slug}`}
+          variant="primary"
+          leadingIcon={StoreIcon}
+          onClick={() => track('store_order_clicked', sel.id)}
+        >
+          {sel.isExample ? 'View store' : 'Order'}
+        </ButtonLink>
+        {sel.whatsapp && !sel.isExample ? (
+          <ButtonLink href={waLink(sel.whatsapp, sel.name)} external variant="whatsapp" leadingIcon={MessageCircle}>
+            WhatsApp
+          </ButtonLink>
+        ) : null}
+        <ButtonLink
+          href={directionsUrl(distOrigin, { lat: sel.lat, lng: sel.lng }, sel.name)}
+          external
+          variant="secondary"
+          leadingIcon={Navigation}
+          onClick={() => track('store_directions_clicked', sel.id)}
+        >
+          Directions
+        </ButtonLink>
+      </div>
+    </div>
+  );
+
+  const list = (
+    <div className="fm-list" ref={listRef}>
+      {rows.map((r) => card(r))}
+      {rows.length === 0 && hasStores && (
+        <div className="fm-empty">
+          <Search size={22} aria-hidden />
+          <p>No stores match. Try another word or clear the filters.</p>
+          <button
+            type="button"
+            className="btn btn-outline btn-sm"
+            onClick={() => {
+              setQuery('');
+              setCat(null);
+              setOpenOnly(false);
+            }}
+          >
+            Clear filters
+          </button>
+        </div>
+      )}
+    </div>
+  );
+
+  const empty = !hasStores && (
+    <div className="fm-empty">
+      <StoreIcon size={24} aria-hidden />
+      <p>No stores here yet. Ilorin sellers can open a free store and appear on this map.</p>
+      <ButtonLink href="/dashboard" variant="primary" size="sm">
+        Invite a seller: open a store
+      </ButtonLink>
+    </div>
+  );
+
+  // Map failed (offline, tiles blocked): the list, grouped by area, shown over
+  // the still-loading map.
+  let fallback: React.ReactNode = null;
+  if (failed && !ready) {
+    const groups = new Map<string, Row[]>();
+    for (const r of rows) groups.set(r.area, [...(groups.get(r.area) ?? []), r]);
+    fallback = (
+      <div className="fm-fallback" role="region" aria-label="Stores by area">
+        <header className="fm-fallback-head">
+          <Link href="/discover" className="btn btn-ghost btn-sm">
+            <ArrowLeft size={16} aria-hidden /> Back
+          </Link>
+          <h1>Stores in Ilorin</h1>
+          <p>The map couldn&apos;t load (you may be offline). Here are the stores by area.</p>
+        </header>
+        {empty}
+        {[...groups.entries()].map(([area, items]) => (
+          <section key={area} className="fm-fallback-group">
+            <h2>
+              <MapPin size={16} aria-hidden /> {area}
+            </h2>
+            <div className="fm-list">{items.map((r) => card(r))}</div>
+          </section>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className={`fm${desktop ? ' is-desktop' : ''}${zoom >= LABEL_ZOOM ? ' show-labels' : ''}${sel ? ' has-selection' : ''}`}>
+      <div ref={spriteRef} hidden aria-hidden>
+        {cats.map((c) => (
+          <span key={c} data-cat={c}>
+            <CategoryIcon category={c} size={20} />
+          </span>
+        ))}
+      </div>
+
+      <div ref={mapEl} className="fm-map" role="application" aria-label="Map of stores in Ilorin" />
+      {fallback}
+      {!ready && <div className="fm-map-loading" aria-hidden />}
+
+      {/* ---------------------------------------------- top: search + chips */}
+      <div className="fm-top">
+        <div className="fm-search glass">
+          <Link href="/discover" className="fm-search-back" aria-label="Back to Discover" title="Back">
+            <ArrowLeft size={18} aria-hidden />
+          </Link>
+          <Search size={17} aria-hidden className="fm-search-ico" />
+          <input
+            ref={searchRef}
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => !desktop && setSheet((s) => (s === 'peek' ? 'half' : s))}
+            placeholder="Search a store, area or landmark"
+            aria-label="Search stores, areas or landmarks in Ilorin"
+            enterKeyHint="search"
+          />
+          {query && (
+            <button type="button" className="fm-search-clear" aria-label="Clear search" onClick={() => setQuery('')}>
+              <X size={16} aria-hidden />
+            </button>
+          )}
+          <kbd className="fm-kbd" aria-hidden>
+            /
+          </kbd>
+        </div>
+        <div className="fm-chips" role="group" aria-label="Filters">
+          <Chip label="Open now" icon={Clock} selected={openOnly} onClick={() => setOpenOnly((v) => !v)} />
+          <Chip label="Heat" icon={Flame} selected={heatOn} onClick={toggleHeat} />
+          <Chip label="All" selected={cat === null} onClick={() => setCat(null)} />
+          {cats.map((c) => (
+            <Chip key={c} label={categoryMeta(c).label} category={c} selected={cat === c} onClick={() => setCat(cat === c ? null : c)} />
+          ))}
+        </div>
+        {heatOn && heatCount === 0 && (
+          <p className="fm-note glass" role="status">
+            Not enough activity in the last 24 hours to show a heat area yet (each area needs at least 5 visits).
+          </p>
+        )}
+        {outside && (
+          <p className="fm-note glass" role="status">
+            You&apos;re outside Ilorin, so we&apos;re showing Ilorin. Pick an area below to explore.
+          </p>
+        )}
+      </div>
+
+      {/* ------------------------------------------------- right-edge FABs */}
+      <div className="fm-fabs">
+        <FAB icon={LocateFixed} label={locState === 'locating' ? 'Finding you…' : 'Locate me'} onClick={locateMe} />
+        <div className="fm-layers-wrap">
+          <FAB icon={Layers} label="Map layers" active={layersOpen} onClick={() => setLayersOpen((v) => !v)} />
+          {layersOpen && (
+            <div className="fm-layers glass" role="dialog" aria-label="Map layers">
+              <SegmentedControl
+                label="Map style"
+                value={base}
+                onChange={setBase}
+                options={[
+                  { value: 'streets', label: 'Streets' },
+                  { value: 'satellite', label: 'Satellite' },
+                ]}
+              />
+              <Chip label="Heat" icon={Flame} selected={heatOn} onClick={toggleHeat} />
+              {can3d && <Chip label="3D buildings" icon={Box} selected={b3d} onClick={() => setB3d((v) => !v)} />}
+            </div>
+          )}
+        </div>
+        <FAB icon={RotateCcw} label="Reset to Ilorin" onClick={resetIlorin} />
+      </div>
+
+      {/* ------------------------------------- bottom sheet / desktop panel */}
+      <aside
+        ref={sheetRef}
+        className={`fm-sheet glass is-${sheet}`}
+        style={sheetStyle}
+        aria-label="Stores on the map"
+      >
+        {!desktop && (
+          <div
+            className="fm-handle"
+            role="button"
+            tabIndex={0}
+            aria-label={`Store list, ${sheet === 'peek' ? 'collapsed' : sheet === 'half' ? 'half open' : 'expanded'}. Activate to expand.`}
+            onPointerDown={onDragStart}
+            onPointerMove={onDragMove}
+            onPointerUp={onDragEnd}
+            onPointerCancel={onDragEnd}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setSheet((s) => (s === 'peek' ? 'half' : s === 'half' ? 'full' : 'peek'));
+              }
+            }}
+          >
+            <span className="fm-grabber" aria-hidden />
+          </div>
+        )}
+
+        <div className="fm-sheet-head">
+          <h1>
+            {rows.length} store{rows.length === 1 ? '' : 's'} in Ilorin
+          </h1>
+          <p>
+            {distOrigin ? `Near ${originLabel ?? 'you'}` : 'Tap Locate me for distances'}
+            {stores.some((s) => s.isExample) ? ' · stores marked Example show sample data' : ''}
+          </p>
+        </div>
+
+        {/* Peek: a swipeable row of nearby stores */}
+        {!desktop && sheet === 'peek' && !sel && (
+          <div className="fm-peek" role="list">
+            {rows.slice(0, 12).map((r) => (
+              <div role="listitem" key={r.slug}>
+                {card(r, true)}
+              </div>
+            ))}
+            {!hasStores && empty}
+          </div>
+        )}
+
+        {(desktop || sheet !== 'peek' || sel) && (
+          <div className="fm-sheet-body">
+            {sel && <div className="fm-detail-wrap">{detail}</div>}
+            <div className={`fm-browse${sel ? ' is-covered' : ''}`} aria-hidden={sel && desktop ? true : undefined}>
+              {trending.length > 0 && (
+                <section className="fm-trending">
+                  <h2>Trending in Ilorin</h2>
+                  <div className="fm-peek">{trending.map((r) => card(r, true))}</div>
+                </section>
+              )}
+              <section className="fm-areas" aria-label="Jump to an area">
+                <h2>Areas</h2>
+                <div className="fm-chips is-wrap">
+                  {ILORIN_AREAS.map((a) => (
+                    <Chip key={a.id} label={a.label} icon={MapPin} onClick={() => flyArea(a.lat, a.lng)} />
+                  ))}
+                </div>
+              </section>
+              <div className="fm-sort">
+                <span>Sort</span>
+                <SegmentedControl
+                  label="Sort stores"
+                  value={sort}
+                  onChange={setSort}
+                  options={[
+                    { value: 'near', label: 'Nearest' },
+                    { value: 'rating', label: 'Top rated' },
+                    { value: 'name', label: 'A–Z' },
+                  ]}
+                />
+              </div>
+              {empty || list}
+            </div>
+          </div>
+        )}
+      </aside>
+    </div>
+  );
+}

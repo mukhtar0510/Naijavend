@@ -710,6 +710,10 @@ export function StoreMap({ stores }: { stores: MapStore[] }) {
           </div>
         </div>
         <div className="nv-map-head-actions">
+          <Link href="/map" className="nv-map-btn" title="Open the full-screen map">
+            <Maximize2 size={15} aria-hidden />
+            <span>Map page</span>
+          </Link>
           <button type="button" className="nv-map-btn" onClick={recenter} title="Centre on my location">
             <Crosshair size={15} aria-hidden />
             <span>Me</span>

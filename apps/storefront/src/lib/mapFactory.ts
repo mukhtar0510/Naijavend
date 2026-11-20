@@ -24,12 +24,73 @@ export interface ThemedMapOptions {
 
 export type BaseLayerId = 'streets' | 'satellite';
 
-// OpenFreeMap: free, keyless OpenStreetMap vector tiles with real light and
-// dark styles (no CSS filter tricks, crisp labels at any zoom).
-const STYLES = {
-  light: 'https://tiles.openfreemap.org/styles/liberty',
-  dark: 'https://tiles.openfreemap.org/styles/dark',
+// OpenFreeMap "liberty": free, keyless OpenStreetMap vector tiles. One style
+// for both themes, recoloured on load to the Kwaravend map palette
+// (REDESIGN 2.6 "Map colours") — soft pastel land and water, clear roads.
+const STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
+
+const MAP_PALETTE = {
+  light: {
+    land: '#EEF6F2', water: '#BFE3F2', park: '#CFEBD9', building: '#E3ECE7',
+    road: '#FFFFFF', casing: '#D5E4DD', rail: '#C2D4CB', label: '#0B1F1A', halo: '#FFFFFF', waterLabel: '#2F6F8F',
+  },
+  dark: {
+    land: '#0C1A17', water: '#0F2A3A', park: '#123026', building: '#14281F',
+    road: '#1B3A33', casing: '#0A1512', rail: '#21423A', label: '#EAF5F1', halo: '#0C1A17', waterLabel: '#7FB8D6',
+  },
 } as const;
+
+/** Recolour the liberty style to the Kwaravend palette (call after style.load). */
+export function applyKwaraStyle(map: MlMap, dark: boolean) {
+  const c = dark ? MAP_PALETTE.dark : MAP_PALETTE.light;
+  const set = (id: string, prop: string, value: unknown) => {
+    try {
+      map.setPaintProperty(id, prop as never, value as never);
+    } catch {
+      /* layer without that property */
+    }
+  };
+  for (const layer of map.getStyle().layers ?? []) {
+    const id = layer.id;
+    if (layer.type === 'background') set(id, 'background-color', c.land);
+    else if (layer.type === 'raster' && id !== SAT_LAYER) map.setLayoutProperty(id, 'visibility', 'none');
+    else if (layer.type === 'fill') {
+      if (id === 'road_area_pattern') map.setLayoutProperty(id, 'visibility', 'none');
+      else if (id === 'water') set(id, 'fill-color', c.water);
+      else if (id === 'building') set(id, 'fill-color', c.building), set(id, 'fill-outline-color', c.casing);
+      else if (/park|wood|grass|pitch|cemetery|wetland/.test(id)) set(id, 'fill-color', c.park), set(id, 'fill-opacity', 1);
+      else set(id, 'fill-color', c.land);
+    } else if (layer.type === 'line') {
+      if (/^waterway/.test(id)) set(id, 'line-color', c.water);
+      else if (/park_outline/.test(id)) set(id, 'line-color', c.park);
+      else if (/rail|hatching/.test(id)) set(id, 'line-color', c.rail);
+      else if (/casing/.test(id)) set(id, 'line-color', c.casing);
+      else if (/^(road|tunnel|bridge)_/.test(id)) set(id, 'line-color', c.road);
+    } else if (layer.type === 'symbol') {
+      set(id, 'text-color', /^water/.test(id) ? c.waterLabel : c.label);
+      set(id, 'text-halo-color', c.halo);
+      set(id, 'text-halo-width', 1.4);
+    } else if (layer.type === 'fill-extrusion') {
+      set(id, 'fill-extrusion-color', c.building);
+      map.setLayoutProperty(id, 'visibility', 'none'); // 3D buildings are opt-in
+    }
+  }
+}
+
+/** Whether this device can comfortably render 3D buildings. */
+export function canShow3D(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  const cores = navigator.hardwareConcurrency ?? 2;
+  const mem = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 4;
+  const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
+  return cores >= 6 && mem >= 4 && !saveData;
+}
+
+/** Toggle the extruded-buildings layer and tilt the camera to show it. */
+export function setBuildings3D(map: MlMap, on: boolean) {
+  if (map.getLayer('building-3d')) map.setLayoutProperty('building-3d', 'visibility', on ? 'visible' : 'none');
+  map.easeTo({ pitch: on ? 50 : 0, duration: 600 });
+}
 
 // Esri World Imagery — keyless satellite raster. Inserted *under* the label
 // layers, so satellite view keeps street and place names (a "hybrid" map).
@@ -64,7 +125,7 @@ export async function createThemedMap(el: HTMLElement, opts: ThemedMapOptions): 
 
   const map = new maplibregl.Map({
     container: el,
-    style: dark ? STYLES.dark : STYLES.light,
+    style: STYLE_URL,
     center: ll(opts.center[0], opts.center[1]),
     zoom: opts.zoom,
     scrollZoom: opts.scrollWheelZoom ?? false,
@@ -96,6 +157,8 @@ export async function createThemedMap(el: HTMLElement, opts: ThemedMapOptions): 
     if (style?._loaded) return resolve();
     map.once('style.load', () => resolve());
   });
+
+  applyKwaraStyle(map, dark);
 
   // Satellite raster sits just below the first label layer, hidden until used.
   const firstSymbol = map.getStyle().layers?.find((l) => l.type === 'symbol')?.id;

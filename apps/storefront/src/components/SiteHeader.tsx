@@ -22,6 +22,7 @@ import { CategoryIcon } from '@/lib/categories';
 const LINKS = [
   { href: '/home', label: 'Home' },
   { href: '/discover', label: 'Discover' },
+  { href: '/map', label: 'Map' },
   // Rankings stay hidden until a city has enough active stores (see T13).
   ...(FEATURES.rankings ? [{ href: '/rankings', label: 'Rankings' }] : []),
   { href: '/about', label: 'About' },
