@@ -3,10 +3,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { LatLng } from '@idevtenancy/shared';
 
+// Quick picks are Ilorin districts, not nationwide cities: the marketplace is
+// Kwara-only for launch, so so every quick pick is an Ilorin district.
 export const QUICK_CITIES: Array<{ label: string; lat: number; lng: number }> = [
-  { label: 'Lekki', lat: 6.4459, lng: 3.4705 },
-  { label: 'Surulere', lat: 6.4969, lng: 3.3511 },
-  { label: 'Abuja', lat: 9.0765, lng: 7.4712 },
+  { label: 'Ilorin centre', lat: 8.4966, lng: 4.5421 },
+  { label: 'Tanke', lat: 8.475, lng: 4.59 },
+  { label: 'Fate', lat: 8.53, lng: 4.55 },
 ];
 
 export type LocateState = 'idle' | 'locating' | 'ready' | 'denied' | 'error';

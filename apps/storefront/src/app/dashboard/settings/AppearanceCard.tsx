@@ -34,7 +34,7 @@ const BG_OVERLAY_LABELS: Record<string, string> = {
 // Named so the choice is obvious, and so gold/Naija green are first-class
 // options rather than something sellers have to hunt for in the colour picker.
 const PRESET_ACCENTS = [
-  { value: '#1D4ED8', label: 'Naijavend blue' },
+  { value: '#1D4ED8', label: 'Kwaravend blue' },
   { value: '#007A4A', label: 'Naija green' },
   { value: '#A16207', label: 'Gold' },
   { value: '#0B0C0E', label: 'Black' },
@@ -342,7 +342,7 @@ export function AppearanceCard({
             value={brief}
             onChange={(e) => setBrief(e.target.value)}
             maxLength={600}
-            placeholder={'Describe the vibe: "elegant boutique for handmade jewellery, dark and premium, gold accents" or "bright and playful cake studio"'}
+            placeholder={'Describe the vibe: "elegant boutique for handmade jewellery, dark and premium, gold accents" or "bright and playful bakery"'}
             rows={2}
           />
         </div>

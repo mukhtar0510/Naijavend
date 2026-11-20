@@ -101,9 +101,9 @@ export function NearbyStores({ stores }: { stores: NearbyStore[] }) {
             </button>
             <span className="nearby-cities">
               or jump to:{' '}
-              <button type="button" className="nearby-city" onClick={() => pickCity('Lekki', 6.4459, 3.4705)}>Lekki</button>
-              <button type="button" className="nearby-city" onClick={() => pickCity('Surulere', 6.4969, 3.3511)}>Surulere</button>
-              <button type="button" className="nearby-city" onClick={() => pickCity('Abuja', 9.0765, 7.4712)}>Abuja</button>
+              <button type="button" className="nearby-city" onClick={() => pickCity('Tanke', 8.475, 4.59)}>Tanke</button>
+              <button type="button" className="nearby-city" onClick={() => pickCity('Fate', 8.53, 4.55)}>Fate</button>
+              <button type="button" className="nearby-city" onClick={() => pickCity('Ilorin centre', 8.4966, 4.5421)}>Ilorin centre</button>
             </span>
           </div>
         </div>
@@ -117,9 +117,9 @@ export function NearbyStores({ stores }: { stores: NearbyStore[] }) {
             Location permission was blocked — that&apos;s fine. Pick a base area instead:
           </p>
           <div className="nearby-cities">
-            <button type="button" className="nearby-city" onClick={() => pickCity('Lekki', 6.4459, 3.4705)}>Lekki</button>
-            <button type="button" className="nearby-city" onClick={() => pickCity('Surulere', 6.4969, 3.3511)}>Surulere</button>
-            <button type="button" className="nearby-city" onClick={() => pickCity('Abuja', 9.0765, 7.4712)}>Abuja</button>
+            <button type="button" className="nearby-city" onClick={() => pickCity('Tanke', 8.475, 4.59)}>Tanke</button>
+            <button type="button" className="nearby-city" onClick={() => pickCity('Fate', 8.53, 4.55)}>Fate</button>
+            <button type="button" className="nearby-city" onClick={() => pickCity('Ilorin centre', 8.4966, 4.5421)}>Ilorin centre</button>
           </div>
         </div>
       )}

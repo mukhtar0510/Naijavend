@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getSellerClient, getOwnStore } from '@/lib/auth';
+import { redirectStaffToPos } from '@/lib/staff';
 import { siteUrl } from '@/lib/site';
 import { formatNaira } from '@idevtenancy/shared';
 import { ListingEditor } from './ListingEditor';
@@ -26,6 +27,7 @@ export default async function ListingsPage({ searchParams }: { searchParams: Pro
   // this guard an expired session crashes this page (sb!.auth on null) with a
   // 500 before the layout's redirect lands. Looked like "listing not saving".
   if (!sb) redirect('/dashboard/signin');
+  await redirectStaffToPos(sb); // R4: listings are owner-only
   const store = await getOwnStore<Store>(sb);
   if (!store) {
     return (
@@ -50,6 +52,11 @@ export default async function ListingsPage({ searchParams }: { searchParams: Pro
         </div>
       )}
       <p className="muted">Products get ordered; services get booked as appointments.</p>
+      <div style={{ display: 'flex', gap: 10, marginBottom: 18 }}>
+        <Link href="/dashboard/listings/bulk" className="btn btn-outline btn-sm">
+          Bulk add products
+        </Link>
+      </div>
 
       {(listings as Listing[] | null)?.length ? (
         <div style={{ display: 'grid', gap: 10, marginBottom: 32 }}>

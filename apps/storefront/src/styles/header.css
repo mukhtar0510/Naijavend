@@ -1,0 +1,264 @@
+/* Header styles used by <SiteHeader /> — extracted from marketplace-v2.css.
+   Kept separate so the landing page can render the header without loading the
+   whole marketplace stylesheet. Regenerate with tmp/extract-header-css.mjs if
+   the header rules change. */
+
+/* ============================================================
+   Kwaravend — marketplace refresh (v2)
+   Header, marketplace home, store map, buyer account, buyer auth.
+   Uses the existing design tokens from base.css, so light/dark and the
+   brand palette stay in one place. Imported after the legacy sheets so
+   these rules win where class names overlap.
+   ============================================================ */
+
+/* ============================== HEADER ============================== */
+.nv-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  -webkit-backdrop-filter: saturate(1.5) blur(16px);
+  backdrop-filter: saturate(1.5) blur(16px);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 0 rgba(11, 12, 14, 0.03);
+}
+
+.nv-header-main {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 22px;
+  min-height: 74px;
+}
+
+.nv-header-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--text);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.nv-header-logo:hover { text-decoration: none; color: var(--text); }
+
+.nv-header-wordmark {
+  font-family: var(--font-heading);
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
+
+.nv-header-wordmark em { font-style: normal; color: var(--gold); }
+
+/* Search is the primary navigation layer — full-width, high contrast. */
+.nv-header-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 620px;
+  justify-self: center;
+  padding: 5px 5px 5px 16px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--elevated);
+  transition: border-color 160ms var(--ease), box-shadow 160ms var(--ease), background 160ms var(--ease);
+}
+
+.nv-header-search:focus-within {
+  background: var(--surface);
+  border-color: var(--blue);
+  box-shadow: 0 0 0 4px var(--blue-tint);
+}
+
+.nv-header-search-icon { color: var(--text-muted); flex-shrink: 0; }
+
+.nv-header-search input {
+  flex: 1;
+  min-width: 0;
+  height: auto;
+  padding: 9px 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.nv-header-search input::placeholder { color: var(--text-muted); }
+
+.nv-header-search-btn {
+  flex-shrink: 0;
+  padding: 9px 18px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--blue);
+  color: #fff;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 160ms var(--ease), transform 160ms var(--ease);
+}
+
+.nv-header-search-btn:hover { background: var(--blue-deep); }
+
+.nv-header-search-btn:active { transform: scale(0.98); }
+
+.nv-header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+.nv-header-links { display: flex; align-items: center; gap: 2px; }
+
+.nv-header-top-link {
+  padding: 8px 10px;
+  border-radius: 999px;
+  color: var(--text-muted);
+  font-size: 13.5px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.nv-header-top-link:hover { color: var(--blue); text-decoration: none; }
+
+.nv-header-top-link.is-active { color: var(--blue); background: var(--blue-tint); }
+
+/* Seller CTA in Naija green so it reads as the commercial action, not chrome. */
+.nv-header-sell { background: var(--naija); border-color: var(--naija); color: #fff; }
+
+.nv-header-sell:hover { background: var(--naija-deep); border-color: var(--naija-deep); color: #fff; }
+
+.nv-header-account {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13.5px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: border-color 160ms var(--ease), color 160ms var(--ease), background 160ms var(--ease);
+}
+
+.nv-header-account:hover { border-color: var(--blue); color: var(--blue); text-decoration: none; }
+
+.nv-header-account.is-active { border-color: var(--blue); background: var(--blue-tint); color: var(--blue); }
+
+.nv-header-sell { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+
+.nv-header-burger {
+  display: none;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+/* Second tier: browse rail. */
+.nv-header-nav {
+  border-top: 1px solid var(--border);
+  background: color-mix(in srgb, var(--elevated) 60%, transparent);
+}
+
+.nv-header-nav-inner {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-height: 44px;
+}
+
+.nv-header-pills { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+
+.nv-header-pill {
+  padding: 6px 12px;
+  border-radius: 999px;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.nv-header-pill:hover { color: var(--text); background: var(--elevated-2); text-decoration: none; }
+
+.nv-header-pill.is-active { color: var(--blue); background: var(--blue-tint); }
+
+.nv-header-cats {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  margin-left: auto;
+}
+
+.nv-header-cats::-webkit-scrollbar { display: none; }
+
+.nv-header-cat {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  color: var(--text-muted);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.nv-header-cat:hover { color: var(--text); background: var(--elevated-2); text-decoration: none; }
+
+.nv-header-cat.is-all { color: var(--blue); font-weight: 700; }
+
+.nv-header-cat.is-open { border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+
+.nv-mobile-cats .nv-header-cat {
+  padding: 9px 13px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+}
+
+@media (max-width: 860px) {
+  .nv-header-main {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 10px 0;
+      min-height: 0;
+    }
+  .nv-header-logo { order: 1; }
+  .nv-header-actions { order: 2; margin-left: auto; }
+  .nv-header-links { display: none; }
+  .nv-header-search { order: 3; flex: 0 0 100%; max-width: none; }
+  .nv-header-nav { display: none; }
+  .nv-header-account { padding: 8px; }
+  .nv-header-account span { display: none; }
+  /* iOS zooms any focused field below 16px — keep the search legible instead. */
+    .nv-header-search input { font-size: 16px; }
+  .nv-header-burger { display: inline-grid; }
+  .nv-header-sell { display: none; }
+}
+
+@media (max-width: 640px) {
+  .nv-header-wordmark { font-size: 19px; }
+  .nv-header-search { padding-left: 12px; }
+  .nv-header-search-btn { padding: 8px 14px; font-size: 12.5px; }
+}
+
+@media (max-width: 1080px) {
+  .nv-header-links .nv-header-top-link { padding: 8px 7px; font-size: 13px; }
+}

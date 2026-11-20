@@ -35,7 +35,7 @@ export default async function SignInPage({
         <div className="auth-blob ab1" />
         <div className="auth-blob ab2" />
         <Link href="/" className="auth-aside-brand">
-          Naija<span>vend</span>
+          Kwara<span>vend</span>
         </Link>
         <div style={{ position: 'relative' }}>
           <h2>Sell to Nigeria from your own corner of the web.</h2>
@@ -80,11 +80,11 @@ export default async function SignInPage({
             <Link href="/legal/privacy">Privacy Policy</Link>.
           </p>
           <p className="auth-back muted">
-            <Link href="/">← Back to marketplace</Link>
+            <Link href="/home">← Back to marketplace</Link>
           </p>
         </div>
       </main>
-      <BackToMarket label="Naijavend" />
+      <BackToMarket label="Kwaravend" />
     </div>
   );
 }

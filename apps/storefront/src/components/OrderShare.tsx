@@ -1,5 +1,7 @@
 'use client';
 
+import { BRAND, orderRef } from '@idevtenancy/shared';
+
 // Share a plain-text order summary via WhatsApp — the channel Nigerian buyers
 // already use for commerce. No server round-trip; the summary is built inline.
 export function OrderShare({
@@ -18,8 +20,8 @@ export function OrderShare({
   function share() {
     const site = window.location.origin;
     const text = [
-      `🧾 My ${storeName} order on Naijavend`,
-      `Order: #${orderId.slice(0, 8).toUpperCase()}`,
+      `🧾 My ${storeName} order on ${BRAND.name}`,
+      `Order: ${orderRef(orderId)}`,
       `Status: ${status}`,
       `Total: ${total}`,
       `Store: ${site}/s/${storeSlug}`,

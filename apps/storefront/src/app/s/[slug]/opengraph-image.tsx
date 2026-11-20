@@ -26,7 +26,7 @@ export default async function OgImage({ params }: { params: { slug: string } }) 
       businessType = String(store.business_type);
       const stats = (store.store_rating_stats as Array<{ overall_rank: number | null; review_count: number }> | null)?.[0];
       if (stats?.overall_rank && stats.review_count >= 3) {
-        rankLine = `#${stats.overall_rank} ranked on Naijavend`;
+        rankLine = `#${stats.overall_rank} ranked on Kwaravend`;
       }
     }
   } catch {
@@ -103,8 +103,8 @@ export default async function OgImage({ params }: { params: { slug: string } }) 
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-          <span style={{ fontSize: 40, fontWeight: 800, color: '#0b0c0e' }}>Naija</span>
-          <span style={{ fontSize: 40, fontWeight: 800, color: '#1d4ed8' }}>cart</span>
+          <span style={{ fontSize: 40, fontWeight: 800, color: '#0b0c0e' }}>Kwara</span>
+          <span style={{ fontSize: 40, fontWeight: 800, color: '#1d4ed8' }}>vend</span>
           </div>
           {rankLine ? (
             <div

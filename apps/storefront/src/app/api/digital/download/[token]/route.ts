@@ -70,7 +70,7 @@ export async function GET(req: NextRequest, { params }: { params: { token: strin
 
     return Response.redirect(signed.signedUrl, 307);
   } catch (err) {
-    console.error('[Naijavend] digital-download:', err);
+    console.error('[Kwaravend] digital-download:', err);
     return new Response(JSON.stringify({ error: { code: 'internal_error', message: 'Something failed on our side. Try again shortly.' } }), {
       status: 500,
       headers: { 'content-type': 'application/json' },

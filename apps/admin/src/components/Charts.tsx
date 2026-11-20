@@ -10,7 +10,7 @@ export interface Slice {
   value: number;
 }
 
-// Brand ramp: Naijavend blues (#1D4ED8 family) + cool slate greys.
+// Brand ramp: Kwaravend blues (#1D4ED8 family) + cool slate greys.
 const PALETTE = ['#1d4ed8', '#3b82f6', '#7fb2f0', '#1e3fa8', '#93c4e8', '#46617f', '#a9bdd4', '#6d7f99'];
 
 function naira(kobo: number): string {

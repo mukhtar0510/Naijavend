@@ -14,11 +14,13 @@ const NAV = [
   { href: '/dashboard/listings', label: 'Listings' },
   { href: '/dashboard/orders', label: 'Orders' },
   { href: '/dashboard/bookings', label: 'Bookings' },
+  { href: '/dashboard/customers', label: 'Customers' },
   { href: '/dashboard/staff', label: 'Staff' },
   { href: '/dashboard/chat', label: 'Chat' },
   { href: '/dashboard/ai', label: 'AI Studio' },
   { href: '/dashboard/analytics', label: 'Analytics' },
   { href: '/dashboard/ratings', label: 'Ratings' },
+  { href: '/dashboard/plan', label: 'Plan' },
   { href: '/dashboard/settings', label: 'Settings' },
 ];
 
@@ -57,8 +59,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
         />
         <aside className="dash-sidebar">
           <div className="dash-sidebar-brand">
-            <Link href="/" className="logo" aria-label="Naijavend home">
-              Naija<span>vend</span>
+            <Link href="/" className="logo" aria-label="Kwaravend home">
+              Kwara<span>vend</span>
             </Link>
             <span className="dash-sidebar-role">Staff · {membership.displayName}</span>
             {/* Staff have no settings page, so they keep the quick switch here. */}
@@ -90,8 +92,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <DashMobileNav items={NAV} roleLabel="Seller studio" storeHref={store ? `/s/${store.slug}` : null} />
       <aside className="dash-sidebar">
         <div className="dash-sidebar-brand">
-          <Link href="/" className="logo" aria-label="Naijavend home">
-            Naija<span>vend</span>
+          <Link href="/" className="logo" aria-label="Kwaravend home">
+            Kwara<span>vend</span>
           </Link>
           <span className="dash-sidebar-role">Seller studio</span>
         </div>

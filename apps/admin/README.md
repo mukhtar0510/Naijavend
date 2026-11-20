@@ -1,4 +1,4 @@
-# Naijavend Control (standalone admin)
+# Kwaravend Control (standalone admin)
 
 Separate Next.js app for platform administration — deployed as its own Vercel
 project, decoupled from the storefront.
@@ -33,7 +33,7 @@ npm run dev                       # http://localhost:3200
 
 ```bash
 cd apps/admin
-vercel link        # create/select the `naijavend-admin` project
+vercel link        # create/select the `kwaravend-admin` project
 vercel deploy --prod
 ```
 

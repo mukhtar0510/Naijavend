@@ -4,6 +4,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getSellerClient, getOwnStore } from '@/lib/auth';
+import { redirectStaffToPos } from '@/lib/staff';
 import { AiStudio } from './AiStudio';
 
 export const dynamic = 'force-dynamic';
@@ -11,6 +12,7 @@ export const dynamic = 'force-dynamic';
 export default async function AiStudioPage() {
   const sb = await getSellerClient();
   if (!sb) redirect('/dashboard/signin'); // layout redirect races this page — guard here too
+  await redirectStaffToPos(sb); // R4: AI Studio is owner-only
 
   const store = await getOwnStore<{ name: string }>(sb, 'name');
   if (!store) {

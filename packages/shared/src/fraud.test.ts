@@ -28,7 +28,7 @@ describe('detectScamPhrases', () => {
   });
 
   it('flags impersonation and countdown pressure', () => {
-    expect(detectScamPhrases('I am from Naijavend support team, verify now')).toContain('impersonation');
+    expect(detectScamPhrases('I am from Kwaravend support team, verify now')).toContain('impersonation');
     expect(detectScamPhrases('Your account will be closed within 2 hours otherwise')).toContain('urgency_threat');
   });
 
@@ -98,7 +98,7 @@ describe('duplicate listings', () => {
     expect(detectStoreSignals('Guaranteed 50% ROI weekly when you invest with us')).toEqual(
       expect.arrayContaining(['guaranteed_returns', 'investment_scam'])
     );
-    expect(detectStoreSignals('We are the official Naijavend partner in Kaduna')).toContain('fake_official');
+    expect(detectStoreSignals('We are the official Kwaravend partner in Kaduna')).toContain('fake_official');
     expect(detectStoreSignals('Double your money in 7 days, forexx trading')).toEqual(
       expect.arrayContaining(['guaranteed_returns'])
     );

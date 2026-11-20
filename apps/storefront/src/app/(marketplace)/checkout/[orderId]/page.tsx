@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { orderRef } from '@idevtenancy/shared';
+import { PAYMENT_METHOD_LABEL, type PaymentMethod } from '@/lib/payments';
+import { PaymentProofUpload } from './PaymentProofUpload';
 
 interface CheckoutData {
   orderId: string;
@@ -11,6 +14,9 @@ interface CheckoutData {
   status: string;
   deliveryMethod?: string;
   deliveryFeeKobo?: number;
+  paymentStatus?: string;
+  paymentMethod?: string;
+  paymentProofUrl?: string | null;
   items: Array<{ title: string; quantity: number; unitPriceKobo: number }>;
   digitalDownloads?: Array<{ title: string; fileName: string; downloadUrl: string }>;
 }
@@ -30,8 +36,7 @@ export default function CheckoutPage({
   const [payToken, setPayToken] = useState('');
   const [data, setData] = useState<CheckoutData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [paying, setPaying] = useState(false);
-  const [paid, setPaid] = useState(false);
+
 
   useEffect(() => {
     params.then((p) => setOrderId(p.orderId));
@@ -49,30 +54,11 @@ export default function CheckoutPage({
       .catch((err: Error) => setError(err.message));
   }, [orderId]);
 
-  async function pay() {
-    setPaying(true);
-    setError(null);
-    try {
-      const res = await fetch('/api/mock-pay', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId, payToken }),
-      });
-      const body = await res.json();
-      if (!res.ok) throw new Error(body?.error?.message ?? 'Payment failed.');
-      setPaid(true);
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setPaying(false);
-    }
-  }
-
   if (error && !data) {
     return (
       <main className="container-narrow" style={{ padding: '48px 20px' }}>
         <div className="alert alert-error">{error}</div>
-        <Link href="/">← Back home</Link>
+        <Link href="/home">← Back home</Link>
       </main>
     );
   }
@@ -87,13 +73,13 @@ export default function CheckoutPage({
     );
   }
 
-  if (paid || data.status === 'paid') {
+  if (data.status === 'paid' || data.paymentStatus === 'paid') {
     return (
       <main className="container-narrow" style={{ padding: '48px 20px' }}>
         <div className="card card-elevated" style={{ textAlign: 'center' }}>
           <h1 style={{ color: 'var(--success)' }}>Payment confirmed</h1>
           <p className="muted">Receipt</p>
-          <p className="mono" style={{ color: 'var(--blue)' }}>{data.orderId}</p>
+          <p className="mono" style={{ color: 'var(--blue)' }}>{orderRef(data.orderId)}</p>
           <p>
             {data.storeName} received {naira(data.totalKobo)}. The seller has been notified and will contact you on
             the number you provided.
@@ -136,7 +122,7 @@ export default function CheckoutPage({
   return (
     <main className="container-narrow" style={{ padding: '48px 20px' }}>
       <h1>Checkout</h1>
-      <p className="muted">Order <span className="mono">{data.orderId}</span></p>
+      <p className="muted">Order <span className="mono">{orderRef(data.orderId)}</span></p>
 
       <div className="card card-elevated" style={{ marginBottom: 20 }}>
         <h2 style={{ fontSize: 18 }}>{data.storeName}</h2>
@@ -164,13 +150,57 @@ export default function CheckoutPage({
 
       {error && <div className="alert alert-error">{error}</div>}
 
-      <button className="btn btn-primary" onClick={pay} disabled={paying} style={{ width: '100%' }}>
-        {paying ? 'Processing payment…' : `Pay ${naira(data.totalKobo)}`}
-      </button>
-      <p className="muted" style={{ fontSize: 13, marginTop: 12 }}>
-        Demo payment flow — no real money moves. In production this hands off to Paystack, and only a
-        signature-verified webhook can mark an order paid.
-      </p>
+      <div className="card">
+        <h2 style={{ fontSize: 17, marginTop: 0 }}>How to pay</h2>
+        {data.paymentMethod === 'bank_transfer' ? (
+          <>
+            <p style={{ marginTop: 0 }}>
+              Transfer <strong className="mono">{naira(data.totalKobo)}</strong> to{' '}
+              {data.storeName} using the account details they gave you, then upload the receipt
+              below so they can confirm it.
+            </p>
+            <PaymentProofUpload
+              orderId={data.orderId}
+              token={payToken}
+              existingUrl={data.paymentProofUrl ?? null}
+            />
+          </>
+        ) : data.paymentMethod === 'pay_on_pickup' ? (
+          <p style={{ marginTop: 0 }}>
+            Pay <strong className="mono">{naira(data.totalKobo)}</strong> when you collect the
+            order from {data.storeName}. The seller confirms the payment in their dashboard.
+          </p>
+        ) : data.paymentMethod === 'cash_on_delivery' ? (
+          <p style={{ marginTop: 0 }}>
+            Pay <strong className="mono">{naira(data.totalKobo)}</strong> in cash when{' '}
+            {data.storeName} delivers. The seller confirms the payment in their dashboard.
+          </p>
+        ) : (
+          <>
+            <p style={{ marginTop: 0 }}>
+              {data.storeName} has not set a payment method yet — contact them to agree how to pay{}
+              <strong className="mono"> {naira(data.totalKobo)}</strong>. If you paid by transfer,
+              upload the receipt below.
+            </p>
+            <PaymentProofUpload
+              orderId={data.orderId}
+              token={payToken}
+              existingUrl={data.paymentProofUrl ?? null}
+            />
+          </>
+        )}
+        {data.paymentStatus === 'awaiting_confirmation' && (
+          <p className="muted" style={{ fontSize: 13, marginBottom: 0 }}>
+            Receipt received — waiting for {data.storeName} to confirm the money.
+          </p>
+        )}
+        {data.paymentMethod && data.paymentMethod !== 'bank_transfer' && (
+          <p className="muted" style={{ fontSize: 12.5, marginBottom: 0 }}>
+            Payment method: {PAYMENT_METHOD_LABEL[data.paymentMethod as PaymentMethod]}. Kwaravend
+            never takes card payments and adds no fee.
+          </p>
+        )}
+      </div>
     </main>
   );
 }

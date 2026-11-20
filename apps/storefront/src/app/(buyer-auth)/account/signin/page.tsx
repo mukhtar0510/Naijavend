@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { BadgeCheck, MapPin, MessageSquare, Star } from 'lucide-react';
 import { BackToMarket } from '@/components/BackToMarket';
-import { NaijavendLogoMark } from '@/components/NaijavendLogo';
+import { KwaravendLogoMark } from '@/components/KwaravendLogo';
 import { SignInPanel, type AuthMode } from './SignInPanel';
 
 export const metadata = { title: 'Sign in' };
@@ -37,9 +37,9 @@ export default async function CustomerSignInPage({
         <div className="nv-auth-aside-orb b" aria-hidden />
 
         <Link href="/" className="nv-auth-brand">
-          <NaijavendLogoMark size={30} />
+          <KwaravendLogoMark size={30} />
           <span>
-            Naija<em>vend</em>
+            Kwara<em>vend</em>
           </span>
         </Link>
 
@@ -49,7 +49,7 @@ export default async function CustomerSignInPage({
           </span>
           <h2>Shop local with total confidence.</h2>
           <p>
-            Every store on Naijavend is a Nigerian business with its own website, a real location
+            Every store on Kwaravend is a Nigerian business with its own website, a real location
             and reviews that can only come from real orders.
           </p>
         </div>
@@ -77,7 +77,7 @@ export default async function CustomerSignInPage({
         </div>
       </section>
 
-      <BackToMarket label="Naijavend" />
+      <BackToMarket label="Kwaravend" />
     </main>
   );
 }

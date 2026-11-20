@@ -1,5 +1,5 @@
 /* ============================================================================
-   Naijavend — brand experience layer (About + FAQ)
+   Kwaravend — brand experience layer (About + FAQ)
    ----------------------------------------------------------------------------
    Scoped `.brand-*` classes only: gradients, isometric 2.5D stacks, device
    mockups, marquee and editorial touches. Everything is driven by the app's
@@ -105,180 +105,6 @@
 .brand-marquee-dot { width: 5px; height: 5px; border-radius: 999px; background: var(--gold); }
 .brand-marquee-item:nth-child(2n) .brand-marquee-dot { background: var(--naija); }
 .brand-marquee-item:nth-child(3n) .brand-marquee-dot { background: var(--blue); }
-
-/* ------------------------------ Hero device art --------------------------- */
-.brand-scene {
-  position: relative;
-  perspective: 1500px;
-  width: 100%;
-}
-.brand-scene-inner {
-  position: relative;
-  transform-style: preserve-3d;
-  will-change: transform;
-}
-
-/* Browser window mockup (2D, sitting in 3D space) */
-.brand-browser {
-  position: relative;
-  border-radius: 18px;
-  border: 1px solid var(--border-strong);
-  background: var(--surface);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.8) inset,
-    0 30px 60px -28px rgba(15, 23, 42, 0.35),
-    0 60px 120px -60px rgba(29, 78, 216, 0.45);
-  overflow: hidden;
-  transform: translateZ(0);
-}
-.brand-browser-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 9px 12px;
-  border-bottom: 1px solid var(--border);
-  background: var(--elevated);
-}
-.brand-browser-dots { display: inline-flex; gap: 5px; }
-.brand-browser-dots i { width: 7px; height: 7px; border-radius: 999px; background: var(--border-strong); }
-.brand-browser-url {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  color: var(--text-muted);
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-/* Store hero inside the mockup */
-.brand-mock-store {
-  padding: 14px 14px 0;
-  display: grid;
-  gap: 12px;
-}
-.brand-mock-head { display: flex; align-items: center; gap: 9px; }
-.brand-mock-avatar {
-  width: 30px; height: 30px;
-  border-radius: 10px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-heading);
-  font-weight: 800;
-  font-size: 12px;
-  color: #fff;
-  background: var(--blue);
-  box-shadow: none;
-}
-.brand-mock-banner {
-  position: relative;
-  border-radius: 12px;
-  padding: 14px;
-  overflow: hidden;
-  color: #fff;
-  background:
-    radial-gradient(120% 160% at 100% 0%, rgba(255, 255, 255, 0.16), transparent 55%),
-    var(--blue);
-}
-.brand-mock-banner::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.25) 1px, transparent 1px);
-  background-size: 14px 14px;
-  opacity: 0.5;
-  pointer-events: none;
-}
-.brand-mock-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding-bottom: 14px; }
-.brand-mock-tile {
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  overflow: hidden;
-  background: var(--surface);
-}
-.brand-mock-thumb { height: 46px; }
-.brand-mock-thumb.t1 { background: #dbe7fd; }
-.brand-mock-thumb.t2 { background: #eef1f6; }
-.brand-mock-thumb.t3 { background: #c7dbfc; }
-.brand-mock-tile-meta { display: grid; gap: 3px; padding: 6px 7px 7px; }
-.brand-mock-tile-meta b { font-size: 9.5px; line-height: 1.2; color: var(--text); }
-.brand-mock-tile-meta span { font-family: var(--font-mono); font-size: 9px; color: var(--blue); }
-
-/* Phone mockup (2.5D layer in front of the browser) */
-.brand-phone {
-  position: absolute;
-  right: -12%;
-  bottom: -10%;
-  width: 168px;
-  border-radius: 26px;
-  padding: 8px;
-  background: var(--surface);
-  border: 1px solid var(--border-strong);
-  box-shadow:
-    0 26px 50px -20px rgba(15, 23, 42, 0.4),
-    0 0 0 6px color-mix(in srgb, var(--surface) 65%, transparent);
-  transform: translateZ(90px) rotate(-6deg);
-}
-.brand-phone-screen {
-  border-radius: 19px;
-  background: var(--elevated);
-  border: 1px solid var(--border);
-  overflow: hidden;
-  display: grid;
-  gap: 7px;
-  padding: 10px 9px 12px;
-}
-.brand-phone-notch {
-  width: 54px; height: 7px;
-  margin: 0 auto 2px;
-  border-radius: 999px;
-  background: var(--border-strong);
-}
-
-/* Floating chips around the devices */
-.brand-float-chip {
-  position: absolute;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 11px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
-  border: 1px solid var(--border);
-  box-shadow: 0 12px 24px -14px rgba(15, 23, 42, 0.45);
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--text);
-  backdrop-filter: blur(10px);
-  white-space: nowrap;
-  transform: translateZ(140px);
-}
-.brand-float-chip .dot { width: 6px; height: 6px; border-radius: 999px; background: var(--success); }
-
-/* Clear "this is a sample" label so mock numbers are never read as live data. */
-.brand-demo-badge {
-  position: absolute;
-  top: -11px;
-  left: 14px;
-  z-index: 3;
-  padding: 3px 9px;
-  border-radius: 999px;
-  background: var(--gold-tint);
-  color: var(--gold);
-  border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
-  font-size: 9.5px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  box-shadow: var(--shadow-xs);
-}
 
 /* Hero lede + trust cards + how-it-works */
 .brand-hero-lede {
@@ -688,24 +514,14 @@
     linear-gradient(to right, rgba(255, 255, 255, 0.055) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.055) 1px, transparent 1px);
 }
-[data-theme='dark'] .brand-browser { box-shadow: 0 30px 60px -28px rgba(0, 0, 0, 0.75), 0 60px 120px -60px rgba(29, 78, 216, 0.35); }
-[data-theme='dark'] .brand-float-chip { background: rgba(26, 29, 37, 0.9); }
 [data-theme='dark'] .brand-slab.is-active { background: color-mix(in srgb, var(--blue-tint) 55%, var(--surface)); }
 [data-theme='dark'] .brand-eyebrow { background: rgba(26, 29, 37, 0.75); }
 
 /* --------------------------------- Mobile --------------------------------- */
 @media (max-width: 900px) {
-  .brand-phone {
-    width: 148px;
-    right: -2%;
-    bottom: -12%;
-  }
   .brand-iso-wrap { height: 300px; }
 }
 @media (max-width: 700px) {
-  .brand-phone { display: none; }
-  .brand-float-chip { display: none; }
-  .brand-browser { border-radius: 15px; }
   .brand-iso-wrap { height: 250px; perspective: 900px; overflow: hidden; }
   .brand-iso { transform: rotateX(52deg) rotateZ(-34deg) scale(0.9); }
   .brand-slab { left: 10%; top: 24%; width: 80%; height: 48%; }

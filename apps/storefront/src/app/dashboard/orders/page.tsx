@@ -3,6 +3,9 @@ import { getSellerClient, getOwnStore } from '@/lib/auth';
 import { getStaffMembership } from '@/lib/staff';
 import { formatNaira } from '@idevtenancy/shared';
 import { OrderActions } from './OrderActions';
+import { ConfirmPayment } from './ConfirmPayment';
+import { PAYMENT_METHOD_LABEL, PAYMENT_STATUS_BADGE, PAYMENT_STATUS_LABEL, paymentStatusOf } from '@/lib/payments';
+import type { PaymentMethod } from '@/lib/payments';
 import type { Order } from '@idevtenancy/shared';
 
 export const dynamic = 'force-dynamic';
@@ -38,22 +41,33 @@ export default async function OrdersPage() {
   return (
     <main>
       <h1>Orders</h1>
-      <p className="muted">Payment status comes from the payment provider — you can fulfill or cancel, but never mark an order paid yourself.</p>
+      <p className="muted">
+        Money and fulfilment are tracked separately. When cash, a transfer or pickup payment
+        actually reaches you, confirm it here — Kwaravend never charges the buyer.
+      </p>
       {(orders as Order[] | null)?.length ? (
         <div style={{ display: 'grid', gap: 10 }}>
-          {(orders as Order[]).map((o) => (
-            <div key={o.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-              <div>
-                <span className={`badge ${STATUS_BADGE[o.status] ?? ''}`}>{o.status}</span>{' '}
-                <strong className="mono">{o.id.slice(0, 8)}</strong>
-                <p className="muted" style={{ margin: '4px 0 0', fontSize: 14 }}>
-                  {o.customer_name} · <span style={{ color: 'var(--naija)', fontWeight: 600 }}>{formatNaira(o.total_kobo)}</span> ·{' '}
-                  {new Date(o.created_at).toLocaleDateString('en-NG', { month: 'short', day: 'numeric' })}
-                </p>
+          {(orders as Order[]).map((o) => {
+            const pay = paymentStatusOf(o);
+            return (
+              <div key={o.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                <div>
+                  <span className={`badge ${STATUS_BADGE[o.status] ?? ''}`}>{o.status}</span>{' '}
+                  <span className={`badge ${PAYMENT_STATUS_BADGE[pay]}`}>{PAYMENT_STATUS_LABEL[pay]}</span>{' '}
+                  <strong className="mono">{o.id.slice(0, 8)}</strong>
+                  <p className="muted" style={{ margin: '4px 0 0', fontSize: 14 }}>
+                    {o.customer_name} · <span style={{ color: 'var(--naija)', fontWeight: 600 }}>{formatNaira(o.total_kobo)}</span> ·{' '}
+                    {PAYMENT_METHOD_LABEL[(o.payment_method ?? '') as PaymentMethod]} ·{' '}
+                    {new Date(o.created_at).toLocaleDateString('en-NG', { month: 'short', day: 'numeric' })}
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                  {pay !== 'paid' && pay !== 'refunded' && <ConfirmPayment orderId={o.id} />}
+                  <OrderActions orderId={o.id} status={o.status} />
+                </div>
               </div>
-              <OrderActions orderId={o.id} status={o.status} />
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div className="empty-state">No orders yet. Share your store link on WhatsApp to get your first sale.</div>

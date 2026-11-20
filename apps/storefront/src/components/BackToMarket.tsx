@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { NaijavendLogoMark } from '@/components/NaijavendLogo';
+import { KwaravendLogoMark } from '@/components/KwaravendLogo';
 
 /**
  * Floating "back to the app" pill — appears on every page that lives outside
@@ -17,7 +17,7 @@ import { NaijavendLogoMark } from '@/components/NaijavendLogo';
  */
 const MARKET_PREFIXES = ['/home', '/discover', '/rankings', '/search', '/about', '/faq', '/legal', '/account', '/offline'];
 
-export function BackToMarket({ label = 'Naijavend home' }: { label?: string }) {
+export function BackToMarket({ label = 'Kwaravend home' }: { label?: string }) {
   const pathname = usePathname();
   const router = useRouter();
   const [canGoBack, setCanGoBack] = useState(false);
@@ -36,7 +36,7 @@ export function BackToMarket({ label = 'Naijavend home' }: { label?: string }) {
   if (!visible) return null;
 
   return (
-    <div className="back-to-market" role="navigation" aria-label="Back to Naijavend">
+    <div className="back-to-market" role="navigation" aria-label="Back to Kwaravend">
       {canGoBack && (
         <button
           type="button"
@@ -48,8 +48,8 @@ export function BackToMarket({ label = 'Naijavend home' }: { label?: string }) {
           ←
         </button>
       )}
-      <Link href="/" className="back-to-market-link" aria-label={label}>
-        <NaijavendLogoMark size={20} />
+      <Link href="/home" className="back-to-market-link" aria-label={label}>
+        <KwaravendLogoMark size={20} />
         <span>{label}</span>
       </Link>
     </div>

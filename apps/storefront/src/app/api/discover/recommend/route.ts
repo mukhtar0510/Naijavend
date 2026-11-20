@@ -77,7 +77,7 @@ async function geminiPicks(candidates: Candidate[], origin: { lat: number; lng: 
     })
     .join('\n');
   const prompt = [
-    'A Nigerian shopper is on a marketplace called Naijavend.',
+    'A Nigerian shopper is on a marketplace called Kwaravend.',
     label ? `They are located around ${label}.` : 'Their location is unknown.',
     interest ? `They asked for: "${interest}".` : 'They did not name an interest — pick genuinely good all-round stores.',
     'Here are the candidate stores:',

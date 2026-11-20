@@ -1,30 +1,29 @@
 import type { Metadata, Viewport } from 'next';
+import { Sora, Inter, JetBrains_Mono } from 'next/font/google';
 // Design system split into modules — imported once at the root, in cascade order:
 // tokens/base → chrome (headers/footers) → components (forms/cards) → interactions (responsive + dark).
 import '../styles/base.css';
 import '../styles/chrome.css';
 import '../styles/components.css';
 import '../styles/interactions.css';
-import '../styles/admin.css';
 import '../styles/mobile.css';
-import '../styles/locations-lightbox.css';
 // Brand experience layer (About / FAQ): gradient canvases, isometric stacks, mockups.
 import '../styles/brand.css';
-// Marketplace refresh: header, home, store map, buyer account and buyer auth.
-import '../styles/marketplace-v2.css';
+// Marketplace refresh (header, home, map, buyer account) is imported by the
+// (marketplace) and (buyer-auth) layouts so the landing page does not ship it.
 // Tailwind utilities for the shadcn/ui components (src/components/ui) — imported
 // last so component utilities win ties against the hand-written design system.
 import '../styles/tailwind.css';
+import { BRAND } from '@idevtenancy/shared';
 import { PwaRegister } from '@/components/PwaRegister';
 import { LanguageDock } from '@/components/LanguageDock';
 
 export const metadata: Metadata = {
   title: {
-    default: 'Naijavend — discover local Nigerian stores & services',
-    template: '%s · Naijavend',
+    default: `${BRAND.name} — discover local stores in ${BRAND.launchRegion.city}`,
+    template: `%s · ${BRAND.name}`,
   },
-  description:
-    'Naijavend — discover trusted Nigerian stores and services with real storefront websites, a street-level map, verified blue ticks, chat, bookings and honest reviews. Order on WhatsApp and shop local.',
+  description: BRAND.description,
   manifest: '/manifest.webmanifest',
   icons: {
     icon: [
@@ -34,8 +33,31 @@ export const metadata: Metadata = {
     ],
     apple: '/icons/apple-touch-icon.png',
   },
-  appleWebApp: { capable: true, title: 'Naijavend', statusBarStyle: 'default' },
+  appleWebApp: { capable: true, title: BRAND.name, statusBarStyle: 'default' },
 };
+
+// Self-hosted core fonts. Fetching fonts.googleapis.com cost ~2 s of
+// render-blocking CSS on every page and caused the hero to reflow when the
+// webfont landed; next/font inlines the @font-face rules and serves the files
+// from our own origin with a metric-matched fallback.
+const sora = Sora({
+  subsets: ['latin'],
+  weight: ['400', '600', '700', '800'],
+  display: 'swap',
+  variable: '--font-sora',
+});
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  display: 'swap',
+  variable: '--font-inter',
+});
+const jetbrains = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['500', '600'],
+  display: 'swap',
+  variable: '--font-jetbrains',
+});
 
 export const viewport: Viewport = {
   themeColor: '#1D4ED8',
@@ -51,20 +73,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const themeScript = `(function(){try{var t=localStorage.getItem('sf-theme');if(!t){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`
 
   return (
-    <html lang="en-NG" suppressHydrationWarning>
+    <html
+      lang="en-NG"
+      className={`${sora.variable} ${inter.variable} ${jetbrains.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-        {/* Fonts: preconnect + parallel stylesheet (replaces render-blocking @import).
-            display=swap keeps text visible while webfonts arrive. */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Fonts: only the three families the marketplace itself uses. The
+            seller theme library (~21 families) lives in <ThemeFonts /> and is
+            mounted only on store pages and the appearance editors — loading it
+            here cost ~1.6 s of render-blocking CSS on every page. */}
+
         {/* Supabase REST + storage: every page queries these — warm the connection early. */}
         <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''} />
         <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''} />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@500;700&family=Manrope:wght@400;600;700;800&family=Outfit:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Urbanist:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&family=Merriweather:wght@400;700;900&family=Lora:ital,wght@0,400;0,600;0,700;1,600&family=Libre+Baskerville:wght@400;700&family=Fraunces:ital,wght@0,500;0,700;0,900;1,600&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Bricolage+Grotesque:wght@400;600;700;800&family=Bebas+Neue&family=Unbounded:wght@400;600;700;800&family=Oswald:wght@400;500;600;700&family=Dancing+Script:wght@500;600;700&family=Pacifico&family=Great+Vibes&family=Satisfy&family=Caveat:wght@500;600;700&display=swap"
-        />
       </head>
       <body>
         {children}

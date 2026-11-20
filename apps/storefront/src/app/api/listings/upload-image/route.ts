@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
 
     if (blocked) {
       await sb.storage.from('store-media').remove([path]).catch(() => undefined);
-      return apiError(422, 'inappropriate_image', 'That photo is not allowed on Naijavend — use a photo of the product itself.');
+      return apiError(422, 'inappropriate_image', 'That photo is not allowed on Kwaravend — use a photo of the product itself.');
     }
     if (labels.length > 0) {
       const store = await getOwnStore<{ id: string }>(sb, 'id');

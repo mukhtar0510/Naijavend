@@ -39,7 +39,7 @@ const QUICK_PICKS = [
   'I bake cakes', 'small chops', 'I cater for events', 'I sell foodstuff', 'I run a mini supermarket',
   'I sell kitchen utensils', 'I make crochet pieces', 'I sell handmade beads', 'personal trainer',
   'I tutor students', 'phone repairs', 'I sell phone accessories', 'I sell gadgets',
-  'I ship from a supplier', 'in Lagos', 'in Abuja', 'in Port Harcourt', 'delivery available',
+  'I ship from a supplier', 'in Ilorin', 'in Tanke', 'in Fate', 'delivery available',
 ] as const;
 
 // Same slugification the API applies when the seller leaves the link blank.
@@ -275,7 +275,7 @@ export default function OnboardingPage() {
         <div className="auth-blob ab1" />
         <div className="auth-blob ab2" />
         <div className="ob-brand">
-          Naija<span>vend</span>
+          Kwara<span>vend</span>
         </div>
 
         <div style={{ position: 'relative' }}>
@@ -336,7 +336,7 @@ export default function OnboardingPage() {
                   onKeyDown={(e) => {
                     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && step1Valid && !busy) generateDraft();
                   }}
-                  placeholder="e.g. I braid hair and do makeup for events in Surulere, Lagos. I also sell wigs."
+                  placeholder="e.g. I braid hair and do makeup for events in Tanke, Ilorin. I also sell wigs."
                   maxLength={600}
                   required
                 />

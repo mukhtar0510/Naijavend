@@ -1,13 +1,13 @@
 export const metadata = {
   title: 'Terms of Service',
-  description: 'The user agreement governing the use of Naijavend by buyers and sellers.',
+  description: 'The user agreement governing the use of Kwaravend by buyers and sellers.',
 };
 
 const SECTIONS: Array<{ h: string; p: string[] }> = [
   {
     h: '1. The agreement',
     p: [
-      'These Terms of Service ("Terms") form the agreement between you and Naijavend when you use the platform — browsing stores, ordering products, booking services, chatting, rating, or creating a seller account and store site. By using Naijavend you accept these Terms.',
+      'These Terms of Service ("Terms") form the agreement between you and Kwaravend when you use the platform — browsing stores, ordering products, booking services, chatting, rating, or creating a seller account and store site. By using Kwaravend you accept these Terms.',
     ],
   },
   {
@@ -21,14 +21,14 @@ const SECTIONS: Array<{ h: string; p: string[] }> = [
     p: [
       'Sellers are responsible for their store content: the accuracy of listings, prices, photos they upload (you must own or have the right to use them), the address and contact details they publish, and the fulfilment of orders and bookings.',
       'Sellers must not list illegal, counterfeit, dangerous or misleading items, and must not use the platform to harass anyone. We may remove content or suspend stores that breach these rules.',
-      'Naijavend provides the storefront and tooling; the contract of sale or service is between the seller and the buyer. Sellers are responsible for any taxes, permits or registrations their business requires.',
+      'Kwaravend provides the storefront and tooling; the contract of sale or service is between the seller and the buyer. Sellers are responsible for any taxes, permits or registrations their business requires.',
     ],
   },
   {
     h: '4. Buyers',
     p: [
-      'Buyers should review a listing carefully and use the chat or WhatsApp to confirm availability before ordering. When you place an order or booking, it is an offer to the seller, which the seller confirms. Payment and delivery/fulfilment are arranged between buyer and seller — Naijavend does not hold funds.',
-      'If something goes wrong with an order, first contact the seller; they are the party to the sale. Naijavend may step in to mediate obvious disputes and will remove sellers who consistently fail their customers.',
+      'Buyers should review a listing carefully and use the chat or WhatsApp to confirm availability before ordering. When you place an order or booking, it is an offer to the seller, which the seller confirms. Payment and delivery/fulfilment are arranged between buyer and seller — Kwaravend does not hold funds.',
+      'If something goes wrong with an order, first contact the seller; they are the party to the sale. Kwaravend may step in to mediate obvious disputes and will remove sellers who consistently fail their customers.',
     ],
   },
   {
@@ -46,13 +46,13 @@ const SECTIONS: Array<{ h: string; p: string[] }> = [
   {
     h: '7. Availability and changes',
     p: [
-      'We aim for a reliable service but provide Naijavend "as is" and "as available". We may add, change or remove features. We are not liable for indirect or consequential loss arising from downtime or errors to the maximum extent permitted by law.',
+      'We aim for a reliable service but provide Kwaravend "as is" and "as available". We may add, change or remove features. We are not liable for indirect or consequential loss arising from downtime or errors to the maximum extent permitted by law.',
     ],
   },
   {
     h: '8. Ending the agreement',
     p: [
-      'You can stop using Naijavend and delete your account at any time. We may suspend or terminate accounts that breach these Terms. Sections that by their nature should survive termination (e.g. liability, content licences granted) do so.',
+      'You can stop using Kwaravend and delete your account at any time. We may suspend or terminate accounts that breach these Terms. Sections that by their nature should survive termination (e.g. liability, content licences granted) do so.',
     ],
   },
   {

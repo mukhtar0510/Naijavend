@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getSellerClient, getOwnStore } from '@/lib/auth';
+import { redirectStaffToPos } from '@/lib/staff';
 import { StaffManager, type StaffRow } from './StaffManager';
 import { StaffToggle, StaffRemove } from './StaffActions';
 import type { Store } from '@idevtenancy/shared';
@@ -9,6 +10,7 @@ export const dynamic = 'force-dynamic';
 export default async function StaffPage() {
   const sb = await getSellerClient();
   if (!sb) redirect('/dashboard/signin'); // layout redirect races this page — guard here too
+  await redirectStaffToPos(sb); // R4: managing staff is owner-only
   const store = await getOwnStore<Pick<Store, 'id' | 'name' | 'slug' | 'plan'>>(sb, 'id, name, slug, plan');
 
   if (!store) {

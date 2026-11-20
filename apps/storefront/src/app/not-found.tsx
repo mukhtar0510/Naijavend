@@ -15,7 +15,7 @@ export default function RootNotFound() {
           changed its address. Try discovering something new instead.
         </p>
         <div className="notfound-actions">
-          <Link href="/" className="btn btn-black">Go home</Link>
+          <Link href="/home" className="btn btn-black">Go home</Link>
           <Link href="/discover" className="btn btn-outline">Discover stores</Link>
           <Link href="/search" className="btn btn-outline">Search</Link>
         </div>

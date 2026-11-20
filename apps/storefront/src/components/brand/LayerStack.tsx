@@ -1,6 +1,6 @@
 'use client';
 
-// "The stack" — Naijavend explained as five layers. A 2.5D isometric stack
+// "The stack" — Kwaravend explained as five layers. A 2.5D isometric stack
 // (Framer Motion) that responds to the list on the left and to pointer tilt,
 // so the page has a real 3D object, not a flat illustration.
 
@@ -107,7 +107,7 @@ export function LayerStack() {
         <div
           className="brand-iso"
           role="img"
-          aria-label={`Naijavend product stack — ${layer.title} layer highlighted`}
+          aria-label={`Kwaravend product stack — ${layer.title} layer highlighted`}
         >
           {LAYERS.map((item, index) => (
             <motion.button

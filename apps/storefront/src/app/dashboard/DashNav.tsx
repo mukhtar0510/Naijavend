@@ -14,11 +14,13 @@ const ICONS: Record<string, ComponentType<{ size?: number }>> = {
   '/dashboard/listings': IconTag,
   '/dashboard/orders': IconBox,
   '/dashboard/bookings': IconCalendar,
+  '/dashboard/customers': IconUsers,
   '/dashboard/staff': IconUsers,
   '/dashboard/chat': IconChat,
   '/dashboard/ai': IconSpark,
   '/dashboard/analytics': IconChart,
   '/dashboard/ratings': IconStar,
+  '/dashboard/plan': IconSpark,
   '/dashboard/settings': IconGear,
 };
 

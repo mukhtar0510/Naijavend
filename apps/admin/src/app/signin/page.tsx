@@ -32,7 +32,7 @@ export default async function AdminSignInPage() {
         <div>
           <h2>One console for the whole marketplace.</h2>
           <p>
-            The working surface for the people who keep Naijavend honest, fast and trustworthy.
+            The working surface for the people who keep Kwaravend honest, fast and trustworthy.
           </p>
         </div>
 

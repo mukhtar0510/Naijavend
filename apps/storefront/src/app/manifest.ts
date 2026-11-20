@@ -1,13 +1,13 @@
 import type { MetadataRoute } from 'next';
+import { BRAND } from '@idevtenancy/shared';
 
-// PWA manifest: makes Naijavend installable on Android/Chrome (and via browser
+// PWA manifest: makes Kwaravend installable on Android/Chrome (and via browser
 // "Add to Home Screen" elsewhere). Icons are static files under /icons.
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Naijavend — storefronts for Nigerian sellers',
-    short_name: 'Naijavend',
-    description:
-      'Discover trusted local Nigerian stores and services. Browse catalogues, order, book appointments, chat with sellers and rate real businesses.',
+    name: `${BRAND.name} — storefronts for local sellers`,
+    short_name: BRAND.name,
+    description: BRAND.description,
     id: '/',
     start_url: '/',
     scope: '/',

@@ -18,7 +18,7 @@ export async function GET() {
   // Growth plan list price per store per month (kobo) — the platform's
   // recurring revenue unit. Stores created on/after a month count from that
   // month (first full month billed at activation).
-  const GROWTH_MONTHLY_KOBO = 50_000; // ₦500/mo placeholder price
+  const GROWTH_MONTHLY_KOBO = 800_000; // ₦8,000/mo — Business Plus price (src/lib/plans.ts)
 
   // Onboarding funnel: last 30 days of tracked events, aggregated client-side below.
   const funnelStart = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();

@@ -236,7 +236,7 @@ function fallbackAnswer(
     const recent = buyer.orders.slice(0, 3);
     const lines = recent.map((o) => `${o.storeName} — ₦${Math.round(o.totalKobo / 100).toLocaleString('en-NG')} — ${o.status} — ${o.items.slice(0, 3).map((i) => i.title).join(', ') || 'items'}`).join('\n');
     return {
-      reply: `Here are the orders I can see on your account:\n${lines}\n\nI only have details for orders placed through Naijavend stores. If you placed an order outside this list, check your messages with that seller directly.\n\nWhen did you last place an order, and what would you like to do with it?`,
+      reply: `Here are the orders I can see on your account:\n${lines}\n\nI only have details for orders placed through Kwaravend stores. If you placed an order outside this list, check your messages with that seller directly.\n\nWhen did you last place an order, and what would you like to do with it?`,
       orders: recent.slice(0, 5).map((o) => ({ id: o.id, storeSlug: o.storeSlug, storeName: o.storeName, totalKobo: o.totalKobo, status: o.status })),
     };
   }
@@ -276,7 +276,7 @@ function fallbackAnswer(
 
   if (matched.length === 0 && !wantsMyOrders && !wantsMyBookings) {
     return {
-      reply: `I couldn't find anything on Naijavend matching “${q.slice(0, 80)}” yet — the marketplace grows daily, so check Discover or browse the rankings for the best-rated stores right now.`,
+      reply: `I couldn't find anything on Kwaravend matching “${q.slice(0, 80)}” yet — the marketplace grows daily, so check Discover or browse the rankings for the best-rated stores right now.`,
     };
   }
 
@@ -296,7 +296,7 @@ function fallbackAnswer(
   const personalNote = preferredSlugs.size > 0 ? ', including stores you' + String.fromCharCode(8217) + 've chatted with' : '';
   const storeList = (pick.map((m) => m.s.name).join(', ') || 'a few stores');
   return {
-    reply: 'Based on what' + String.fromCharCode(8217) + 's listed on Naijavend' + personalNote + ', ' + storeList + ' look like your best bet.' + itemLine + distLine + ' Tap a store below to see everything they offer.',
+    reply: 'Based on what' + String.fromCharCode(8217) + 's listed on Kwaravend' + personalNote + ', ' + storeList + ' look like your best bet.' + itemLine + distLine + ' Tap a store below to see everything they offer.',
     stores: pick.slice(0, 4).map((m) => ({ slug: m.s.slug, name: m.s.name, category: m.s.category })),
   };
 }
@@ -330,7 +330,7 @@ async function geminiAnswer(
   ).join('\n');
 
   const prompt = [
-    'You are the Naijavend shopping assistant for a Nigerian marketplace.',
+    'You are the Kwaravend shopping assistant for a Nigerian marketplace.',
     label ? `The shopper is around ${label}.` : 'The shopper location is unknown.',
     `Shopper asked: “${q.slice(0, 300)}”`,
     '=== CATALOGUE (the ONLY store/product facts you may use — never invent products, prices, stock or availability) ===',
@@ -425,7 +425,7 @@ export async function POST(req: NextRequest) {
   const b = body as Record<string, unknown>;
   const question = sanitizeText(b.q ?? '', 300);
   if (question.length < 3) {
-    return apiError(422, 'empty_question', 'Ask me something — e.g. “who sells cakes in Lekki?” or “where is my last order?”');
+    return apiError(422, 'empty_question', 'Ask me something — e.g. “who sells fabric in Tanke?” or “where is my last order?”');
   }
 
   let origin: { lat: number; lng: number } | null = null;

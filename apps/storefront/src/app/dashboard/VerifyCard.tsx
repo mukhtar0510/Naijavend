@@ -63,7 +63,7 @@ export function VerifyCard({
       <p className="muted" style={{ margin: 0, fontSize: 14 }}>Verification</p>
       <p style={{ margin: '6px 0', fontSize: 16, fontWeight: 700 }}>Get the blue tick ✔</p>
       <p className="muted" style={{ margin: '0 0 10px', fontSize: 13.5 }}>
-        Verified stores are badged everywhere on Naijavend. Requirement:{' '}
+        Verified stores are badged everywhere on Kwaravend. Requirement:{' '}
         <strong>{REVIEWS_REQUIRED}+ reviews</strong> averaging <strong>{AVG_REQUIRED}+ stars</strong>.
       </p>
       <div className="verify-progress" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}>

@@ -1,4 +1,4 @@
-/* Naijavend — design system (light).
+/* Kwaravend — design system (light).
    White surfaces, blue #1D4ED8 primary + black accents. Store pages render as
    independent sites inside /s/*: their own masthead/footer, no marketplace chrome.
    Fonts: Sora (display) / Inter (body) / JetBrains Mono (prices, order IDs). */
@@ -70,10 +70,12 @@
   --shadow-md: 0 8px 24px rgba(11, 12, 14, 0.09);
   --shadow-lg: 0 16px 48px rgba(11, 12, 14, 0.14);
 
-  /* Type */
-  --font-heading: 'Sora', 'Inter', sans-serif;
-  --font-body: 'Inter', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  /* Type. The --font-* trio is injected by next/font on <html> (self-hosted,
+     metric-matched fallbacks); the literal names stay as a safety net for any
+     stylesheet loaded outside the root layout. */
+  --font-heading: var(--font-sora, 'Sora'), 'Inter', sans-serif;
+  --font-body: var(--font-inter, 'Inter'), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains, 'JetBrains Mono'), ui-monospace, monospace;
 
   --ease: cubic-bezier(0.2, 0, 0.4, 1);
   --dur-fast: 140ms;
@@ -222,6 +224,22 @@ textarea { resize: vertical; min-height: 96px; }
 .badge-gold { color: var(--gold); border-color: color-mix(in srgb, var(--gold) 35%, transparent); background: var(--gold-tint); }
 .badge-naija { color: var(--naija); border-color: color-mix(in srgb, var(--naija) 35%, transparent); background: var(--naija-tint); }
 .badge-danger { color: var(--danger); border-color: rgba(220, 38, 38, 0.35); background: var(--danger-tint); }
+
+/* Seller milestone badge — gold reads as earned, not as a money-in status. */
+.achievement-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  color: var(--gold);
+  border: 1px solid color-mix(in srgb, var(--gold) 45%, transparent);
+  background: var(--gold-tint);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, white 35%, transparent);
+}
+.achievement-badge svg { flex: none; }
 
 /* Stars */
 .stars { color: var(--gold-bright); letter-spacing: 2px; font-size: 15px; }

@@ -1,6 +1,6 @@
 export const metadata = {
   title: 'Cookies Policy',
-  description: 'The cookies and local storage Naijavend uses, and why.',
+  description: 'The cookies and local storage Kwaravend uses, and why.',
 };
 
 const COOKIES: Array<{ name: string; type: string; purpose: string }> = [
@@ -19,7 +19,7 @@ export default function CookiesPage() {
       <h1>Cookies Policy</h1>
       <p className="muted">Last updated: 20 September 2026</p>
       <p style={{ fontSize: 15 }}>
-        Naijavend uses a very small number of cookies and browser storage entries. We do not use advertising or
+        Kwaravend uses a very small number of cookies and browser storage entries. We do not use advertising or
         third-party tracking cookies, and we never sell browsing data.
       </p>
 

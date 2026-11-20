@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { PAYMENT_METHODS } from '@/lib/payments';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 
@@ -28,6 +29,8 @@ export default function OrderPage() {
   // Delivery options configured by the seller (pickup / rider / courier).
   const [deliveryOptions, setDeliveryOptions] = useState<Array<{ method: string; label: string; feeKobo: number }>>([]);
   const [deliveryMethod, setDeliveryMethod] = useState('');
+  // No gateway: the buyer picks how they will pay and the seller confirms it.
+  const [paymentMethod, setPaymentMethod] = useState<'cash_on_delivery' | 'bank_transfer' | 'pay_on_pickup'>('cash_on_delivery');
 
   useEffect(() => {
     let alive = true;
@@ -89,6 +92,7 @@ export default function OrderPage() {
           customerPhone: phone,
           promoCode: promo.trim() || undefined,
           deliveryMethod: deliveryMethod || undefined,
+          paymentMethod,
         }),
       });
       const body = await res.json();
@@ -113,12 +117,15 @@ export default function OrderPage() {
           <h1>Order placed</h1>
           <p className="muted">Order reference</p>
           <p className="mono" style={{ fontSize: 18, color: 'var(--blue)' }}>{orderId}</p>
-          <p className="muted">Next step: confirm payment to send the order to the seller.</p>
+          <p className="muted">
+            The seller has been given your order. Pay them directly — Kwaravend does not take
+            card payments.
+          </p>
           <Link
             className="btn btn-primary"
             href={payToken ? `/checkout/${orderId}?pt=${payToken}` : `/checkout/${orderId}`}
           >
-            Continue to payment
+            View order &amp; next steps
           </Link>
         </div>
       </main>
@@ -191,6 +198,38 @@ export default function OrderPage() {
             <p className="hint">Fee is set by the store and added to your total before payment.</p>
           </div>
         )}
+        <div className="field">
+          <label>How will you pay?</label>
+          <div style={{ display: 'grid', gap: 8 }}>
+            {PAYMENT_METHODS.map((m) => (
+              <label
+                key={m.id}
+                className="card"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '10px 12px',
+                  cursor: 'pointer',
+                  borderColor: paymentMethod === m.id ? 'var(--blue)' : undefined,
+                }}
+              >
+                <input
+                  type="radio"
+                  name="payment"
+                  value={m.id}
+                  checked={paymentMethod === m.id}
+                  onChange={() => setPaymentMethod(m.id)}
+                />
+                <span style={{ flex: 1, fontSize: 14.5 }}>
+                  {m.label}
+                  <span className="muted" style={{ display: 'block', fontSize: 12.5 }}>{m.hint}</span>
+                </span>
+              </label>
+            ))}
+          </div>
+          <p className="hint">The seller confirms the money after you pay them. Nothing is charged here.</p>
+        </div>
         <div className="field">
           <label htmlFor="promo">Discount code (optional)</label>
           <input

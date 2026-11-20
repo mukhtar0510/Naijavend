@@ -49,7 +49,7 @@ export async function PATCH(req: NextRequest) {
       // or redirect vector.
       const prefix = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/avatars/`;
       if (!raw.startsWith(prefix)) {
-        return apiError(422, 'invalid_avatar', 'Avatar must be uploaded through Naijavend.');
+        return apiError(422, 'invalid_avatar', 'Avatar must be uploaded through Kwaravend.');
       }
       updates.avatar_url = raw;
     }

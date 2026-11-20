@@ -1,13 +1,13 @@
 export const metadata = {
   title: 'Privacy Policy',
-  description: 'How Naijavend collects, uses and protects your personal data.',
+  description: 'How Kwaravend collects, uses and protects your personal data.',
 };
 
 const SECTIONS: Array<{ h: string; p: string[] }> = [
   {
     h: '1. Who we are',
     p: [
-      'Naijavend ("we", "us") is a marketplace platform that lets Nigerian sellers create their own online store sites and lets customers discover, order from, book and chat with those sellers. This policy explains what personal data we collect and how we use it, whether you are a customer or a seller.',
+      'Kwaravend ("we", "us") is a marketplace platform that lets Nigerian sellers create their own online store sites and lets customers discover, order from, book and chat with those sellers. This policy explains what personal data we collect and how we use it, whether you are a customer or a seller.',
     ],
   },
   {
@@ -19,7 +19,7 @@ const SECTIONS: Array<{ h: string; p: string[] }> = [
       'Reviews: the star rating and optional comment you leave for a store, linked to the phone number used for the order or booking.',
       'Messages: chats you send to a seller through the in-app chat, so both sides keep a history.',
       'Usage analytics: anonymous events such as store visits, listing views, shares and link copies. These contain no names, emails or identifiers — see the Cookies Policy for details.',
-      'Location data: the map view and distance features run entirely in your browser. When you share your location (or pick a base area), it is stored only on your device and used to compute distances and directions in the app — your precise location is never sent to Naijavend servers.',
+      'Location data: the map view and distance features run entirely in your browser. When you share your location (or pick a base area), it is stored only on your device and used to compute distances and directions in the app — your precise location is never sent to Kwaravend servers.',
     ],
   },
   {
@@ -49,7 +49,7 @@ const SECTIONS: Array<{ h: string; p: string[] }> = [
   {
     h: '6. Your rights',
     p: [
-      'You may request a copy of your data, correct it, or delete your account at any time. Sellers can edit or remove their store content from the dashboard. Customers can contact a store directly to resolve an order, and can ask us to delete reviews they posted. To exercise any right, contact naijavend2026@gmail.com.',
+      'You may request a copy of your data, correct it, or delete your account at any time. Sellers can edit or remove their store content from the dashboard. Customers can contact a store directly to resolve an order, and can ask us to delete reviews they posted. To exercise any right, contact us through the in-app chat.',
     ],
   },
   {

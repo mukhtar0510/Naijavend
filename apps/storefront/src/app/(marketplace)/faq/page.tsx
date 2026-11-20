@@ -8,11 +8,11 @@ import { FaqExplorer } from '@/components/brand/FaqExplorer';
 export const metadata: Metadata = {
   title: 'Frequently asked questions',
   description:
-    'How Naijavend works — buying, selling, the blue tick, the map, POS, staff accounts and your privacy. Searchable answers in plain English.',
+    'How Kwaravend works — buying, selling, the blue tick, the map, POS, staff accounts and your privacy. Searchable answers in plain English.',
 };
 
 const HIGHLIGHTS = [
-  'Free to start',
+  'Free plan available',
   '0% commission',
   'Reviews from real orders',
   'Location stays in your browser',
@@ -60,7 +60,7 @@ export default function FaqPage() {
               Policies
             </Link>
             <Link href="/dashboard" className="brand-chip no-underline">
-              Sell on Naijavend
+              Sell on Kwaravend
             </Link>
           </div>
         </div>

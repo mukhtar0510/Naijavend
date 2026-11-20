@@ -8,6 +8,16 @@ const nextConfig = {
   // Hide the floating dev badges (route indicator + red error dot) in development.
   // Errors still surface in the terminal and the click-through overlay. No effect in production.
   devIndicators: { buildActivity: false, buildActivityPosition: 'bottom-right' },
+  // Feature-flagged routes: a config-level redirect gives a real 307 instead of
+  // streaming a page that only redirects after the shell is flushed. The flag is
+  // read at build time, the same way NEXT_PUBLIC_* values are.
+  async redirects() {
+    // Rankings ship ON (Kwara-scoped). Only an explicit off value hides them.
+    const raw = (process.env.NEXT_PUBLIC_FLAG_RANKINGS ?? '').toLowerCase();
+    const off = ['off', '0', 'false'].includes(raw);
+    return off ? [{ source: '/rankings', destination: '/discover', permanent: false }] : [];
+  },
+
   // Security headers on every response. The CSP allows exactly the external
   // origins the app actually uses (fonts, OSM map tiles, seller-uploaded media,
   // the OSRM routing fetch) — everything else is blocked. A stricter
@@ -20,11 +30,11 @@ const nextConfig = {
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com data:",
-      "img-src 'self' data: blob: https://*.supabase.co https://images.unsplash.com https://tile.openstreetmap.org",
+      "img-src 'self' data: blob: https://*.supabase.co https://images.unsplash.com https://tile.openstreetmap.org https://server.arcgisonline.com",
       // Listing videos stream from Supabase Storage (media falls back to
       // default-src 'self' without this, which would block them).
       "media-src 'self' https://*.supabase.co",
-      "connect-src 'self' https://*.supabase.co https://router.project-osrm.org https://tile.openstreetmap.org",
+      "connect-src 'self' https://*.supabase.co https://router.project-osrm.org https://routing.openstreetmap.de https://tile.openstreetmap.org",
       // No iframes are used anywhere (maps are Leaflet); block all framing.
       "frame-src 'none'",
       "form-action 'self'",

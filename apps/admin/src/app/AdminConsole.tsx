@@ -157,7 +157,7 @@ interface FlagRow {
 // emit — mirrors packages/shared/src/fraud.ts, which the standalone console
 // deliberately does not import (zero workspace dependencies by design).
 const FLAG_LABEL_TEXT: Record<string, string> = {
-  off_platform_payment: 'Asks to pay outside Naijavend',
+  off_platform_payment: 'Asks to pay outside Kwaravend',
   credentials_request: 'Asks for an OTP, PIN or bank details',
   advance_fee: 'Up-front fee or gift-card request',
   impersonation: 'Claims to be staff, police or a delivery agent',
@@ -173,7 +173,7 @@ const FLAG_LABEL_TEXT: Record<string, string> = {
   duplicate_listing: 'Duplicates an existing listing title',
   guaranteed_returns: 'Promises guaranteed returns or a fixed percentage of profit',
   investment_scam: 'Investment/crypto earnings claim',
-  fake_official: 'Claims official Naijavend status',
+  fake_official: 'Claims official Kwaravend status',
   fake_review: 'Looks like a fake review',
   harassment: 'Harassment or abuse',
   spam: 'Spam',
@@ -651,7 +651,7 @@ export function AdminConsole({ adminEmail }: { adminEmail: string }) {
           <div className="admin-workspace">
             <span className="admin-workspace-avatar" aria-hidden>NV</span>
             <div>
-              <strong>Naijavend</strong>
+              <strong>Kwaravend</strong>
               <span>Platform workspace</span>
             </div>
           </div>
@@ -707,7 +707,7 @@ export function AdminConsole({ adminEmail }: { adminEmail: string }) {
                   <span className="admin-eyebrow">Live platform</span>
                   <h2>Overview</h2>
                   <p className="admin-section-sub">
-                    Money, people and trust across Naijavend — updated{' '}
+                    Money, people and trust across Kwaravend — updated{' '}
                     {new Date().toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' })}.
                   </p>
                 </div>
@@ -835,7 +835,7 @@ export function AdminConsole({ adminEmail }: { adminEmail: string }) {
                     <div>
                       <h3>Monthly recurring revenue (MRR)</h3>
                       <p className="chart-sub">
-                        Growth-plan stores × ₦500/mo · {metrics.mrr?.growthStores ?? 0} growth store{((metrics.mrr?.growthStores ?? 0) === 1) ? '' : 's'}
+                        Growth-plan stores × ₦8,000/mo · {metrics.mrr?.growthStores ?? 0} growth store{((metrics.mrr?.growthStores ?? 0) === 1) ? '' : 's'}
                       </p>
                     </div>
                     <div className="chart-hero-stat">

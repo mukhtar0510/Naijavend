@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import AiAssistantPage from './AiAssistantPage';
 
-export const metadata: Metadata = { title: 'Ask Naijavend — your shopping assistant' };
+export const metadata: Metadata = { title: 'Ask Kwaravend — your shopping assistant' };
 
 // AiAssistantPage reads the ?q= deep link via useSearchParams(), which Next 14
 // requires to be inside a Suspense boundary during static prerender.

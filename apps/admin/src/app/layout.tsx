@@ -3,10 +3,10 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: 'Naijavend Control — admin',
-    template: '%s · Naijavend Control',
+    default: 'Kwaravend Control — admin',
+    template: '%s · Kwaravend Control',
   },
-  description: 'Naijavend platform administration console.',
+  description: 'Kwaravend platform administration console.',
 };
 
 export const viewport: Viewport = {

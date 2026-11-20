@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Suspense } from 'react';
+
 import { getCustomerSession } from '@/lib/auth';
 import { supabaseAnon } from '@/lib/supabase';
 import { formatNaira } from '@idevtenancy/shared';
@@ -118,11 +118,9 @@ export default async function MyOrdersPage() {
   const customer = session.user;
 
   // Kick off every independent read NOW, before any JSX, so they run in
-  // parallel with the shell streaming to the browser. Each section below
-  // awaits its own promise behind a Suspense boundary — so the orders list no
-  // longer waits for the (often-empty) saved-stores index, and the referral
-  // code UPSERT (a write!) is off the critical path entirely. A rejected
-  // query degrades its own section only.
+  // parallel. The sections are resolved here rather than as async JSX children:
+  // a `Promise<Element>` is not a JSX element type under the React 18 typings
+  // the deploy build uses. A rejected query still degrades its own section only.
   const summaryP = loadSummary(sb, customer.id);
   const ordersP = loadOrders(sb, customer.id);
   const storeIndexP = loadStoreIndex();
@@ -177,27 +175,17 @@ export default async function MyOrdersPage() {
       <div className="nv-acc-content">
         <div className="nv-acc-grid">
           <div className="nv-acc-main">
-            <Suspense fallback={<StatsSkeleton />}>
-              <OrdersSummarySection promise={summaryP} />
-            </Suspense>
-            <Suspense fallback={<OrdersListSkeleton />}>
-              <OrdersListSection promise={ordersP} />
-            </Suspense>
+            {await OrdersSummarySection({ promise: summaryP })}
+            {await OrdersListSection({ promise: ordersP })}
             <RecentProducts />
-            <Suspense fallback={<WideCardSkeleton lines={1} block={110} />}>
-              <SavedStoresSection promise={storeIndexP} />
-            </Suspense>
-            <Suspense fallback={<WideCardSkeleton lines={1} block={104} />}>
-              <ReferralSection promise={referralP} />
-            </Suspense>
+            {await SavedStoresSection({ promise: storeIndexP })}
+            {await ReferralSection({ promise: referralP })}
             <SellerUpsellCard />
           </div>
 
           <aside className="nv-acc-side">
             <AskAiCard />
-            <Suspense fallback={<WideCardSkeleton lines={1} block={210} />}>
-              <BuyAgainSection promise={ordersP} />
-            </Suspense>
+            {await BuyAgainSection({ promise: ordersP })}
           </aside>
         </div>
       </div>
@@ -309,46 +297,11 @@ async function ReferralSection({ promise }: { promise: Promise<{ link: string; i
   return <ReferralCard link={link} invited={invited} />;
 }
 
-// ============ Skeletons (shaped like the real sections) ============
-
-function StatsSkeleton() {
-  return (
-    <div className="skel-grid skel-grid-4" aria-busy="true" aria-label="Loading order summary">
-      {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="skel skel-stat" />
-      ))}
-    </div>
-  );
-}
-
-function OrdersListSkeleton() {
-  return (
-    <section className="card card-elevated" style={{ padding: 18 }} aria-busy="true" aria-label="Loading your orders">
-      <div className="skel skel-line w-25" style={{ height: 20 }} />
-      <div className="account-skel-stack" style={{ marginTop: 14 }}>
-        <div className="skel skel-order" />
-        <div className="skel skel-order" />
-      </div>
-    </section>
-  );
-}
-
-function WideCardSkeleton({ lines, block }: { lines: number; block: number }) {
-  return (
-    <section className="card card-elevated" style={{ padding: 18 }} aria-busy="true" aria-label="Loading">
-      {Array.from({ length: lines }).map((_, i) => (
-        <div key={i} className="skel skel-line w-30" style={{ height: 18 }} />
-      ))}
-      <div className="skel" style={{ height: block, marginTop: 12 }} />
-    </section>
-  );
-}
-
 // ============ Static sections (no data needed) ============
 
 function SellerUpsellCard() {
   return (
-    <section className="nv-acc-card nv-acc-selling" aria-label="Sell on Naijavend">
+    <section className="nv-acc-card nv-acc-selling" aria-label="Sell on Kwaravend">
       <div className="seller-upsell-head">
         <div>
           <h2>💼 Turn shopping into selling</h2>
@@ -396,11 +349,11 @@ function AskAiCard() {
     { label: 'Recommend something', q: 'Recommend products I might like' },
   ];
   return (
-    <section className="nv-acc-card nv-acc-ai" aria-label="Ask Naijavend">
+    <section className="nv-acc-card nv-acc-ai" aria-label="Ask Kwaravend">
       <div className="nv-acc-ai-head">
         <div className="ask-ai-icon">🤖</div>
         <div className="ask-ai-title">
-          <h2>Ask Naijavend</h2>
+          <h2>Ask Kwaravend</h2>
           <p className="muted" style={{ margin: 0, fontSize: 12.5 }}>
             Shopping assistant — stores, orders, picks.
           </p>

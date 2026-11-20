@@ -1,0 +1,116 @@
+/* ===========================================================================
+   Mobile polish for the marketplace (home, discover, rankings, store cards).
+   Loaded after marketplace-v2.css so these win at phone widths.
+   =========================================================================== */
+
+@media (max-width: 700px) {
+  /* ---------------------------------- header ------------------------------- */
+  .nv-header-main { padding: 8px 0; gap: 8px; }
+  .nv-header-search { height: 44px; }
+  .nv-header-search-btn { min-height: 34px; }
+
+  /* ----------------------------------- hero -------------------------------- */
+  .nv-hero { padding: 26px 0 30px; }
+  .nv-hero-title { font-size: 29px; line-height: 1.07; letter-spacing: -0.04em; margin: 14px 0 12px; }
+  .nv-hero-sub { font-size: 14.5px; line-height: 1.55; margin-bottom: 16px; }
+  /* The sticky header already searches the whole catalogue; a second full-size
+     search box in the hero just pushes the store preview off screen. */
+  .nv-hero-search .hero-search { display: none; }
+  .nv-hero-search .hero-trending {
+    margin-top: 0;
+    gap: 7px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-right: 14px;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(90deg, #000 86%, transparent 100%);
+    mask-image: linear-gradient(90deg, #000 86%, transparent 100%);
+  }
+  .nv-hero-search .hero-trending::-webkit-scrollbar { display: none; }
+  .nv-hero-search .trend-chip { flex: 0 0 auto; }
+  .nv-hero-ctas { gap: 8px; margin-top: 16px; }
+  .nv-hero-ctas .btn {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: center;
+    padding: 12px 10px;
+    font-size: 14px;
+  }
+  .nv-hero-proof { margin-top: 16px; gap: 10px; }
+  .nv-hero-proof strong { font-size: 12.5px; }
+  .nv-hero-proof span { font-size: 11.5px; }
+
+  .nv-hero-preview { margin: 22px 0 0; padding: 8px; border-radius: 20px; }
+  .nv-hp-banner { height: 92px; border-radius: 14px; }
+  /* The watermark used to sit where the store row overlaps the banner. */
+  .nv-hp-banner-mark {
+    top: 10px;
+    bottom: auto;
+    left: 12px;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+  .nv-hp-body { padding: 0 6px 4px; gap: 10px; margin-top: -20px; }
+  .nv-hp-store { gap: 8px; }
+  .nv-hp-logo { width: 40px; height: 40px; border-radius: 12px; border-width: 2px; }
+  .nv-hp-store strong { font-size: 13.5px; }
+  .nv-hp-store span { font-size: 11px; }
+  .nv-hp-tile { height: 58px; }
+  .nv-hp-foot { font-size: 11.5px; padding-top: 8px; }
+
+  /* ---------------------------------- sections ----------------------------- */
+  .nv-section { margin-top: 30px; }
+  .nv-section-head h2 { font-size: 20px; line-height: 1.15; }
+  .nv-section-head p { font-size: 13.5px; }
+
+  .nv-trust-item { padding: 14px 0; }
+  .nv-trust-item h3 { font-size: 14px; }
+  .nv-trust-item p { font-size: 12.5px; }
+
+  /* ------------------------------- category rail --------------------------- */
+  .nv-cat-rail { gap: 8px; padding-right: 14px; }
+  .nv-cat-tile {
+    flex: 0 0 164px;
+    padding: 12px;
+    gap: 9px;
+  }
+  .nv-cat-emoji { width: 30px; height: 30px; font-size: 15px; }
+  .nv-cat-label { font-size: 13px; }
+
+  /* -------------------------------- store cards ---------------------------- */
+  .nv-store-grid { gap: 14px; }
+  .nv-store-banner { height: 76px; }
+  .nv-store-body { gap: 8px; padding: 0 14px 14px; }
+  .nv-store-head { margin-top: -15px; gap: 9px; }
+  .nv-store-logo { width: 42px; height: 42px; border-radius: 12px; border-width: 2px; }
+  .nv-store-id { padding-top: 12px; }
+  .nv-store-id h3 { font-size: 15px; }
+  .nv-store-desc { font-size: 12.5px; line-height: 1.5; }
+  .nv-store-foot { padding-top: 8px; font-size: 12px; }
+  .nv-store-addr { max-width: 60%; }
+
+  /* ------------------------------- discover hero --------------------------- */
+  .brand-hero { padding-top: 22px !important; padding-bottom: 24px !important; }
+  .brand-hero h1 { font-size: 30px !important; line-height: 1.05 !important; }
+  .brand-hero p { font-size: 14.5px !important; line-height: 1.5 !important; }
+  .brand-hero .brand-eyebrow { font-size: 11.5px; }
+  .brand-search { border-radius: 14px; }
+  .brand-search input { font-size: 16px; }
+  .brand-search button { padding: 0 14px !important; }
+}
+
+@media (max-width: 420px) {
+  .nv-hero-title { font-size: 27px; }
+  .nv-hero-ctas .btn { padding: 11px 8px; font-size: 13.5px; }
+  .nv-cat-tile { flex-basis: 152px; }
+  .nv-hp-tile { height: 52px; }
+
+  /* Fade affordance on horizontally-scrolling chip rails. */
+  .cat-filter .brand-chip-row,
+  .nv-cat-rail {
+    -webkit-mask-image: linear-gradient(90deg, #000 84%, transparent 100%);
+    mask-image: linear-gradient(90deg, #000 84%, transparent 100%);
+  }
+}

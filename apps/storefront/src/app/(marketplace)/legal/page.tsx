@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export const metadata = {
   title: 'Legal',
-  description: 'Naijavend legal documents: privacy policy, terms of service and cookies policy.',
+  description: 'Kwaravend legal documents: privacy policy, terms of service and cookies policy.',
 };
 
 export default function LegalIndex() {
@@ -10,7 +10,7 @@ export default function LegalIndex() {
     <div className="card" style={{ padding: 28 }}>
       <h1>Legal documents</h1>
       <p className="muted">
-        The agreements that govern your use of Naijavend — whether you&apos;re shopping or selling.
+        The agreements that govern your use of Kwaravend — whether you&apos;re shopping or selling.
       </p>
       <ul style={{ lineHeight: 2 }}>
         <li><Link href="/legal/privacy">Privacy Policy</Link> — what we collect, why, and your rights.</li>
@@ -18,7 +18,7 @@ export default function LegalIndex() {
         <li><Link href="/legal/cookies">Cookies Policy</Link> — the cookies and local storage we use and why.</li>
       </ul>
       <p className="muted" style={{ fontSize: 14 }}>
-        Questions about anything here? Contact us through the in-app chat or at naijavend2026@gmail.com.
+        Questions about anything here? Contact us through the in-app chat.
       </p>
     </div>
   );

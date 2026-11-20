@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getSellerClient, getOwnStore } from '@/lib/auth';
+import { redirectStaffToPos } from '@/lib/staff';
 import { ChatInbox } from './ChatInbox';
 import type { Store } from '@idevtenancy/shared';
 
@@ -19,6 +20,7 @@ export interface InboxThread {
 export default async function SellerChatPage() {
   const sb = await getSellerClient();
   if (!sb) redirect('/dashboard/signin'); // layout redirect races this page — guard here too
+  await redirectStaffToPos(sb); // R4: the inbox is owner-only
   const store = await getOwnStore<Pick<Store, 'id' | 'name' | 'slug'>>(sb, 'id, name, slug');
   if (!store) {
     return (

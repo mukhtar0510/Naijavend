@@ -6,6 +6,8 @@ import '../../../styles/base.css';
 import '../../../styles/chrome.css';
 import '../../../styles/components.css';
 import '../../../styles/interactions.css';
+import '../../../styles/locations-lightbox.css';
+import { ThemeFonts } from '@/components/ThemeFonts';
 import { TrackStoreView } from '@/components/TrackStoreView';
 import { OpenBadge } from '@/components/OpenBadge';
 import { BackToMarket } from '@/components/BackToMarket';
@@ -84,7 +86,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
 // Independent store-site shell: every /s/* page renders as the seller's OWN website —
 // its own masthead, navigation and footer — styled with the theme they picked in
-// dashboard settings, with Naijavend only as a quiet platform badge.
+// dashboard settings, with Kwaravend only as a quiet platform badge.
 export default async function StoreSiteLayout({
   children,
   params,
@@ -118,7 +120,7 @@ export default async function StoreSiteLayout({
 
   const brandLogo = t?.logo_url ?? t?.favicon_url ?? null;
 
-  // The chosen theme overrides the Naijavend design tokens inside this store site.
+  // The chosen theme overrides the Kwaravend design tokens inside this store site.
   const themeStyle = {
     '--st-accent': t?.accent_color ?? DEFAULTS.accent_color,
     '--st-accent-soft': t?.accent_soft ?? DEFAULTS.accent_soft,
@@ -126,7 +128,7 @@ export default async function StoreSiteLayout({
     '--st-bg': t?.background_color ?? DEFAULTS.background_color,
     '--st-font-heading': `'${t?.font_heading ?? DEFAULTS.font_heading}', 'Inter', sans-serif`,
     '--st-font-body': `'${t?.font_body ?? DEFAULTS.font_body}', system-ui, sans-serif`,
-    // Optional per-site text colours — null/absent falls back to the Naijavend defaults.
+    // Optional per-site text colours — null/absent falls back to the Kwaravend defaults.
     ...(t?.text_color ? { '--st-text': t.text_color } : {}),
     ...(t?.heading_color ? { '--st-heading': t.heading_color } : {}),
     ...(t?.muted_color ? { '--st-muted': t.muted_color } : {}),
@@ -167,6 +169,8 @@ export default async function StoreSiteLayout({
       data-cursive-heading={CURSIVE_FONTS.includes(t?.font_heading ?? '') ? 'true' : 'false'}
       style={themeStyle}
     >
+      {/* Theme font library — only store pages pay for it. */}
+      <ThemeFonts />
       {s.announcement && (
         <div className="store-announcement">{s.announcement}</div>
       )}
@@ -188,7 +192,7 @@ export default async function StoreSiteLayout({
             {waNumber && <Link href={`/s/${store.slug}#reach`}>Contact</Link>}
             <Link href={`/s/${store.slug}/chat`}>Chat</Link>
             <Link href={`/s/${store.slug}/rate`}>Reviews</Link>
-            <Link className="btn btn-outline btn-sm xplat-link" href="/discover">More on Naijavend</Link>
+            <Link className="btn btn-outline btn-sm xplat-link" href="/discover">More on Kwaravend</Link>
           </nav>
         </div>
       </header>
@@ -219,7 +223,7 @@ export default async function StoreSiteLayout({
               {waNumber && <Link href={`/s/${store.slug}#reach`}>Contact & location</Link>}
               <Link className="xplat-link" href="/discover">More stores</Link>
               <Link className="xplat-link" href="/faq">Help & FAQ</Link>
-              <Link className="xplat-link" href="/dashboard">Sell on Naijavend</Link>
+              <Link className="xplat-link" href="/dashboard">Sell on Kwaravend</Link>
             </nav>
             <nav className="footer-col" aria-label="Legal">
               <h4>Legal</h4>
@@ -234,12 +238,12 @@ export default async function StoreSiteLayout({
             </span>
             <span>
               Built on{' '}
-              <Link className="xplat-link" href="/">Naijavend</Link> — storefronts for Nigerian sellers. 🇳🇬
+              <Link className="xplat-link" href="/home">Kwaravend</Link> — storefronts for Nigerian sellers. 🇳🇬
             </span>
           </div>
         </div>
       </footer>
-      <BackToMarket label="Naijavend" />
+      <BackToMarket label="Kwaravend" />
     </div>
   );
 }

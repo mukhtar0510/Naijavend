@@ -20,7 +20,9 @@ export async function GET(req: NextRequest) {
     const sb = supabaseService();
     const { data: order, error } = await sb
       .from('orders')
-      .select('id, status, total_kobo, store_id, delivery_method, delivery_fee_kobo, stores(name, slug), order_items(quantity, unit_price_kobo, listings(title, type))')
+      // `*` (not an explicit column list) so this keeps working before the T04
+      // payment columns migration is applied.
+      .select('*, stores(name, slug), order_items(quantity, unit_price_kobo, listings(title, type))')
       .eq('id', orderId)
       .maybeSingle();
     if (error) throw error;
@@ -60,6 +62,9 @@ export async function GET(req: NextRequest) {
       totalKobo: order.total_kobo,
       deliveryMethod: order.delivery_method ?? '',
       deliveryFeeKobo: order.delivery_fee_kobo ?? 0,
+      paymentStatus: order.payment_status ?? undefined,
+      paymentMethod: order.payment_method ?? '',
+      paymentProofUrl: order.payment_proof_url ?? null,
       storeName: (order.stores as unknown as { name: string } | null)?.name ?? 'Store',
       storeSlug: (order.stores as unknown as { slug: string } | null)?.slug ?? '',
       items: items.map((i) => ({ title: i.listings?.title ?? 'Item', quantity: i.quantity, unitPriceKobo: i.unit_price_kobo })),

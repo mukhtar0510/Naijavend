@@ -1,4 +1,4 @@
-// The Naijavend blue tick — shown next to verified store names.
+// The Kwaravend blue tick — shown next to verified store names.
 // Verification rule: 30+ reviews averaging 4.0+ stars (see /api/verification/apply).
 export function VerifiedTick({ size = 16 }: { size?: number }) {
   return (

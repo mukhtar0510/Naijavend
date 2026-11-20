@@ -2,7 +2,7 @@
   "name": "idevtenancy",
   "private": true,
   "version": "0.1.0",
-  "description": "Naijavend — storefronts for Nigerian sellers. Store + service builder with AI-assisted setup, ratings, map presence, rankings, and WhatsApp storefront links.",
+  "description": "Kwaravend — storefronts, orders and delivery tracking for sellers in Ilorin, Kwara State.",
   "packageManager": "pnpm@10.34.5",
   "workspaces": [
     "apps/*",

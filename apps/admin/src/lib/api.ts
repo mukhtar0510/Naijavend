@@ -9,6 +9,6 @@ export function apiOk<T>(data: T, status = 200) {
 }
 
 export function internalError(logContext: string, err: unknown) {
-  console.error(`[Naijavend Admin] ${logContext}:`, err);
+  console.error(`[Kwaravend Admin] ${logContext}:`, err);
   return apiError(500, 'internal_error', 'Something failed on our side. Try again shortly.');
 }

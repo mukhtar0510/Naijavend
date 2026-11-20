@@ -17,12 +17,30 @@ import { Reveal, Stagger, StaggerItem } from '@/components/brand/Motion';
 import { STORE_CATEGORIES, categoryEmoji, categoryLabel } from '@idevtenancy/shared';
 import type { Store, StoreRatingStats } from '@idevtenancy/shared';
 
-export const revalidate = 60; // ISR — static-fast, invalidated on seller writes via revalidatePath
+// Rankings launch scoped to one state, so a small board is still a useful one.
+// Stores are filtered by their pinned coordinates, with the address as a
+// fallback for sellers who have not dropped a pin yet.
+export const revalidate = 60;
 export const metadata = {
-  title: 'Store rankings',
+  title: 'Store rankings in Ilorin',
   description:
-    'The top-rated Nigerian stores and service providers on Naijavend, ranked by verified customer reviews. Browse overall or by trade.',
+    'The top-rated stores and service providers in Ilorin, Kwara State, ranked by verified customer reviews. Browse overall or by trade.',
 };
+
+const KWARA_BOUNDS = { minLat: 7.8, maxLat: 10.2, minLng: 2.6, maxLng: 6.2 };
+
+function inKwara(store: Store): boolean {
+  const { latitude: lat, longitude: lng } = store;
+  if (typeof lat === 'number' && typeof lng === 'number') {
+    return (
+      lat >= KWARA_BOUNDS.minLat &&
+      lat <= KWARA_BOUNDS.maxLat &&
+      lng >= KWARA_BOUNDS.minLng &&
+      lng <= KWARA_BOUNDS.maxLng
+    );
+  }
+  return /kwara|ilorin/i.test(store.address ?? '');
+}
 
 interface RankedStore {
   store: Store;
@@ -30,17 +48,17 @@ interface RankedStore {
   theme: { logo_url: string | null; favicon_url: string | null } | null;
 }
 
-async function getRanked(category?: string, limit = 10): Promise<RankedStore[]> {
+async function getRanked(category?: string, limit = 100): Promise<RankedStore[]> {
   const sb = supabaseAnon();
   let query = sb
     .from('store_rating_stats')
     .select('store_id, review_count, avg_stars, weighted_score, overall_rank, category_rank, stores!inner(*, store_themes(logo_url, favicon_url))')
     .gt('review_count', 0)
     .order('weighted_score', { ascending: false })
-    .limit(limit);
+    .limit(100);
   if (category) query = query.eq('stores.category', category);
   const { data } = await query;
-  return (data ?? []).map((row: Record<string, unknown>) => {
+  const ranked = (data ?? []).map((row: Record<string, unknown>) => {
     const themes = (row.stores as { store_themes?: Array<{ logo_url: string | null; favicon_url: string | null }> } | null)?.store_themes;
     return {
       store: row.stores as unknown as Store,
@@ -56,6 +74,8 @@ async function getRanked(category?: string, limit = 10): Promise<RankedStore[]> 
       },
     };
   });
+  // Fetch wide, then keep only Kwara stores — the board is state-scoped.
+  return ranked.filter((entry) => inKwara(entry.store)).slice(0, limit);
 }
 
 const MEDALS = ['🥇', '🥈', '🥉'];
@@ -121,13 +141,13 @@ export default async function RankingsPage({
 }) {
   const rawCategory = searchParams.category ?? '';
   const category = STORE_CATEGORIES.includes(rawCategory as never) ? rawCategory : undefined;
-  const entries = await getRanked(category, 10);
+  const entries = await getRanked(category);
 
   const podium = entries.slice(0, 3);
   const rest = entries.slice(3);
   const reviewsCounted = entries.reduce((sum, e) => sum + e.stats.review_count, 0);
   const bestScore = entries.reduce((max, e) => Math.max(max, Number(e.stats.weighted_score) || 0), 0);
-  const title = category ? `Best in ${categoryLabel(category)}` : 'Overall rankings';
+  const title = category ? `Best in ${categoryLabel(category)}` : 'Overall in Ilorin';
   const href = (value?: string) => (value ? `/rankings?category=${value}` : '/rankings');
 
   return (
@@ -145,7 +165,7 @@ export default async function RankingsPage({
             <Reveal>
               <span className="nv-pill">
                 <span className="nv-pill-dot" aria-hidden />
-                Public rankings · updated continuously
+                Public rankings · Ilorin, Kwara State
               </span>
             </Reveal>
             <Reveal delay={0.06}>
@@ -157,8 +177,9 @@ export default async function RankingsPage({
             </Reveal>
             <Reveal delay={0.12}>
               <p className="nv-rank-sub">
-                Every score here comes from buyers who actually ordered or booked. No paid placement,
-                no sponsored slots — just a weighted record of how sellers treat their customers.
+                Every score here comes from buyers in Ilorin who actually ordered or booked. No paid
+                placement, no sponsored slots — just a weighted record of how sellers treat their
+                customers.
               </p>
             </Reveal>
           </div>
@@ -215,7 +236,7 @@ export default async function RankingsPage({
                 <p>
                   {category
                     ? `Top ${entries.length} in ${categoryLabel(category)} by weighted review score.`
-                    : `The top ${entries.length} stores across every trade on Naijavend.`}
+                    : `The top ${entries.length} stores across every trade in Ilorin.`}
                 </p>
               </div>
               <Link href="/faq" className="nv-section-link">

@@ -11,7 +11,7 @@ export default function OfflinePage() {
         <span className="notfound-glyph" aria-hidden>📡</span>
         <h1>You&apos;re offline</h1>
         <p>
-          Naijavend needs a connection to load live store data. Pages you visited
+          Kwaravend needs a connection to load live store data. Pages you visited
           recently may still open from the offline copy — try going back or
           retrying below.
         </p>
@@ -19,7 +19,7 @@ export default function OfflinePage() {
           <button className="btn btn-black" type="button" onClick={() => window.location.reload()}>
             Retry connection
           </button>
-          <a href="/" className="btn btn-outline">Go home</a>
+          <a href="/home" className="btn btn-outline">Go home</a>
         </div>
       </div>
     </div>

@@ -7,6 +7,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
+import { FEATURES } from '@/lib/flags';
 import {
   ChevronDown,
   CircleHelp,
@@ -71,7 +72,7 @@ const FAQS: FaqItem[] = [
     text: 'cost price free commission subscription fees selling',
     answer: (
       <>
-        Free. Your own store website (<em>naijavend.ng/s/your-name</em>), catalogue, bookings, chat and analytics cost
+        Free. Your own store website (<em>kwaravend.com/s/your-name</em>), catalogue, bookings, chat and analytics cost
         nothing to start. Create an account from the <Link href="/dashboard/signin">seller sign-in</Link> page.
       </>
     ),
@@ -128,8 +129,15 @@ const FAQS: FaqItem[] = [
     text: 'rankings rank score volume recency weight leaderboard',
     answer: (
       <>
-        Stores are ranked by review score and volume with recency weighting — see the <Link href="/rankings">Rankings</Link>{' '}
-        page. Games and fake reviews are removed and can cost an account.
+        Stores are ranked by review score and volume with recency weighting
+        {FEATURES.rankings ? (
+          <>
+            {' '}— see the <Link href="/rankings">Rankings</Link> page
+          </>
+        ) : (
+          ' — the public leaderboard opens once a city has enough active stores'
+        )}
+        . Fake reviews are removed and can cost an account.
       </>
     ),
   },
@@ -140,7 +148,7 @@ const FAQS: FaqItem[] = [
     text: 'map distance location gps share area driving walking privacy',
     answer: (
       <>
-        Share your location once (or pick a base area like Lekki or Surulere) and every store is placed by real
+        Share your location once (or pick a base area like Tanke or Fate) and every store is placed by real
         distance and direction, with walking and driving estimates. Your location is{' '}
         <strong>stored only in your browser</strong> — it is never sent to our servers.
       </>
@@ -312,7 +320,7 @@ export function FaqExplorer() {
               Legal &amp; policies →
             </Link>
             <Link href="/dashboard" className="text-[13px] font-semibold">
-              Sell on Naijavend →
+              Sell on Kwaravend →
             </Link>
           </div>
         </div>

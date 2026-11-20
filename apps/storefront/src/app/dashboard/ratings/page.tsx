@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getSellerClient, getOwnStore } from '@/lib/auth';
+import { redirectStaffToPos } from '@/lib/staff';
 import { Stars } from '@/components/Stars';
 import type { StoreRating, StoreRatingStats } from '@idevtenancy/shared';
 
@@ -8,6 +9,7 @@ export const dynamic = 'force-dynamic';
 export default async function RatingsPage() {
   const sb = await getSellerClient();
   if (!sb) redirect('/dashboard/signin'); // layout redirect races this page — guard here too
+  await redirectStaffToPos(sb); // R4: ratings are owner-only
   const store = await getOwnStore<
     { id: string; store_rating_stats: StoreRatingStats[] | StoreRatingStats | null }
   >(sb, 'id, store_rating_stats(review_count, avg_stars, weighted_score, overall_rank, category_rank)');

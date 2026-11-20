@@ -10,6 +10,8 @@
 -- idempotent (if exists / drop-if-exists guards) so it can be re-run safely.
 
 -- 1. Widen the feature CHECK to cover every AI feature past and planned.
+-- The list must stay a superset of what is already stored, or the constraint
+-- cannot be added to a table with existing rows (image_gen, suggest_reply).
 alter table public.ai_usage_log drop constraint if exists ai_usage_log_feature_check;
 alter table public.ai_usage_log
   add constraint ai_usage_log_feature_check
@@ -19,7 +21,13 @@ alter table public.ai_usage_log
     'style_store',
     'assistant_chat',
     'assistant_action',
-    'social_post'
+    'social_post',
+    'image_gen',
+    'listing_draft',
+    'suggest_reply',
+    'translation',
+    'weekly_insight',
+    'moderation'
   ));
 
 -- 2. Columns the style-store route (and future assistant work) already writes.

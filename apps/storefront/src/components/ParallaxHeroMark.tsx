@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { NaijavendLogoMark } from '@/components/NaijavendLogo';
+import { KwaravendLogoMark } from '@/components/KwaravendLogo';
 
 // Parallax 3D hero mark: the logo tilts toward the pointer with layered
 // depth (shadow + glow counter-move for a genuine 3D feel). Falls back to
@@ -47,7 +47,7 @@ export function ParallaxHeroMark() {
 
   return (
     <div ref={ref} className="nv-logo-hero parallax-hero" style={{ transition: 'transform 0.18s ease-out' }}>
-      <NaijavendLogoMark size={96} />
+      <KwaravendLogoMark size={96} />
     </div>
   );
 }

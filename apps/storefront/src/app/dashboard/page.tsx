@@ -5,6 +5,7 @@ import { redirectStaffToPos } from '@/lib/staff';
 import { siteUrl } from '@/lib/site';
 import { Stars } from '@/components/Stars';
 import { VerifyCard } from './VerifyCard';
+import { SetupChecklist } from './SetupChecklist';
 import { StoreQrCode } from '@/components/StoreQrCode';
 import { formatNaira } from '@idevtenancy/shared';
 import type { Store, StoreRatingStats, StoreTheme } from '@idevtenancy/shared';
@@ -52,8 +53,11 @@ export default async function DashboardHome({
   const banner = theme?.banner_url ?? theme?.subheader_url ?? null;
 
   const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-  const [{ count: pendingOrders }, { count: pendingBookings }, { count: reviewCount }, { count: visitsAll }, { count: visits30 }, salesRes] = await Promise.all([
+  const [{ count: pendingOrders }, { count: paidOrders }, { count: pendingBookings }, { count: reviewCount }, { count: visitsAll }, { count: visits30 }, salesRes, { count: listingCount }] = await Promise.all([
     sb.from('orders').select('*', { count: 'exact', head: true }).eq('store_id', s.id).eq('status', 'pending'),
+    // All-time money-in orders. Fulfilled orders were paid first, so both count
+    // toward the first-10 milestone.
+    sb.from('orders').select('*', { count: 'exact', head: true }).eq('store_id', s.id).in('status', ['paid', 'fulfilled']),
     sb.from('bookings').select('*', { count: 'exact', head: true })
       .in('listing_id', (await sb.from('listings').select('id').eq('store_id', s.id)).data?.map((l) => l.id) ?? [])
       .eq('status', 'pending'),
@@ -61,8 +65,11 @@ export default async function DashboardHome({
     sb.from('store_events').select('*', { count: 'exact', head: true }).eq('store_id', s.id).eq('event_type', 'view'),
     sb.from('store_events').select('*', { count: 'exact', head: true }).eq('store_id', s.id).eq('event_type', 'view').gte('created_at', since30),
     sb.from('store_sales_daily').select('revenue_kobo').eq('store_id', s.id).gte('day', since30.slice(0, 10)),
+    sb.from('listings').select('*', { count: 'exact', head: true }).eq('store_id', s.id),
   ]);
   const revenueKobo = (salesRes.data ?? []).reduce((sum, r) => sum + Number(r.revenue_kobo ?? 0), 0);
+  const paidOrderCount = paidOrders ?? 0;
+  const hasFirstTenBadge = paidOrderCount >= 10;
 
   return (
     <main>
@@ -73,6 +80,31 @@ export default async function DashboardHome({
           /s/{s.slug}
         </Link>
       </p>
+
+      <SetupChecklist
+        steps={[
+          { label: 'Store created', done: true, href: `/s/${s.slug}`, cta: 'View' },
+          {
+            label: 'Add your first 3 products',
+            done: (listingCount ?? 0) >= 3,
+            href: '/dashboard/listings/bulk',
+            cta: 'Bulk add',
+          },
+          { label: 'Add a logo', done: Boolean(logo), href: '/dashboard/settings', cta: 'Add logo' },
+          {
+            label: 'Set your WhatsApp number',
+            done: Boolean(s.whatsapp_number),
+            href: '/dashboard/settings',
+            cta: 'Set number',
+          },
+          {
+            label: 'Get your first order',
+            done: (paidOrderCount ?? 0) > 0 || (pendingOrders ?? 0) > 0,
+            href: '/dashboard/settings',
+            cta: 'Share store',
+          },
+        ]}
+      />
 
       {/* ——— Section 1: Storefront preview ——— */}
       <section className="dash-section" aria-labelledby="sec-storefront" style={{ marginTop: 12 }}>
@@ -122,6 +154,18 @@ export default async function DashboardHome({
                   <span className="badge badge-blue">{s.category}</span>
                   <span className="badge">{s.business_type}</span>
                   {s.plan === 'growth' && <span className="badge badge-black">Growth</span>}
+                  {hasFirstTenBadge && (
+                    <span
+                      className="achievement-badge"
+                      title={`First 10 paid orders reached — ${paidOrderCount} so far`}
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <circle cx="12" cy="9" r="6" stroke="currentColor" strokeWidth="2" />
+                        <path d="M8.5 14.2 7 22l5-2.6L17 22l-1.5-7.8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      First 10 orders
+                    </span>
+                  )}
                 </div>
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginTop: 6 }}>
                   <Stars value={Number(stats?.avg_stars ?? 0)} />

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { MapEmbed } from '@/components/MapEmbed';
 import { CategoryPicker } from '@/components/CategoryPicker';
+import { FEATURES } from '@/lib/flags';
 import { BUSINESS_DAYS, categoryEmoji, categoryLabel, type BusinessHours } from '@idevtenancy/shared';
 
 interface StoreSettings {
@@ -28,11 +29,11 @@ const DAY_LABELS: Record<(typeof BUSINESS_DAYS)[number], string> = {
 };
 
 const SOCIAL_FIELDS: Array<{ key: string; label: string; placeholder: string }> = [
-  { key: 'instagram', label: 'Instagram', placeholder: 'amakaglow' },
-  { key: 'twitter', label: 'X (Twitter)', placeholder: 'amakaglow' },
-  { key: 'facebook', label: 'Facebook', placeholder: 'amakaglowstudio' },
-  { key: 'tiktok', label: 'TikTok', placeholder: 'amakaglow' },
-  { key: 'youtube', label: 'YouTube', placeholder: '@amakaglow' },
+  { key: 'instagram', label: 'Instagram', placeholder: 'kwarafashions' },
+  { key: 'twitter', label: 'X (Twitter)', placeholder: 'kwarafashions' },
+  { key: 'facebook', label: 'Facebook', placeholder: 'kwarafashions' },
+  { key: 'tiktok', label: 'TikTok', placeholder: 'kwarafashions' },
+  { key: 'youtube', label: 'YouTube', placeholder: '@kwarafashions' },
 ];
 
 const DELIVERY_METHODS: Array<{ key: string; label: string; hint: string }> = [
@@ -157,7 +158,7 @@ export function SettingsForm({ store, whatsapp }: { store: StoreSettings; whatsa
         <h2 style={{ fontSize: 18 }}>Location</h2>
         <div className="field">
           <label htmlFor="addr">Address</label>
-          <input id="addr" type="text" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="12 Adeniran Ogunsanya St, Surulere, Lagos" maxLength={300} />
+          <input id="addr" type="text" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="12 Ibrahim Taiwo Road, Tanke, Ilorin" maxLength={300} />
         </div>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <div className="field" style={{ flex: 1, minWidth: 140 }}>
@@ -265,7 +266,7 @@ export function SettingsForm({ store, whatsapp }: { store: StoreSettings; whatsa
             value={announcement}
             onChange={(e) => setAnnouncement(e.target.value)}
             maxLength={140}
-            placeholder="Free delivery in Lekki this week! 🎉"
+            placeholder="Free delivery in Tanke this week! 🎉"
           />
         </div>
         <h2 style={{ fontSize: 18 }}>Delivery & pickup</h2>
@@ -275,7 +276,7 @@ export function SettingsForm({ store, whatsapp }: { store: StoreSettings; whatsa
             onChange={(e) => setDeliveryInfo(e.target.value)}
             maxLength={400}
             rows={3}
-            placeholder="We deliver across Lagos Mainland — ₦1,500 flat. Pickup at our Lekki shop Mon–Sat, 9am–6pm."
+            placeholder="We deliver across Ilorin — ₦1,500 flat. Pickup at our Tanke shop Mon–Sat, 9am–6pm."
           />
           <p className="hint">Areas, fees and pickup options — shown in your store&apos;s contact section.</p>
         </div>
@@ -329,6 +330,7 @@ export function SettingsForm({ store, whatsapp }: { store: StoreSettings; whatsa
         </div>
       </div>
 
+      {FEATURES.dropshipperMode && (
       <div className="card" style={{ marginBottom: 16 }}>
         <h2 style={{ fontSize: 18 }}>Dropshipper</h2>
         <p className="hint" style={{ marginTop: 0 }}>
@@ -356,12 +358,13 @@ export function SettingsForm({ store, whatsapp }: { store: StoreSettings; whatsa
               onChange={(e) => setDropshipInfo(e.target.value)}
               maxLength={400}
               rows={3}
-              placeholder="Orders ship from our Lagos fulfilment partner in 1–2 days; international items arrive in 7–14 days. Tracking sent on WhatsApp."
+              placeholder="Orders ship from our Ilorin fulfilment partner in 1–2 days; international items arrive in 7–14 days. Tracking sent on WhatsApp."
             />
             <p className="hint">Be upfront about delivery windows — it builds trust and reduces refund requests.</p>
           </div>
         )}
       </div>
+      )}
 
       <div className="card">
         <h2 style={{ fontSize: 18 }}>WhatsApp</h2>
@@ -372,7 +375,7 @@ export function SettingsForm({ store, whatsapp }: { store: StoreSettings; whatsa
         </div>
         <div className="field">
           <label htmlFor="greet">Pre-filled greeting (optional)</label>
-          <textarea id="greet" value={greeting} onChange={(e) => setGreeting(e.target.value)} maxLength={300} placeholder="Hello! I found your store on Naijavend and I'm interested in…" />
+          <textarea id="greet" value={greeting} onChange={(e) => setGreeting(e.target.value)} maxLength={300} placeholder="Hello! I found your store on Kwaravend and I'm interested in…" />
         </div>
         <div className="field">
           <label style={{ display: 'flex', gap: 8, alignItems: 'center' }}>

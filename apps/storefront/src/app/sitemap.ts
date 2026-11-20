@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { supabaseAnon } from '@/lib/supabase';
 import { siteUrl } from '@/lib/site';
+import { FEATURES } from '@/lib/flags';
 
 export const revalidate = 3600; // ISR — fresh sitemap hourly
 
@@ -10,8 +11,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${base}/`, changeFrequency: 'daily', priority: 1 },
     { url: `${base}/discover`, changeFrequency: 'daily', priority: 0.9 },
-    { url: `${base}/rankings`, changeFrequency: 'daily', priority: 0.8 },
+    ...(FEATURES.rankings
+      ? [{ url: `${base}/rankings`, changeFrequency: 'daily' as const, priority: 0.8 }]
+      : []),
     { url: `${base}/search`, changeFrequency: 'daily', priority: 0.7 },
+    { url: `${base}/pricing`, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/faq`, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${base}/legal`, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${base}/legal/privacy`, changeFrequency: 'yearly', priority: 0.3 },

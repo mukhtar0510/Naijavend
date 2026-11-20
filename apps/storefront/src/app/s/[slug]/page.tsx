@@ -16,8 +16,11 @@ import { VerifiedTick } from '@/components/VerifiedTick';
 import { RecordRecentView } from '@/components/RecordRecentView';
 import { OpenBadge } from '@/components/OpenBadge';
 import { LocationsGallery } from '@/components/LocationsGallery';
+import { AddToCart } from '@/components/AddToCart';
+import { StoreCart } from '@/components/StoreCart';
 import { formatHours } from '@/lib/hours';
 import { siteUrl, schemaTypeForCategory } from '@/lib/site';
+import { FEATURES } from '@/lib/flags';
 import type { Listing, Store, StoreRating, StoreRatingStats, StoreTheme } from '@idevtenancy/shared';
 
 export const revalidate = 60; // ISR — static-fast, invalidated on seller writes via revalidatePath
@@ -57,7 +60,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     const store = await getStore(params.slug);
     if (!store) return { title: 'Store not found' };
     return {
-      description: store.description || `${store.name} — a local business on Naijavend.`,
+      description: store.description || `${store.name} — a local business on Kwaravend.`,
       alternates: { canonical: `${siteUrl()}/s/${store.slug}` },
       openGraph: {
         title: store.name,
@@ -170,9 +173,11 @@ export default async function StorePage({ params }: { params: { slug: string } }
             <div className="store-hero-meta">
               <span className="badge badge-blue">{store.category}</span>
               <span className="badge">{store.business_type}</span>
-              {store.is_dropshipper && <span className="badge badge-dropship" title="Ships from a supplier">🚚 Dropshipper</span>}
+              {FEATURES.dropshipperMode && store.is_dropshipper && (
+                <span className="badge badge-dropship" title="Ships from a supplier">🚚 Dropshipper</span>
+              )}
               <OpenBadge hours={store.business_hours} />
-              {stats && stats.overall_rank && stats.review_count >= 3 && (
+              {FEATURES.rankings && stats && stats.overall_rank && stats.review_count >= 3 && (
                 <span className="rank-chip">
                   #{stats.overall_rank} overall · #{stats.category_rank} in {store.category}
                 </span>
@@ -288,7 +293,7 @@ export default async function StorePage({ params }: { params: { slug: string } }
                 <p style={{ margin: 0, whiteSpace: 'pre-line' }}>{store.delivery_info}</p>
               </div>
             )}
-            {store.is_dropshipper && (
+            {FEATURES.dropshipperMode && store.is_dropshipper && (
               <div className="card dropship-card">
                 <h3 style={{ marginTop: 0, fontSize: 16 }}>
                   🌍 Shipping &amp; suppliers{' '}
@@ -370,9 +375,21 @@ export default async function StorePage({ params }: { params: { slug: string } }
                 )}
                 <div style={{ display: 'flex', gap: 8, marginTop: 'auto', flexWrap: 'wrap' }}>
                   {listing.type === 'product' ? (
-                    <Link className="btn btn-primary btn-sm" href={`/s/${store.slug}/order/${listing.id}`}>
-                      Order
-                    </Link>
+                    <>
+                      <Link className="btn btn-primary btn-sm" href={`/s/${store.slug}/order/${listing.id}`}>
+                        Order
+                      </Link>
+                      <AddToCart
+                        slug={store.slug}
+                        compact
+                        item={{
+                          listingId: listing.id,
+                          title: listing.title,
+                          priceKobo: listing.price_kobo,
+                          image: cover,
+                        }}
+                      />
+                    </>
                   ) : (
                     <Link className="btn btn-primary btn-sm" href={`/s/${store.slug}/book/${listing.id}`}>
                       Book appointment
@@ -431,6 +448,8 @@ export default async function StorePage({ params }: { params: { slug: string } }
         <ReportButton storeId={store.id} storeName={store.name} />
       </div>
       </div>
+      {/* One cart per store; guests check out without an account. */}
+      <StoreCart slug={store.slug} storeName={store.name} />
     </main>
   );
 }

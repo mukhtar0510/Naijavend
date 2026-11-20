@@ -1,5 +1,5 @@
 /* =====================================================================
-   Naijavend — mobile refinement pass
+   Kwaravend — mobile refinement pass
    Tightens every marketplace body section and seller store-site section
    on phones: spacing scale, typography scale, touch targets, grids.
    All rules are max-width overrides — desktop is untouched.
@@ -389,7 +389,7 @@
 }
 
 /* =====================================================================
-   Naijavend — compact mobile redesign pass (researched)
+   Kwaravend — compact mobile redesign pass (researched)
    Sources: learnui.design mobile typography guidelines; 2026 mobile UI
    trend writeups (compact app-like spacing, hairline-bordered cards,
    edge-to-edge sections, reduced chrome).

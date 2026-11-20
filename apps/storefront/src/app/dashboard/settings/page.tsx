@@ -1,8 +1,11 @@
 import { redirect } from 'next/navigation';
 import { getSellerClient, getOwnStore } from '@/lib/auth';
 import { redirectStaffToPos } from '@/lib/staff';
+import { ThemeFonts } from '@/components/ThemeFonts';
 import { SettingsForm } from './SettingsForm';
 import { AppearanceCard } from './AppearanceCard';
+import { SimpleBrandCard } from './SimpleBrandCard';
+import { FEATURES } from '@/lib/flags';
 import { AnnouncementCard } from './AnnouncementCard';
 import { SettingsTabs } from './SettingsTabs';
 import { ThemeSetting } from '@/components/ThemeSetting';
@@ -55,6 +58,8 @@ export default async function SettingsPage() {
 
   return (
     <main style={{ maxWidth: 780 }}>
+      {/* The appearance editors preview seller-chosen theme fonts. */}
+      <ThemeFonts />
       <h1>Store settings</h1>
       <p className="dash-sub">Everything about how your store presents to buyers.</p>
 
@@ -65,7 +70,9 @@ export default async function SettingsPage() {
               <h2>Business basics</h2>
               <span className="muted">Name, address, hours, WhatsApp</span>
             </div>
-            <LocationsCard storeName={s.name} initialLocations={locations} />
+            {FEATURES.multiBranchTools ? (
+              <LocationsCard storeName={s.name} initialLocations={locations} />
+            ) : null}
             <SettingsForm
               store={{
                 name: s.name,
@@ -104,17 +111,18 @@ export default async function SettingsPage() {
           <section className="dash-section" aria-label="Look and feel" style={{ marginTop: 12 }}>
             <div className="dash-section-head">
               <h2>Look &amp; feel</h2>
-              <span className="muted">Colours, fonts, layout, images, favicon</span>
+              <span className="muted">Logo, accent colour and template</span>
             </div>
             {/* App UI theme — separate from the storefront branding below. */}
             <div className="dash-subsection" style={{ marginBottom: 20 }}>
               <h3 style={{ margin: '0 0 4px', fontSize: 15 }}>Your dashboard theme</h3>
               <p className="muted" style={{ margin: '0 0 10px', fontSize: 13 }}>
-                Only changes how Naijavend looks while you&apos;re signed in — your storefront keeps its own colours.
+                Only changes how Kwaravend looks while you&apos;re signed in — your storefront keeps its own colours.
               </p>
               <ThemeSetting />
             </div>
             <GalleryCard initialGallery={gallery} />
+            {FEATURES.storefrontCustomisation ? (
             <AppearanceCard
               slug={s.slug}
               storeName={s.name}
@@ -157,6 +165,14 @@ export default async function SettingsPage() {
                 }
               }
             />
+            ) : (
+              <SimpleBrandCard
+                slug={s.slug}
+                initialLogoUrl={theme?.logo_url ?? null}
+                initialAccent={theme?.accent_color ?? '#1D4ED8'}
+                initialLayout={theme?.layout ?? 'modern'}
+              />
+            )}
           </section>
         }
       />

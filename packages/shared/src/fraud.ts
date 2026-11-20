@@ -12,7 +12,7 @@
 // normal trading conversation ("transfer" alone never fires).
 
 export type FraudLabel =
-  | 'off_platform_payment' // asked to pay outside Naijavend
+  | 'off_platform_payment' // asked to pay outside Kwaravend
   | 'credentials_request' // OTP, PIN, card number, BVN, password
   | 'advance_fee' // fees, "clearance", "activation" paid up-front
   | 'impersonation' // staff, brigade, delivery agent impersonation
@@ -26,12 +26,12 @@ export type FraudLabel =
 const SCAM_RULES: ReadonlyArray<readonly [FraudLabel, RegExp]> = [
   ['off_platform_payment', /\b(pay|payment|send|paying|paid|send am|wire)\b[^.!?\n]{0,40}\b(outside|off)\s+(the\s+)?(platform|site|app|system)\b/i],
   ['off_platform_payment', /\b(pay|payment|send|transfer)\b[^.!?\n]{0,40}\b(directly\s+to\s+(my|our)|to\s+my\s+(personal|personal\s+acct?|opay|kuda|palmpay|moniepoint|sterling|gtb|zenith|access|uba|first\s+bank))\b/i],
-  ['off_platform_payment', /\b(don'?t|do\s+not|no\s+need\s+to|avoid)\b[^.!?\n]{0,40}\b(pay|paying|use)\b[^.!?\n]{0,30}\b(on|through|via|inside)\b[^.!?\n]{0,20}\b(naijavend|the\s+site|the\s+platform|the\s+app)\b/i],
+  ['off_platform_payment', /\b(don'?t|do\s+not|no\s+need\s+to|avoid)\b[^.!?\n]{0,40}\b(pay|paying|use)\b[^.!?\n]{0,30}\b(on|through|via|inside)\b[^.!?\n]{0,20}\b(kwaravend|the\s+site|the\s+platform|the\s+app)\b/i],
   ['advance_fee', /\b(pay|send)\b[^.!?\n]{0,30}\b(fee|fees|charge|charges|levy|clearance|activation|verification fee|upgrade fee|deposit)\b[^.!?\n]{0,40}\b(first|before|beforehand|upfront|up-front)\b/i],
   ['advance_fee', /\b(send|pay)\b[^.!?\n]{0,30}\b(gift\s+card|airtime\s+top[- ]?up|crypto|bitcoin|usdt|trc20|western\s+union|ria|money\s+gram)\b/i],
   ['credentials_request', /\b(otp|one[- ]?time\s+password|pin\s+code|bvn|nin|card\s+number|cvv|expiry\s+date|account\s+password|bank\s+details)\b/i],
   ['credentials_request', /\b(kindly|please|abeg|please\s+share)\b[^.!?\n]{0,30}\b(confirm|send|enter|give)\b[^.!?\n]{0,30}\b(otp|code|password|pin|token)\b/i],
-  ['impersonation', /\b(i\s+am|i'?m)\b[^.!?\n]{0,40}\b(from|of)\b[^.!?\n]{0,30}\b(naijavend\s+(staff|support|team|admin)|customer\s+care|efcc|fccpc|police|army|military)\b/i],
+  ['impersonation', /\b(i\s+am|i'?m)\b[^.!?\n]{0,40}\b(from|of)\b[^.!?\n]{0,30}\b(kwaravend\s+(staff|support|team|admin)|customer\s+care|efcc|fccpc|police|army|military)\b/i],
   ['impersonation', /\b(this\s+is|here\s+is)\b[^.!?\n]{0,30}\b(your\s+)?(delivery\s+rider|dispatch|rider)\b[^.!?\n]{0,40}\b(pay|send)\b/i],
   ['urgency_threat', /\b(your\s+(account|store|listing|page))\b[^.!?\n]{0,40}\b(will\s+be\s+(closed|banned|suspended|deleted)|is\s+going\s+to\s+be\s+(closed|banned))\b/i],
   ['urgency_threat', /\b(within|in)\b\s+(\d{1,3}\s+)?(minutes|mins|hours)\b[^.!?\n]{0,40}\b(otherwise|or\s+else|if\s+not)\b/i],
@@ -43,7 +43,7 @@ const SCAM_RULES: ReadonlyArray<readonly [FraudLabel, RegExp]> = [
 /** Human-facing explanations, keyed by label — shown to sellers/staff so a
  * flag is never a bare red dot. */
 export const FRAUD_LABEL_TEXT: Record<FraudLabel, string> = {
-  off_platform_payment: 'Asks to pay outside Naijavend',
+  off_platform_payment: 'Asks to pay outside Kwaravend',
   credentials_request: 'Asks for an OTP, PIN or bank details',
   advance_fee: 'Up-front fee or gift-card request',
   impersonation: 'Claims to be staff, police or a delivery agent',
@@ -137,7 +137,7 @@ export function assessReview(comment: unknown, stars: unknown): ReviewVerdict {
 // ---------------------------------------------------------------------------
 
 /** Signals that a NEW store is more likely than not a scam page:
- * investment/ROI promises and claims of official Naijavend status — the two
+ * investment/ROI promises and claims of official Kwaravend status — the two
  * claims that reported fake stores on Nigerian marketplaces actually make. */
 const STORE_SIGNALS: ReadonlyArray<readonly [string, RegExp]> = [
   ['guaranteed_returns', /\bguarante(?:ed|e|d)?\b[^.!?\n]{0,60}\b(profit|return|returns|interest|earnings?|income)\b/i],
@@ -148,9 +148,9 @@ const STORE_SIGNALS: ReadonlyArray<readonly [string, RegExp]> = [
   // "Guaranteed 50% ROI weekly when you invest with us" — the return figure
   // precedes the verb in the copy every one of these scams actually uses.
   ['investment_scam', /\b(roi|returns?|profits?|passive\s+income)\b[^.!?\n]{0,60}\b(invest(?:ment|ors?)?|earn|staking)\b/i],
-  ['fake_official', /\b(official|verified|approved|accredited)\b[^.!?\n]{0,30}\b(partner|dealer|representative)?\s*of\s+naijavend\b/i],
-  ['fake_official', /\b(official|authorized|authorised)\s+naijavend\b/i],
-  ['fake_official', /\bnaijavend\s+(staff|admin|team|management)\b/i],
+  ['fake_official', /\b(official|verified|approved|accredited)\b[^.!?\n]{0,30}\b(partner|dealer|representative)?\s*of\s+kwaravend\b/i],
+  ['fake_official', /\b(official|authorized|authorised)\s+kwaravend\b/i],
+  ['fake_official', /\bkwaravend\s+(staff|admin|team|management)\b/i],
 ];
 
 /** Human-readable notes for each store signal (kept next to the rules so a
@@ -158,7 +158,7 @@ const STORE_SIGNALS: ReadonlyArray<readonly [string, RegExp]> = [
 export const STORE_SIGNAL_TEXT: Record<string, string> = {
   guaranteed_returns: 'Promises guaranteed returns or a fixed percentage of profit',
   investment_scam: 'Investment/crypto earnings claim',
-  fake_official: 'Claims official Naijavend status',
+  fake_official: 'Claims official Kwaravend status',
 };
 
 /** Scan a store's name/description/announcement for fake-store signals. */

@@ -13,7 +13,20 @@ export interface LeafletMapOptions {
   scrollWheelZoom?: boolean;
   /** Extra padding-bottom-right for attribution over overlays. */
   attributionPrefix?: string;
+  /** Hard pan limit, e.g. one state. Pins outside it are unreachable. */
+  maxBounds?: [[number, number], [number, number]];
+  /** Add a Streets / Satellite switch (top-right). Default: false. */
+  layerSwitch?: boolean;
 }
+
+export type BaseLayerId = 'streets' | 'satellite';
+
+// Esri World Imagery — keyless satellite tiles (attribution required). Useful
+// in Ilorin where many shops sit on unnamed streets: buyers recognise the roof.
+const SATELLITE = {
+  url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  attribution: 'Imagery &copy; Esri, Maxar, Earthstar Geographics',
+} as const;
 
 // CARTO basemaps now watermark free usage with "API KEY REQUIRED", so tiles
 // come from OpenStreetMap's standard tile server (free, keyless, attribution
@@ -37,6 +50,9 @@ export function prefersDarkMap(): boolean {
   return document.documentElement.getAttribute('data-theme') === 'dark';
 }
 
+/** A Leaflet map with a programmatic base-layer switch. */
+export type ThemedMap = import('leaflet').Map & { setBaseLayer?: (id: BaseLayerId) => void };
+
 /**
  * Creates a themed Leaflet map on `el`. Returns the map instance; the caller
  * owns adding markers/layers and destroying it on unmount.
@@ -44,7 +60,7 @@ export function prefersDarkMap(): boolean {
 export async function createThemedMap(
   el: HTMLElement,
   opts: LeafletMapOptions
-): Promise<import('leaflet').Map> {
+): Promise<ThemedMap> {
   const L = (await import('leaflet')).default;
   const dark = opts.dark ?? prefersDarkMap();
   const tiles = dark ? TILES.dark : TILES.light;
@@ -55,22 +71,40 @@ export async function createThemedMap(
     zoomControl: opts.zoomControl ?? false,
     scrollWheelZoom: opts.scrollWheelZoom ?? false,
     attributionControl: true,
+    ...(opts.maxBounds
+      ? { maxBounds: opts.maxBounds, maxBoundsViscosity: 0.9, minZoom: 7 }
+      : {}),
   });
 
-  L.tileLayer(tiles.url, {
-    maxZoom: 19,
-    // OSM standard tiles have no {s} subdomains; keep default single-host.
-    attribution: opts.attributionPrefix
-      ? `${opts.attributionPrefix} · ${tiles.attribution}`
-      : tiles.attribution,
-  }).addTo(map);
+  const attribution = (a: string) => (opts.attributionPrefix ? `${opts.attributionPrefix} · ${a}` : a);
+  // OSM standard tiles have no {s} subdomains; keep default single-host.
+  const streets = L.tileLayer(tiles.url, { maxZoom: 19, attribution: attribution(tiles.attribution) });
+  const satellite = L.tileLayer(SATELLITE.url, { maxZoom: 19, maxNativeZoom: 18, attribution: attribution(SATELLITE.attribution) });
+  streets.addTo(map);
 
   // Dark cartography: filter the tile pane (not markers/overlays) to a dark
-  // scheme. Class removed automatically with the pane on map removal.
-  if (dark) {
-    const pane = map.getPane('tilePane');
-    if (pane) pane.classList.add('map-tiles-dark');
+  // scheme. Never filter satellite imagery — inverted photos are unreadable.
+  const pane = map.getPane('tilePane');
+  const syncDark = (layer: BaseLayerId) => pane?.classList.toggle('map-tiles-dark', dark && layer === 'streets');
+  syncDark('streets');
+
+  const layers: Record<BaseLayerId, import('leaflet').TileLayer> = { streets, satellite };
+  (map as ThemedMap).setBaseLayer = (id: BaseLayerId) => {
+    for (const [k, l] of Object.entries(layers)) {
+      if (k === id) { if (!map.hasLayer(l)) l.addTo(map); }
+      else if (map.hasLayer(l)) map.removeLayer(l);
+    }
+    syncDark(id);
+  };
+
+  if (opts.layerSwitch) {
+    L.control
+      .layers({ Streets: streets, Satellite: satellite }, undefined, { position: 'topright', collapsed: false })
+      .addTo(map);
+    map.on('baselayerchange', (e: import('leaflet').LayersControlEvent) =>
+      syncDark(e.layer === satellite ? 'satellite' : 'streets'),
+    );
   }
 
-  return map;
+  return map as ThemedMap;
 }

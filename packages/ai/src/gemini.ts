@@ -39,7 +39,7 @@ const STORE_CATEGORIES = [
 ] as const;
 
 const SYSTEM_INSTRUCTION = [
-  'You are the in-house copywriter and brand designer for Naijavend, a Nigerian',
+  'You are the in-house copywriter and brand designer for Kwaravend, a Nigerian',
   'social marketplace where small businesses sell products and services (beauty,',
   'fashion, food, repairs, tutoring and more). Write warm, concrete, trustworthy',
   'copy for Nigerian customers. Always reply with a single valid JSON object and',
@@ -178,7 +178,7 @@ const FEATURES: Record<AiRequest['feature'], FeatureSpec> = {
 
   assistant_chat: {
     system: [
-      'You are the business assistant for sellers on Naijavend, a Nigerian social marketplace.',
+      'You are the business assistant for sellers on Kwaravend, a Nigerian social marketplace.',
       'You give short, practical, specific advice grounded ONLY in the store facts provided —',
       'never invent orders, revenue or numbers. Always reply with a single valid JSON object and nothing else.',
     ].join(' '),
@@ -281,7 +281,7 @@ const FEATURES: Record<AiRequest['feature'], FeatureSpec> = {
         '- 0-3 reply candidates for the customer message, in the SAME language the customer wrote in.',
         '- Each 1-3 sentences (max ~60 characters each is ideal on a phone).',
         '- Never promise a price, stock or delivery time that is not in the context above.',
-        "- If the customer asked for something off-platform payment, reply must tell them to pay only through Naijavend.",
+        "- If the customer asked for something off-platform payment, reply must tell them to pay only through Kwaravend.",
       ].join('\n'),
     sanitize: (parsed): AiSuggestRepliesDraft => {
       const suggestions = (Array.isArray(parsed.replies) ? parsed.replies : [])
@@ -318,7 +318,7 @@ const FEATURES: Record<AiRequest['feature'], FeatureSpec> = {
 
   weekly_insight: {
     system: [
-      'You are the friendly weekly-report writer for a Nigerian seller on Naijavend.',
+      'You are the friendly weekly-report writer for a Nigerian seller on Kwaravend.',
       'You are GIVEN the numbers — never invent, round away or restate them differently.',
       'Write like a shop partner talking to a busy trader: plain words, no marketing fluff,',
       'no jargon like “KPI” or “funnel”, max 60 words. Always reply with a single valid JSON object and nothing else.',

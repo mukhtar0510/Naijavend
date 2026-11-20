@@ -5,7 +5,7 @@
 // pin plus optional branch pins; clicking a pin opens a "Get directions" bubble.
 // Falls back to the Google iframe only if the container never mounts (SSR-safe
 // wrapper below keeps the page server-renderable).
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createThemedMap } from '@/lib/mapFactory';
 
 export interface MapPin {
@@ -26,12 +26,18 @@ interface InnerProps {
 function LeafletPins({ pins, height = 220 }: InnerProps) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [ready, setReady] = useState(false);
+  // Serialises map lifecycles on the one container: a remount (React dev
+  // double-mount, new pins) waits for the previous map to be removed first,
+  // otherwise Leaflet throws "Map container is already initialized".
+  const lastRef = useRef<Promise<unknown>>(Promise.resolve());
 
   useEffect(() => {
     if (!ref.current || pins.length === 0) return;
     let map: import('leaflet').Map | null = null;
     let cancelled = false;
-    void (async () => {
+    const prev = lastRef.current;
+    lastRef.current = (async () => {
+      await prev;
       const L = (await import('leaflet')).default;
       if (cancelled || !ref.current) return;
       map = await createThemedMap(ref.current, {
@@ -39,9 +45,11 @@ function LeafletPins({ pins, height = 220 }: InnerProps) {
         zoom: 15,
         zoomControl: true,
         scrollWheelZoom: false,
+        layerSwitch: true,
       });
       if (cancelled) {
         map.remove();
+        map = null;
         return;
       }
       const pts: [number, number][] = [];
@@ -66,7 +74,18 @@ function LeafletPins({ pins, height = 220 }: InnerProps) {
           (first.directionsUrl
             ? `<br/><a href="${first.directionsUrl}" target="_blank" rel="noopener noreferrer">Get directions ↗</a>`
             : '');
-        L.marker([first.lat, first.lng])
+        // Branded pin (Leaflet's default PNG marker breaks under Next's bundler).
+        const isMain = group.includes(pins[0]);
+        L.marker([first.lat, first.lng], {
+          icon: L.divIcon({
+            className: 'map-pin-wrap',
+            html: `<span class="map-pin map-pin-sm">${isMain ? '🏪' : '📍'}</span>`,
+            iconSize: [34, 34],
+            iconAnchor: [17, 17],
+            popupAnchor: [0, -16],
+          }),
+          title: group.map((p) => p.label).join(' + '),
+        })
           .addTo(map)
           .bindPopup(`<strong>${title}</strong>${body}`);
         pts.push([first.lat, first.lng]);
@@ -117,10 +136,12 @@ export function MapEmbed({
   const directionsUrl = (lat: number, lng: number, label: string) =>
     `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
 
-  const pins: MapPin[] = [
-    { lat: latitude, lng: longitude, label: name },
-    ...extraPins,
-  ];
+  // Stable identity so the map isn't torn down and rebuilt on every render.
+  const extraKey = JSON.stringify(extraPins);
+  const pins: MapPin[] = useMemo(
+    () => [{ lat: latitude, lng: longitude, label: name }, ...(JSON.parse(extraKey) as MapPin[])],
+    [latitude, longitude, name, extraKey],
+  );
 
   return (
     <div className="map-embed" style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)' }}>

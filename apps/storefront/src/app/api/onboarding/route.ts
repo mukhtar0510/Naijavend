@@ -101,7 +101,7 @@ export async function POST(req: NextRequest) {
       throw error;
     }
 
-    // Fake-store screen (offline): ROI promises and "official Naijavend partner"
+    // Fake-store screen (offline): ROI promises and "official Kwaravend partner"
     // claims are what reported scam stores actually say. Flag for review — the
     // store still exists and can be cleaned up; nothing is auto-removed.
     const signals = detectStoreSignals([finalName, businessDescription, finalDescription].join(' '));

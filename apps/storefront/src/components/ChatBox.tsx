@@ -229,7 +229,7 @@ export function ChatBox({
                   <div className="chat-scam" role="status">
                     ⚠️ <strong>{FRAUD_LABEL_TEXT[scam[0]]}.</strong>{' '}
                     {scam.length > 1 ? '+ other risk signals · ' : ''}
-                    Send the seller a reminder: payments stay on Naijavend.
+                    Send the seller a reminder: payments stay on Kwaravend.
                   </div>
                 )}
               </div>

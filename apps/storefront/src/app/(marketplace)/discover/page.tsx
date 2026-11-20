@@ -100,7 +100,7 @@ export default async function DiscoverPage({
 
           <Reveal delay={0.12}>
             <p className="mb-7 max-w-[56ch] text-[16px] leading-relaxed text-muted-foreground">
-              Every Naijavend store is a Nigerian business with its own website, a pinned location on the map and
+              Every Kwaravend store is a Nigerian business with its own website, a pinned location on the map and
               reviews that come from real orders. Search by name, filter by trade, or switch to the map.
             </p>
           </Reveal>

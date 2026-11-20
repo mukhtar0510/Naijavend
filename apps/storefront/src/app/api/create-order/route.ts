@@ -38,10 +38,16 @@ export async function POST(req: NextRequest) {
   const customerPhone = sanitizeText(b.customerPhone, 16);
   const promoInput = sanitizeText(b.promoCode, 40).toUpperCase();
   const deliveryMethod = sanitizeText(b.deliveryMethod, 20); // '', pickup, rider or courier
+  const paymentMethod = sanitizeText(b.paymentMethod, 24);
   const lines = parseCartLines(b.items);
 
   if (deliveryMethod && !['pickup', 'rider', 'courier'].includes(deliveryMethod)) {
     return apiError(422, 'invalid_delivery', 'Pick a valid delivery option.');
+  }
+
+  const PAYMENT_METHODS = ['', 'cash_on_delivery', 'bank_transfer', 'pay_on_pickup', 'other'];
+  if (!PAYMENT_METHODS.includes(paymentMethod)) {
+    return apiError(422, 'invalid_payment_method', 'Pick how you will pay.');
   }
 
   if (!slug) return apiError(400, 'missing_store', 'Store is required.');
@@ -125,13 +131,9 @@ export async function POST(req: NextRequest) {
     // Attribute the order to the signed-in customer (if any) so it shows in /account.
     const customer = await getCustomerUser();
 
-    const { data: order, error: orderErr } = await sb
-      .from('orders')
-      .insert({ store_id: store.id, customer_id: customer?.id ?? null, customer_name: customerName, customer_phone: customerPhone, total_kobo: totalKobo, discount_code: appliedCode, discount_kobo: discountKobo, delivery_method: deliveryMethod, delivery_fee_kobo: deliveryFeeKobo, status: 'pending' })
-      .select('id')
-      .single();
-    if (orderErr) throw orderErr;
-
+    // The RPC below writes the order itself. Inserting here first used to create
+    // a second, empty order on every successful checkout.
+    //
     // Use the atomic order RPC to create order + items + stock decrement + promo increment in one transaction.
     // This prevents half-written state (order without items, stock decremented but no order, promo counted but no order) that
     // the old separate-write approach could leave on failure.
@@ -146,11 +148,25 @@ export async function POST(req: NextRequest) {
       p_discount_code: appliedCode,
       p_delivery_method: deliveryMethod,
       p_total_kobo: totalKobo,
+      p_customer_id: customer?.id ?? null,
+      p_delivery_fee_kobo: deliveryFeeKobo,
+      p_discount_kobo: discountKobo,
     });
     if (atomicErr) throw atomicErr;
     // result contains { order_id, status } from the RPC.
     // The checkout page expects orderId; the returned field is also order_id.
     const atomicOrderId = (result as { order_id: string }).order_id;
+
+    // Record how the buyer intends to pay. Best-effort until the T04 migration
+    // (payment_method column) has been applied — a missing column must not cost
+    // the buyer their order.
+    if (paymentMethod) {
+      const { error: payMethodErr } = await sb
+        .from('orders')
+        .update({ payment_method: paymentMethod })
+        .eq('id', atomicOrderId);
+      if (payMethodErr) console.warn('[create-order] payment_method not stored:', payMethodErr.message);
+    }
 
     if (cacheKey) {
       if (idempotencyCache.size >= IDEMPOTENCY_MAX_ENTRIES) {

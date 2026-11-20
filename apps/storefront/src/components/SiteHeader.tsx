@@ -12,14 +12,17 @@ import {
   UserRound,
   X,
 } from 'lucide-react';
-import { NaijavendLogoMark } from '@/components/NaijavendLogo';
+import { KwaravendLogoMark } from '@/components/KwaravendLogo';
+import { FEATURES } from '@/lib/flags';
 import { categoryEmoji, categoryLabel } from '@idevtenancy/shared';
 
 // One row of navigation. Everything else lives where it belongs: categories on
 // the home page, help/legal in the footer, selling in the primary button.
 const LINKS = [
+  { href: '/home', label: 'Home' },
   { href: '/discover', label: 'Discover' },
-  { href: '/rankings', label: 'Rankings' },
+  // Rankings stay hidden until a city has enough active stores (see T13).
+  ...(FEATURES.rankings ? [{ href: '/rankings', label: 'Rankings' }] : []),
   { href: '/about', label: 'About' },
 ];
 
@@ -66,10 +69,10 @@ export function SiteHeader() {
   return (
     <header className="nv-header">
       <div className="container nv-header-main">
-        <Link href="/" className="nv-header-logo" aria-label="Naijavend home">
-          <NaijavendLogoMark size={30} />
+        <Link href="/" className="nv-header-logo" aria-label="Kwaravend home">
+          <KwaravendLogoMark size={30} />
           <span className="nv-header-wordmark">
-            Naija<em>vend</em>
+            Kwara<em>vend</em>
           </span>
         </Link>
 

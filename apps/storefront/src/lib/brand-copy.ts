@@ -1,6 +1,6 @@
 // Shared brand copy for the two public brand pages.
 //
-// `/` is the brand's front door (the full Naijavend story, product layers and
+// `/` is the brand's front door (the full Kwaravend story, product layers and
 // live components). `/about` is the focused story page. They intentionally
 // draw from this one module so the principles, trust rules and audience copy
 // never drift apart.
@@ -19,7 +19,7 @@ export const PRINCIPLES = [
   {
     k: '03',
     title: 'Free has to mean free',
-    body: 'The POS, staff logins and extra branches are included. A business should not have to outgrow Naijavend before it can afford to run itself properly.',
+    body: 'The POS, staff logins and extra branches are included. A business should not have to outgrow Kwaravend before it can afford to run itself properly.',
   },
 ] as const;
 

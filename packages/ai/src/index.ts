@@ -426,7 +426,7 @@ const CATEGORY_PRESETS: Record<string, StylePreset> = {
     layout: 'modern',
     hero_style: 'gradient',
     background_color: '#FFFFFF',
-    note: 'The Naijavend default: white surfaces, blue actions, black accents — safe and modern.',
+    note: 'The Kwaravend default: white surfaces, blue actions, black accents — safe and modern.',
   },
 };
 
@@ -727,7 +727,7 @@ function dummySocialPost(input: string): string {
       `${topic} — now available at ${store}! ✨\n\n` +
       `Quality you can trust, prices you'll love, and fast delivery across Nigeria.\n` +
       `Send us a DM or tap the WhatsApp link in bio to order. 📦\n\n` +
-      `#NaijaBusiness #ShopSmall #BuyNaija #Naijavend`
+      `#NaijaBusiness #ShopSmall #BuyNaija #Kwaravend`
     );
   }
   if (platform === 'facebook') {

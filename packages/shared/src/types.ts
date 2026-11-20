@@ -1,4 +1,4 @@
-// Naijavend shared domain types — used by storefront, seller app, and server routes.
+// Kwaravend shared domain types — used by storefront, seller app, and server routes.
 
 export type BusinessType = 'product' | 'service' | 'hybrid';
 export type ListingType = 'product' | 'service' | 'digital';
@@ -19,7 +19,7 @@ export type AiFeature =
   | 'weekly_insight'
   | 'moderation';
 
-/** Interface + chat languages supported by Naijavend translation. */
+/** Interface + chat languages supported by Kwaravend translation. */
 export type LanguageCode = 'en' | 'pid' | 'yo' | 'ha' | 'ig';
 
 export const LANGUAGES: ReadonlyArray<{ code: LanguageCode; label: string; native: string }> = [
@@ -180,6 +180,11 @@ export interface Order {
   discount_code: string | null;
   discount_kobo: number;
   status: OrderStatus;
+  /** Money, tracked separately from fulfilment. Optional until the T04 migration runs. */
+  payment_status?: 'unpaid' | 'awaiting_confirmation' | 'paid' | 'refunded' | 'failed';
+  payment_method?: '' | 'cash_on_delivery' | 'bank_transfer' | 'pay_on_pickup' | 'other';
+  payment_proof_url?: string | null;
+  payment_confirmed_at?: string | null;
   payment_reference: string | null;
   created_at: string;
   updated_at: string;

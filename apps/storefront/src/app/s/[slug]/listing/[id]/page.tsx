@@ -299,7 +299,7 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
                     <Stars value={Number(stats.avg_stars)} />{' '}
                     <span className="muted" style={{ fontSize: 13.5 }}>
                       {stats.review_count} review{stats.review_count === 1 ? '' : 's'}
-                      {stats.overall_rank ? ` · #${stats.overall_rank} on Naijavend` : ''}
+                      {stats.overall_rank ? ` · #${stats.overall_rank} on Kwaravend` : ''}
                     </span>
                   </div>
                 )}

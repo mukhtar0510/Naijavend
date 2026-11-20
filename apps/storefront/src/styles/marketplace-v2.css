@@ -1,5 +1,5 @@
 /* ============================================================
-   Naijavend — marketplace refresh (v2)
+   Kwaravend — marketplace refresh (v2)
    Header, marketplace home, store map, buyer account, buyer auth.
    Uses the existing design tokens from base.css, so light/dark and the
    brand palette stay in one place. Imported after the legacy sheets so
@@ -451,13 +451,17 @@
   display: grid;
   gap: 12px;
   padding: 0 8px 8px;
+  margin-top: -22px;
 }
 .nv-hp-store {
   display: flex;
-  align-items: center;
+  /* Bottom-aligned so the logo overlaps the banner but the store name sits on
+     the card instead of colliding with the watermark. */
+  align-items: flex-end;
   gap: 10px;
-  margin-top: -22px;
+  margin-top: 0;
 }
+.nv-hp-store > div { padding-bottom: 3px; }
 .nv-hp-logo {
   width: 46px;
   height: 46px;
@@ -1132,7 +1136,7 @@
   font-size: 11.5px;
   font-weight: 800;
 }
-.nv-map-list { display: grid; gap: 4px; padding: 6px; max-height: 540px; overflow: auto; }
+.nv-map-list { position: relative; display: grid; align-content: start; gap: 4px; padding: 6px; max-height: 540px; overflow: auto; }
 .nv-map-store {
   display: flex;
   align-items: center;
@@ -1258,6 +1262,103 @@
 }
 .nv-map.is-fullscreen .nv-map-canvas { height: min(62vh, 720px); }
 .nv-map.is-fullscreen .nv-map-list { max-height: min(62vh, 720px); }
+
+/* ---- map upgrades: quick filters, tools, clusters, steps ---- */
+.nv-map-quick { gap: 6px; margin-top: -4px; }
+.nv-map-chip { display: inline-flex; align-items: center; gap: 5px; }
+.nv-map-chip .nv-map-dot { width: 7px; height: 7px; }
+.nv-map-sep { width: 1px; height: 20px; background: var(--border); margin: 0 2px; }
+.nv-map-radius { display: inline-flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.nv-map-radius > span { color: var(--text-muted); font-size: 12px; font-weight: 600; }
+.nv-map-sort { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; color: var(--text-muted); font-size: 12px; font-weight: 600; }
+.nv-map-sort select {
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+.nv-map-clear {
+  display: inline-flex; align-items: center; gap: 4px;
+  height: 32px; padding: 0 11px;
+  border: 0; border-radius: 999px;
+  background: transparent; color: var(--blue);
+  font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.nv-map-clear:hover { background: var(--blue-tint); }
+
+.nv-map-tools {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 500;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.nv-map-seg, .nv-map-chipbtn {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(6px);
+}
+.nv-map-seg { padding: 3px; }
+.nv-map-seg button, .nv-map-chipbtn {
+  display: inline-flex; align-items: center; gap: 5px;
+  height: 28px; padding: 0 11px;
+  border: 0; border-radius: 999px;
+  background: transparent; color: var(--text-muted);
+  font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.nv-map-chipbtn { height: 36px; padding: 0 13px; }
+.nv-map-seg button.is-active { background: var(--blue); color: #fff; }
+.nv-map-seg button:not(.is-active):hover, .nv-map-chipbtn:hover { color: var(--text); }
+.nv-map-legend .is-cluster { background: var(--gold, #d4a017); }
+.nv-map-routing {
+  position: absolute; left: 50%; top: 12px; z-index: 500;
+  transform: translateX(-50%);
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+  font-size: 12px; font-weight: 700; color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.nv-map-panel-head { gap: 8px; }
+.nv-map-inview {
+  display: inline-flex; align-items: center; gap: 4px;
+  margin-left: auto;
+  color: var(--text-muted); font-size: 11.5px; font-weight: 650; cursor: pointer;
+}
+.nv-map-inview input { accent-color: var(--blue); margin: 0; }
+.nv-map-store { position: relative; }
+.nv-map-store.is-hover:not(.is-active) { background: var(--elevated); }
+.nv-map-store:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
+.nv-map-store-meta svg { color: var(--gold, #d4a017); fill: currentColor; }
+.nv-map-rank {
+  position: absolute; left: 4px; top: 4px; z-index: 1;
+  display: grid; place-items: center;
+  width: 17px; height: 17px; border-radius: 50%;
+  background: var(--blue); color: #fff;
+  font-size: 10px; font-weight: 800;
+}
+
+.nv-map-steps { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 12px; }
+.nv-map-steps summary { cursor: pointer; font-size: 13px; font-weight: 700; color: var(--blue); }
+.nv-map-steps ol { margin: 10px 0 0; padding: 0 0 0 20px; display: grid; gap: 6px; max-height: 240px; overflow: auto; }
+.nv-map-steps li { font-size: 13px; }
+.nv-map-steps li span { margin-right: 6px; }
+.nv-map-steps li em { font-style: normal; color: var(--text-muted); font-size: 12px; }
+.nv-map-detail-note { margin: 12px 0 0; color: var(--text-muted); font-size: 12.5px; }
+.nv-map-linkbtn { border: 0; padding: 0; background: none; color: var(--blue); font: inherit; font-weight: 700; cursor: pointer; text-decoration: underline; }
 
 /* ============================== BUYER ACCOUNT ============================== */
 .nv-acc { display: grid; gap: 18px; }
@@ -1758,6 +1859,10 @@
   .nv-map-list { max-height: 280px; }
   .nv-map-head-actions { width: 100%; }
   .nv-map-search { flex: 1 1 100%; }
+  .nv-map-sort { margin-left: 0; }
+  .nv-map-sep { display: none; }
+  .nv-map-tools { top: 8px; right: 8px; }
+  .nv-map-legend { display: none; }
   .nv-map-search input { font-size: 16px; }
   .nv-map-detail { padding: 14px; }
   .nv-map.is-fullscreen { padding: 12px 12px 18px; }

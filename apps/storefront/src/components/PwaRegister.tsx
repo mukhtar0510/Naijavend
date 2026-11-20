@@ -58,8 +58,8 @@ export function PwaRegister() {
       type="button"
       className="pwa-install-btn"
       onClick={install}
-      title="Install Naijavend on this device"
-      aria-label="Install Naijavend app"
+      title="Install Kwaravend on this device"
+      aria-label="Install Kwaravend app"
     >
       ⬇ Install app
     </button>

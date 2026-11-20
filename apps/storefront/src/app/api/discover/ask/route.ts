@@ -48,7 +48,7 @@ function fallbackAnswer(q: string, stores: CatalogStore[], origin: { lat: number
   const matched = scored.filter((m) => m.score >= 2);
   if (matched.length === 0) {
     return {
-      reply: `I couldn't find anything on Naijavend matching “${q.slice(0, 80)}” yet — the marketplace grows daily, so check Discover or browse the rankings for the best-rated stores right now.`,
+      reply: `I couldn't find anything on Kwaravend matching “${q.slice(0, 80)}” yet — the marketplace grows daily, so check Discover or browse the rankings for the best-rated stores right now.`,
       stores: [],
     };
   }
@@ -59,7 +59,7 @@ function fallbackAnswer(q: string, stores: CatalogStore[], origin: { lat: number
     ? ` It's about ${formatDistance(haversineKm(origin, { lat: first.lat, lng: first.lng }))} from you.`
     : '';
   return {
-    reply: `Based on what's listed on Naijavend, ${names.split(',')[0].trim()} looks like your best bet.${itemLine}${distLine} Tap a store below to see everything they offer.`,
+    reply: `Based on what's listed on Kwaravend, ${names.split(',')[0].trim()} looks like your best bet.${itemLine}${distLine} Tap a store below to see everything they offer.`,
     stores: matched.map((m) => ({ slug: m.s.slug, name: m.s.name, category: m.s.category })),
   };
 }
@@ -77,7 +77,7 @@ async function geminiAnswer(q: string, stores: CatalogStore[], origin: { lat: nu
   }).join('\n');
 
   const prompt = [
-    'You are the Naijavend shopping assistant for a Nigerian marketplace.',
+    'You are the Kwaravend shopping assistant for a Nigerian marketplace.',
     label ? `The shopper is around ${label}.` : '',
     `Shopper asked: "${q.slice(0, 300)}"`,
     'Catalogue (the ONLY facts you may use — never invent products or prices):',
@@ -121,7 +121,7 @@ export async function POST(req: NextRequest) {
   const b = body as Record<string, unknown>;
   const question = sanitizeText(b.q ?? '', 300);
   if (question.length < 3) {
-    return apiError(422, 'empty_question', 'Ask me something — e.g. “who sells cakes in Lekki?”');
+    return apiError(422, 'empty_question', 'Ask me something — e.g. “who sells fabric in Tanke?”');
   }
   let origin: { lat: number; lng: number } | null = null;
   const latNum = Number(b.lat);

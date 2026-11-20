@@ -1,4 +1,4 @@
-// Naijavend service worker — installable PWA + offline mode.
+// Kwaravend service worker — installable PWA + offline mode.
 //
 // Strategy:
 //  - Precache the app shell (offline page + icons) at install.
@@ -7,7 +7,7 @@
 //  - Static assets (/_next/static, /icons): cache-first (immutable content).
 //  - Never intercept: Supabase REST/auth/storage, maps tiles, fonts CSS (network
 //    only — data must be live and user-specific).
-const VERSION = 'naijavend-v3';
+const VERSION = 'kwaravend-v3';
 const SHELL = [
   '/offline',
   '/icons/icon-192.png',

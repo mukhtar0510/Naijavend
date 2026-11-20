@@ -5,6 +5,7 @@ import { Stars } from '@/components/Stars';
 import { embedText } from '@idevtenancy/ai';
 import { parseSearchQuery } from '@/lib/search-terms';
 import { isMissingColumn } from '@/lib/supabase';
+import { FEATURES } from '@/lib/flags';
 import type { Store, StoreRatingStats, StoreTheme } from '@idevtenancy/shared';
 
 export const dynamic = 'force-dynamic';
@@ -25,7 +26,7 @@ export default async function SearchPage({
   const q = (searchParams.q ?? '').trim().slice(0, 80);
   const kind = KINDS.has(searchParams.kind ?? '') ? (searchParams.kind as string) : 'all';
 
-  // What the buyer actually asked for ("…under 15k in Lagos" → budget + city).
+  // What the buyer actually asked for ("…under 15k in Tanke" → budget + city).
   const parsed = q ? parseSearchQuery(q) : null;
   const effectiveKind = kind === 'all' && parsed?.kind ? parsed.kind : kind;
 
@@ -226,8 +227,8 @@ export default async function SearchPage({
         });
 
         // Location/category filters apply only when they leave something to
-        // show — a Lagos search must never end on an empty store list just
-        // because every Lagos store left its address blank.
+        // show — an Ilorin-area search must never end on an empty store list just
+        // because every Ilorin store left its address blank.
         const storeKept = scoredStores.filter(({ row }) => {
           if (cityLc && !String(row.address ?? '').toLowerCase().replace(/\s+/g, '').includes(cityLc)) return false;
           if (category && String(row.category ?? '').toLowerCase() !== category) return false;
@@ -262,7 +263,7 @@ export default async function SearchPage({
     <main>
       <div className="page-intro">
         <div className="container">
-          <h1>{q ? `Results for “${q}”` : 'Search Naijavend'}</h1>
+          <h1>{q ? `Results for “${q}”` : 'Search Kwaravend'}</h1>
           <p>Products, services and stores — one search box.</p>
         </div>
       </div>      <div className="container" style={{ padding: '28px 20px' }}>
@@ -273,7 +274,7 @@ export default async function SearchPage({
           name="q"
           defaultValue={q ?? ''}
           placeholder="Search products, services or stores…"
-          aria-label="Search Naijavend"
+          aria-label="Search Kwaravend"
           maxLength={80}
         />
         <select name="kind" defaultValue={kind} aria-label="Search category">
@@ -288,9 +289,14 @@ export default async function SearchPage({
       {!q && (
         <div className="card" style={{ marginTop: 18, maxWidth: 560 }}>
           <p style={{ margin: 0 }}>
-            Try “cheap gift under 15k in Lagos”, “braids near me”, “ankara fabric” — or browse{' '}
-            <Link href="/discover">all stores</Link>,{' '}
-            <Link href="/rankings">top-ranked stores</Link>.
+            Try “cheap gift under 15k in Tanke”, “braids near me”, “ankara fabric” — or browse{' '}
+            <Link href="/discover">all stores</Link>
+            {FEATURES.rankings ? (
+              <>
+                , <Link href="/rankings">top-ranked stores</Link>
+              </>
+            ) : null}
+            .
           </p>
         </div>
       )}

@@ -46,6 +46,7 @@ alter table public.digital_deliveries enable row level security;
 -- Nobody reads deliveries directly through the anon client; the download route
 -- uses the service role. These policies exist so the service role is the ONLY
 -- path (deny-by-default with explicit policies is the safest shape here).
+drop policy if exists "no public anonym read on digital deliveries" on public.digital_deliveries;
 create policy "no public anonym read on digital deliveries"
   on public.digital_deliveries for select
   to anon

@@ -4,10 +4,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import QRCode from 'qrcode';
 import { LinkIcon, CheckIcon } from '@/components/SocialIcons';
 
-// Branded QR codes for Naijavend store + product sharing — a custom card
+// Branded QR codes for Kwaravend store + product sharing — a custom card
 // layout, not just a bare square: glacier-blue frame with a header band
 // ("SCAN ME" + store/product name), the QR modules in the seller's accent,
-// a centre logo well (seller logo, or the built-in Naijavend mark), and a
+// a centre logo well (seller logo, or the built-in Kwaravend mark), and a
 // footer band with the store name + URL. The whole card downloads as one PNG,
 // so flyers, price tags and shop windows get the full branded layout.
 // Rendered client-side with `qrcode` — no server cost, no external image API.
@@ -34,7 +34,7 @@ interface StoreQrCodeProps {
 const QUIET_ZONE = 14; // px white margin around the modules — required for scans
 const CARD_W = 520; // logical card width of the exported PNG
 
-/** Built-in Naijavend fallback logo: rounded badge with a location-pin + bag. */
+/** Built-in Kwaravend fallback logo: rounded badge with a location-pin + bag. */
 function drawDefaultLogo(ctx: CanvasRenderingContext2D, cx: number, cy: number, size: number, accent: string) {
   const r = size / 2;
   ctx.save();

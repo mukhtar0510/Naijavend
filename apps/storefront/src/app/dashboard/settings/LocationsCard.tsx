@@ -59,7 +59,7 @@ async function uploadLocationPhoto(file: File): Promise<string> {
 }
 
 /**
- * Multi-location manager: add named branches ("Lekki shop", "Yaba kiosk" —
+ * Multi-location manager: add named branches ("Tanke shop", "Fate kiosk" —
  * or plain Store 1 / Store 2), each with its own address, pin, phone and
  * opening hours. Staff can be tagged to branches on the Staff page.
  */
@@ -179,7 +179,7 @@ export function LocationsCard({ storeName, initialLocations }: { storeName: stri
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <div className="field" style={{ flex: 1, minWidth: 180 }}>
             <label htmlFor="loc-label">Branch name</label>
-            <input id="loc-label" type="text" value={draft.label} onChange={(e) => set({ label: e.target.value })} placeholder="Lekki flagship / Store 2" maxLength={60} />
+            <input id="loc-label" type="text" value={draft.label} onChange={(e) => set({ label: e.target.value })} placeholder="Tanke flagship / Store 2" maxLength={60} />
           </div>
           <div className="field" style={{ flex: 1, minWidth: 180 }}>
             <label htmlFor="loc-phone">Phone (optional)</label>
@@ -188,7 +188,7 @@ export function LocationsCard({ storeName, initialLocations }: { storeName: stri
         </div>
         <div className="field">
           <label htmlFor="loc-addr">Address</label>
-          <input id="loc-addr" type="text" value={draft.address} onChange={(e) => set({ address: e.target.value })} placeholder="5 Admiralty Way, Lekki Phase 1, Lagos" maxLength={300} />
+          <input id="loc-addr" type="text" value={draft.address} onChange={(e) => set({ address: e.target.value })} placeholder="12 Ibrahim Taiwo Road, Tanke, Ilorin" maxLength={300} />
         </div>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <div className="field" style={{ flex: 1, minWidth: 140 }}>

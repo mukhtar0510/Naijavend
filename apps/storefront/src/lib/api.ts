@@ -11,6 +11,6 @@ export function apiOk<T>(data: T, status = 200) {
 
 // Never leak internal DB errors to clients (backend skill #51).
 export function internalError(logContext: string, err: unknown) {
-  console.error(`[Naijavend] ${logContext}:`, err);
+  console.error(`[Kwaravend] ${logContext}:`, err);
   return apiError(500, 'internal_error', 'Something failed on our side. Try again shortly.');
 }

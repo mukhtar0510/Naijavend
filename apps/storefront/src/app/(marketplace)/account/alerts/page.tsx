@@ -4,7 +4,7 @@ import { getCustomerClient, getCustomerUser } from '@/lib/auth';
 import { AlertsInbox } from './AlertsInbox';
 
 export const dynamic = 'force-dynamic';
-export const metadata: Metadata = { title: 'Alerts — Naijavend' };
+export const metadata: Metadata = { title: 'Alerts — Kwaravend' };
 
 interface AlertRow {
   id: string;

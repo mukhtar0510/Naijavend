@@ -6,14 +6,14 @@ const OWN = ownHostsFromSiteUrl('https://naijacart-roan.vercel.app');
 describe('classifyTrafficSource', () => {
   it('never shows localhost or other dev traffic', () => {
     for (const ref of [
-      'http://localhost:3000/s/amaka',
+      'http://localhost:3000/s/kwara-fashions',
       'http://localhost:3002/',
       'http://127.0.0.1:3000/',
       'http://192.168.1.10:3000/',
       'http://10.0.0.5/',
       'http://172.20.3.4/',
       'http://mybox.local/',
-      'http://naijavend.test/',
+      'http://kwaravend.test/',
       'file:///C:/Users/mukhtar/index.html',
       'localhost:3000',
     ]) {
@@ -23,11 +23,11 @@ describe('classifyTrafficSource', () => {
     }
   });
 
-  it('labels browsing Naijavend itself as the home page', () => {
+  it('labels browsing Kwaravend itself as the home page', () => {
     expect(classifyTrafficSource('https://naijacart-roan.vercel.app/', null, OWN)).toMatchObject({ kind: 'home', label: 'Home page' });
-    expect(classifyTrafficSource('https://naijacart-roan.vercel.app/s/amaka', null, OWN).label).toBe('Home page');
+    expect(classifyTrafficSource('https://naijacart-roan.vercel.app/s/kwara-fashions', null, OWN).label).toBe('Home page');
     // Relative and deploy-URL referrers are still "on our site".
-    expect(classifyTrafficSource('/s/amaka', null, OWN).label).toBe('Home page');
+    expect(classifyTrafficSource('/s/kwara-fashions', null, OWN).label).toBe('Home page');
     expect(classifyTrafficSource('https://naijacart-hm9qcfv0w-mukhtars-projects-3ebe63be.vercel.app/', null, OWN).label).toBe('Home page');
   });
 

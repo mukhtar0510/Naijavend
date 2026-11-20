@@ -218,7 +218,7 @@ export function AiPickRow() {
             <input
               type="text"
               className="ai-picks-input"
-              placeholder='e.g. “Who sells cakes in Lekki under ₦20,000?”'
+              placeholder='e.g. “Who sells fabric in Tanke under ₦20,000?”'
               value={askInput}
               onChange={(e) => setAskInput(e.target.value)}
               maxLength={200}

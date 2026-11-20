@@ -879,7 +879,7 @@
 
 /* ============ Store-site theming (per-store appearance from store_themes) ============
    The /s/[slug] layout sets --st-* custom properties from the seller's chosen theme;
-   everything below picks them up, falling back to Naijavend defaults. */
+   everything below picks them up, falling back to Kwaravend defaults. */
 .site-shell {
   --st-accent: var(--blue);
   --st-accent-soft: var(--blue-soft);
@@ -922,7 +922,7 @@
 .site-shell .store-masthead-name { font-family: var(--st-font-heading); }
 
 /* Optional per-site text colours (seller-chosen): --st-text/--st-heading/--st-muted
-   are only set when the seller picked them; fallback = Naijavend tokens. */
+   are only set when the seller picked them; fallback = Kwaravend tokens. */
 .site-shell {
   --st-text: var(--text);
   --st-heading: var(--st-text);
@@ -1055,8 +1055,8 @@
   .site-shell[data-hover-anim='zoom'] a.listing-card:hover .catalogue-cover { transform: none; }
 }
 
-/* Platform links ("Sell on Naijavend", "More stores", legal pages) belong to
-   Naijavend, not the seller's theme — exempt them from --st-* overrides so a
+/* Platform links ("Sell on Kwaravend", "More stores", legal pages) belong to
+   Kwaravend, not the seller's theme — exempt them from --st-* overrides so a
    loud seller palette can't make platform links unreadable. */
 .site-shell .xplat-link,
 .site-shell a.xplat-link,

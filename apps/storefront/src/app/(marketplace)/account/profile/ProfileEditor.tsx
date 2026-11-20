@@ -155,7 +155,7 @@ export function ProfileEditor({ email, initialName, initialPhone, initialAvatarU
           value={name}
           maxLength={80}
           onChange={(e) => setName(e.target.value)}
-          placeholder="e.g. Amaka Obi"
+          placeholder="e.g. Aminat Bello"
         />
       </div>
 

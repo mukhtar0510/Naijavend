@@ -1,14 +1,18 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import {
   ArrowRight,
   BadgeCheck,
   MapPin,
   MessageCircle,
+  Palette,
   ShieldCheck,
   Sparkles,
   Star,
   Store as StoreIcon,
+  Wand2,
 } from 'lucide-react';
+import { BRAND, STARTER_TEMPLATE_COUNT } from '@idevtenancy/shared';
 import { supabaseAnon } from '@/lib/supabase';
 import { categoryClass, categoryEmoji, categoryLabel, STORE_CATEGORIES } from '@idevtenancy/shared';
 import { Stars } from '@/components/Stars';
@@ -18,10 +22,15 @@ import { ProductCard, type ProductCardItem } from '@/components/ProductCard';
 import { RecentlyViewed } from '@/components/RecentlyViewed';
 import { HeroSearch } from '@/components/HeroSearch';
 import { Reveal, Stagger, StaggerItem } from '@/components/brand/Motion';
+import { StoreDesigner } from '@/components/brand/StoreDesigner';
 import type { Store, StoreRatingStats, StoreTheme } from '@idevtenancy/shared';
 
 export const revalidate = 60; // ISR — static-fast, invalidated on seller writes via revalidatePath
-export const metadata = { title: 'Marketplace home' };
+export const metadata: Metadata = {
+  title: 'Home — shop Ilorin stores',
+  description:
+    'Kwaravend Home: browse verified Ilorin storefronts, see prices in naira, and order, book or chat on WhatsApp. Every seller is based in Kwara State.',
+};
 
 // Featured trades on the homepage rail. Deliberately short: the goal is
 // orientation, not a directory — "All categories" leads to /discover.
@@ -36,6 +45,10 @@ const HOME_CATEGORIES = [
   'education',
 ] as const;
 
+// Real Ilorin neighbourhoods, so the map band points at places a buyer can
+// actually walk to instead of cities the product does not serve yet.
+const ILORIN_AREAS = ['Tanke', 'Fate', 'Taiwo Road', 'Unity', 'GRA', 'Sango'];
+
 // PostgREST one-to-one embeds return objects, one-to-many arrays — normalise both.
 function one<T>(v: T | T[] | null | undefined): T | null {
   if (v == null) return null;
@@ -45,13 +58,13 @@ function one<T>(v: T | T[] | null | undefined): T | null {
 const TRUST = [
   {
     icon: ShieldCheck,
-    title: 'Real businesses',
-    text: 'Every store is a Nigerian business with a public site and a pinned address.',
+    title: 'Real Ilorin businesses',
+    text: 'Every store is a Kwara business with a public site and a pinned Ilorin address.',
   },
   {
     icon: MapPin,
-    title: 'Real locations',
-    text: 'See open-now status, walking and driving distance on the street map.',
+    title: 'Walkable locations',
+    text: 'See open-now status plus walking and driving distance from where you are in Ilorin.',
   },
   {
     icon: Star,
@@ -163,33 +176,27 @@ export default async function HomePage() {
     <main className="nv-home">
       {/* ================================ HERO ================================ */}
       <section className="nv-hero">
-        <div className="nv-hero-canvas" aria-hidden>
-          <span className="nv-hero-grid" />
-          <span className="nv-hero-orb nv-orb-a" />
-          <span className="nv-hero-orb nv-orb-b" />
-          <span className="nv-hero-orb nv-orb-c" />
-        </div>
-
+        <span className="nv-hero-grain" aria-hidden />
         <div className="container nv-hero-inner">
           <div className="nv-hero-copy">
             <Reveal>
               <span className="nv-pill">
                 <span className="nv-pill-dot" aria-hidden />
-                Nigeria&apos;s marketplace of real storefronts
+                Home · {BRAND.launchRegion.city}, {BRAND.launchRegion.state} State
               </span>
             </Reveal>
 
             <Reveal delay={0.06}>
               <h1 className="nv-hero-title">
-                Shop the best of Nigeria,
+                Your home for Ilorin&apos;s
                 <br />
-                <span className="nv-grad-text">one real store at a time.</span>
+                <span className="nv-grad">real storefronts.</span>
               </h1>
             </Reveal>
 
             <Reveal delay={0.12}>
               <p className="nv-hero-sub">
-                Compare verified stores across Nigeria, see exactly where they are and what they
+                Compare verified Kwara stores, see exactly where they are in Ilorin and what they
                 sell in naira, then order, book or chat on WhatsApp — without leaving the page.
               </p>
             </Reveal>
@@ -213,12 +220,12 @@ export default async function HomePage() {
 
             <Reveal delay={0.3}>
               <div className="nv-hero-proof">
-                <div className="nv-avatars" aria-hidden>
+                <span className="nv-avatars" aria-hidden>
                   <span>🛍️</span>
                   <span>💅</span>
                   <span>🍲</span>
                   <span>👗</span>
-                </div>
+                </span>
                 <p>
                   <strong>Verified sellers, honest reviews</strong>
                   <span>Naira prices · street-level map · no fake stars</span>
@@ -236,20 +243,14 @@ export default async function HomePage() {
                   <i />
                   <i />
                 </span>
-                <span className="nv-hp-url">
-                  naijavend.com/s/{spotlight?.slug ?? 'your-store'}
-                </span>
+                <span className="nv-hp-url">kwaravend.com/s/{spotlight?.slug ?? 'your-store'}</span>
               </div>
 
               <div
                 className="nv-hp-banner"
-                style={
-                  spotlightBanner
-                    ? { backgroundImage: `url('${spotlightBanner}')` }
-                    : undefined
-                }
+                style={spotlightBanner ? { backgroundImage: `url('${spotlightBanner}')` } : undefined}
               >
-                {!spotlightBanner && <span className="nv-hp-banner-mark">Naijavend</span>}
+                {!spotlightBanner && <span className="nv-hp-banner-mark">Kwaravend</span>}
               </div>
 
               <div className="nv-hp-body">
@@ -259,7 +260,7 @@ export default async function HomePage() {
                     <img src={spotlightLogo} alt="" className="nv-hp-logo" />
                   ) : (
                     <span className="nv-hp-logo nv-hp-logo-fallback">
-                      {(spotlight?.name ?? 'N').charAt(0).toUpperCase()}
+                      {(spotlight?.name ?? 'K').charAt(0).toUpperCase()}
                     </span>
                   )}
                   <div>
@@ -268,8 +269,7 @@ export default async function HomePage() {
                       <VerifiedTick size={13} />
                     </strong>
                     <span>
-                      {spotlight ? categoryLabel(spotlight.category) : 'Beauty & lifestyle'} ·
-                      Lagos
+                      {spotlight ? categoryLabel(spotlight.category) : 'Beauty & lifestyle'} · Ilorin
                     </span>
                   </div>
                 </div>
@@ -282,8 +282,13 @@ export default async function HomePage() {
 
                 <div className="nv-hp-foot">
                   <span>
-                    <Star size={12} /> {spotlight?.stats?.avg_stars ? Number(spotlight.stats.avg_stars).toFixed(1) : '4.9'}
-                    <em>{spotlight?.stats?.review_count ? `${spotlight.stats.review_count} reviews` : '128 reviews'}</em>
+                    <Star size={12} />{' '}
+                    {spotlight?.stats?.avg_stars ? Number(spotlight.stats.avg_stars).toFixed(1) : '4.9'}
+                    <em>
+                      {spotlight?.stats?.review_count
+                        ? `${spotlight.stats.review_count} reviews`
+                        : '128 reviews'}
+                    </em>
                   </span>
                   <span className="nv-hp-open">
                     <i /> Open now
@@ -303,7 +308,7 @@ export default async function HomePage() {
       </section>
 
       {/* ============================== TRUST BAR ============================= */}
-      <section className="nv-trust" aria-label="Why buy on Naijavend">
+      <section className="nv-trust" aria-label="Why buy on Kwaravend">
         <div className="container nv-trust-grid">
           {TRUST.map(({ icon: Icon, title, text }) => (
             <div key={title} className="nv-trust-item">
@@ -319,7 +324,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <div className="container nv-home-body">
+      <div className="container nv-body">
         {error && <div className="alert alert-error">{error}</div>}
 
         {/* ============================== CATEGORIES ============================ */}
@@ -327,7 +332,7 @@ export default async function HomePage() {
           <div className="nv-section-head">
             <div>
               <h2 id="nv-cats-title">Shop by trade</h2>
-              <p>From tailors in Surulere to bakeries in Abuja — pick a trade to start.</p>
+              <p>Tailors in Tanke, food sellers in Fate, tech shops on Taiwo Road — pick a trade to start.</p>
             </div>
             <Link href="/discover" className="nv-section-link">
               All {STORE_CATEGORIES.length} categories <ArrowRight size={15} />
@@ -351,8 +356,8 @@ export default async function HomePage() {
         <section className="nv-section" aria-labelledby="nv-stores-title">
           <div className="nv-section-head">
             <div>
-              <h2 id="nv-stores-title">Fresh on Naijavend</h2>
-              <p>New storefronts from sellers who just went live.</p>
+              <h2 id="nv-stores-title">Fresh on Kwaravend</h2>
+              <p>New storefronts from Ilorin sellers who just went live.</p>
             </div>
             <Link href="/discover" className="nv-section-link">
               See all stores <ArrowRight size={15} />
@@ -422,15 +427,17 @@ export default async function HomePage() {
                           </div>
                         </div>
 
-                        <p className="nv-store-desc">
-                          {store.description.slice(0, 130)}
-                          {store.description.length > 130 ? '…' : ''}
-                        </p>
+                        {store.description ? (
+                          <p className="nv-store-desc">
+                            {store.description.slice(0, 130)}
+                            {store.description.length > 130 ? '…' : ''}
+                          </p>
+                        ) : null}
 
                         <div className="nv-store-foot">
                           <span className="nv-store-addr">
                             <MapPin size={13} aria-hidden />
-                            {store.address ?? 'Online store'}
+                            {store.address?.trim() || 'Online store'}
                           </span>
                           <span className="nv-store-visit">
                             Visit <ArrowRight size={14} aria-hidden />
@@ -454,7 +461,7 @@ export default async function HomePage() {
             <div className="nv-section-head">
               <div>
                 <h2 id="nv-trending-title">Trending right now</h2>
-                <p>The products buyers are ordering most across every store.</p>
+                <p>The products buyers are ordering most across every Ilorin store.</p>
               </div>
               <Link href="/search" className="nv-section-link">
                 Search everything <ArrowRight size={15} />
@@ -467,6 +474,29 @@ export default async function HomePage() {
             </div>
           </section>
         )}
+
+        {/* ========================= STORE DESIGNER ========================= */}
+        <section className="nv-section" id="designer" aria-labelledby="nv-designer-title">
+          <div className="sdg-band">
+            <div className="nv-section-head sdg-band-head">
+              <div>
+                <span className="sdg-eyebrow">
+                  <Palette size={13} aria-hidden /> Storefront designer
+                </span>
+                <h2 id="nv-designer-title">Preview your page and pick a template</h2>
+                <p>
+                  Every plan starts with {STARTER_TEMPLATE_COUNT} templates. Type a vibe and the AI
+                  theme designer drafts the colours, fonts and layout — then open your free store
+                  to save it.
+                </p>
+              </div>
+              <Link href="/dashboard" className="btn btn-primary">
+                <Wand2 size={16} aria-hidden /> Design my store
+              </Link>
+            </div>
+            <StoreDesigner />
+          </div>
+        </section>
       </div>
 
       {/* ================================ MAP BAND ============================ */}
@@ -475,17 +505,17 @@ export default async function HomePage() {
           <div className="nv-mapband">
             <div className="nv-mapband-copy">
               <span className="nv-pill nv-pill-invert">
-                <MapPin size={13} aria-hidden /> Street-level map
+                <MapPin size={13} aria-hidden /> Ilorin street map
               </span>
               <h2 id="nv-map-title">Find out who&apos;s open near you</h2>
               <p>
-                Real addresses, live open-now status and walking or driving routes to every store.
+                Real addresses, live open-now status and walking or driving routes across Ilorin.
                 Share your location once — it stays in your browser.
               </p>
               <div className="nv-mapband-chips">
-                {['Lagos', 'Abuja', 'Port Harcourt', 'Ibadan', 'Kano'].map((city) => (
-                  <Link key={city} href="/discover?view=map" className="nv-mapband-chip">
-                    {city}
+                {ILORIN_AREAS.map((area) => (
+                  <Link key={area} href="/discover?view=map" className="nv-mapband-chip">
+                    {area}
                   </Link>
                 ))}
               </div>
@@ -519,8 +549,8 @@ export default async function HomePage() {
       <section className="nv-section container" aria-labelledby="nv-steps-title">
         <div className="nv-section-head">
           <div>
-            <h2 id="nv-steps-title">How Naijavend works</h2>
-            <p>Built for how shopping actually happens here.</p>
+            <h2 id="nv-steps-title">How Kwaravend works</h2>
+            <p>Built for how shopping actually happens in Ilorin.</p>
           </div>
         </div>
         <div className="nv-steps">
@@ -544,10 +574,10 @@ export default async function HomePage() {
         <div className="nv-cta">
           <div>
             <span className="nv-pill nv-pill-invert">Free, forever</span>
-            <h2 id="nv-cta-title">Your store deserves its own website.</h2>
+            <h2 id="nv-cta-title">Your Ilorin store deserves its own website.</h2>
             <p>
-              Catalogue, bookings, chat, POS, staff accounts and a blue tick — all included. Our
-              AI can design the whole storefront for you in minutes.
+              Catalogue, bookings, chat, POS, staff accounts and a blue tick — all included. Our AI
+              can design the whole storefront for you in minutes.
             </p>
           </div>
           <div className="nv-cta-actions">

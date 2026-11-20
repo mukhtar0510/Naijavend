@@ -54,7 +54,7 @@ export function SignInPanel({ next, initialMode }: { next: string; initialMode: 
       </div>
 
       <div className="nv-auth-head">
-        <h1>{mode === 'signin' ? 'Welcome back to Naijavend' : 'Create your free Naijavend account'}</h1>
+        <h1>{mode === 'signin' ? 'Welcome back to Kwaravend' : 'Create your free Kwaravend account'}</h1>
         <p>
           {mode === 'signin'
             ? 'One tap and you are in. No password to forget, no forms to fill.'

@@ -40,7 +40,7 @@ export function ShareBar({
   logoUrl?: string | null;
 }) {
   const [copied, setCopied] = useState(false);
-  const text = `Check out ${storeName} on Naijavend`;
+  const text = `Check out ${storeName} on Kwaravend`;
 
   async function share(target: (typeof TARGETS)[number]['key']) {
     track(storeId, 'share', target);

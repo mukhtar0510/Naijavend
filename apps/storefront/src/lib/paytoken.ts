@@ -14,7 +14,7 @@ function secret(): string {
     // so tokens can't be forged without reading the server env, and rotates
     // whenever ADMIN_EMAILS changes (invalidating outstanding checkout links).
     cachedSecret = createHash('sha256')
-      .update(`${process.env.ADMIN_EMAILS ?? 'idevtenancy'}::naijavend-mock-pay-v1`)
+      .update(`${process.env.ADMIN_EMAILS ?? 'idevtenancy'}::kwaravend-mock-pay-v1`)
       .digest('hex');
   }
   return cachedSecret;

@@ -4,7 +4,7 @@ import { getCustomerUser } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = { title: 'Your conversations — Naijavend' };
+export const metadata: Metadata = { title: 'Your conversations — Kwaravend' };
 
 interface Convo {
   storeId: string;

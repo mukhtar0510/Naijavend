@@ -39,8 +39,8 @@ export function DashMobileNav({
   return (
     <div className="dash-mobile">
       <header className="dash-mobile-bar">
-        <Link href="/dashboard" className="logo" aria-label="Naijavend dashboard">
-          Naija<span>vend</span>
+        <Link href="/dashboard" className="logo" aria-label="Kwaravend dashboard">
+          Kwara<span>vend</span>
         </Link>
         <div className="dash-mobile-actions">
           <button

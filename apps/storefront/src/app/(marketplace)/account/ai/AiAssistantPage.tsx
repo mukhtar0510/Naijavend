@@ -119,7 +119,7 @@ export default function AiAssistantPage() {
     <main className="ai-app">
       <header className="ai-app-top">
         <div>
-          <h2 style={{ margin: 0, fontSize: 17 }}>💬 Ask Naijavend</h2>
+          <h2 style={{ margin: 0, fontSize: 17 }}>💬 Ask Kwaravend</h2>
           <span className="muted" style={{ fontSize: 12.5 }}>
             Your shopping assistant · catalogue + your own orders and bookings
           </span>
@@ -139,7 +139,7 @@ export default function AiAssistantPage() {
           <>
             <div className="ai-bubble ai-bubble-bot">
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 4 }}>
-                <strong>Naijavend shopping assistant</strong>
+                <strong>Kwaravend shopping assistant</strong>
                 {source && <span className="ai-provider-badge">powered by {source}</span>}
               </div>
               <div className="ai-reply">{answer.reply}</div>
@@ -196,7 +196,7 @@ export default function AiAssistantPage() {
         ) : (
           <div className="ai-app-empty">
             <div className="ai-app-empty-icon">🛍️</div>
-            <h3>Ask Naijavend</h3>
+            <h3>Ask Kwaravend</h3>
             <p className="muted">
               Ask about stores, products, prices, your orders and bookings — the assistant answers from the
               marketplace catalogue and your own account, not guesses.
@@ -218,13 +218,13 @@ export default function AiAssistantPage() {
         )}
 
         {status === 'asking' && (
-          <div className="ai-bubble ai-bubble-bot ai-bubble-typing">Asking Naijavend…</div>
+          <div className="ai-bubble ai-bubble-bot ai-bubble-typing">Asking Kwaravend…</div>
         )}
       </div>
 
       {status === 'idle' && !answer && (
         <div className="muted" style={{ fontSize: 12.5, textAlign: 'center', padding: '6px 12px 10px' }}>
-          Only stores listed on Naijavend and your own orders/bookings are used to answer. Nothing is invented.
+          Only stores listed on Kwaravend and your own orders/bookings are used to answer. Nothing is invented.
         </div>
       )}
 
@@ -236,9 +236,9 @@ export default function AiAssistantPage() {
           onChange={(e) => setQuestion(e.target.value)}
           onKeyDown={handleKeyDown}
           disabled={status === 'asking'}
-          placeholder="Ask anything — e.g. “who sells cakes in Lekki?” or “where is my last order?”"
+          placeholder="Ask anything — e.g. “who sells fabric in Tanke?” or “where is my last order?”"
           maxLength={300}
-          aria-label="Ask Naijavend"
+          aria-label="Ask Kwaravend"
         />
         <button
           type="submit"

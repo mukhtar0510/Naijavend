@@ -2,7 +2,7 @@
 //
 // A raw referrer is not something to show a seller: it can be "localhost:3000"
 // (their own dev browser), a deploy URL, or a bare domain. Sellers care about
-// three things — did the visitor browse Naijavend itself, find the store via a
+// three things — did the visitor browse Kwaravend itself, find the store via a
 // search engine, or arrive through a shared link — so every referrer is folded
 // into a small set of labels and dev/internal traffic is dropped entirely.
 
@@ -121,8 +121,8 @@ export function classifyTrafficSource(
   if (/localhost|127\.0\.0\.1|\[::1\]/i.test(raw)) return { kind: 'internal', label: '', ignore: true };
   if (/^file:\/\//i.test(raw)) return { kind: 'internal', label: '', ignore: true };
 
-  // Same-site referrers are often relative ("/s/amaka") — they came from
-  // another page on Naijavend, i.e. the home page, search or marketplace browse.
+  // Same-site referrers are often relative ("/s/kwara-fashions") — they came from
+  // another page on Kwaravend, i.e. the home page, search or marketplace browse.
   if (raw.startsWith('/')) {
     return { kind: 'home', label: SOURCE_LABELS.home, ignore: false };
   }

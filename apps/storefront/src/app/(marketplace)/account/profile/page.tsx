@@ -50,7 +50,7 @@ export default async function ProfilePage() {
       <section aria-label="Appearance" style={{ marginTop: 28 }}>
         <h2 style={{ fontSize: 17, margin: '0 0 4px' }}>Appearance</h2>
         <p className="muted" style={{ margin: '0 0 12px', fontSize: 13 }}>
-          Choose how Naijavend looks on this device. Store pages keep the seller&apos;s own branding.
+          Choose how Kwaravend looks on this device. Store pages keep the seller&apos;s own branding.
         </p>
         <ThemeSetting />
       </section>

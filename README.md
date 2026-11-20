@@ -1,4 +1,4 @@
-# Naijavend
+# Kwaravend
 
 Storefronts for Nigerian sellers — each seller gets their own customisable store site (`/s/<slug>`) inside a shared marketplace, with products, services, bookings, chat, a live map locator, ratings, blue-tick verification, referrals, announcements, and a PWA install experience.
 
@@ -30,8 +30,8 @@ Demo logins (dev seed): seller `amaka@demo.test`, customer `demo@demo.test` — 
    ```bash
    git init
    git add -A
-   git commit -m "Naijavend initial"
-   git remote add origin https://github.com/<you>/naijavend.git
+   git commit -m "Kwaravend initial"
+   git remote add origin https://github.com/<you>/kwaravend.git
    git push -u origin main
    ```
 2. On [vercel.com/new](https://vercel.com/new), import that repository. Vercel reads `vercel.json` and runs `pnpm install --frozen-lockfile` + `pnpm --filter @idevtenancy/storefront build` from the root automatically. No "Root Directory" override needed.
