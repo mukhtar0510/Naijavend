@@ -1,12 +1,11 @@
 'use client';
 
-// Store-page location map — a real Leaflet map (same themed tiles as the
-// discover locator) instead of the old keyless Google iframe. Shows the main
-// pin plus optional branch pins; clicking a pin opens a "Get directions" bubble.
-// Falls back to the Google iframe only if the container never mounts (SSR-safe
-// wrapper below keeps the page server-renderable).
+// Store-page location map: a MapLibre map with the same basemap styles as the
+// Discover locator. Shows the main pin plus optional branch pins; clicking a
+// pin opens a "Get directions" bubble.
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { createThemedMap } from '@/lib/mapFactory';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import { createThemedMap, ll } from '@/lib/mapFactory';
 
 export interface MapPin {
   lat: number;
@@ -23,22 +22,24 @@ interface InnerProps {
   height?: number;
 }
 
-function LeafletPins({ pins, height = 220 }: InnerProps) {
+const esc = (s: string) =>
+  s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+
+function MapPins({ pins, height = 220 }: InnerProps) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [ready, setReady] = useState(false);
   // Serialises map lifecycles on the one container: a remount (React dev
-  // double-mount, new pins) waits for the previous map to be removed first,
-  // otherwise Leaflet throws "Map container is already initialized".
+  // double-mount, new pins) waits for the previous map to be removed first.
   const lastRef = useRef<Promise<unknown>>(Promise.resolve());
 
   useEffect(() => {
     if (!ref.current || pins.length === 0) return;
-    let map: import('leaflet').Map | null = null;
+    let map: import('maplibre-gl').Map | null = null;
     let cancelled = false;
     const prev = lastRef.current;
     lastRef.current = (async () => {
       await prev;
-      const L = (await import('leaflet')).default;
+      const lib = await import('maplibre-gl');
       if (cancelled || !ref.current) return;
       map = await createThemedMap(ref.current, {
         center: [pins[0].lat, pins[0].lng],
@@ -52,9 +53,8 @@ function LeafletPins({ pins, height = 220 }: InnerProps) {
         map = null;
         return;
       }
-      const pts: [number, number][] = [];
-      // Detect duplicate coordinates (e.g. branch rows with the same point as
-      // the main pin) so we can collapse them into ONE marker listing all names.
+      // Collapse pins that share a coordinate (e.g. a branch row with the
+      // main pin's point) into ONE marker listing all names.
       const byCoord = new Map<string, MapPin[]>();
       for (const pin of pins) {
         const k = `${pin.lat.toFixed(6)},${pin.lng.toFixed(6)}`;
@@ -62,40 +62,30 @@ function LeafletPins({ pins, height = 220 }: InnerProps) {
         list.push(pin);
         byCoord.set(k, list);
       }
+      const bounds = new lib.LngLatBounds();
       for (const group of byCoord.values()) {
         const first = group[0];
-        // One marker per distinct coordinate; popup lists every label in the group.
-        const title = group.map((p) => p.label.replace(/</g, '&lt;')).join(' + ');
+        const title = group.map((p) => esc(p.label)).join(' + ');
         const addresses = group.filter((p) => p.address);
         const body =
           (addresses.length
-            ? `<br/><span style="font-size:12px">${addresses.map((p) => (p.address ?? '').replace(/</g, '&lt;')).join('<br/>')}</span>`
+            ? `<br/><span style="font-size:12px">${addresses.map((p) => esc(p.address ?? '')).join('<br/>')}</span>`
             : '') +
           (first.directionsUrl
-            ? `<br/><a href="${first.directionsUrl}" target="_blank" rel="noopener noreferrer">Get directions ↗</a>`
+            ? `<br/><a href="${esc(first.directionsUrl)}" target="_blank" rel="noopener noreferrer">Get directions ↗</a>`
             : '');
-        // Branded pin (Leaflet's default PNG marker breaks under Next's bundler).
-        const isMain = group.includes(pins[0]);
-        L.marker([first.lat, first.lng], {
-          icon: L.divIcon({
-            className: 'map-pin-wrap',
-            html: `<span class="map-pin map-pin-sm">${isMain ? '🏪' : '📍'}</span>`,
-            iconSize: [34, 34],
-            iconAnchor: [17, 17],
-            popupAnchor: [0, -16],
-          }),
-          title: group.map((p) => p.label).join(' + '),
-        })
-          .addTo(map)
-          .bindPopup(`<strong>${title}</strong>${body}`);
-        pts.push([first.lat, first.lng]);
+        const el = document.createElement('button');
+        el.type = 'button';
+        el.className = 'map-pin-wrap';
+        el.setAttribute('aria-label', group.map((p) => p.label).join(' + '));
+        el.innerHTML = `<span class="map-pin map-pin-sm">${group.includes(pins[0]) ? '🏪' : '📍'}</span>`;
+        new lib.Marker({ element: el, anchor: 'center' })
+          .setLngLat(ll(first.lat, first.lng))
+          .setPopup(new lib.Popup({ offset: 20, className: 'map-tip' }).setHTML(`<strong>${title}</strong>${body}`))
+          .addTo(map);
+        bounds.extend(ll(first.lat, first.lng));
       }
-      if (pts.length > 1) {
-        map.fitBounds(
-          (L as unknown as { latLngBounds(pts: [number, number][]): { pad(n: number): unknown } }).latLngBounds(pts).pad(0.3) as never,
-          { maxZoom: 16 }
-        );
-      }
+      if (byCoord.size > 1) map.fitBounds(bounds, { padding: 40, maxZoom: 16, duration: 0 });
       setReady(true);
     })();
     return () => {
@@ -116,7 +106,7 @@ function LeafletPins({ pins, height = 220 }: InnerProps) {
 }
 
 /**
- * Server-component-friendly wrapper: renders pins on a Leaflet map when
+ * Server-component-friendly wrapper: renders pins on a MapLibre map when
  * there are coordinates, otherwise nothing (callers hide the section).
  */
 export function MapEmbed({
@@ -145,7 +135,7 @@ export function MapEmbed({
 
   return (
     <div className="map-embed" style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)' }}>
-      <LeafletPins pins={pins} height={height} />
+      <MapPins pins={pins} height={height} />
       <a
         className="map-embed-open"
         href={directionsUrl(latitude, longitude, name)}

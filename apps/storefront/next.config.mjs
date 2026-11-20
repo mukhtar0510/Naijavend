@@ -30,12 +30,14 @@ const nextConfig = {
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com data:",
-      "img-src 'self' data: blob: https://*.supabase.co https://images.unsplash.com https://tile.openstreetmap.org https://server.arcgisonline.com",
+      "img-src 'self' data: blob: https://*.supabase.co https://images.unsplash.com https://tile.openstreetmap.org https://tiles.openfreemap.org https://server.arcgisonline.com",
       // Listing videos stream from Supabase Storage (media falls back to
       // default-src 'self' without this, which would block them).
       "media-src 'self' https://*.supabase.co",
-      "connect-src 'self' https://*.supabase.co https://router.project-osrm.org https://routing.openstreetmap.de https://tile.openstreetmap.org",
-      // No iframes are used anywhere (maps are Leaflet); block all framing.
+      "connect-src 'self' https://*.supabase.co https://router.project-osrm.org https://routing.openstreetmap.de https://tile.openstreetmap.org https://tiles.openfreemap.org https://server.arcgisonline.com",
+      // MapLibre parses vector tiles in a Web Worker it spawns from a blob: URL.
+      "worker-src 'self' blob:",
+      // No iframes are used anywhere (maps are MapLibre); block all framing.
       "frame-src 'none'",
       "form-action 'self'",
       "base-uri 'self'",

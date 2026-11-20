@@ -1,110 +1,154 @@
-// Shared Leaflet map factory — one place that decides tiles, theming and
-// controls for every map in the app (store locator, store-page embeds).
-// Client-only: import dynamic ('leaflet') at call time.
+// Shared MapLibre map factory — one place that decides basemap styles,
+// theming and controls for every map in the app (store locator, store-page
+// embeds). Client-only: maplibre-gl is imported dynamically at call time.
 'use client';
 
-export interface LeafletMapOptions {
+import type { Map as MlMap } from 'maplibre-gl';
+
+export interface ThemedMapOptions {
+  /** [lat, lng] — kept lat-first like the rest of the app; converted inside. */
   center: [number, number];
   zoom: number;
-  /** Use dark cartography when the app is in dark mode. Default: auto-detect. */
+  /** Use the dark vector style. Default: follow the app's data-theme. */
   dark?: boolean;
-  /** Show the Leaflet zoom +/- control (hidden by default; pinch/buttons suffice). */
+  /** Show the +/- / compass control (top-left). Default: false. */
   zoomControl?: boolean;
   scrollWheelZoom?: boolean;
-  /** Extra padding-bottom-right for attribution over overlays. */
-  attributionPrefix?: string;
-  /** Hard pan limit, e.g. one state. Pins outside it are unreachable. */
+  /** Hard pan limit as [[south, west], [north, east]], e.g. one state. */
   maxBounds?: [[number, number], [number, number]];
-  /** Add a Streets / Satellite switch (top-right). Default: false. */
+  /** Lowest allowed zoom (keeps the view from leaving the bounded city). */
+  minZoom?: number;
+  /** Add a Streets / Satellite switch control (top-right). Default: false. */
   layerSwitch?: boolean;
 }
 
 export type BaseLayerId = 'streets' | 'satellite';
 
-// Esri World Imagery — keyless satellite tiles (attribution required). Useful
-// in Ilorin where many shops sit on unnamed streets: buyers recognise the roof.
-const SATELLITE = {
-  url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-  attribution: 'Imagery &copy; Esri, Maxar, Earthstar Geographics',
+// OpenFreeMap: free, keyless OpenStreetMap vector tiles with real light and
+// dark styles (no CSS filter tricks, crisp labels at any zoom).
+const STYLES = {
+  light: 'https://tiles.openfreemap.org/styles/liberty',
+  dark: 'https://tiles.openfreemap.org/styles/dark',
 } as const;
 
-// CARTO basemaps now watermark free usage with "API KEY REQUIRED", so tiles
-// come from OpenStreetMap's standard tile server (free, keyless, attribution
-// required). Dark mode applies a CSS filter to the tile pane (invert + hue)
-// instead of a separate dark tile set — no API keys, no watermarks.
-const TILES = {
-  light: {
-    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  },
-  dark: {
-    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  },
-} as const;
+// Esri World Imagery — keyless satellite raster. Inserted *under* the label
+// layers, so satellite view keeps street and place names (a "hybrid" map).
+// Useful in Ilorin where many shops sit on unnamed streets.
+const SATELLITE_URL =
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+const SAT_SOURCE = 'nv-satellite';
+const SAT_LAYER = 'nv-satellite';
 
 export function prefersDarkMap(): boolean {
   if (typeof document === 'undefined') return false;
   return document.documentElement.getAttribute('data-theme') === 'dark';
 }
 
-/** A Leaflet map with a programmatic base-layer switch. */
-export type ThemedMap = import('leaflet').Map & { setBaseLayer?: (id: BaseLayerId) => void };
+/** A MapLibre map with a programmatic base-layer switch. */
+export type ThemedMap = MlMap & { setBaseLayer: (id: BaseLayerId) => void };
+
+/** [lat, lng] → MapLibre's [lng, lat]. */
+export const ll = (lat: number, lng: number): [number, number] => [lng, lat];
 
 /**
- * Creates a themed Leaflet map on `el`. Returns the map instance; the caller
- * owns adding markers/layers and destroying it on unmount.
+ * Creates a themed MapLibre map on `el` and resolves once its style has
+ * loaded (so callers can add sources/layers straight away). The caller owns
+ * adding markers/layers and calling `map.remove()` on unmount.
  */
-export async function createThemedMap(
-  el: HTMLElement,
-  opts: LeafletMapOptions
-): Promise<ThemedMap> {
-  const L = (await import('leaflet')).default;
+export async function createThemedMap(el: HTMLElement, opts: ThemedMapOptions): Promise<ThemedMap> {
+  const maplibregl = await import('maplibre-gl');
+  // v6's worker is a separate module file that webpack doesn't emit; it is
+  // copied to /public/maplibre by scripts/copy-maplibre-worker.mjs.
+  maplibregl.setWorkerUrl('/maplibre/maplibre-gl-worker.mjs');
   const dark = opts.dark ?? prefersDarkMap();
-  const tiles = dark ? TILES.dark : TILES.light;
 
-  const map = L.map(el, {
-    center: opts.center,
+  const map = new maplibregl.Map({
+    container: el,
+    style: dark ? STYLES.dark : STYLES.light,
+    center: ll(opts.center[0], opts.center[1]),
     zoom: opts.zoom,
-    zoomControl: opts.zoomControl ?? false,
-    scrollWheelZoom: opts.scrollWheelZoom ?? false,
-    attributionControl: true,
+    scrollZoom: opts.scrollWheelZoom ?? false,
+    attributionControl: { compact: true },
+    dragRotate: false,
+    pitchWithRotate: false,
+    ...(opts.minZoom != null ? { minZoom: opts.minZoom } : {}),
     ...(opts.maxBounds
-      ? { maxBounds: opts.maxBounds, maxBoundsViscosity: 0.9, minZoom: 7 }
+      ? {
+          maxBounds: [
+            ll(opts.maxBounds[0][0], opts.maxBounds[0][1]),
+            ll(opts.maxBounds[1][0], opts.maxBounds[1][1]),
+          ] as [[number, number], [number, number]],
+        }
       : {}),
+  }) as ThemedMap;
+  map.touchZoomRotate.disableRotation();
+
+  if (opts.zoomControl) {
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left');
+  }
+
+  // Resolve as soon as the *style* is ready (enough to add sources, layers
+  // and markers) rather than on 'load', which also waits for every first-view
+  // tile — on slow Nigerian mobile data that left pins missing for ages.
+  // (isStyleLoaded() also waits on sources/tiles, so listen for 'style.load'.)
+  await new Promise<void>((resolve) => {
+    const style = (map as unknown as { style?: { _loaded?: boolean } }).style;
+    if (style?._loaded) return resolve();
+    map.once('style.load', () => resolve());
   });
 
-  const attribution = (a: string) => (opts.attributionPrefix ? `${opts.attributionPrefix} · ${a}` : a);
-  // OSM standard tiles have no {s} subdomains; keep default single-host.
-  const streets = L.tileLayer(tiles.url, { maxZoom: 19, attribution: attribution(tiles.attribution) });
-  const satellite = L.tileLayer(SATELLITE.url, { maxZoom: 19, maxNativeZoom: 18, attribution: attribution(SATELLITE.attribution) });
-  streets.addTo(map);
+  // Satellite raster sits just below the first label layer, hidden until used.
+  const firstSymbol = map.getStyle().layers?.find((l) => l.type === 'symbol')?.id;
+  map.addSource(SAT_SOURCE, {
+    type: 'raster',
+    tiles: [SATELLITE_URL],
+    tileSize: 256,
+    maxzoom: 18,
+    attribution: 'Imagery &copy; Esri, Maxar, Earthstar Geographics',
+  });
+  map.addLayer(
+    { id: SAT_LAYER, type: 'raster', source: SAT_SOURCE, layout: { visibility: 'none' } },
+    firstSymbol,
+  );
 
-  // Dark cartography: filter the tile pane (not markers/overlays) to a dark
-  // scheme. Never filter satellite imagery — inverted photos are unreadable.
-  const pane = map.getPane('tilePane');
-  const syncDark = (layer: BaseLayerId) => pane?.classList.toggle('map-tiles-dark', dark && layer === 'streets');
-  syncDark('streets');
-
-  const layers: Record<BaseLayerId, import('leaflet').TileLayer> = { streets, satellite };
-  (map as ThemedMap).setBaseLayer = (id: BaseLayerId) => {
-    for (const [k, l] of Object.entries(layers)) {
-      if (k === id) { if (!map.hasLayer(l)) l.addTo(map); }
-      else if (map.hasLayer(l)) map.removeLayer(l);
-    }
-    syncDark(id);
+  let current: BaseLayerId = 'streets';
+  const switchBtns: HTMLButtonElement[] = [];
+  map.setBaseLayer = (id: BaseLayerId) => {
+    current = id;
+    if (map.getLayer(SAT_LAYER)) map.setLayoutProperty(SAT_LAYER, 'visibility', id === 'satellite' ? 'visible' : 'none');
+    for (const b of switchBtns) b.setAttribute('aria-pressed', String(b.dataset.layer === current));
   };
 
   if (opts.layerSwitch) {
-    L.control
-      .layers({ Streets: streets, Satellite: satellite }, undefined, { position: 'topright', collapsed: false })
-      .addTo(map);
-    map.on('baselayerchange', (e: import('leaflet').LayersControlEvent) =>
-      syncDark(e.layer === satellite ? 'satellite' : 'streets'),
-    );
+    const box = document.createElement('div');
+    box.className = 'maplibregl-ctrl nv-ml-switch';
+    for (const [id, label] of [
+      ['streets', 'Streets'],
+      ['satellite', 'Satellite'],
+    ] as const) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = label;
+      b.dataset.layer = id;
+      b.setAttribute('aria-pressed', String(id === current));
+      b.addEventListener('click', () => map.setBaseLayer(id));
+      switchBtns.push(b);
+      box.appendChild(b);
+    }
+    map.addControl({ onAdd: () => box, onRemove: () => box.remove() }, 'top-right');
   }
 
-  return map as ThemedMap;
+  return map;
+}
+
+/** GeoJSON circle polygon (for radius rings) — MapLibre has no circle-in-metres primitive. */
+export function circlePolygon(lat: number, lng: number, km: number, steps = 72): GeoJSON.Feature<GeoJSON.Polygon> {
+  const coords: [number, number][] = [];
+  const dLat = km / 110.574;
+  const dLng = km / (111.32 * Math.cos((lat * Math.PI) / 180));
+  for (let i = 0; i <= steps; i++) {
+    const t = (i / steps) * 2 * Math.PI;
+    coords.push([lng + dLng * Math.cos(t), lat + dLat * Math.sin(t)]);
+  }
+  return { type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: [coords] } };
 }

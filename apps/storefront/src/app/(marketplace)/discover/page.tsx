@@ -3,6 +3,7 @@ import { supabaseAnon } from '@/lib/supabase';
 import { Stars } from '@/components/Stars';
 import { NearbyStores } from '@/components/NearbyStores';
 import { StoreMap, type MapStore } from '@/components/StoreMap';
+import { inIlorin } from '@/lib/ilorin';
 import { DiscoverTabs } from '@/components/DiscoverTabs';
 import { DiscoverCategories } from './DiscoverCategories';
 import { AiPickRow } from '@/components/AiPickRow';
@@ -55,8 +56,9 @@ export default async function DiscoverPage({
     .map((s) => ({ slug: s.slug, name: s.name, address: s.address ?? null, category: s.category, lat: Number(s.latitude), lng: Number(s.longitude) }));
 
   // Richer objects for the map locator: logo, open-now hours, rating, tick, dropshipper tag.
+  // The map is Ilorin-only, so only stores pinned inside the city count.
   const mapStores: MapStore[] = finalStores
-    .filter((s) => s.latitude != null && s.longitude != null)
+    .filter((s) => s.latitude != null && s.longitude != null && inIlorin(Number(s.latitude), Number(s.longitude)))
     .map((s) => ({
       slug: s.slug,
       name: s.name,
@@ -301,8 +303,8 @@ export default async function DiscoverPage({
               <div className="mb-4 flex flex-wrap items-center gap-2 text-[13px] font-semibold text-muted-foreground">
                 <Sparkles size={14} style={{ color: 'var(--blue)' }} />
                 {mapStores.length > 0
-                  ? `${mapStores.length} ${mapStores.length === 1 ? 'store' : 'stores'} pinned on the map`
-                  : 'No stores have a location yet'}
+                  ? `${mapStores.length} ${mapStores.length === 1 ? 'store' : 'stores'} pinned in Ilorin`
+                  : 'No Ilorin stores have a location yet'}
                 {querySuffix ? (
                   <Link href="/discover" className="brand-chip no-underline" style={{ marginLeft: 'auto' }}>
                     Clear filters
