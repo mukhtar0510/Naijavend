@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
+import { Heart as IcHeart, Truck as IcTruck } from 'lucide-react';
 
 type FaqItem = {
   id: string;
@@ -97,7 +98,7 @@ const FAQS: FaqItem[] = [
     text: 'dropshipper dropshipping supplier shipping delivery window badge',
     answer: (
       <>
-        Dropshippers ship items directly from a supplier to the customer. They carry the <strong>🚚 Dropshipper</strong>{' '}
+        Dropshippers ship items directly from a supplier to the customer. They carry the <strong><IcTruck className="ico-inline" aria-hidden /> Dropshipper</strong>{' '}
         badge and publish their typical delivery window on their store site, so buyers know what to expect.
       </>
     ),
@@ -181,7 +182,7 @@ const FAQS: FaqItem[] = [
     text: 'saved stores heart referrals invite link friends credit account',
     answer: (
       <>
-        Tap the ♡ on any store to save it to your account page. Your invite link sits on the same page — friends who
+        Tap the <IcHeart className="ico-inline" aria-hidden /> on any store to save it to your account page. Your invite link sits on the same page — friends who
         sign up through it within 30 days are credited to you.
       </>
     ),

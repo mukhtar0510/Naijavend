@@ -15,6 +15,8 @@ import '../styles/brand.css';
 // Tailwind utilities for the shadcn/ui components (src/components/ui) — imported
 // last so component utilities win ties against the hand-written design system.
 import '../styles/tailwind.css';
+// One button / chip / focus system — last so it governs every page (REDESIGN R1).
+import '../styles/system.css';
 import { BRAND } from '@idevtenancy/shared';
 import { PwaRegister } from '@/components/PwaRegister';
 import { LanguageDock } from '@/components/LanguageDock';

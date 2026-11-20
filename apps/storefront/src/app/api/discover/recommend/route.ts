@@ -43,7 +43,7 @@ function fallbackPicks(candidates: Candidate[], origin: { lat: number; lng: numb
   const scored = candidates.map((c, i) => {
     let score = c.rating + Math.min(1.2, c.reviewCount / 40);
     const reasons: string[] = [];
-    if (c.rating >= 4.5) reasons.push(`rated ${c.rating.toFixed(1)}★ by customers`);
+    if (c.rating >= 4.5) reasons.push(`rated ${c.rating.toFixed(1)} out of 5 by customers`);
     else if (c.reviewCount >= 3) reasons.push(`${c.reviewCount} positive reviews`);
     if (c.open) {
       score += 0.5;
@@ -73,7 +73,7 @@ async function geminiPicks(candidates: Candidate[], origin: { lat: number; lng: 
   const table = short
     .map((c, i) => {
       const dist = origin && c.lat != null && c.lng != null ? `${Math.round(haversineKm(origin, { lat: c.lat, lng: c.lng }))}km from viewer` : 'distance unknown';
-      return `${i}: ${c.name} | ${c.category} | ${c.rating.toFixed(1)}★ (${c.reviewCount} reviews) | ${dist} | ${c.open ? 'open now' : 'maybe closed'} | ${(c.description || c.address || c.category).slice(0, 90)}`;
+      return `${i}: ${c.name} | ${c.category} | ${c.rating.toFixed(1)}/5 (${c.reviewCount} reviews) | ${dist} | ${c.open ? 'open now' : 'maybe closed'} | ${(c.description || c.address || c.category).slice(0, 90)}`;
     })
     .join('\n');
   const prompt = [

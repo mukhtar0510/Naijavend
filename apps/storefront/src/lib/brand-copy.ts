@@ -1,3 +1,4 @@
+import { BookOpen, Cake, Scissors, Shirt, ShoppingBasket, Smartphone, Truck, Wrench } from 'lucide-react';
 // Shared brand copy for the two public brand pages.
 //
 // `/` is the brand's front door (the full Kwaravend story, product layers and
@@ -35,14 +36,14 @@ export const MARKET = [
 ] as const;
 
 export const PERSONAS = [
-  { ico: '🎂', title: 'Cake & food studios', text: 'Pre-orders, delivery windows, weekend slots.' },
-  { ico: '💇🏾‍♀️', title: 'Beauty & braids', text: 'Bookings that don’t double-up, price lists that stay current.' },
-  { ico: '📱', title: 'Phones & gadgets', text: 'Stock counts, variants and a catalogue buyers can trust.' },
-  { ico: '👗', title: 'Fashion & thrift', text: 'Lookbooks, sizes, drops and DM-free ordering.' },
-  { ico: '📚', title: 'Tutors & lessons', text: 'Recurring slots, packages and student reviews.' },
-  { ico: '🛠️', title: 'Home services', text: 'Coverage areas, call-outs and service pricing.' },
-  { ico: '🚚', title: 'Dropshippers', text: 'Honest shipping windows on every listing.' },
-  { ico: '🧺', title: 'Markets & pop-ups', text: 'Free POS for the stall, storefront for the rest of the week.' },
+  { ico: Cake, title: 'Cake & food studios', text: 'Pre-orders, delivery windows, weekend slots.' },
+  { ico: Scissors, title: 'Beauty & braids', text: 'Bookings that don’t double-up, price lists that stay current.' },
+  { ico: Smartphone, title: 'Phones & gadgets', text: 'Stock counts, variants and a catalogue buyers can trust.' },
+  { ico: Shirt, title: 'Fashion & thrift', text: 'Lookbooks, sizes, drops and DM-free ordering.' },
+  { ico: BookOpen, title: 'Tutors & lessons', text: 'Recurring slots, packages and student reviews.' },
+  { ico: Wrench, title: 'Home services', text: 'Coverage areas, call-outs and service pricing.' },
+  { ico: Truck, title: 'Dropshippers', text: 'Honest shipping windows on every listing.' },
+  { ico: ShoppingBasket, title: 'Markets & pop-ups', text: 'Free POS for the stall, storefront for the rest of the week.' },
 ] as const;
 
 /** Trust rules are modules (icons), so this one is typed by the consumer. */

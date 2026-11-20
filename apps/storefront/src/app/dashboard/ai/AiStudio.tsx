@@ -7,6 +7,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
+import { Hand as IcHand, Image as IcImage, Megaphone as IcMegaphone, MessageCircle as IcMessageCircle } from 'lucide-react';
 
 interface ChatMsg {
   role: 'user' | 'assistant';
@@ -224,7 +225,7 @@ export function AiStudio({ storeName }: { storeName: string }) {
       {/* Header — title, provider badge, tools toggle */}
       <header className="ai-app-top">
         <div>
-          <h2 style={{ margin: 0, fontSize: 17 }}>💬 AI Studio</h2>
+          <h2 style={{ margin: 0, fontSize: 17 }}><IcMessageCircle className="ico-inline" aria-hidden /> AI Studio</h2>
           <span className="muted" style={{ fontSize: 12.5 }}>
             Smart help for {storeName} · grounded in your store, last 30 days
           </span>
@@ -233,16 +234,16 @@ export function AiStudio({ storeName }: { storeName: string }) {
           {aiStatus && (
             <span className="ai-status-pill" title="AI Studio status">
               {aiStatus.imageGen.enabled
-                ? `🖼 ${aiStatus.imageGen.provider === 'gemini' ? 'Gemini images' : 'placeholder images'}`
-                : '🖼 image gen off (no Gemini key)'}
+                ? `${aiStatus.imageGen.provider === 'gemini' ? 'Gemini images' : 'placeholder images'}`
+                : 'image gen off (no Gemini key)'}
               {' · '}
               {aiStatus.whatsapp.configured
-                ? '📱 WhatsApp send ready'
+                ? 'WhatsApp send ready'
                 : !aiStatus.whatsapp.hasNumber
-                  ? '📱 add WhatsApp number'
+                  ? 'add WhatsApp number'
                   : !aiStatus.whatsapp.tokenSet || !aiStatus.whatsapp.phoneIdSet
-                    ? '📱 WhatsApp not configured'
-                    : '📱 WhatsApp number set'}
+                    ? 'WhatsApp not configured'
+                    : 'WhatsApp number set'}
             </span>
           )}
           {provider && (
@@ -250,7 +251,7 @@ export function AiStudio({ storeName }: { storeName: string }) {
               className="ai-provider-badge"
               title={provider === 'gemini' ? 'Answers drafted by Gemini' : 'Basic offline drafts — add GEMINI_API_KEY to unlock full AI'}
             >
-              {provider === 'gemini' ? '✦ Gemini' : '✦ Basic mode'}
+              {provider === 'gemini' ? 'Gemini' : 'Basic mode'}
             </span>
           )}
           <button
@@ -260,7 +261,7 @@ export function AiStudio({ storeName }: { storeName: string }) {
             aria-expanded={toolsOpen}
             title="Social post generator"
           >
-            📣 Social posts
+            <IcMegaphone className="ico-inline" aria-hidden /> Social posts
           </button>
           <button
             type="button"
@@ -269,7 +270,7 @@ export function AiStudio({ storeName }: { storeName: string }) {
             aria-expanded={imageToolOpen}
             title="AI image generator"
           >
-            🖼 AI images
+            <IcImage className="ico-inline" aria-hidden /> AI images
           </button>
         </div>
       </header>
@@ -278,7 +279,7 @@ export function AiStudio({ storeName }: { storeName: string }) {
       <div className="ai-app-thread" ref={threadRef} aria-live="polite">
         {empty && (
           <div className="ai-app-empty">
-            <div className="ai-app-empty-icon">👋</div>
+            <div className="ai-app-empty-icon"><IcHand className="ico-inline" aria-hidden /></div>
             <h3>Welcome to AI Studio</h3>
             <p className="muted">
               Ask me anything about growing your store — orders, pricing, promotions — or open{' '}
@@ -317,7 +318,7 @@ export function AiStudio({ storeName }: { storeName: string }) {
             {m.kind === 'post' && (
               <div style={{ marginTop: 8 }}>
                 <button type="button" className="btn btn-sm" onClick={copyPost}>
-                  {copied ? 'Copied ✓' : 'Copy caption'}
+                  {copied ? 'Copied ' : 'Copy caption'}
                 </button>
               </div>
             )}

@@ -21,6 +21,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { LANGUAGES, PHRASEBOOK, type LanguageCode } from '@idevtenancy/shared';
 import { callApi } from '@/lib/api-client';
+import { Check as IcCheck, Globe as IcGlobe } from 'lucide-react';
 
 const COOKIE = 'nv_lang';
 // BCP-47 codes for <html lang>; Nigerian Pidgin is `pcm`, not `pid`.
@@ -277,7 +278,7 @@ export function LanguageDock() {
         aria-haspopup="menu"
         title="Change language — English, Pidgin, Yoruba, Hausa, Igbo"
       >
-        🌐 <span className="lang-dock-label">{current?.native}</span>
+        <IcGlobe className="ico-inline" aria-hidden /> <span className="lang-dock-label">{current?.native}</span>
         {busy && <span className="lang-dock-busy" aria-label="Translating" />}
       </button>
 
@@ -295,7 +296,7 @@ export function LanguageDock() {
             >
               <span>{l.native}</span>
               <span className="lang-dock-sub">{l.label}</span>
-              {l.code === lang && <span aria-hidden>✓</span>}
+              {l.code === lang && <span aria-hidden><IcCheck className="ico-inline" aria-hidden /></span>}
             </button>
           ))}
           {lang !== 'en' && (

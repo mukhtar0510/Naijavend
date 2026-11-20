@@ -3,12 +3,13 @@
 // Full-page offline fallback, precached at service-worker install time.
 // Client component: the retry button needs an onClick handler.
 import { metadata } from './metadata';
+import { WifiOff as IcWifiOff } from 'lucide-react';
 
 export default function OfflinePage() {
   return (
     <div className="container notfound">
       <div className="notfound-card">
-        <span className="notfound-glyph" aria-hidden>📡</span>
+        <span className="notfound-glyph" aria-hidden><IcWifiOff className="ico-inline" aria-hidden /></span>
         <h1>You&apos;re offline</h1>
         <p>
           Kwaravend needs a connection to load live store data. Pages you visited

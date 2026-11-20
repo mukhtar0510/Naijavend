@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { MapPin as IcMapPin, Phone as IcPhone, X as IcX } from 'lucide-react';
 
 export type LocationBranch = {
   id: string;
@@ -76,13 +77,13 @@ export function LocationsGallery({ branches }: { branches: LocationBranch[] }) {
           )}
           <div style={{ padding: '12px 14px 14px' }}>
             <h3 style={{ margin: '0 0 4px', fontSize: 16 }}>
-              📍 {b.label || `Store ${i + 1}`}
+              <IcMapPin className="ico-inline" aria-hidden /> {b.label || `Store ${i + 1}`}
             </h3>
             {b.note && <p className="muted" style={{ margin: '0 0 4px', fontSize: 13 }}>{b.note}</p>}
             {b.address && <p style={{ margin: '4px 0', fontSize: 14.5 }}>{b.address}</p>}
             {b.phone && (
               <p style={{ margin: '4px 0', fontSize: 14.5 }}>
-                📞 <a href={`tel:${b.phone.replace(/[^+0-9]/g, '')}`}>{b.phone}</a>
+                <IcPhone className="ico-inline" aria-hidden /> <a href={`tel:${b.phone.replace(/[^+0-9]/g, '')}`}>{b.phone}</a>
               </p>
             )}
             {b.latitude != null && b.longitude != null && (
@@ -106,7 +107,7 @@ export function LocationsGallery({ branches }: { branches: LocationBranch[] }) {
             {/* eslint-disable-next-line @next/next/no-img-element -- seller-uploaded URL */}
             <img src={open.image_url} alt={`${open.label || 'Location'} — ${open.address}`} />
             <div className="loc-lightbox-caption">
-              <strong>📍 {open.label || `Store ${(openIdx ?? 0) + 1}`}</strong>
+              <strong><IcMapPin className="ico-inline" aria-hidden /> {open.label || `Store ${(openIdx ?? 0) + 1}`}</strong>
               <span>{open.address}</span>
             </div>
             {withPhotos.length > 1 && (
@@ -116,7 +117,7 @@ export function LocationsGallery({ branches }: { branches: LocationBranch[] }) {
                 <button type="button" aria-label="Next photo" onClick={() => setOpenIdx((cur) => (cur === null ? null : (cur + 1) % branches.length))}>→</button>
               </div>
             )}
-            <button type="button" className="loc-lightbox-close" aria-label="Close photo viewer" onClick={() => setOpenIdx(null)}>✕</button>
+            <button type="button" className="loc-lightbox-close" aria-label="Close photo viewer" onClick={() => setOpenIdx(null)}><IcX className="ico-inline" aria-hidden /></button>
           </div>
         </div>
       )}

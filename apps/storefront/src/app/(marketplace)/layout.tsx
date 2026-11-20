@@ -1,6 +1,7 @@
 import '../../styles/marketplace-v2.css';
 import '../../styles/marketplace-mobile.css';
 import '../../styles/store-designer.css';
+import '../../styles/system.css';
 import { SiteHeader } from '@/components/SiteHeader';
 import { CookieBanner } from '@/components/CookieBanner';
 import { SiteFooter } from '@/components/SiteFooter';

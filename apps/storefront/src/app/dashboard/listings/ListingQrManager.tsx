@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { StoreQrCode } from '@/components/StoreQrCode';
+import { Printer as IcPrinter } from 'lucide-react';
 
 // Per-listing QR manager for the seller dashboard: expand a listing row to get
 // its branded, downloadable QR (points at the product page), plus a bulk
@@ -25,7 +26,7 @@ export function ListingQrManager({ items }: { items: ListingQrItem[] }) {
     <div className="qr-manager">
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
         <button type="button" className="btn btn-outline btn-sm" onClick={() => setSheetOpen((v) => !v)} aria-expanded={sheetOpen}>
-          🖨️ {sheetOpen ? 'Hide print sheet' : 'Print all QR tags'}
+          <IcPrinter className="ico-inline" aria-hidden /> {sheetOpen ? 'Hide print sheet' : 'Print all QR tags'}
         </button>
         <span className="hint" style={{ margin: 0 }}>
           Each product gets its own QR — perfect for price tags and market stalls.

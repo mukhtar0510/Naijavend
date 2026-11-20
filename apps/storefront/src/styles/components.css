@@ -2610,3 +2610,8 @@
 }
 [data-theme='dark'] .example-tag { background: color-mix(in srgb, var(--gold) 18%, transparent); color: var(--gold-bright); }
 .map-tip-ex { font-style: normal; font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--gold); margin-left: 4px; }
+
+.map-pin .map-pin-tick svg, .map-tip-star svg { display: block; }
+.map-tip-star { display: inline-block; color: var(--accent); vertical-align: -1px; }
+.map-pin > svg { width: 20px; height: 20px; }
+.map-pin-sm > svg { width: 16px; height: 16px; color: var(--primary); }

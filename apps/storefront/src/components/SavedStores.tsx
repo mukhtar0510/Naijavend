@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getSavedSlugs, SAVED_EVENT } from '@/lib/saved';
+import { Heart as IcHeart } from 'lucide-react';
 
 export interface SavedCandidate {
   slug: string;
@@ -33,7 +34,7 @@ export function SavedStores({ stores }: { stores: SavedCandidate[] }) {
   return (
     <section className="card card-elevated saved-section" aria-label="Saved stores">
       <div className="saved-head">
-        <h2>♥ Saved stores</h2>
+        <h2><IcHeart className="ico-inline" aria-hidden /> Saved stores</h2>
         <span className="muted" style={{ fontSize: 12.5 }}>
           Tap the heart on any store to keep it here.
         </span>

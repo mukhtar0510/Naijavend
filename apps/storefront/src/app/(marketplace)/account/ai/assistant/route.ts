@@ -319,7 +319,7 @@ async function geminiAnswer(
   const catalogLines = short.map((s, i) => {
     const dist = origin && s.lat != null && s.lng != null ? `${formatDistance(haversineKm(origin, { lat: s.lat, lng: s.lng }))} away` : '';
     const items = s.items.slice(0, 4).map((it) => `${it.title} ₦${Math.round(it.priceKobo / 100)}`).join(', ');
-    return `[${i}] ${s.name} (${s.category}) ${dist ? `· ${dist}` : ''}${s.rating >= 4 ? `· ⭐${s.rating.toFixed(1)}` : ''}· ${items || 'no listed items'}${s.address ? ` · ${s.address}` : ''}`;
+    return `[${i}] ${s.name} (${s.category}) ${dist ? `· ${dist}` : ''}${s.rating >= 4 ? `· rated ${s.rating.toFixed(1)}` : ''}· ${items || 'no listed items'}${s.address ? ` · ${s.address}` : ''}`;
   }).join('\n');
 
   const orderLines = buyer.orders.slice(0, 6).map((o) =>

@@ -1,7 +1,9 @@
+import type * as React from 'react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getCustomerClient, getCustomerUser } from '@/lib/auth';
 import { AlertsInbox } from './AlertsInbox';
+import { Bell as IcBell, Calendar as IcCalendar, TrendingDown as IcTrendingDown, MessageCircle as IcMessageCircle, Receipt as IcReceipt, Scale as IcScale, ShoppingBag as IcShoppingBag } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Alerts — Kwaravend' };
@@ -16,13 +18,13 @@ interface AlertRow {
   created_at: string;
 }
 
-const KIND_ICON: Record<string, string> = {
-  new_product: '🛍️',
-  price_drop: '⬇️',
-  order_update: '🧾',
-  booking_update: '📅',
-  chat: '💬',
-  dispute_update: '⚖️',
+const KIND_ICON: Record<string, React.ReactNode> = {
+  new_product: <IcShoppingBag className="ico-inline" aria-hidden />,
+  price_drop: <IcTrendingDown className="ico-inline" aria-hidden />,
+  order_update: <IcReceipt className="ico-inline" aria-hidden />,
+  booking_update: <IcCalendar className="ico-inline" aria-hidden />,
+  chat: <IcMessageCircle className="ico-inline" aria-hidden />,
+  dispute_update: <IcScale className="ico-inline" aria-hidden />,
 };
 
 // Buyer alerts inbox — new products from followed stores, price drops, order/
@@ -71,7 +73,7 @@ export default async function AlertsPage() {
     href: r.href,
     read: Boolean(r.read_at),
     createdAt: r.created_at,
-    icon: KIND_ICON[r.kind] ?? '🔔',
+    icon: KIND_ICON[r.kind] ?? <IcBell className="ico-inline" aria-hidden />,
   }));
 
   return (
@@ -79,7 +81,7 @@ export default async function AlertsPage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
         <h1>Alerts</h1>
         <span className="muted" style={{ fontSize: 13.5 }}>
-          {unread > 0 ? `${unread} unread` : 'All caught up ✅'}
+          {unread > 0 ? `${unread} unread` : 'All caught up '}
         </span>
       </div>
       <p className="muted" style={{ marginTop: -4, marginBottom: 16 }}>

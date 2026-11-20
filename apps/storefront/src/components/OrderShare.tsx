@@ -1,6 +1,7 @@
 'use client';
 
 import { BRAND, orderRef } from '@idevtenancy/shared';
+import { Share2 as IcShare2 } from 'lucide-react';
 
 // Share a plain-text order summary via WhatsApp — the channel Nigerian buyers
 // already use for commerce. No server round-trip; the summary is built inline.
@@ -20,7 +21,7 @@ export function OrderShare({
   function share() {
     const site = window.location.origin;
     const text = [
-      `🧾 My ${storeName} order on ${BRAND.name}`,
+      `My ${storeName} order on ${BRAND.name}`,
       `Order: ${orderRef(orderId)}`,
       `Status: ${status}`,
       `Total: ${total}`,
@@ -37,7 +38,7 @@ export function OrderShare({
       onClick={share}
       title="Share this order via WhatsApp"
     >
-      Share 📲
+      Share <IcShare2 className="ico-inline" aria-hidden />
     </button>
   );
 }

@@ -4,6 +4,7 @@ import { redirectStaffToPos } from '@/lib/staff';
 import { StaffManager, type StaffRow } from './StaffManager';
 import { StaffToggle, StaffRemove } from './StaffActions';
 import type { Store } from '@idevtenancy/shared';
+import { MapPin as IcMapPin } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -68,7 +69,7 @@ export default async function StaffPage() {
                           : [];
                         if (tags.length === 0) return <span className="badge">All branches</span>;
                         return tags.map((id) => (
-                          <span key={id} className="badge badge-blue">📍 {labelFor(id)}</span>
+                          <span key={id} className="badge badge-blue"><IcMapPin className="ico-inline" aria-hidden /> {labelFor(id)}</span>
                         ));
                       })()}
                     </div>

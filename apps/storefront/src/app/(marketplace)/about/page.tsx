@@ -291,7 +291,7 @@ export default function AboutPage() {
               <StaggerItem key={persona.title}>
                 <div className="nv-cat-tile" style={{ cursor: 'default' }}>
                   <span className="nv-cat-emoji" aria-hidden>
-                    {persona.ico}
+                    <persona.ico size={22} aria-hidden />
                   </span>
                   <span className="nv-cat-label">{persona.title}</span>
                   <span className="sdg-tpl-best" style={{ fontSize: 11 }}>

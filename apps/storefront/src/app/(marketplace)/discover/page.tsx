@@ -17,6 +17,7 @@ import { ArrowRight, MapPin, Search, Sparkles, Store as StoreIcon } from 'lucide
 import { Reveal, Stagger, StaggerItem } from '@/components/brand/Motion';
 import { LISTED_EXAMPLE_VALUES } from '@/lib/flags';
 import { CategoryIcon } from '@/lib/categories';
+import { Search as IcSearch, Truck as IcTruck } from 'lucide-react';
 
 export const revalidate = 60; // ISR — static-fast, invalidated on seller writes via revalidatePath
 export const metadata = { title: 'Discover stores' };
@@ -107,8 +108,9 @@ export default async function DiscoverPage({
 
           <Reveal delay={0.12}>
             <p className="mb-7 max-w-[56ch] text-[16px] leading-relaxed text-muted-foreground">
-              Every Kwaravend store is a Nigerian business with its own website, a pinned location on the map and
-              reviews that come from real orders. Search by name, filter by trade, or switch to the map.
+              Ilorin businesses with their own store website, a pinned location on the map and reviews that only
+              come from real orders. Stores marked Example show sample data. Search by name, filter by trade, or
+              switch to the map.
             </p>
           </Reveal>
 
@@ -156,7 +158,7 @@ export default async function DiscoverPage({
                   style={{ background: 'var(--elevated)' }}
                 >
                   <div className="mb-3 text-3xl" aria-hidden>
-                    🔍
+                    <IcSearch className="ico-inline" aria-hidden />
                   </div>
                   <h2 className="mb-1.5 font-heading text-[19px] font-extrabold tracking-[-0.02em] text-foreground">
                     No stores match that search
@@ -210,7 +212,7 @@ export default async function DiscoverPage({
                                 </span>
                                 {store.is_dropshipper ? (
                                   <span className="absolute bottom-2.5 right-2.5 rounded-full border border-border px-2.5 py-1 text-[11px] font-bold text-foreground backdrop-blur">
-                                    🚚 Dropship
+                                    <IcTruck className="ico-inline" aria-hidden /> Dropship
                                   </span>
                                 ) : null}
                               </div>

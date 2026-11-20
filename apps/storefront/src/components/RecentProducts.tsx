@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { ProductCard, type ProductCardItem } from '@/components/ProductCard';
 import { getRecentProducts } from '@/components/RecordProductView';
+import { Eye as IcEye } from 'lucide-react';
 
 // "Recently viewed" products section on My account — reads the local history
 // recorded on listing pages. Products that have since been removed (or belong
@@ -69,7 +70,7 @@ export function RecentProducts() {
   return (
     <section className="card card-elevated recent-section" aria-label="Recently viewed products">
       <div className="recent-head">
-        <h2>👀 Recently viewed products</h2>
+        <h2><IcEye className="ico-inline" aria-hidden /> Recently viewed products</h2>
         <span className="muted" style={{ fontSize: 12.5 }}>
           Products you looked at recently, so you can buy again.
         </span>

@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { BRAND, STARTER_TEMPLATE_COUNT } from '@idevtenancy/shared';
 import { supabaseAnon } from '@/lib/supabase';
-import { categoryClass, categoryLabel, STORE_CATEGORIES } from '@idevtenancy/shared';
+import { categoryClass, categoryLabel, isOpenNow, STORE_CATEGORIES } from '@idevtenancy/shared';
 import { Stars } from '@/components/Stars';
 import { VerifiedTick } from '@/components/VerifiedTick';
 import { ExampleTag } from '@/components/ExampleStoreBanner';
@@ -27,6 +27,7 @@ import { StoreDesigner } from '@/components/brand/StoreDesigner';
 import type { Store, StoreRatingStats, StoreTheme } from '@idevtenancy/shared';
 import { LISTED_EXAMPLE_VALUES } from '@/lib/flags';
 import { CategoryIcon } from '@/lib/categories';
+import { Shirt as IcShirt, ShoppingBag as IcShoppingBag, Smartphone as IcSmartphone, Sparkles as IcSparkles, Store as IcStore, Truck as IcTruck, Utensils as IcUtensils } from 'lucide-react';
 
 export const revalidate = 60; // ISR — static-fast, invalidated on seller writes via revalidatePath
 export const metadata: Metadata = {
@@ -173,6 +174,10 @@ export default async function HomePage() {
   // The hero preview borrows the newest real store so the page never shows
   // invented merchandising to a first-time visitor.
   const spotlight = featured[0] ?? null;
+  // Honest preview: every badge on the spotlight card reflects real data.
+  const spotlightVerified = spotlight?.verification_status === 'verified';
+  const spotlightOpen = spotlight ? isOpenNow(spotlight.business_hours) : false;
+  const spotlightReviews = Number(spotlight?.stats?.review_count ?? 0);
   const spotlightBanner = spotlight?.theme?.banner_url ?? spotlight?.theme?.subheader_url ?? null;
   const spotlightLogo = spotlight?.theme?.logo_url ?? spotlight?.theme?.favicon_url ?? null;
 
@@ -225,10 +230,10 @@ export default async function HomePage() {
             <Reveal delay={0.3}>
               <div className="nv-hero-proof">
                 <span className="nv-avatars" aria-hidden>
-                  <span>🛍️</span>
-                  <span>💅</span>
-                  <span>🍲</span>
-                  <span>👗</span>
+                  <span><IcShoppingBag className="ico-inline" aria-hidden /></span>
+                  <span><IcSparkles className="ico-inline" aria-hidden /></span>
+                  <span><IcUtensils className="ico-inline" aria-hidden /></span>
+                  <span><IcShirt className="ico-inline" aria-hidden /></span>
                 </span>
                 <p>
                   <strong>Verified sellers, honest reviews</strong>
@@ -270,7 +275,8 @@ export default async function HomePage() {
                   <div>
                     <strong>
                       {spotlight?.name ?? 'Your store, live'}
-                      <VerifiedTick size={13} />
+                      {spotlightVerified && <VerifiedTick size={13} />}
+                      {spotlight?.is_example && <ExampleTag />}
                     </strong>
                     <span>
                       {spotlight ? categoryLabel(spotlight.category) : 'Beauty & lifestyle'} · Ilorin
@@ -286,25 +292,32 @@ export default async function HomePage() {
 
                 <div className="nv-hp-foot">
                   <span>
-                    <Star size={12} />{' '}
-                    {spotlight?.stats?.avg_stars ? Number(spotlight.stats.avg_stars).toFixed(1) : '4.9'}
-                    <em>
-                      {spotlight?.stats?.review_count
-                        ? `${spotlight.stats.review_count} reviews`
-                        : '128 reviews'}
-                    </em>
+                    {spotlightReviews > 0 ? (
+                      <>
+                        <Star size={12} /> {Number(spotlight?.stats?.avg_stars ?? 0).toFixed(1)}
+                        <em>
+                          {spotlightReviews} review{spotlightReviews === 1 ? '' : 's'}
+                        </em>
+                      </>
+                    ) : (
+                      <em>No reviews yet</em>
+                    )}
                   </span>
-                  <span className="nv-hp-open">
-                    <i /> Open now
-                  </span>
+                  {spotlightOpen ? (
+                    <span className="nv-hp-open">
+                      <i /> Open now
+                    </span>
+                  ) : null}
                 </div>
               </div>
 
-              <span className="nv-hp-float f1">
-                <ShieldCheck size={13} /> Verified seller
-              </span>
+              {spotlightVerified && (
+                <span className="nv-hp-float f1">
+                  <ShieldCheck size={13} /> Verified seller
+                </span>
+              )}
               <span className="nv-hp-float f2">
-                <MessageCircle size={13} /> Replies in minutes
+                <MessageCircle size={13} /> Chat or order on WhatsApp
               </span>
             </div>
           </Reveal>
@@ -370,7 +383,7 @@ export default async function HomePage() {
 
           {featured.length === 0 && !error ? (
             <div className="nv-empty">
-              <span aria-hidden>🏪</span>
+              <span aria-hidden><IcStore className="ico-inline" aria-hidden /></span>
               <h3>No stores yet — the first one could be yours</h3>
               <p>Open a free storefront in minutes and appear right here.</p>
               <Link href="/dashboard" className="btn btn-primary">
@@ -399,7 +412,7 @@ export default async function HomePage() {
                           <span aria-hidden><CategoryIcon category={store.category} /></span>
                           {categoryLabel(store.category)}
                         </span>
-                        {store.is_dropshipper && <span className="nv-store-flag">🚚 Dropship</span>}
+                        {store.is_dropshipper && <span className="nv-store-flag"><IcTruck className="ico-inline" aria-hidden /> Dropship</span>}
                       </div>
 
                       <div className="nv-store-body">
@@ -539,10 +552,10 @@ export default async function HomePage() {
               <span className="nv-mb-road r2" />
               <span className="nv-mb-road r3" />
               <span className="nv-mb-me" />
-              <span className="nv-mb-pin p1">💅</span>
-              <span className="nv-mb-pin p2">🍲</span>
-              <span className="nv-mb-pin p3">👗</span>
-              <span className="nv-mb-pin p4">📱</span>
+              <span className="nv-mb-pin p1"><IcSparkles className="ico-inline" aria-hidden /></span>
+              <span className="nv-mb-pin p2"><IcUtensils className="ico-inline" aria-hidden /></span>
+              <span className="nv-mb-pin p3"><IcShirt className="ico-inline" aria-hidden /></span>
+              <span className="nv-mb-pin p4"><IcSmartphone className="ico-inline" aria-hidden /></span>
               <span className="nv-mb-tag t1">Open now</span>
               <span className="nv-mb-tag t2">1.2 km · 14 min walk</span>
             </div>

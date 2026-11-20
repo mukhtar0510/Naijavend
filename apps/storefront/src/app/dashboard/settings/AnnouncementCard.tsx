@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Megaphone as IcMegaphone } from 'lucide-react';
 
 const MAX_CHARS = 140;
 
@@ -59,7 +60,7 @@ export function AnnouncementCard({
 
   return (
     <div className="card card-elevated" style={{ marginBottom: 20 }}>
-      <h2 style={{ margin: '0 0 4px', fontSize: 18 }}>📢 Announcement banner</h2>
+      <h2 style={{ margin: '0 0 4px', fontSize: 18 }}><IcMegaphone className="ico-inline" aria-hidden /> Announcement banner</h2>
       <p className="muted" style={{ margin: '0 0 14px', fontSize: 13.5 }}>
         A banner on your store site for promos and updates. Leave the schedule empty to always show it.
       </p>
@@ -81,7 +82,7 @@ export function AnnouncementCard({
       <div className="field">
         <label>Live preview</label>
         <div className="store-ribbon" style={{ margin: 0 }}>
-          <span className="store-ribbon-tag" aria-hidden>📢</span>
+          <span className="store-ribbon-tag" aria-hidden><IcMegaphone className="ico-inline" aria-hidden /></span>
           <p style={{ opacity: text.trim() ? 1 : 0.5 }}>{text.trim() || 'Your announcement will appear like this…'}</p>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { PAYMENT_METHODS } from '@/lib/payments';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { Check as IcCheck } from 'lucide-react';
 
 function naira(kobo: number) {
   return kobo === 0 ? 'Free' : `₦${(kobo / 100).toLocaleString('en-NG')}`;
@@ -245,7 +246,7 @@ export default function OrderPage() {
           {promoState.kind === 'checking' && <p className="hint">Checking code…</p>}
           {promoState.kind === 'valid' && (
             <p className="hint" style={{ color: 'var(--success)', fontWeight: 600 }}>
-              ✓ {promoState.percentOff}% off applied — verified live before your order is created.
+              <IcCheck className="ico-inline" aria-hidden /> {promoState.percentOff}% off applied — verified live before your order is created.
             </p>
           )}
           {promoState.kind === 'invalid' && (

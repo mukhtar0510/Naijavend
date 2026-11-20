@@ -3,12 +3,13 @@ import { InAppBrowserWarning } from '@/components/InAppBrowserWarning';
 import { BackToMarket } from '@/components/BackToMarket';
 
 import Link from 'next/link';
+import { Bot as IcBot, Lock as IcLock, MessageCircle as IcMessageCircle, Store as IcStore, TrendingUp as IcTrendingUp, Zap as IcZap } from 'lucide-react';
 
 const POINTS = [
-  { ico: '🏪', text: 'Your own store website at /s/your-name — styled your way.' },
-  { ico: '🤖', text: 'AI drafts your store name, copy and theme in seconds.' },
-  { ico: '💬', text: 'Orders, bookings and chat in one dashboard.' },
-  { ico: '📈', text: 'See views, shares and sales in your analytics.' },
+  { ico: <IcStore className="ico-inline" aria-hidden />, text: 'Your own store website at /s/your-name — styled your way.' },
+  { ico: <IcBot className="ico-inline" aria-hidden />, text: 'AI drafts your store name, copy and theme in seconds.' },
+  { ico: <IcMessageCircle className="ico-inline" aria-hidden />, text: 'Orders, bookings and chat in one dashboard.' },
+  { ico: <IcTrendingUp className="ico-inline" aria-hidden />, text: 'See views, shares and sales in your analytics.' },
 ];
 
 /** Only allow local, absolute paths under /dashboard — never an open redirect.
@@ -67,9 +68,9 @@ export default async function SignInPage({
           </p>
 
           <div className="auth-trust">
-            <span>🏪 Free to start</span>
-            <span>🔐 Secure by Google</span>
-            <span>⚡ 5-second setup</span>
+            <span><IcStore className="ico-inline" aria-hidden /> Free to start</span>
+            <span><IcLock className="ico-inline" aria-hidden /> Secure by Google</span>
+            <span><IcZap className="ico-inline" aria-hidden /> 5-second setup</span>
           </div>
 
           <p className="auth-switch">

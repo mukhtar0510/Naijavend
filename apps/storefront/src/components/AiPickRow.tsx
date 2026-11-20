@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { MessageCircle as IcMessageCircle, Sparkles as IcSparkles, Store as IcStore } from 'lucide-react';
 
 interface Pick {
   kind: string;
@@ -131,7 +132,7 @@ export function AiPickRow() {
   return (
     <section className="ai-picks" aria-label="AI shopping assistant">
       <div className="ai-picks-head">
-        <h2>✨ AI picks for you</h2>
+        <h2><IcSparkles className="ico-inline" aria-hidden /> AI picks for you</h2>
         <span className={`ai-picks-src${source === 'gemini' ? ' live' : ''}`} title={source === 'gemini' ? 'Live Gemini recommendations' : 'Smart on-marketplace ranking'}>
           {source === 'gemini' ? 'Gemini' : 'Smart rank'}
         </span>
@@ -160,7 +161,7 @@ export function AiPickRow() {
           onClick={() => setAskOpen((v) => !v)}
           aria-expanded={askOpen}
         >
-          💬 Ask the AI
+          <IcMessageCircle className="ico-inline" aria-hidden /> Ask the AI
         </button>
       </div>
       {picks && picks.length > 0 && (
@@ -192,12 +193,12 @@ export function AiPickRow() {
             {askThread.map((m, i) => (
               <div key={i} className="ai-ask-turn">
                 <p className="ai-ask-q"> You: {m.q}</p>
-                <p className="ai-ask-a">✨ {m.reply}</p>
+                <p className="ai-ask-a"><IcSparkles className="ico-inline" aria-hidden /> {m.reply}</p>
                 {m.stores.length > 0 && (
                   <div className="ai-ask-stores">
                     {m.stores.map((s) => (
                       <Link key={s.slug} href={`/s/${s.slug}`} className="ai-ask-store">
-                        🏪 {s.name}
+                        <IcStore className="ico-inline" aria-hidden /> {s.name}
                         <em>{s.category}</em>
                       </Link>
                     ))}
@@ -205,7 +206,7 @@ export function AiPickRow() {
                 )}
               </div>
             ))}
-            {askBusy && <p className="muted ai-ask-turn">✨ Thinking…</p>}
+            {askBusy && <p className="muted ai-ask-turn"><IcSparkles className="ico-inline" aria-hidden /> Thinking…</p>}
             <div ref={askEndRef} />
           </div>
           <form

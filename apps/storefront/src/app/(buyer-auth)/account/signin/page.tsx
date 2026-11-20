@@ -68,7 +68,7 @@ export default async function CustomerSignInPage({
           ))}
         </ul>
 
-        <p className="nv-auth-aside-foot">Made in Nigeria 🇳🇬 · Free for buyers, always</p>
+        <p className="nv-auth-aside-foot">Made in Nigeria  · Free for buyers, always</p>
       </section>
 
       <section className="nv-auth-panel">

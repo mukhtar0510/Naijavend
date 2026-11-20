@@ -28,7 +28,7 @@ export function AddToCart({
       onClick={add}
       aria-live="polite"
     >
-      {added ? 'Added ✓' : 'Add to cart'}
+      {added ? 'Added ' : 'Add to cart'}
     </button>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Megaphone as IcMegaphone, Palette as IcPalette, Store as IcStore } from 'lucide-react';
 
 /**
  * Dashboard settings tabs, styled like the discover page tabs (.disc-tabs).
@@ -30,7 +31,7 @@ export function SettingsTabs({
           className={`disc-tab${tab === 'business' ? ' on' : ''}`}
           onClick={() => setTab('business')}
         >
-          🏪 Business
+          <IcStore className="ico-inline" aria-hidden /> Business
         </button>
         <button
           type="button"
@@ -39,7 +40,7 @@ export function SettingsTabs({
           className={`disc-tab${tab === 'announcement' ? ' on' : ''}`}
           onClick={() => setTab('announcement')}
         >
-          📣 Announcement
+          <IcMegaphone className="ico-inline" aria-hidden /> Announcement
         </button>
         <button
           type="button"
@@ -48,7 +49,7 @@ export function SettingsTabs({
           className={`disc-tab${tab === 'appearance' ? ' on' : ''}`}
           onClick={() => setTab('appearance')}
         >
-          🎨 Look &amp; feel
+          <IcPalette className="ico-inline" aria-hidden /> Look &amp; feel
         </button>
       </div>
       {tab === 'business' && business}

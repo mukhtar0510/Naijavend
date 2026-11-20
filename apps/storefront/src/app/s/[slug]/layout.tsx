@@ -7,6 +7,7 @@ import '../../../styles/chrome.css';
 import '../../../styles/components.css';
 import '../../../styles/interactions.css';
 import '../../../styles/locations-lightbox.css';
+import '../../../styles/system.css';
 import { ThemeFonts } from '@/components/ThemeFonts';
 import { TrackStoreView } from '@/components/TrackStoreView';
 import { OpenBadge } from '@/components/OpenBadge';
@@ -238,7 +239,7 @@ export default async function StoreSiteLayout({
             </span>
             <span>
               Built on{' '}
-              <Link className="xplat-link" href="/home">Kwaravend</Link> — storefronts for Nigerian sellers. 🇳🇬
+              <Link className="xplat-link" href="/home">Kwaravend</Link> — storefronts for Nigerian sellers. 
             </span>
           </div>
         </div>

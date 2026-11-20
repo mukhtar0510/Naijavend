@@ -1,4 +1,5 @@
 import '../../styles/admin.css';
+import '../../styles/system.css';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { isAdmin, adminEmails } from '@/lib/admin';

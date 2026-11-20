@@ -56,7 +56,7 @@ export function SiteFooter() {
         </div>
         <div className="footer-base">
           <span>© {new Date().getFullYear()} Kwaravend. All rights reserved.</span>
-          <span>Made in Nigeria 🇳🇬</span>
+          <span>Made in Nigeria </span>
         </div>
       </div>
     </footer>

@@ -73,7 +73,7 @@ async function geminiAnswer(q: string, stores: CatalogStore[], origin: { lat: nu
   const lines = short.map((s, i) => {
     const dist = origin && s.lat != null && s.lng != null ? `${formatDistance(haversineKm(origin, { lat: s.lat, lng: s.lng }))} away` : '';
     const items = s.items.slice(0, 4).map((it) => `${it.title} ₦${Math.round(it.priceKobo / 100)}`).join(', ');
-    return `[${i}] ${s.name} (${s.category}) ${dist ? `· ${dist}` : ''}${s.rating >= 4 ? `· ⭐${s.rating.toFixed(1)}` : ''}· items: ${items || 'no listed items'}${s.address ? ` · ${s.address}` : ''}`;
+    return `[${i}] ${s.name} (${s.category}) ${dist ? `· ${dist}` : ''}${s.rating >= 4 ? `· rated ${s.rating.toFixed(1)}` : ''}· items: ${items || 'no listed items'}${s.address ? ` · ${s.address}` : ''}`;
   }).join('\n');
 
   const prompt = [

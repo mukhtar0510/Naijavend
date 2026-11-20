@@ -43,11 +43,11 @@ export async function POST(req: NextRequest) {
   if (raw.length === 0) {
     const welcome = [
       'Welcome to AI Studio! I help you grow your store. Here is what I can do:',
-      '💬  Business assistant — answers about orders, pricing, content, delivery and staffing,',
+      '- Business assistant — answers about orders, pricing, content, delivery and staffing,',
       '      grounded in your store\'s own stats (listings, orders, visits).',
-      '📣  Social posts — caption drafts for WhatsApp status, Instagram and Facebook.',
-      '🎨  Store styling — palette, fonts and layouts for your store site.',
-      '📝  Listing descriptions — copy that sells each product or service.',
+      '- Social posts — caption drafts for WhatsApp status, Instagram and Facebook.',
+      '- Store styling — palette, fonts and layouts for your store site.',
+      '- Listing descriptions — copy that sells each product or service.',
       '',
       'To begin, send me a sentence about your store, e.g. "How do I get more orders this week?"\n',
       'No API key needed for these first drafts — they improve automatically when',

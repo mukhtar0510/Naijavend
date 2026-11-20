@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { isSaved, toggleSaved, SAVED_EVENT } from '@/lib/saved';
+import { Heart } from 'lucide-react';
 
 // Save/unsave a store. Local-first (this browser), no account required.
 // Clicks are stopped from bubbling so hearts inside store-card links don't
@@ -33,7 +34,7 @@ export function SavedHeart({ slug, name }: { slug: string; name: string }) {
         setSaved(toggleSaved(slug));
       }}
     >
-      {saved ? '♥' : '♡'}
+      <Heart size={18} fill={saved ? 'currentColor' : 'none'} aria-hidden />
     </button>
   );
 }

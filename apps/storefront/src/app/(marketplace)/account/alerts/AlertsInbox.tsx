@@ -11,7 +11,7 @@ export interface AlertItem {
   href: string;
   read: boolean;
   createdAt: string;
-  icon: string;
+  icon: React.ReactNode;
 }
 
 // Interactive inbox: opening an alert marks it read (POST /api/alerts) and

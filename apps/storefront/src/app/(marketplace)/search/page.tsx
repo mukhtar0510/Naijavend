@@ -7,6 +7,7 @@ import { parseSearchQuery } from '@/lib/search-terms';
 import { isMissingColumn } from '@/lib/supabase';
 import { FEATURES, LISTED_EXAMPLE_VALUES } from '@/lib/flags';
 import type { Store, StoreRatingStats, StoreTheme } from '@idevtenancy/shared';
+import { MapPin as IcMapPin, Sparkles as IcSparkles, Truck as IcTruck } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Search' };
@@ -310,7 +311,7 @@ export default async function SearchPage({
           {parsed.notes.map((n) => (
             <span key={n} className="badge badge-blue" style={{ fontSize: 11.5 }}>{n}</span>
           ))}
-          {semantic && <span className="badge" style={{ fontSize: 11.5 }}>✨ Semantic match</span>}
+          {semantic && <span className="badge" style={{ fontSize: 11.5 }}><IcSparkles className="ico-inline" aria-hidden /> Semantic match</span>}
         </div>
       )}
 
@@ -350,7 +351,7 @@ export default async function SearchPage({
                     )}
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                       <h3>{store.name}</h3>
-                      {store.is_dropshipper && <span className="badge badge-dropship" title="Ships from a supplier">🚚 Dropshipper</span>}
+                      {store.is_dropshipper && <span className="badge badge-dropship" title="Ships from a supplier"><IcTruck className="ico-inline" aria-hidden /> Dropshipper</span>}
                     </div>
                     {store.stats && store.stats.review_count > 0 && (
                       <span style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -360,7 +361,7 @@ export default async function SearchPage({
                         </span>
                       </span>
                     )}
-                    {store.address && <p className="store-card-addr">📍 {store.address}</p>}
+                    {store.address && <p className="store-card-addr"><IcMapPin className="ico-inline" aria-hidden /> {store.address}</p>}
                     <span className="store-card-visit">Visit store site →</span>
                   </div>
                 </Link>

@@ -17,6 +17,7 @@ import { Reveal, Stagger, StaggerItem } from '@/components/brand/Motion';
 import { STORE_CATEGORIES, categoryLabel } from '@idevtenancy/shared';
 import type { Store, StoreRatingStats } from '@idevtenancy/shared';
 import { CategoryIcon } from '@/lib/categories';
+import { Medal as IcMedal, Trophy as IcTrophy } from 'lucide-react';
 
 // Rankings launch scoped to one state, so a small board is still a useful one.
 // Stores are filtered by their pinned coordinates, with the address as a
@@ -79,7 +80,7 @@ async function getRanked(category?: string, limit = 100): Promise<RankedStore[]>
   return ranked.filter((entry) => inKwara(entry.store)).slice(0, limit);
 }
 
-const MEDALS = ['🥇', '🥈', '🥉'];
+const MEDALS = ['1', '2', '3'];
 
 function RankLogo({
   store,
@@ -215,7 +216,7 @@ export default async function RankingsPage({
         {/* ============================== FILTERS ============================== */}
         <nav className="nv-rank-cats" aria-label="Ranking category">
           <Link href={href()} className={`nv-rank-cat${!category ? ' is-active' : ''}`}>
-            <span aria-hidden>🏆</span> All trades
+            <IcTrophy className="ico-inline" aria-hidden /> All trades
           </Link>
           {STORE_CATEGORIES.map((c) => (
             <Link
@@ -247,7 +248,7 @@ export default async function RankingsPage({
 
             {entries.length === 0 ? (
               <div className="nv-rank-empty">
-                <span aria-hidden>🏅</span>
+                <IcMedal className="ico-inline" aria-hidden />
                 <h3>Not enough reviews yet</h3>
                 <p>
                   {category
@@ -306,7 +307,7 @@ export default async function RankingsPage({
                               </strong>
                               <em>
                                 <CategoryIcon category={entry.store.category} /> {categoryLabel(entry.store.category)}
-                                {entry.store.is_dropshipper ? ' · 🚚 dropshipper' : ''}
+                                {entry.store.is_dropshipper ? ' · dropshipper' : ''}
                               </em>
                             </span>
                             <span className="nv-rank-rating">

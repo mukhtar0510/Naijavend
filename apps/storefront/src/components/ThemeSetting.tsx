@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Moon as IcMoon, Sun as IcSun } from 'lucide-react';
 
 type Theme = 'light' | 'dark';
 
@@ -42,7 +43,7 @@ export function ThemeSetting() {
         className={`theme-setting-opt${current === 'light' ? ' is-on' : ''}`}
         onClick={() => apply('light')}
       >
-        <span className="theme-setting-ico" aria-hidden>☀️</span>
+        <span className="theme-setting-ico" aria-hidden><IcSun className="ico-inline" aria-hidden /></span>
         <span className="theme-setting-copy">
           <strong>Light</strong>
           <span>Bright surfaces, dark text — the default.</span>
@@ -55,7 +56,7 @@ export function ThemeSetting() {
         className={`theme-setting-opt${current === 'dark' ? ' is-on' : ''}`}
         onClick={() => apply('dark')}
       >
-        <span className="theme-setting-ico" aria-hidden>🌙</span>
+        <span className="theme-setting-ico" aria-hidden><IcMoon className="ico-inline" aria-hidden /></span>
         <span className="theme-setting-copy">
           <strong>Dark</strong>
           <span>Dimmed surfaces for night-time use.</span>

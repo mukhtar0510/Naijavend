@@ -7,6 +7,7 @@ import type { ChatMessage } from '@idevtenancy/shared';
 // the server stores flags from — always-on, no round-trip, no model key.
 import { detectScamPhrases, FRAUD_LABEL_TEXT } from '@idevtenancy/shared';
 import { callApi } from '@/lib/api-client';
+import { Hand as IcHand, TriangleAlert as IcTriangleAlert } from 'lucide-react';
 
 interface SuggestReplyResponse {
   suggestions: string[];
@@ -204,7 +205,7 @@ export function ChatBox({
       <div className="chat-log" ref={logRef} onScroll={onScroll}>
         {messages.length === 0 && !error && (
           <p className="muted" style={{ margin: 'auto', fontSize: 14.5 }}>
-            No messages yet — say hello 👋
+            No messages yet — say hello <IcHand className="ico-inline" aria-hidden />
           </p>
         )}
         {messages.map((m, i) => {
@@ -227,7 +228,7 @@ export function ChatBox({
                 </div>
                 {scam.length > 0 && (
                   <div className="chat-scam" role="status">
-                    ⚠️ <strong>{FRAUD_LABEL_TEXT[scam[0]]}.</strong>{' '}
+                    <IcTriangleAlert className="ico-inline" aria-hidden /> <strong>{FRAUD_LABEL_TEXT[scam[0]]}.</strong>{' '}
                     {scam.length > 1 ? '+ other risk signals · ' : ''}
                     Send the seller a reminder: payments stay on Kwaravend.
                   </div>
@@ -240,7 +241,7 @@ export function ChatBox({
       {error && <div className="alert alert-error" style={{ margin: '10px 12px 0' }}>{error}</div>}
       {role === 'seller' && needSuggestionWarning && (
         <div className="alert alert-error" style={{ margin: '10px 12px 0' }} role="status">
-          ⚠️ {suggestions?.warning}
+          <IcTriangleAlert className="ico-inline" aria-hidden /> {suggestions?.warning}
         </div>
       )}
       {role === 'seller' && (needsSuggestion || suggesting) && (

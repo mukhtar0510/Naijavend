@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getCustomerUser, getCustomerClient } from '@/lib/auth';
 import { ProfileEditor } from './ProfileEditor';
 import { ThemeSetting } from '@/components/ThemeSetting';
+import { Calendar as IcCalendar, MessageCircle as IcMessageCircle, Receipt as IcReceipt } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Profile' };
@@ -57,7 +58,7 @@ export default async function ProfilePage() {
 
       <div className="prof-links">
         <Link href="/account" className="prof-link-card">
-          <span className="prof-link-ico" aria-hidden>🧾</span>
+          <span className="prof-link-ico" aria-hidden><IcReceipt className="ico-inline" aria-hidden /></span>
           <span>
             <strong>My orders</strong>
             <span className="muted">Track deliveries and downloads</span>
@@ -65,7 +66,7 @@ export default async function ProfilePage() {
           <span className="prof-link-arrow" aria-hidden>→</span>
         </Link>
         <Link href="/account/bookings" className="prof-link-card">
-          <span className="prof-link-ico" aria-hidden>📅</span>
+          <span className="prof-link-ico" aria-hidden><IcCalendar className="ico-inline" aria-hidden /></span>
           <span>
             <strong>My bookings</strong>
             <span className="muted">Appointments with sellers</span>
@@ -73,7 +74,7 @@ export default async function ProfilePage() {
           <span className="prof-link-arrow" aria-hidden>→</span>
         </Link>
         <Link href="/account/chats" className="prof-link-card">
-          <span className="prof-link-ico" aria-hidden>💬</span>
+          <span className="prof-link-ico" aria-hidden><IcMessageCircle className="ico-inline" aria-hidden /></span>
           <span>
             <strong>My chats</strong>
             <span className="muted">Messages with stores</span>

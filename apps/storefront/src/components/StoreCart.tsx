@@ -14,6 +14,7 @@ import {
 } from '@/lib/cart';
 import { PAYMENT_METHODS } from '@/lib/payments';
 import { formatNaira } from '@idevtenancy/shared';
+import { ShoppingCart as IcShoppingCart } from 'lucide-react';
 
 interface DeliveryOption {
   method: string;
@@ -140,7 +141,7 @@ export function StoreCart({ slug, storeName }: { slug: string; storeName: string
         onClick={() => setOpen(true)}
         style={{ position: 'fixed', right: 16, bottom: 16, zIndex: 60, boxShadow: 'var(--shadow-lg)' }}
       >
-        🛒 Cart · {count} · {formatNaira(subtotal)}
+        <IcShoppingCart className="ico-inline" aria-hidden /> Cart · {count} · {formatNaira(subtotal)}
       </button>
 
       {open && (

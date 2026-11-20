@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { haversineKm, formatDistance, travelEstimates, directionsUrl, type LatLng } from '@idevtenancy/shared';
+import { Car, Footprints, MapPin } from 'lucide-react';
 
 export interface NearbyStore {
   slug: string;
@@ -81,7 +82,7 @@ export function NearbyStores({ stores }: { stores: NearbyStore[] }) {
   return (
     <section className="nearby" aria-label="Stores near you">
       <div className="nearby-head">
-        <h2>📍 Stores near you</h2>
+        <h2><MapPin className="ico-inline" aria-hidden /> Stores near you</h2>
         {state === 'ready' && (
           <button type="button" className="btn btn-outline btn-sm" onClick={() => setState('idle')}>
             Change
@@ -136,7 +137,7 @@ export function NearbyStores({ stores }: { stores: NearbyStore[] }) {
           <div className="nearby-list">
             {ranked.slice(0, 6).map((s, i) => (
               <div key={s.slug} className="card nearby-row">
-                <span className="nearby-rank" aria-hidden>{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}</span>
+                <span className="nearby-rank" aria-hidden>{i + 1}</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <Link href={`/s/${s.slug}`}><strong>{s.name}</strong></Link>
                   <p className="muted" style={{ margin: '2px 0 0', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -146,7 +147,7 @@ export function NearbyStores({ stores }: { stores: NearbyStore[] }) {
                 <div className="nearby-dist" style={{ textAlign: 'right' }}>
                   <strong>{formatDistance(s.km)}</strong>
                   <p className="muted" style={{ margin: 0, fontSize: 12 }}>
-                    {s.km <= 25 ? `🚶 ${s.eta.walk} · ` : ''}🚗 {s.eta.drive}
+                    {s.km <= 25 ? <><Footprints className="ico-inline" aria-hidden /> {s.eta.walk} · </> : null}<Car className="ico-inline" aria-hidden /> {s.eta.drive}
                   </p>
                 </div>
                 <a className="btn btn-outline btn-sm nearby-directions" href={directionsUrl(origin, { lat: s.lat, lng: s.lng }, s.name)} target="_blank" rel="noreferrer">

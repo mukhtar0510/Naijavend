@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import { CircleCheck as IcCircleCheck } from 'lucide-react';
 
 /**
  * Bank-transfer receipt upload. Guests are authorised by the signed-in customer
@@ -45,7 +46,7 @@ export function PaymentProofUpload({
   if (state === 'done') {
     return (
       <p className="muted" style={{ fontSize: 14 }}>
-        ✅ Receipt sent. The seller will confirm your payment and contact you on the number you
+        <IcCircleCheck className="ico-inline" aria-hidden /> Receipt sent. The seller will confirm your payment and contact you on the number you
         gave.
       </p>
     );

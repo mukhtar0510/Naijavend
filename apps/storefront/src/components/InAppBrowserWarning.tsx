@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Share as IcShare } from 'lucide-react';
 
 /**
  * iOS in-app browsers (opening a link from WhatsApp, Instagram, X, Facebook…)
@@ -30,7 +31,7 @@ export function InAppBrowserWarning() {
     <div className="alert alert-error" role="alert" style={{ marginBottom: 14 }}>
       <strong>Open this page in Safari.</strong> You&apos;re viewing it inside another app
       (WhatsApp, Instagram, X…), and those built-in browsers block sign-in. Tap the
-      share icon <span aria-hidden>⬆️</span> and choose <em>Open in Safari</em>, then sign in there.
+      share icon <IcShare className="ico-inline" aria-hidden /> and choose <em>Open in Safari</em>, then sign in there.
     </div>
   );
 }

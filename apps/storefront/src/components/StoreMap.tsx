@@ -91,6 +91,12 @@ const EMPTY_FC: GeoJSON.FeatureCollection = { type: 'FeatureCollection', feature
 
 type Plotted = MapStore & { km: number | null; open: boolean; hoursToday: string | null };
 
+// Lucide (ISC) glyphs as strings for map markers, which are plain HTML.
+const svg = (inner: string, size = 12) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
+const SVG_CHECK = svg('<path d="M20 6 9 17l-5-5"/>', 10);
+const SVG_STAR = svg('<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" fill="currentColor"/>', 11);
+
 const esc = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
@@ -403,11 +409,11 @@ export function StoreMap({ stores }: { stores: MapStore[] }) {
       el.className = 'map-pin-wrap';
       el.setAttribute('aria-label', `${s.name}${s.km != null ? `, ${formatDistance(s.km)} away` : ''}`);
       el.innerHTML = `<span class="map-pin" style="--pin-ring:${categoryColor(s.category)}">${logo}<i data-open="${s.open ? '1' : '0'}"></i>${
-        s.verified ? '<b class="map-pin-tick" aria-hidden="true">✓</b>' : ''
+        s.verified ? `<b class="map-pin-tick" aria-hidden="true">${SVG_CHECK}</b>` : ''
       }</span>`;
       const tipHtml = `<strong>${esc(s.name)}</strong>${s.isExample ? ' <em class="map-tip-ex">Example</em>' : ''}<br/><span>${s.open ? 'Open now' : 'Closed'}${
         s.km != null ? ` · ${formatDistance(s.km)}` : ''
-      }${s.rating != null && s.reviewCount ? ` · ★ ${s.rating.toFixed(1)}` : ''}</span>`;
+      }${s.rating != null && s.reviewCount ? ` · <span class="map-tip-star">${SVG_STAR}</span> ${s.rating.toFixed(1)}` : ''}</span>`;
       el.addEventListener('click', (e) => {
         e.stopPropagation();
         setSelected(s.slug);
@@ -979,7 +985,7 @@ export function StoreMap({ stores }: { stores: MapStore[] }) {
               </strong>
               <p>
                 <CategoryIcon category={selPlotted.category} /> {selPlotted.category.replace(/-/g, ' ')}
-                {selPlotted.isDropshipper ? ' · 🚚 dropshipper' : ''}
+                {selPlotted.isDropshipper ? ' · dropshipper' : ''}
                 {selPlotted.hoursToday ? ` · today ${selPlotted.hoursToday}` : ''}
               </p>
             </div>

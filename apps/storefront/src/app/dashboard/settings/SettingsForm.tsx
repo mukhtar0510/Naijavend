@@ -267,7 +267,7 @@ export function SettingsForm({ store, whatsapp }: { store: StoreSettings; whatsa
             value={announcement}
             onChange={(e) => setAnnouncement(e.target.value)}
             maxLength={140}
-            placeholder="Free delivery in Tanke this week! 🎉"
+            placeholder="Free delivery in Tanke this week! "
           />
         </div>
         <h2 style={{ fontSize: 18 }}>Delivery & pickup</h2>

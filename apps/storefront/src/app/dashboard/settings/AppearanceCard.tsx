@@ -6,6 +6,7 @@ import { Stars } from '@/components/Stars';
 import { STORE_TEMPLATES, STORE_FONTS, LISTING_STYLES, HOVER_ANIMS, BACKGROUND_GRADIENTS, isBackgroundGradient, BACKGROUND_OVERLAYS, CONTENT_WIDTHS, categoryLabel } from '@idevtenancy/shared';
 import type { AiStyleDraft, StoreTheme } from '@idevtenancy/shared';
 import { CategoryIcon } from '@/lib/categories';
+import { Image as IcImage, Sparkles as IcSparkles } from 'lucide-react';
 
 const FONTS = STORE_FONTS;
 const HERO_STYLES = ['gradient', 'image', 'solid'] as const;
@@ -111,7 +112,7 @@ function ImageUploadField({
               display: 'grid', placeItems: 'center', fontSize: 22, background: 'var(--elevated)', flexShrink: 0,
             }}
           >
-            🖼️
+            <IcImage className="ico-inline" aria-hidden />
           </span>
         )}
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -337,7 +338,7 @@ export function AppearanceCard({
 
       {/* AI stylist */}
       <div className="card card-elevated" style={{ marginBottom: 16 }}>
-        <h3 style={{ fontSize: 15.5 }}>✨ Let AI style your store</h3>
+        <h3 style={{ fontSize: 15.5 }}><IcSparkles className="ico-inline" aria-hidden /> Let AI style your store</h3>
         <div className="field" style={{ marginBottom: 10 }}>
           <textarea
             value={brief}

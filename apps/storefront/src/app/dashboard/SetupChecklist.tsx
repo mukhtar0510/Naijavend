@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { CircleCheck as IcCircleCheck } from 'lucide-react';
 
 interface Step {
   label: string;
@@ -49,7 +50,7 @@ export function SetupChecklist({ steps }: { steps: Step[] }) {
         {steps.map((step) => (
           <li key={step.label} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14 }}>
             <span aria-hidden style={{ width: 18, textAlign: 'center' }}>
-              {step.done ? '✅' : '○'}
+              {step.done ? <IcCircleCheck className="ico-inline" aria-hidden /> : '○'}
             </span>
             <span style={{ flex: 1, textDecoration: step.done ? 'line-through' : undefined, opacity: step.done ? 0.6 : 1 }}>
               {step.label}

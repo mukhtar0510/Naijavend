@@ -1,0 +1,265 @@
+/* Kwaravend UI system (REDESIGN R1 §2.4–2.5).
+   ONE button system, ONE chip system, ONE focus ring, ONE pressed state.
+   Imported last so it governs every page. Colours come from tokens.css only.
+   React wrappers: components/ui/button.tsx (Button, IconButton, FAB) and
+   components/ui/chip.tsx (Chip, Badge, Tag). Legacy one-off classes are folded
+   into the same look below so every existing screen matches immediately. */
+
+/* ------------------------------------------------------------ focus ring */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+::selection { background: color-mix(in srgb, var(--primary) 28%, transparent); }
+
+/* --------------------------------------------------------------- buttons */
+.btn,
+.share-btn,
+.nv-map-btn,
+.ai-tool-btn,
+.cat-more-btn,
+.ob-step-btn,
+.loc-photo-btn,
+.pwa-install-btn,
+.dispute-report-btn,
+.brand-layer-btn,
+.sdg-ghost-btn {
+  --btn-bg: var(--surface);
+  --btn-fg: var(--text);
+  --btn-border: var(--border-strong);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 20px;
+  border: 1px solid var(--btn-border);
+  border-radius: 999px;
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  text-decoration: none !important;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--dur-2) var(--ease-standard),
+    border-color var(--dur-2) var(--ease-standard),
+    color var(--dur-2) var(--ease-standard),
+    box-shadow var(--dur-2) var(--ease-standard),
+    transform var(--dur-1) var(--ease-standard);
+}
+.btn svg, .nv-map-btn svg, .share-btn svg { flex: none; }
+.btn:hover, .share-btn:hover, .nv-map-btn:hover, .ai-tool-btn:hover, .cat-more-btn:hover, .ob-step-btn:hover,
+.loc-photo-btn:hover, .pwa-install-btn:hover, .dispute-report-btn:hover, .brand-layer-btn:hover, .sdg-ghost-btn:hover {
+  border-color: var(--primary);
+  color: var(--btn-fg-hover, var(--primary));
+  transform: none;
+}
+.btn:active:not(:disabled), .share-btn:active, .nv-map-btn:active, .ai-tool-btn:active, .ob-step-btn:active {
+  transform: scale(var(--press-scale));
+}
+.btn:disabled, .btn[aria-disabled='true'] { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+/* Variants: primary · secondary · tertiary · destructive · link */
+.btn-primary {
+  --btn-bg: var(--primary);
+  --btn-fg: var(--on-primary);
+  --btn-border: var(--primary);
+  --btn-fg-hover: var(--on-primary);
+  box-shadow: 0 6px 18px -8px color-mix(in srgb, var(--primary) 70%, transparent);
+}
+.btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+.btn-outline, .btn-secondary { --btn-bg: var(--surface); --btn-fg: var(--text); --btn-border: var(--border-strong); }
+.btn-black {
+  --btn-bg: var(--text);
+  --btn-fg: var(--surface);
+  --btn-border: var(--text);
+  --btn-fg-hover: var(--surface);
+}
+.btn-black:hover { background: color-mix(in srgb, var(--text) 85%, var(--primary)); }
+.btn-ghost, .btn-tertiary { --btn-bg: transparent; --btn-fg: var(--primary); --btn-border: transparent; }
+.btn-ghost:hover, .btn-tertiary:hover { background: var(--primary-tint); border-color: transparent; }
+.btn-danger, .btn-destructive { --btn-bg: var(--danger); --btn-fg: #ffffff; --btn-border: var(--danger); --btn-fg-hover: #ffffff; }
+[data-theme='dark'] .btn-danger, [data-theme='dark'] .btn-destructive { --btn-fg: #1a0505; --btn-fg-hover: #1a0505; }
+.btn-danger:hover, .btn-destructive:hover { filter: brightness(1.06); border-color: var(--danger); }
+.btn-link { --btn-bg: transparent; --btn-border: transparent; --btn-fg: var(--primary); min-height: 0; padding: 0; text-decoration: underline !important; text-underline-offset: 3px; }
+.btn-whatsapp { --btn-bg: var(--whatsapp); --btn-fg: #06130a; --btn-border: var(--whatsapp); --btn-fg-hover: #06130a; }
+.btn-whatsapp:hover { filter: brightness(1.06); border-color: var(--whatsapp); }
+/* On-photo / on-brand-band buttons */
+.btn-white { --btn-bg: #ffffff; --btn-fg: #0b1f1a; --btn-border: #ffffff; --btn-fg-hover: #0b1f1a; }
+.btn-ghost-light { --btn-bg: rgba(255, 255, 255, 0.1); --btn-fg: #ffffff; --btn-border: rgba(255, 255, 255, 0.35); --btn-fg-hover: #ffffff; }
+
+/* Sizes (touch target stays ≥ 44px on touch screens) */
+.btn-sm { min-height: 36px; padding: 0 14px; font-size: 13.5px; gap: 6px; }
+.btn-lg { min-height: 52px; padding: 0 28px; font-size: 16px; }
+.btn-block, .btn-full { width: 100%; }
+.btn-icon { width: 44px; padding: 0; }
+.btn-sm.btn-icon { width: 36px; }
+@media (pointer: coarse) { .btn-sm, .nv-map-btn { min-height: 44px; } }
+
+/* Loading: keeps width, shows a spinner over the label */
+.btn[aria-busy='true'] { position: relative; color: transparent !important; pointer-events: none; }
+.btn[aria-busy='true']::after {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--btn-fg);
+  border-right-color: transparent;
+  animation: btn-spin 0.7s linear infinite;
+}
+@keyframes btn-spin { to { transform: rotate(360deg); } }
+
+/* Floating action button (map controls) */
+.fab {
+  display: inline-grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  color: var(--text);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  transition: transform var(--dur-1) var(--ease-standard), color var(--dur-2) var(--ease-standard);
+}
+.fab:hover { color: var(--primary); }
+.fab:active { transform: scale(var(--press-scale)); }
+
+/* ----------------------------------------------------------------- chips */
+.chip,
+.brand-chip,
+.nv-pill,
+.nv-map-cat,
+.ai-chip,
+.rank-chip,
+.nv-rank-cat,
+.ob-quick-chip,
+.nv-mapband-chip,
+.nv-cat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 650;
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none !important;
+  text-transform: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--dur-2) var(--ease-standard),
+    border-color var(--dur-2) var(--ease-standard),
+    color var(--dur-2) var(--ease-standard),
+    transform var(--dur-1) var(--ease-standard);
+}
+:is(.chip, .brand-chip, .nv-pill, .nv-map-cat, .ai-chip, .rank-chip, .nv-rank-cat, .ob-quick-chip, .nv-cat-chip):hover {
+  border-color: var(--border-strong);
+  background: var(--surface-raised);
+  color: var(--text);
+}
+:is(.chip, .brand-chip, .nv-pill, .nv-map-cat, .ai-chip, .rank-chip, .nv-rank-cat, .ob-quick-chip, .nv-cat-chip):active {
+  transform: scale(var(--press-scale));
+}
+/* Selected */
+:is(.chip, .brand-chip, .nv-pill, .nv-map-cat, .ai-chip, .rank-chip, .nv-rank-cat, .ob-quick-chip, .nv-cat-chip):is(
+    .is-active, .active, .on, .ai-chip-active, [aria-pressed='true'], [aria-selected='true'], [aria-current='page']
+  ) {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--on-primary);
+}
+:is(.chip, .nv-map-cat, .brand-chip, .nv-pill):is(.is-active, [aria-pressed='true'], [aria-current='page']) svg {
+  color: currentColor !important;
+}
+.chip-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 14%, transparent);
+  font-size: 11px;
+  font-weight: 800;
+}
+/* Chips sitting on a dark brand band keep their glass look */
+.nv-mapband-chip { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.22); color: #ffffff; }
+.nv-mapband-chip:hover { background: rgba(255, 255, 255, 0.18); color: #ffffff; }
+.nv-pill-invert { background: var(--text); color: var(--surface); border-color: var(--text); }
+
+/* ---------------------------------------------------------- badges & tags */
+.badge { border-radius: 999px; font-weight: 700; }
+.badge-blue, .badge-primary { color: var(--primary); border-color: color-mix(in srgb, var(--primary) 35%, transparent); background: var(--primary-tint); }
+.badge-info { color: var(--info); border-color: color-mix(in srgb, var(--info) 35%, transparent); background: var(--info-tint); }
+.badge-success { color: var(--success); border-color: color-mix(in srgb, var(--success) 35%, transparent); background: var(--success-tint); }
+.badge-warning { color: var(--warning); border-color: color-mix(in srgb, var(--warning) 35%, transparent); background: var(--warning-tint); }
+.badge-danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 35%, transparent); background: var(--danger-tint); }
+.badge-black { color: var(--text); border-color: var(--border-strong); background: var(--surface-raised); }
+.badge svg { flex: none; }
+
+/* ------------------------------------------------------- surfaces & cards */
+.card {
+  background: var(--elevated);
+  border-color: var(--border);
+  transition: border-color var(--dur-2) var(--ease-standard), box-shadow var(--dur-2) var(--ease-standard);
+}
+[data-theme='dark'] .card { background: var(--elevated); }
+.glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+
+/* Page hero bands: one brand glow instead of the old blue/beige wash */
+.page-hero,
+.page-intro,
+.page-intro-gold {
+  background: var(--hero-glow), var(--bg-0) !important;
+  border-bottom: 1px solid var(--border);
+}
+[data-theme='dark'] .page-hero,
+[data-theme='dark'] .page-intro,
+[data-theme='dark'] .page-intro-gold { background: var(--hero-glow), var(--surface) !important; }
+
+/* --------------------------------------------------------------- forms */
+:where(input:not([type='checkbox']):not([type='radio']):not([type='range']), select, textarea) {
+  border-color: var(--border-strong);
+  background-color: var(--surface);
+  color: var(--text);
+  transition: border-color var(--dur-2) var(--ease-standard), box-shadow var(--dur-2) var(--ease-standard);
+}
+:where(input, select, textarea):focus-visible { border-color: var(--primary) !important; }
+:where(input[type='checkbox'], input[type='radio'], input[type='range']) { accent-color: var(--primary); }
+
+/* --------------------------------------------------------- typography */
+h1 { font-size: clamp(28px, 4.2vw + 12px, 44px); letter-spacing: -0.03em; }
+h2 { font-size: clamp(22px, 2vw + 14px, 30px); letter-spacing: -0.02em; }
+.price, .money-value, .tabular { font-variant-numeric: tabular-nums; }
+
+/* ---------------------------------------------------- reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .btn, .chip, .fab, .brand-chip, .nv-pill, .nv-map-cat { transition: none; }
+  .btn:active, .chip:active, .fab:active { transform: none; }
+}
+
+/* Lucide icons sitting inline with text (replaced emojis) */
+.ico-inline { display: inline-block; width: 1em; height: 1em; vertical-align: -0.14em; flex: none; }

@@ -9,6 +9,7 @@ import { SetupChecklist } from './SetupChecklist';
 import { StoreQrCode } from '@/components/StoreQrCode';
 import { formatNaira } from '@idevtenancy/shared';
 import type { Store, StoreRatingStats, StoreTheme } from '@idevtenancy/shared';
+import { Eye as IcEye, MapPin as IcMapPin, Star as IcStar } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -177,7 +178,7 @@ export default async function DashboardHome({
                   </span>
                 </div>
                 {s.address && (
-                  <p className="muted" style={{ margin: '6px 0 0', fontSize: 14 }}>📍 {s.address}</p>
+                  <p className="muted" style={{ margin: '6px 0 0', fontSize: 14 }}><IcMapPin className="ico-inline" aria-hidden /> {s.address}</p>
                 )}
               </div>
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', paddingBottom: 4 }}>
@@ -248,7 +249,7 @@ export default async function DashboardHome({
             <Link href={`/s/${s.slug}/rate`}>Share your review link →</Link>
           </div>
           <div className="card card-elevated">
-            <p className="muted" style={{ margin: 0, fontSize: 14 }}>Store visits 👀</p>
+            <p className="muted" style={{ margin: 0, fontSize: 14 }}>Store visits <IcEye className="ico-inline" aria-hidden /></p>
             <p style={{ fontSize: 32, margin: 0, fontFamily: 'var(--font-mono)' }}>{visitsAll ?? 0}</p>
             <span className="muted" style={{ fontSize: 13.5, display: 'block', margin: '2px 0 6px' }}>+{visits30 ?? 0} in the last 30 days</span>
             <Link href="/dashboard/analytics">Full analytics →</Link>
@@ -260,7 +261,7 @@ export default async function DashboardHome({
       <section className="dash-section" aria-labelledby="sec-verify">
         <div className="dash-section-head">
           <h2 id="sec-verify">Verification</h2>
-          <span className="muted">30+ reviews at 4★ average earns the blue tick</span>
+          <span className="muted">30+ reviews at 4<IcStar className="ico-inline" aria-hidden /> average earns the blue tick</span>
         </div>
         <div className="dash-panel">
           <VerifyCard

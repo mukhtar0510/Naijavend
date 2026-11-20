@@ -67,7 +67,7 @@ export function FollowButton({ storeId, storeName }: { storeId: string; storeNam
       title={isFollowing ? `Unfollow ${storeName}` : `Get alerts from ${storeName}`}
       style={{ minWidth: 118 }}
     >
-      {busy ? '…' : isFollowing ? '🔔 Following' : '🔔 Follow'}
+      {busy ? '…' : isFollowing ? 'Following' : 'Follow'}
     </button>
   );
 }

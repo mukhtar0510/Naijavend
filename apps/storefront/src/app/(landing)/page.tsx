@@ -337,7 +337,7 @@ export default function LandingPage() {
             </Link>
           </div>
           <p className="mt-5 text-[12px] text-muted-foreground">
-            Made in Nigeria 🇳🇬 · free to start · no commission
+            Made in Nigeria  · free to start · no commission
           </p>
         </div>
       </section>

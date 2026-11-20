@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { haversineKm, formatDistance, travelEstimates, directionsUrl, type LatLng } from '@idevtenancy/shared';
+import { Car as IcCar, Footprints as IcFootprints, MapPin as IcMapPin } from 'lucide-react';
 
 /**
  * "Distance from you" card on the store page. Uses the viewer's geolocation
@@ -52,7 +53,7 @@ export function DistanceCard({ lat, lng, name }: { lat: number; lng: number; nam
 
   return (
     <div className="card distance-card">
-      <h3 style={{ marginTop: 0, fontSize: 16 }}>📍 Distance from you</h3>
+      <h3 style={{ marginTop: 0, fontSize: 16 }}><IcMapPin className="ico-inline" aria-hidden /> Distance from you</h3>
 
       {state === 'idle' && (
         <>
@@ -81,7 +82,7 @@ export function DistanceCard({ lat, lng, name }: { lat: number; lng: number; nam
         <div className="distance-body">
           <div className="distance-big">{formatDistance(km)}</div>
           <p className="muted" style={{ margin: '0 0 8px', fontSize: 13 }}>
-            straight-line · 🚶 {eta.walk} walk · 🚗 {eta.drive} drive
+            straight-line · <IcFootprints className="ico-inline" aria-hidden /> {eta.walk} walk · <IcCar className="ico-inline" aria-hidden /> {eta.drive} drive
           </p>
           <a className="btn btn-outline btn-sm" href={directionsUrl(origin, store, name)} target="_blank" rel="noreferrer">
             Get directions ↗

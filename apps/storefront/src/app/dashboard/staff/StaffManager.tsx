@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { MapPin as IcMapPin } from 'lucide-react';
 
 export interface StaffRow {
   id: string;
@@ -102,7 +103,7 @@ export function StaffManager({ slug, locations }: { slug: string; locations?: { 
                     aria-pressed={on}
                     onClick={() => setLocationIds((prev) => (on ? prev.filter((x) => x !== loc.id) : [...prev, loc.id]))}
                   >
-                    📍 {loc.label}
+                    <IcMapPin className="ico-inline" aria-hidden /> {loc.label}
                   </button>
                 );
               })}

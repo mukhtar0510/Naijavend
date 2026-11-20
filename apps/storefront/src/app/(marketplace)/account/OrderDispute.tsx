@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { Flag as IcFlag, Store as IcStore } from 'lucide-react';
 
 // "Report a problem" on one order — opens a small form, files the dispute via
 // /api/disputes, then shows the report's live status (open → resolved/refunded/
@@ -110,7 +111,7 @@ export function OrderDispute({ orderId, orderStatus }: { orderId: string; orderS
           )}
         </div>
         {dispute.seller_note && (
-          <p className="dispute-note">🏪 {dispute.seller_note}</p>
+          <p className="dispute-note"><IcStore className="ico-inline" aria-hidden /> {dispute.seller_note}</p>
         )}
         {dispute.status === 'open' && (
           <p className="muted" style={{ margin: '4px 0 0', fontSize: 12.5 }}>
@@ -139,7 +140,7 @@ export function OrderDispute({ orderId, orderStatus }: { orderId: string; orderS
         className="btn btn-outline btn-sm dispute-report-btn"
         onClick={() => setOpen(true)}
       >
-        ⚑ Report a problem
+        <IcFlag className="ico-inline" aria-hidden /> Report a problem
       </button>
     );
   }

@@ -47,7 +47,7 @@ export function ListingRow({
             aria-expanded={editing}
             onClick={() => setEditing((v) => !v)}
           >
-            {editing ? 'Close editor' : '✏️ Edit'}
+            {editing ? 'Close editor' : 'Edit'}
           </button>
           {removeAction}
         </div>

@@ -4,6 +4,7 @@ import { supabaseAnon } from '@/lib/supabase';
 import { formatNaira } from '@idevtenancy/shared';
 import type { Listing, Store } from '@idevtenancy/shared';
 import { CategoryIcon } from '@/lib/categories';
+import { Calendar as IcCalendar, ShoppingCart as IcShoppingCart } from 'lucide-react';
 
 export const revalidate = 60; // ISR — static-fast, invalidated on seller writes via revalidatePath
 
@@ -54,12 +55,12 @@ export default async function CataloguePage({
           <Link href={`/s/${s.slug}/catalogue`} className={`badge ${!typeFilter ? 'badge-black' : ''}`}>All</Link>
           {hasProducts && (
             <Link href={`/s/${s.slug}/catalogue?type=product`} className={`badge ${typeFilter === 'product' ? 'badge-black' : ''}`}>
-              🛒 Products
+              <IcShoppingCart className="ico-inline" aria-hidden /> Products
             </Link>
           )}
           {hasServices && (
             <Link href={`/s/${s.slug}/catalogue?type=service`} className={`badge ${typeFilter === 'service' ? 'badge-black' : ''}`}>
-              📅 Services
+              <IcCalendar className="ico-inline" aria-hidden /> Services
             </Link>
           )}
         </div>

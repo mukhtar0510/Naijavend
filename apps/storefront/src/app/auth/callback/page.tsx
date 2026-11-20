@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 import { purgeSupabaseBrowserState } from '@/lib/oauth-cleanup';
+import { CircleAlert as IcCircleAlert } from 'lucide-react';
 
 // OAuth landing page: Google redirects here with ?code=... The browser client
 // that started the flow holds the PKCE verifier, so the exchange happens
@@ -81,7 +82,7 @@ export default function OAuthCallbackPage() {
     <main style={{ minHeight: '60vh', display: 'grid', placeItems: 'center', padding: 24 }}>
       {error ? (
         <div className="card" style={{ maxWidth: 460, padding: 28, textAlign: 'center' }}>
-          <div style={{ fontSize: 32, marginBottom: 8 }}>😕</div>
+          <div style={{ fontSize: 32, marginBottom: 8 }}><IcCircleAlert className="ico-inline" aria-hidden /></div>
           <h1 style={{ fontSize: 20, marginTop: 0 }}>Sign-in didn&apos;t finish</h1>
           <p className="muted" style={{ fontSize: 14.5 }}>{error}</p>
           <Link className="btn btn-primary" href={backHref} style={{ marginTop: 12 }}>

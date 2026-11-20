@@ -14,6 +14,7 @@ import { CopyLinkButton } from '@/components/CopyLinkButton';
 import type { Listing, Store, StoreRatingStats, StoreTheme } from '@idevtenancy/shared';
 import { alsoBought } from '@/lib/also-bought';
 import { ProductCard, type ProductCardItem } from '@/components/ProductCard';
+import { MapPin as IcMapPin, MessageCircle as IcMessageCircle } from 'lucide-react';
 
 export const revalidate = 60; // ISR — static-fast, invalidated on seller writes via revalidatePath
 
@@ -151,7 +152,7 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
           <nav aria-label="Breadcrumb" className="muted" style={{ fontSize: 13.5, marginBottom: 14 }}>
             <Link href={`/s/${store.slug}`}>← Back to {store.name}</Link>
           </nav>
-          <span className="badge badge-blue">{isDigital ? '⚡ Digital download' : isService ? 'Service' : 'Product'}</span>
+          <span className="badge badge-blue">{isDigital ? 'Digital download' : isService ? 'Service' : 'Product'}</span>
         </div>
       </div>
 
@@ -201,7 +202,7 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
                   />
                 )}
                 <Link className="btn btn-outline btn-lg" href={`/s/${store.slug}/chat`}>
-                  💬 Chat with us
+                  <IcMessageCircle className="ico-inline" aria-hidden /> Chat with us
                 </Link>
               </div>
 
@@ -303,7 +304,7 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
                     </span>
                   </div>
                 )}
-                {store.address && <p className="muted" style={{ fontSize: 13.5, margin: '4px 0 0' }}>📍 {store.address}</p>}
+                {store.address && <p className="muted" style={{ fontSize: 13.5, margin: '4px 0 0' }}><IcMapPin className="ico-inline" aria-hidden /> {store.address}</p>}
               </div>
               <Link className="btn btn-outline btn-sm" href={`/s/${store.slug}`}>
                 Visit store

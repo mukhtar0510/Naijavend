@@ -23,6 +23,7 @@ import { siteUrl, schemaTypeForCategory } from '@/lib/site';
 import { FEATURES } from '@/lib/flags';
 import { ExampleStoreBanner } from '@/components/ExampleStoreBanner';
 import type { Listing, Store, StoreRating, StoreRatingStats, StoreTheme } from '@idevtenancy/shared';
+import { Calendar as IcCalendar, Globe as IcGlobe, MapPin as IcMapPin, ShoppingBag as IcShoppingBag, Truck as IcTruck } from 'lucide-react';
 
 export const revalidate = 60; // ISR — static-fast, invalidated on seller writes via revalidatePath
 
@@ -178,7 +179,7 @@ export default async function StorePage({ params }: { params: { slug: string } }
               <span className="badge badge-blue">{store.category}</span>
               <span className="badge">{store.business_type}</span>
               {FEATURES.dropshipperMode && store.is_dropshipper && (
-                <span className="badge badge-dropship" title="Ships from a supplier">🚚 Dropshipper</span>
+                <span className="badge badge-dropship" title="Ships from a supplier"><IcTruck className="ico-inline" aria-hidden /> Dropshipper</span>
               )}
               <OpenBadge hours={store.business_hours} />
               {FEATURES.rankings && stats && stats.overall_rank && stats.review_count >= 3 && (
@@ -203,7 +204,7 @@ export default async function StorePage({ params }: { params: { slug: string } }
             <p style={{ fontSize: 17, marginBottom: 8 }}>{store.description}</p>
             {store.address && (
               <p className="muted" style={{ fontSize: 14.5, marginBottom: 16 }}>
-                📍 {store.address}
+                <IcMapPin className="ico-inline" aria-hidden /> {store.address}
               </p>
             )}
             <div className="store-hero-ctas" style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
@@ -293,14 +294,14 @@ export default async function StorePage({ params }: { params: { slug: string } }
             )}
             {store.delivery_info && (
               <div className="card">
-                <h3 style={{ marginTop: 0, fontSize: 16 }}>🚚 Delivery & pickup</h3>
+                <h3 style={{ marginTop: 0, fontSize: 16 }}><IcTruck className="ico-inline" aria-hidden /> Delivery & pickup</h3>
                 <p style={{ margin: 0, whiteSpace: 'pre-line' }}>{store.delivery_info}</p>
               </div>
             )}
             {FEATURES.dropshipperMode && store.is_dropshipper && (
               <div className="card dropship-card">
                 <h3 style={{ marginTop: 0, fontSize: 16 }}>
-                  🌍 Shipping &amp; suppliers{' '}
+                  <IcGlobe className="ico-inline" aria-hidden /> Shipping &amp; suppliers{' '}
                   <span className="badge badge-dropship" style={{ verticalAlign: 'middle' }}>Dropshipper</span>
                 </h3>
                 <p style={{ margin: 0, whiteSpace: 'pre-line' }}>
@@ -363,7 +364,7 @@ export default async function StorePage({ params }: { params: { slug: string } }
                 ) : (
                   <Link href={`/s/${store.slug}/listing/${listing.id}`} aria-label={listing.title}>
                     <div className="catalogue-cover-fallback" aria-hidden>
-                      {listing.type === 'service' ? '📅' : '🛍️'}
+                      {listing.type === 'service' ? <IcCalendar className="ico-inline" aria-hidden /> : <IcShoppingBag className="ico-inline" aria-hidden />}
                     </div>
                   </Link>
                 )}

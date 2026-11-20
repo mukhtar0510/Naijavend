@@ -7,6 +7,7 @@ import { aiComplete } from '@idevtenancy/ai';
 import { CategoryPicker } from '@/components/CategoryPicker';
 import { trackStepView, trackStepComplete, trackChip, trackPreviewShown, trackAbandon } from '@/lib/funnel';
 import { CategoryIcon } from '@/lib/categories';
+import { Calendar as IcCalendar, Check as IcCheck, Package as IcPackage, Rocket as IcRocket, ShoppingBasket as IcShoppingBasket, Sparkles as IcSparkles, Store as IcStore, Truck as IcTruck, Zap as IcZap } from 'lucide-react';
 
 interface AiPreview {
   name: string;
@@ -15,9 +16,9 @@ interface AiPreview {
 }
 
 const STEPS = [
-  { n: 1, label: 'Your business', ico: '🏪' },
-  { n: 2, label: 'AI draft', ico: '✨' },
-  { n: 3, label: 'Go live', ico: '🚀' },
+  { n: 1, label: 'Your business', ico: <IcStore className="ico-inline" aria-hidden /> },
+  { n: 2, label: 'AI draft', ico: <IcSparkles className="ico-inline" aria-hidden /> },
+  { n: 3, label: 'Go live', ico: <IcRocket className="ico-inline" aria-hidden /> },
 ] as const;
 
 const ASIDE_COPY: Record<number, { h: string; p: string }> = {
@@ -27,9 +28,9 @@ const ASIDE_COPY: Record<number, { h: string; p: string }> = {
 };
 
 const TYPE_OPTIONS = [
-  { value: 'product', ico: '📦', title: 'Products', hint: 'Physical goods you stock or ship' },
-  { value: 'service', ico: '📅', title: 'Services', hint: 'Bookable appointments' },
-  { value: 'hybrid', ico: '🧺', title: 'Both', hint: 'A mix of products and services' },
+  { value: 'product', ico: <IcPackage className="ico-inline" aria-hidden />, title: 'Products', hint: 'Physical goods you stock or ship' },
+  { value: 'service', ico: <IcCalendar className="ico-inline" aria-hidden />, title: 'Services', hint: 'Bookable appointments' },
+  { value: 'hybrid', ico: <IcShoppingBasket className="ico-inline" aria-hidden />, title: 'Both', hint: 'A mix of products and services' },
 ] as const;
 
 // Tap-to-add keywords for step 1: on a phone, typing a business description is
@@ -296,7 +297,7 @@ export default function OnboardingPage() {
                   disabled={s.n > step || (s.n === 2 && !aiPreview)}
                 >
                   <span className="ob-step-dot" aria-hidden>
-                    {state === 'done' ? '✓' : s.ico}
+                    {state === 'done' ? <IcCheck className="ico-inline" aria-hidden /> : s.ico}
                   </span>
                   <span className="ob-step-label">
                     <strong>Step {s.n}</strong>
@@ -343,14 +344,14 @@ export default function OnboardingPage() {
                 />
                 <p className="hint">
                   {businessDescription.trim().length}/600 — the AI drafts your name, description and category from this.
-                  {draftRestored && ' ✓ Draft restored from this device.'}
+                  {draftRestored && ' Draft restored from this device.'}
                 </p>
               </div>
 
               {liveDraft && (
                 <div className="card ob-live-preview" aria-live="polite">
                   <div className="ob-live-head">
-                    <span aria-hidden>✨</span> <strong>Live preview</strong>
+                    <span aria-hidden><IcSparkles className="ico-inline" aria-hidden /></span> <strong>Live preview</strong>
                     <span className="ob-live-mut">— updates as you tap or type</span>
                   </div>
                   <div className="ob-live-name">
@@ -363,7 +364,7 @@ export default function OnboardingPage() {
                   </div>
                   <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
                     <button type="button" className="btn btn-primary btn-sm" onClick={useDraftNow}>
-                      ⚡ Use this draft →
+                      <IcZap className="ico-inline" aria-hidden /> Use this draft →
                     </button>
                     <p className="hint" style={{ margin: 0 }}>
                       or keep typing — you can edit every word before anything goes live.
@@ -385,7 +386,7 @@ export default function OnboardingPage() {
                         className={`ob-quick-chip${on ? ' is-on' : ''}`}
                         onClick={() => toggleQuickPick(phrase)}
                       >
-                        {on ? '✓ ' : '+ '}{phrase}
+                        {on ? '' : '+ '}{phrase}
                       </button>
                     );
                   })}
@@ -421,14 +422,14 @@ export default function OnboardingPage() {
                   aria-checked={isDropshipper}
                   onClick={() => setIsDropshipper((v) => !v)}
                 >
-                  <span className="ob-type-ico" aria-hidden>🚚</span>
+                  <span className="ob-type-ico" aria-hidden><IcTruck className="ico-inline" aria-hidden /></span>
                   <span>
                     <strong>I ship from a supplier (dropshipping)</strong>
                     <span className="ob-type-hint">
                       Get a verified Dropshipper tag and a shipping card on your store. Supplier details can be added later.
                     </span>
                   </span>
-                  <span className="ob-dropship-mark" aria-hidden>{isDropshipper ? '✓' : ''}</span>
+                  <span className="ob-dropship-mark" aria-hidden>{isDropshipper ? <IcCheck className="ico-inline" aria-hidden /> : ''}</span>
                 </button>
               )}
 
@@ -529,8 +530,8 @@ export default function OnboardingPage() {
                 <div>
                   <span className="ob-sum-k">Extras</span>
                   <span className="ob-sum-v">
-                    {isDropshipper ? '🚚 Dropshipper tag' : 'Standard store'}
-                    {(useAiName || useAiDescription) && ' · ✨ AI-assisted copy'}
+                    {isDropshipper ? 'Dropshipper tag' : 'Standard store'}
+                    {(useAiName || useAiDescription) && ' · AI-assisted copy'}
                   </span>
                 </div>
               </div>
@@ -538,7 +539,7 @@ export default function OnboardingPage() {
               <div className="ob-nav">
                 <button className="btn btn-outline" onClick={() => setStep(2)} disabled={busy}>← Back</button>
                 <button className="btn btn-primary" onClick={publish} disabled={busy}>
-                  {busy ? 'Publishing…' : '🚀 Create my store'}
+                  {busy ? 'Publishing…' : 'Create my store'}
                 </button>
               </div>
             </>

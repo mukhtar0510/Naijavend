@@ -52,7 +52,7 @@ export function ChatInbox({
   return (
     <>
       <p className="muted" style={{ fontSize: 13.5, marginTop: -6 }}>
-        {totalUnread > 0 ? `💬 ${totalUnread} unread message${totalUnread === 1 ? '' : 's'}` : 'All caught up ✅'}
+        {totalUnread > 0 ? `${totalUnread} unread message${totalUnread === 1 ? '' : 's'}` : 'All caught up '}
       </p>
       <div className="chat-inbox">
         <div className="thread-list">

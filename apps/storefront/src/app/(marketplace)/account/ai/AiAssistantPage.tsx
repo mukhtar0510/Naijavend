@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { sanitizeText } from '@idevtenancy/shared';
+import { MessageCircle as IcMessageCircle, ShoppingBag as IcShoppingBag } from 'lucide-react';
 
 interface Answer {
   reply: string;
@@ -119,7 +120,7 @@ export default function AiAssistantPage() {
     <main className="ai-app">
       <header className="ai-app-top">
         <div>
-          <h2 style={{ margin: 0, fontSize: 17 }}>💬 Ask Kwaravend</h2>
+          <h2 style={{ margin: 0, fontSize: 17 }}><IcMessageCircle className="ico-inline" aria-hidden /> Ask Kwaravend</h2>
           <span className="muted" style={{ fontSize: 12.5 }}>
             Your shopping assistant · catalogue + your own orders and bookings
           </span>
@@ -195,7 +196,7 @@ export default function AiAssistantPage() {
           </>
         ) : (
           <div className="ai-app-empty">
-            <div className="ai-app-empty-icon">🛍️</div>
+            <div className="ai-app-empty-icon"><IcShoppingBag className="ico-inline" aria-hidden /></div>
             <h3>Ask Kwaravend</h3>
             <p className="muted">
               Ask about stores, products, prices, your orders and bookings — the assistant answers from the

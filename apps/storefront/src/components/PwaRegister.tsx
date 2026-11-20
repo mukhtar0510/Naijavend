@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Download as IcDownload } from 'lucide-react';
 
 // Registers /sw.js (offline mode) in PRODUCTION and surfaces the browser's
 // install prompt as a small floating button when the app is installable.
@@ -61,7 +62,7 @@ export function PwaRegister() {
       title="Install Kwaravend on this device"
       aria-label="Install Kwaravend app"
     >
-      ⬇ Install app
+      <IcDownload className="ico-inline" aria-hidden /> Install app
     </button>
   );
 }

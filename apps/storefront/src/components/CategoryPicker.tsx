@@ -1,7 +1,8 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { STORE_CATEGORIES, STORE_CATEGORY_LABELS, STORE_CATEGORY_EMOJI } from '@idevtenancy/shared';
+import { STORE_CATEGORIES, STORE_CATEGORY_LABELS } from '@idevtenancy/shared';
+import { CategoryIcon } from '@/lib/categories';
 
 // One-line "what's in it" hints so sellers can tell categories apart at a glance
 // (and so the search can match how people actually describe their business).
@@ -59,7 +60,6 @@ export function CategoryPicker({
 
   const known = (STORE_CATEGORIES as readonly string[]).includes(value);
   const label = known ? (STORE_CATEGORY_LABELS as Record<string, string>)[value] ?? value : value;
-  const emoji = (STORE_CATEGORY_EMOJI as Record<string, string>)[value] ?? '🛍️';
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -79,7 +79,7 @@ export function CategoryPicker({
         aria-expanded={open}
         aria-haspopup="listbox"
       >
-        <span className="ob-type-ico" aria-hidden>{emoji}</span>
+        <span className="ob-type-ico" aria-hidden><CategoryIcon category={known ? value : 'general'} size={20} /></span>
         <span style={{ flex: 1, textAlign: 'left' }}>{label}</span>
         <span className="ob-cat-caret" aria-hidden>{open ? '▲' : '▼'}</span>
       </button>
@@ -107,7 +107,7 @@ export function CategoryPicker({
                   setQ('');
                 }}
               >
-                <span className="ob-type-ico" aria-hidden>{STORE_CATEGORY_EMOJI[c]}</span>
+                <span className="ob-type-ico" aria-hidden><CategoryIcon category={c} size={20} /></span>
                 <strong>{STORE_CATEGORY_LABELS[c]}</strong>
                 <span className="ob-type-hint">{HINTS[c]}</span>
               </button>

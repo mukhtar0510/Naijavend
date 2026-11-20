@@ -20,6 +20,7 @@ import {
   Sparkles,
   UserRound,
 } from 'lucide-react';
+import { Bot as IcBot, Briefcase as IcBriefcase, CircleCheck as IcCircleCheck, CreditCard as IcCreditCard, Hourglass as IcHourglass, Package as IcPackage, Palette as IcPalette, Receipt as IcReceipt, Repeat as IcRepeat, ShoppingBag as IcShoppingBag, Store as IcStore, Ticket as IcTicket } from 'lucide-react';
 
 const STATUS_BADGE: Record<string, string> = {
   pending: 'badge-black',
@@ -304,7 +305,7 @@ function SellerUpsellCard() {
     <section className="nv-acc-card nv-acc-selling" aria-label="Sell on Kwaravend">
       <div className="seller-upsell-head">
         <div>
-          <h2>💼 Turn shopping into selling</h2>
+          <h2><IcBriefcase className="ico-inline" aria-hidden /> Turn shopping into selling</h2>
           <p className="muted" style={{ margin: '6px 0 0', fontSize: 13.5 }}>
             Every order you make here comes from a seller just like you. Open your own store in
             minutes — and let our AI design and style it for you.
@@ -316,7 +317,7 @@ function SellerUpsellCard() {
           Start selling
         </Link>
         <Link href="/dashboard/ai" className="btn btn-outline">
-          🎨 Let AI design my store
+          <IcPalette className="ico-inline" aria-hidden /> Let AI design my store
         </Link>
       </div>
     </section>
@@ -329,7 +330,7 @@ function BuyAgainCard({ buyAgain }: { buyAgain: ProductCardItem[] }) {
   return (
     <section className="nv-acc-card" aria-label="Buy again">
       <div className="nv-acc-card-head">
-        <h2>🔁 Buy again</h2>
+        <h2><IcRepeat className="ico-inline" aria-hidden /> Buy again</h2>
         <span className="muted" style={{ fontSize: 12.5 }}>
           Items you bought before, most recent first
         </span>
@@ -351,7 +352,7 @@ function AskAiCard() {
   return (
     <section className="nv-acc-card nv-acc-ai" aria-label="Ask Kwaravend">
       <div className="nv-acc-ai-head">
-        <div className="ask-ai-icon">🤖</div>
+        <div className="ask-ai-icon"><IcBot className="ico-inline" aria-hidden /></div>
         <div className="ask-ai-title">
           <h2>Ask Kwaravend</h2>
           <p className="muted" style={{ margin: 0, fontSize: 12.5 }}>
@@ -384,10 +385,10 @@ function OrdersSummary({ rows }: { rows: SummaryRow[] }) {
   const delivered = rows.filter((o) => o.status === 'fulfilled').length;
 
   const stats = [
-    { label: 'Orders placed', value: Number(rows.length), ico: '🧾' },
-    { label: 'Total spent', value: formatNaira(spent), ico: '💳' },
-    { label: 'In progress', value: Number(active), ico: '⏳' },
-    { label: 'Delivered', value: Number(delivered), ico: '✅' },
+    { label: 'Orders placed', value: Number(rows.length), ico: <IcReceipt className="ico-inline" aria-hidden /> },
+    { label: 'Total spent', value: formatNaira(spent), ico: <IcCreditCard className="ico-inline" aria-hidden /> },
+    { label: 'In progress', value: Number(active), ico: <IcHourglass className="ico-inline" aria-hidden /> },
+    { label: 'Delivered', value: Number(delivered), ico: <IcCircleCheck className="ico-inline" aria-hidden /> },
   ];
   return (
     <div className="nv-acc-stats" aria-label="Order summary">
@@ -418,7 +419,7 @@ function OrdersList({ orders, loadError }: { orders: OrderRow[]; loadError: bool
           </h2>
         </header>
         <div className="nv-acc-blank">
-          <span aria-hidden>🧾</span>
+          <span aria-hidden><IcReceipt className="ico-inline" aria-hidden /></span>
           <h3>No orders yet</h3>
           <p>Browse stores to see your first order here.</p>
           <Link href="/discover" className="btn btn-outline btn-sm">
@@ -462,7 +463,7 @@ function OrdersList({ orders, loadError }: { orders: OrderRow[]; loadError: bool
                     ))
                   ) : (
                     <span className="nv-acc-order-ph" aria-hidden>
-                      {o.status === 'fulfilled' ? '📦' : '🛍️'}
+                      {o.status === 'fulfilled' ? <IcPackage className="ico-inline" aria-hidden /> : <IcShoppingBag className="ico-inline" aria-hidden />}
                     </span>
                   )}
                 </div>
@@ -476,7 +477,7 @@ function OrdersList({ orders, loadError }: { orders: OrderRow[]; loadError: bool
                   <div className="nv-acc-order-meta">
                     {store && (
                       <Link href={`/s/${store.slug}`} className="nv-acc-order-store">
-                        🏪 {store.name}
+                        <IcStore className="ico-inline" aria-hidden /> {store.name}
                       </Link>
                     )}
                     <span>
@@ -502,7 +503,7 @@ function OrdersList({ orders, loadError }: { orders: OrderRow[]; loadError: bool
                   )}
                   {(o.discount_kobo ?? 0) > 0 && (
                     <span className="nv-acc-order-discount">
-                      🎟️ {o.discount_code} — saved {formatNaira(o.discount_kobo as number)}
+                      <IcTicket className="ico-inline" aria-hidden /> {o.discount_code} — saved {formatNaira(o.discount_kobo as number)}
                     </span>
                   )}
                 </div>

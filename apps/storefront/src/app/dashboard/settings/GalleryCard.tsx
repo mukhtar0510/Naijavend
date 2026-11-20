@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Image as IcImage, X as IcX } from 'lucide-react';
 
 const MAX_GALLERY = 5;
 
@@ -71,7 +72,7 @@ export function GalleryCard({ initialGallery }: { initialGallery: string[] }) {
 
   return (
     <div className="card" style={{ marginBottom: 16 }}>
-      <h2 style={{ fontSize: 18 }}>🖼️ Store gallery</h2>
+      <h2 style={{ fontSize: 18 }}><IcImage className="ico-inline" aria-hidden /> Store gallery</h2>
       <p className="hint" style={{ marginTop: 0 }}>
         Show buyers the real place: 1–5 photos of your shop, counter or workspace — displayed
         as a gallery on your store site.
@@ -97,7 +98,7 @@ export function GalleryCard({ initialGallery }: { initialGallery: string[] }) {
                   cursor: 'pointer', fontSize: 12, lineHeight: 1,
                 }}
               >
-                ✕
+                <IcX className="ico-inline" aria-hidden />
               </button>
             </span>
           ))}

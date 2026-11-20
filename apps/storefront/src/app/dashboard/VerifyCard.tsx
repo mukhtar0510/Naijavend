@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { VerifiedTick } from '@/components/VerifiedTick';
+import { Check as IcCheck } from 'lucide-react';
 
 const REVIEWS_REQUIRED = 30;
 const AVG_REQUIRED = 4.0;
@@ -61,7 +62,7 @@ export function VerifyCard({
   return (
     <div className="card card-elevated verify-card">
       <p className="muted" style={{ margin: 0, fontSize: 14 }}>Verification</p>
-      <p style={{ margin: '6px 0', fontSize: 16, fontWeight: 700 }}>Get the blue tick ✔</p>
+      <p style={{ margin: '6px 0', fontSize: 16, fontWeight: 700 }}>Get the blue tick <IcCheck className="ico-inline" aria-hidden /></p>
       <p className="muted" style={{ margin: '0 0 10px', fontSize: 13.5 }}>
         Verified stores are badged everywhere on Kwaravend. Requirement:{' '}
         <strong>{REVIEWS_REQUIRED}+ reviews</strong> averaging <strong>{AVG_REQUIRED}+ stars</strong>.
@@ -71,8 +72,8 @@ export function VerifyCard({
       </div>
       <p className="muted" style={{ margin: '6px 0 0', fontSize: 13 }}>
         {reviewCount}/{REVIEWS_REQUIRED} reviews
-        {reviewCount > 0 ? ` · ${avg.toFixed(1)}★ average` : ''}{' '}
-        {avg > 0 && avg < AVG_REQUIRED ? `· needs ${AVG_REQUIRED}+★ average` : ''}
+        {reviewCount > 0 ? ` · ${avg.toFixed(1)}average` : ''}{' '}
+        {avg > 0 && avg < AVG_REQUIRED ? `· needs ${AVG_REQUIRED}+average` : ''}
       </p>
       <div style={{ marginTop: 12, display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
         <button type="button" className="btn btn-primary btn-sm" disabled={!eligible || busy} onClick={apply}>

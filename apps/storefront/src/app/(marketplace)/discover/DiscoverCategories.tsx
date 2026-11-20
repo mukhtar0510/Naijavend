@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
 import { STORE_CATEGORIES, categoryLabel } from '@idevtenancy/shared';
 import { CategoryIcon } from '@/lib/categories';
+import { Circle as IcCircle } from 'lucide-react';
 
 const INLINE_COUNT = 5;
 
@@ -68,7 +69,7 @@ export function DiscoverCategories({
           All stores
         </Link>
         <Link href={openNowHref()} className={`brand-chip no-underline ${openOnly ? 'is-active' : ''}`}>
-          <span aria-hidden>🟢</span> Open now
+          <span aria-hidden><IcCircle className="ico-inline" aria-hidden /></span> Open now
         </Link>
         {STORE_CATEGORIES.map((c, i) => (
           <Link

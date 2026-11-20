@@ -17,7 +17,7 @@ const initialsOf = (name: string) =>
     .filter(Boolean)
     .slice(0, 2)
     .map((w) => w[0]!.toUpperCase())
-    .join('') || '🙂';
+    .join('') || '?';
 
 // Self-service profile editor: avatar upload (2 MB JPEG/PNG/WebP), name and
 // phone. Saves go to /api/account/profile (RLS-scoped to the signed-in
@@ -134,7 +134,7 @@ export function ProfileEditor({ email, initialName, initialPhone, initialAvatarU
               }}
             />
             <button type="button" className="btn btn-outline btn-sm" onClick={() => fileRef.current?.click()} disabled={uploading}>
-              {avatarUrl ? 'Change photo' : '📷 Upload photo'}
+              {avatarUrl ? 'Change photo' : 'Upload photo'}
             </button>
             {avatarUrl && (
               <button type="button" className="btn btn-outline btn-sm prof-remove" onClick={removeAvatar} disabled={uploading}>

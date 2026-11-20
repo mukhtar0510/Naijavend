@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Listing } from '@idevtenancy/shared';
+import { CreditCard as IcCreditCard, Image as IcImage, Sparkles as IcSparkles, Video as IcVideo, X as IcX } from 'lucide-react';
 
 const MAX_IMAGES = 5;
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -370,7 +371,7 @@ export function ListingEditor({ storeId, listing }: { storeId: string; listing?:
         <textarea id={editing ? `ldesc-${listing!.id}` : 'ldesc'} value={description} onChange={(e) => { setDescription(e.target.value); setAiDescription(false); }} maxLength={2000} placeholder="What is it, who is it for, what makes it good?" />
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginTop: 8 }}>
           <button type="button" className="btn btn-outline btn-sm" onClick={draftWithAi} disabled={aiBusy || (title.trim().length < 2 && imageUrls.length === 0)}>
-            {aiBusy ? 'Drafting…' : imageUrls.length ? '✍️ Draft from photo' : 'Draft with AI'}
+            {aiBusy ? 'Drafting…' : imageUrls.length ? 'Draft from photo' : 'Draft with AI'}
           </button>
           {(title.trim().length >= 2 || imageUrls.length > 0) && (
             <span className="hint" style={{ margin: 0 }}>
@@ -430,7 +431,7 @@ export function ListingEditor({ storeId, listing }: { storeId: string; listing?:
                     background: 'var(--surface)', cursor: 'pointer', lineHeight: 1, fontSize: 12,
                   }}
                 >
-                  ✕
+                  <IcX className="ico-inline" aria-hidden />
                 </button>
                 <div style={{ display: 'grid', gap: 4, marginTop: 4, width: 76 }}>
                   <button
@@ -441,7 +442,7 @@ export function ListingEditor({ storeId, listing }: { storeId: string; listing?:
                     onClick={() => void editPhoto(url, 'remove-background')}
                     title="Swap the background for clean white"
                   >
-                    🖼️ Remove bg
+                    <IcImage className="ico-inline" aria-hidden /> Remove bg
                   </button>
                   <button
                     type="button"
@@ -451,7 +452,7 @@ export function ListingEditor({ storeId, listing }: { storeId: string; listing?:
                     onClick={() => void editPhoto(url, 'enhance')}
                     title="Crop, straighten and brighten"
                   >
-                    ✨ Clean up
+                    <IcSparkles className="ico-inline" aria-hidden /> Clean up
                   </button>
                 </div>
               </div>
@@ -463,7 +464,7 @@ export function ListingEditor({ storeId, listing }: { storeId: string; listing?:
 
         {type === 'digital' && (
           <div className="field" style={{ background: 'var(--elevated-2)', padding: 12, borderRadius: 10, marginTop: 10 }}>
-            <label htmlFor="digital-file">💳 File to sell (PDF, EPUB, ZIP, MP3, MP4…)</label>
+            <label htmlFor="digital-file"><IcCreditCard className="ico-inline" aria-hidden /> File to sell (PDF, EPUB, ZIP, MP3, MP4…)</label>
             {editing && listing && (
               <form
                 onSubmit={async (e) => {
@@ -537,7 +538,7 @@ export function ListingEditor({ storeId, listing }: { storeId: string; listing?:
           <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
             <video src={videoUrl} controls style={{ width: 180, borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }} />
             <div>
-              <p className="hint" style={{ margin: 0 }}>📹 {videoName || 'Video attached'}</p>
+              <p className="hint" style={{ margin: 0 }}><IcVideo className="ico-inline" aria-hidden /> {videoName || 'Video attached'}</p>
               <button type="button" className="btn btn-outline btn-sm" onClick={removeVideo} style={{ marginTop: 6 }}>Remove video</button>
             </div>
           </div>

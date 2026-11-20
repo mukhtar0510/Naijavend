@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import QRCode from 'qrcode';
 import { LinkIcon, CheckIcon } from '@/components/SocialIcons';
+import { Download as IcDownload } from 'lucide-react';
 
 // Branded QR codes for Kwaravend store + product sharing — a custom card
 // layout, not just a bare square: glacier-blue frame with a header band
@@ -290,7 +291,7 @@ function QrCanvas({
       />
       {error && <p className="field-error" style={{ margin: 0 }}>{error}</p>}
       <button type="button" className="btn btn-outline btn-sm" onClick={onDownload}>
-        Download PNG ⬇
+        Download PNG <IcDownload className="ico-inline" aria-hidden />
       </button>
       <button type="button" className="btn btn-outline btn-sm" onClick={onCopy} aria-label="Copy the link">
         {copied ? <CheckIcon size={14} /> : <LinkIcon size={14} />} {copied ? 'Link copied!' : 'Copy link'}

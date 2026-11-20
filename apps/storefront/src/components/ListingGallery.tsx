@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { ShoppingBag as IcShoppingBag } from 'lucide-react';
 
 // Product-page gallery: optional product video first, then big main image
 // with a clickable thumbnail strip below.
@@ -13,7 +14,7 @@ export function ListingGallery({ images, videoUrl, title }: { images: string[]; 
   if (slots.length === 0) {
     return (
       <div className="gallery-placeholder" aria-label={`${title} — no photos yet`}>
-        🛍️
+        <IcShoppingBag className="ico-inline" aria-hidden />
       </div>
     );
   }

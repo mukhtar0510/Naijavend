@@ -22,7 +22,7 @@ export function HeroSearch({ trending }: { trending: ProductCardItem[] }) {
   }
 
   const chips = trending.length > 0
-    ? trending.slice(0, 4).map((t) => ({ label: `🔥 ${t.title}`, query: t.title }))
+    ? trending.slice(0, 4).map((t) => ({ label: `${t.title}`, query: t.title }))
     : FALLBACK_CHIPS.map((c) => ({ label: c, query: c }));
 
   return (

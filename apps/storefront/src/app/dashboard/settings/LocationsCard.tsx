@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { BUSINESS_DAYS, type BusinessHours } from '@idevtenancy/shared';
+import { MapPin as IcMapPin } from 'lucide-react';
 
 const DAY_LABELS: Record<(typeof BUSINESS_DAYS)[number], string> = {
   mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday', sat: 'Saturday', sun: 'Sunday',
@@ -134,7 +135,7 @@ export function LocationsCard({ storeName, initialLocations }: { storeName: stri
 
   return (
     <div className="card" style={{ marginBottom: 16 }}>
-      <h2 style={{ fontSize: 18 }}>📍 Locations</h2>
+      <h2 style={{ fontSize: 18 }}><IcMapPin className="ico-inline" aria-hidden /> Locations</h2>
       <p className="hint" style={{ marginTop: 0 }}>
         Have more than one shop? Add each branch here — they all show on your store site with
         their own address, phone and hours. Your main address above is branch one.
@@ -156,7 +157,7 @@ export function LocationsCard({ storeName, initialLocations }: { storeName: stri
               </div>
               <p className="muted" style={{ margin: '6px 0 0', fontSize: 13.5 }}>
                 {row.address || 'No address yet'}
-                {row.phone ? ` · 📞 ${row.phone}` : ''}
+                {row.phone ? ` · ${row.phone}` : ''}
                 {row.note ? ` — ${row.note}` : ''}
               </p>
               {row.image_url && (

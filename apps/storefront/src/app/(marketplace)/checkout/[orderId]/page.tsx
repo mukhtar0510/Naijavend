@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { orderRef } from '@idevtenancy/shared';
 import { PAYMENT_METHOD_LABEL, type PaymentMethod } from '@/lib/payments';
 import { PaymentProofUpload } from './PaymentProofUpload';
+import { Zap as IcZap } from 'lucide-react';
+import { Download as IcDownload } from 'lucide-react';
 
 interface CheckoutData {
   orderId: string;
@@ -86,13 +88,13 @@ export default function CheckoutPage({
           </p>
           {data.digitalDownloads && data.digitalDownloads.length > 0 && (
             <div style={{ margin: '18px 0 4px', padding: 16, border: '1px solid var(--border)', borderRadius: 12, background: 'var(--elevated-2)', textAlign: 'left' }}>
-              <strong style={{ fontSize: 15 }}>⚡ Your downloads are ready</strong>
+              <strong style={{ fontSize: 15 }}><IcZap className="ico-inline" aria-hidden /> Your downloads are ready</strong>
               <p className="muted" style={{ fontSize: 13, marginTop: 4 }}>
                 Each link works once — download now and save your file.
               </p>
               {data.digitalDownloads.map((d) => (
                 <a key={d.downloadUrl} href={d.downloadUrl} className="btn btn-primary" style={{ margin: '6px 8px 6px 0' }} download>
-                  ⬇ Download {d.fileName}
+                  <IcDownload className="ico-inline" aria-hidden /> Download {d.fileName}
                 </a>
               ))}
             </div>

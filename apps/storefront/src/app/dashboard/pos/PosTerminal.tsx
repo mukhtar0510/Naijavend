@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { formatNaira } from '@idevtenancy/shared';
+import { CircleCheck as IcCircleCheck, ShoppingBag as IcShoppingBag } from 'lucide-react';
 
 export interface PosListing {
   id: string;
@@ -122,7 +123,7 @@ export function PosTerminal({ listings, slug, isGrowth, staffName }: PosProps) {
                   // eslint-disable-next-line @next/next/no-img-element -- seller-supplied remote URL
                   <img src={l.image_url} alt="" />
                 ) : (
-                  <span className="pos-tile-fallback" aria-hidden>🛍️</span>
+                  <span className="pos-tile-fallback" aria-hidden><IcShoppingBag className="ico-inline" aria-hidden /></span>
                 )}
                 <span className="pos-tile-name">{l.title}</span>
                 <span className="pos-tile-price">{formatNaira(l.price_kobo)}</span>
@@ -165,7 +166,7 @@ export function PosTerminal({ listings, slug, isGrowth, staffName }: PosProps) {
               className={`pos-method${method === m ? ' is-active' : ''}`}
               onClick={() => setMethod(m)}
             >
-              {m === 'cash' ? '💵 Cash' : m === 'transfer' ? '🏦 Transfer' : '💳 Card'}
+              {m === 'cash' ? 'Cash' : m === 'transfer' ? 'Transfer' : 'Card'}
             </button>
           ))}
         </div>
@@ -177,7 +178,7 @@ export function PosTerminal({ listings, slug, isGrowth, staffName }: PosProps) {
 
         {receipt && (
           <div className="alert alert-success" style={{ marginTop: 10 }} role="status">
-            ✅ Paid {formatNaira(receipt.total)} via {receipt.method}. Sale recorded.
+            <IcCircleCheck className="ico-inline" aria-hidden /> Paid {formatNaira(receipt.total)} via {receipt.method}. Sale recorded.
           </div>
         )}
       </aside>

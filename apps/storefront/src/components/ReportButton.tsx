@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Flag as IcFlag } from 'lucide-react';
 
 const REASONS: Array<{ value: string; label: string }> = [
   { value: 'scam', label: 'Possible scam' },
@@ -55,7 +56,7 @@ export function ReportButton({ storeId, storeName }: { storeId: string; storeNam
   return (
     <>
       <button type="button" className="btn btn-sm btn-ghost" onClick={() => setOpen(true)}>
-        ⚑ Report store
+        <IcFlag className="ico-inline" aria-hidden /> Report store
       </button>
 
       {open && (

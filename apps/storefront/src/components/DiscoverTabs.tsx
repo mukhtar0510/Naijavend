@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { List as IcList, Map as IcMap } from 'lucide-react';
 
 // Discover page tabs: the classic list (nearby list, search, store cards) and
 // the full street-map view in their own tabs.
@@ -25,7 +26,7 @@ export function DiscoverTabs({
           className={`disc-tab${tab === 'list' ? ' on' : ''}`}
           onClick={() => setTab('list')}
         >
-          🧭 List
+          <IcList className="ico-inline" aria-hidden /> List
         </button>
         <button
           type="button"
@@ -34,7 +35,7 @@ export function DiscoverTabs({
           className={`disc-tab${tab === 'map' ? ' on' : ''}`}
           onClick={() => setTab('map')}
         >
-          🗺️ Map
+          <IcMap className="ico-inline" aria-hidden /> Map
         </button>
       </div>
       {tab === 'list' ? list : map}

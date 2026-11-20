@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { Star as IcStar } from 'lucide-react';
 
 export default function RatePage() {
   const { slug } = useParams<{ slug: string }>();
@@ -81,7 +82,7 @@ export default function RatePage() {
                   padding: 0,
                 }}
               >
-                ★
+                <IcStar className="ico-inline" aria-hidden />
               </button>
             ))}
           </div>

@@ -9,6 +9,7 @@ import { ListingRow } from './ListingRow';
 import { DiscountManager, type DiscountRow } from './DiscountManager';
 import { ListingQrManager } from './ListingQrManager';
 import type { Listing, Store } from '@idevtenancy/shared';
+import { Calendar as IcCalendar, Image as IcImage, ShoppingBag as IcShoppingBag } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -80,13 +81,13 @@ export default async function ListingsPage({ searchParams }: { searchParams: Pro
                     // eslint-disable-next-line @next/next/no-img-element -- seller-supplied remote URL
                     <img className="dash-listing-thumb" src={cover} alt="" />
                   ) : (
-                    <div className="dash-listing-thumb" aria-hidden>{l.type === 'service' ? '📅' : '🛍️'}</div>
+                    <div className="dash-listing-thumb" aria-hidden>{l.type === 'service' ? <IcCalendar className="ico-inline" aria-hidden /> : <IcShoppingBag className="ico-inline" aria-hidden />}</div>
                   )}
                   <div style={{ minWidth: 0 }}>
                     <strong>{l.title}</strong>{' '}
                     <span className="badge badge-blue">{l.type}</span>
                     {(l.image_urls?.length ?? 0) > 0 && (
-                      <span className="badge" style={{ marginLeft: 4 }}>🖼 {l.image_urls.length}</span>
+                      <span className="badge" style={{ marginLeft: 4 }}><IcImage className="ico-inline" aria-hidden /> {l.image_urls.length}</span>
                     )}
                     <p className="muted mono" style={{ margin: '4px 0 0', fontSize: 14 }}>
                       {formatNaira(l.price_kobo)}
