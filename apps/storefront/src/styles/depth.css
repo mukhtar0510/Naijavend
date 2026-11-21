@@ -1,0 +1,60 @@
+/* Depth system styles (REDESIGN_V2 §3): TiltCard, DepthStage, ParallaxStack,
+   IsoBlock. Tokens only — no raw colours. */
+
+/* ---- TiltCard ---- */
+.tilt-card {
+  position: relative;
+  isolation: isolate;
+  transform-style: preserve-3d;
+  will-change: transform;
+  border-radius: var(--radius-md, 16px);
+}
+.tilt-card-light {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity var(--dur-2) var(--ease-standard);
+  mix-blend-mode: plus-lighter;
+}
+[data-theme='light'] .tilt-card-light,
+:root:not([data-theme]) .tilt-card-light { mix-blend-mode: normal; }
+.tilt-card:focus-within { outline: none; }
+
+/* ---- DepthStage / ParallaxStack ---- */
+.depth-stage { position: relative; transform-style: preserve-3d; }
+.depth-layer { position: absolute; inset: 0; pointer-events: none; will-change: transform; }
+.parallax-stack { position: relative; display: grid; }
+.parallax-stack > .parallax-item { grid-area: 1 / 1; will-change: transform; }
+
+/* ---- Elevation utilities ---- */
+.e1 { box-shadow: var(--e1); }
+.e2 { box-shadow: var(--e2); }
+.e3 { box-shadow: var(--e3); }
+.e4 { box-shadow: var(--e4); }
+.e5 { box-shadow: var(--e5); }
+
+/* ---- Glass (V2 §2.8) ---- */
+.glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-highlight), var(--e2);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+
+/* ---- Isometric blocks ---- */
+.iso-scene { display: block; width: 100%; height: auto; overflow: visible; }
+.iso-building .iso-top { fill: var(--surface-raised); }
+.iso-building .iso-right { fill: color-mix(in srgb, var(--surface) 82%, var(--primary)); }
+.iso-building .iso-left { fill: var(--surface); }
+.iso-stall .iso-top { fill: color-mix(in srgb, var(--primary) 55%, var(--surface)); }
+.iso-stall .iso-right { fill: color-mix(in srgb, var(--primary) 30%, var(--surface)); }
+.iso-stall .iso-left { fill: color-mix(in srgb, var(--primary) 20%, var(--surface)); }
+.iso-parcel .iso-top { fill: color-mix(in srgb, var(--gold-fill) 55%, var(--surface)); }
+.iso-parcel .iso-right { fill: color-mix(in srgb, var(--gold-fill) 35%, var(--surface)); }
+.iso-parcel .iso-left { fill: color-mix(in srgb, var(--gold-fill) 25%, var(--surface)); }
+.iso-block polygon { stroke: var(--border); stroke-width: 0.6; stroke-linejoin: round; }
+.iso-win { fill: color-mix(in srgb, var(--text) 12%, transparent); }
+.iso-win.is-lit { fill: var(--gold-fill); }

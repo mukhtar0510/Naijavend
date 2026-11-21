@@ -5,7 +5,7 @@
 // so the page has a real 3D object, not a flat illustration.
 
 import * as React from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'motion/react';
 import { Compass, Monitor, Package, Palette, Wallet } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePrefersReducedMotion } from '@/lib/usePrefersReducedMotion';

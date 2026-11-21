@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Sora, Inter, JetBrains_Mono } from 'next/font/google';
+import { Sora, Inter, Inter_Tight, JetBrains_Mono } from 'next/font/google';
 // Design system split into modules — imported once at the root, in cascade order:
 // tokens/base → chrome (headers/footers) → components (forms/cards) → interactions (responsive + dark).
 import '../styles/tokens.css';
@@ -17,9 +17,12 @@ import '../styles/brand.css';
 import '../styles/tailwind.css';
 // One button / chip / focus system — last so it governs every page (REDESIGN R1).
 import '../styles/system.css';
+// Depth system: TiltCard, DepthStage, IsoBlock, glass, elevation (REDESIGN_V2 §3).
+import '../styles/depth.css';
 import { BRAND } from '@idevtenancy/shared';
 import { PwaRegister } from '@/components/PwaRegister';
 import { LanguageDock } from '@/components/LanguageDock';
+import { MotionProvider } from '@/components/motion/MotionProvider';
 
 export const metadata: Metadata = {
   title: {
@@ -55,6 +58,14 @@ const inter = Inter({
   display: 'swap',
   variable: '--font-inter',
 });
+// REDESIGN_V2 §5.1 display face: a heavy open-licence grotesk (OFL), tight
+// tracking, for headlines. Self-hosted by next/font like the others.
+const interTight = Inter_Tight({
+  subsets: ['latin'],
+  weight: ['600', '700', '800'],
+  display: 'swap',
+  variable: '--font-inter-tight',
+});
 const jetbrains = JetBrains_Mono({
   subsets: ['latin'],
   weight: ['500', '600'],
@@ -63,7 +74,10 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const viewport: Viewport = {
-  themeColor: '#1D4ED8',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#1456E0' },
+    { media: '(prefers-color-scheme: dark)', color: '#05070D' },
+  ],
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
@@ -73,12 +87,12 @@ export const viewport: Viewport = {
 // (marketplace) wraps public pages; /s/* store pages are independent sites.
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   // No-FOUC theme: apply the saved (or OS) theme before first paint.
-  const themeScript = `(function(){try{var t=localStorage.getItem('sf-theme');if(!t){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`
+  const themeScript = `(function(){try{var t=localStorage.getItem('sf-theme');if(!t){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);if(localStorage.getItem('nv-reduce-effects')==='1')document.documentElement.classList.add('reduce-effects');}catch(e){}})();`
 
   return (
     <html
       lang="en-NG"
-      className={`${sora.variable} ${inter.variable} ${jetbrains.variable}`}
+      className={`${sora.variable} ${inter.variable} ${interTight.variable} ${jetbrains.variable}`}
       suppressHydrationWarning
     >
       <head>
@@ -93,7 +107,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''} />
       </head>
       <body>
-        {children}
+        <MotionProvider>{children}</MotionProvider>
         <PwaRegister />
         {/* Language + interface translation (EN / Pidgin / Yoruba / Hausa / Igbo). */}
         <LanguageDock />

@@ -4,7 +4,7 @@
 // fades up in sequence. Framer Motion useScroll + spring drives the fill.
 
 import * as React from 'react';
-import { motion, useScroll, useSpring } from 'framer-motion';
+import { motion, useScroll, useSpring } from 'motion/react';
 import { Reveal } from '@/components/brand/Motion';
 import { usePrefersReducedMotion } from '@/lib/usePrefersReducedMotion';
 

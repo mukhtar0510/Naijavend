@@ -18,7 +18,8 @@
   /* Type. The --font-* trio is injected by next/font on <html> (self-hosted,
      metric-matched fallbacks); the literal names stay as a safety net for any
      stylesheet loaded outside the root layout. */
-  --font-heading: var(--font-sora, 'Sora'), 'Inter', sans-serif;
+  --font-display: var(--font-inter-tight, 'Inter Tight'), var(--font-inter, 'Inter'), sans-serif;
+  --font-heading: var(--font-display);
   --font-body: var(--font-inter, 'Inter'), system-ui, sans-serif;
   --font-mono: var(--font-jetbrains, 'JetBrains Mono'), ui-monospace, monospace;
 

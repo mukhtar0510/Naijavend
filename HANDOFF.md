@@ -9,7 +9,7 @@ session.
 
 ## 1. What this project is
 
-**Naijavend** — a marketplace where every Nigerian seller gets their own real
+**Kwaravend** — a marketplace where every Nigerian seller gets their own real
 store website (`/s/<slug>`) with catalogue, bookings, chat, POS, staff accounts
 and a blue-tick verification system. Buyers browse a shared marketplace, follow
 stores, pay (mock/WhatsApp-first), and leave reviews.
@@ -106,7 +106,7 @@ this file — never commit a live credential. The admin allow-list email was con
 
 ## 4. What this session changed
 
-1. **`/` is the landing page again** (About/Naijavend story, 819 lines, restored
+1. **`/` is the landing page again** (About/Kwaravend story, 819 lines, restored
    from dangling commit `231f8f3`). Signed-in sellers are redirected to
    `/dashboard` by the page itself.
 2. **Landing redirect for returning visitors** — `apps/storefront/src/middleware.ts`

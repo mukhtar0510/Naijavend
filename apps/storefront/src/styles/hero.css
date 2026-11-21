@@ -1,0 +1,237 @@
+/* "/" hero (REDESIGN_V2 §5.1 reference look). Tokens only. */
+
+.kvh {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--bg-0);
+  border-bottom: 1px solid var(--border);
+}
+/* faint 64px grid fading out radially + blue glow low right */
+.kvh-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    var(--hero-glow),
+    linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0 / 64px 64px,
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 0 0 / 64px 64px;
+  -webkit-mask-image: radial-gradient(120% 90% at 50% 30%, #000 40%, transparent 85%);
+  mask-image: radial-gradient(120% 90% at 50% 30%, #000 40%, transparent 85%);
+}
+.kvh-inner {
+  display: grid;
+  gap: 40px;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 56px 16px 64px;
+}
+@media (min-width: 1024px) {
+  .kvh-inner { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 40px; padding: 88px 28px 104px; }
+}
+
+/* ---- Copy ---- */
+.kvh-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 13px;
+  border: 1px solid color-mix(in srgb, var(--gold-fill) 55%, transparent);
+  border-radius: 999px;
+  background: var(--gold-tint);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+}
+.kvh-star { color: var(--gold); fill: currentColor; }
+.kvh-title {
+  margin: 18px 0 16px;
+  font: 800 clamp(38px, 5vw, 64px)/1.02 var(--font-display);
+  letter-spacing: -0.035em;
+  color: var(--text);
+}
+.kvh-title > span { display: inline-block; }
+@media (min-width: 1024px) { .kvh-title > span { display: block; white-space: nowrap; } }
+.kvh-gold {
+  position: relative;
+  color: var(--gold);
+  background: linear-gradient(100deg, transparent 0%, color-mix(in srgb, var(--gold-fill) 35%, transparent) 50%, transparent 100%) no-repeat;
+  background-size: 0% 100%;
+  animation: kvh-sweep 0.9s var(--ease-standard) 0.7s 1 forwards;
+}
+.kvh-sub { max-width: 52ch; margin: 0 0 26px; color: var(--text-muted); font-size: clamp(16px, 1.6vw, 18px); line-height: 1.6; }
+.kvh-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.kvh-story {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 18px;
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 14.5px;
+  text-decoration: none;
+}
+.kvh-story:hover { text-decoration: underline; text-underline-offset: 3px; }
+.kvh-checks { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 0; padding: 0; list-style: none; }
+.kvh-checks li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+}
+.kvh-checks svg { color: var(--green); }
+@media (max-width: 639px) {
+  .kvh-actions .btn { width: 100%; justify-content: center; }
+}
+
+/* load-in: rise + fade with a short stagger, under 1.2 s total */
+.kvh-rise { animation: kvh-rise 0.55s var(--ease-standard) both; animation-delay: calc(var(--i, 0) * 60ms); }
+@keyframes kvh-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes kvh-sweep { to { background-size: 100% 100%; } }
+@media (prefers-reduced-motion: reduce) { .kvh-rise, .kvh-gold { animation: none; } }
+html.reduce-effects .kvh-rise, html.reduce-effects .kvh-gold { animation: none; }
+
+/* ---- Mockup ---- */
+.kvh-mock { position: relative; padding: 0 0 56px; max-width: 640px; width: 100%; justify-self: center; }
+.kvh-frame {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--e4), 0 30px 80px -30px color-mix(in srgb, var(--primary) 45%, transparent);
+}
+.kvh-example {
+  position: absolute;
+  top: -12px;
+  left: 16px;
+  z-index: 3;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--gold-fill);
+  color: var(--on-gold);
+  font: 800 11px/1.3 var(--font-body);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.kvh-chrome {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.kvh-chrome i { width: 10px; height: 10px; border-radius: 50%; background: var(--border-strong); }
+.kvh-url {
+  flex: 1;
+  margin-left: 10px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--bg-1);
+  color: var(--text-muted);
+  font: 500 12px/1.2 var(--font-mono);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.kvh-store { padding: 16px; display: grid; gap: 14px; }
+.kvh-store-head { display: flex; align-items: center; gap: 10px; }
+.kvh-store-head > div { display: grid; gap: 2px; flex: 1; min-width: 0; }
+.kvh-store-head strong { display: inline-flex; align-items: center; gap: 5px; color: var(--text); font-size: 15px; }
+.kvh-tick { color: var(--primary); }
+.kvh-area { display: inline-flex; align-items: center; gap: 4px; color: var(--text-muted); font-size: 12.5px; }
+.kvh-avatar {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--primary-tint-2);
+  color: var(--primary);
+  font: 800 14px/1 var(--font-display);
+}
+.kvh-avatar.sm { width: 28px; height: 28px; border-radius: 9px; font-size: 11px; }
+.kvh-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--green-tint);
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 700;
+}
+.kvh-open i { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+.kvh-promo {
+  display: grid;
+  gap: 4px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: var(--primary);
+  color: var(--on-primary);
+}
+.kvh-promo strong { font: 800 18px/1.2 var(--font-display); letter-spacing: -0.02em; }
+.kvh-promo span { font-size: 13px; opacity: 0.9; }
+.kvh-products { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.kvh-product {
+  display: grid;
+  gap: 5px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-1);
+}
+.kvh-img { aspect-ratio: 4 / 3; border-radius: 8px; }
+.kvh-img-a { background: linear-gradient(135deg, color-mix(in srgb, var(--cat-cakes) 45%, var(--surface)), color-mix(in srgb, var(--cat-cakes) 15%, var(--surface))); }
+.kvh-img-b { background: linear-gradient(135deg, color-mix(in srgb, var(--cat-food) 45%, var(--surface)), color-mix(in srgb, var(--cat-food) 15%, var(--surface))); }
+.kvh-img-c { background: linear-gradient(135deg, color-mix(in srgb, var(--cat-hair) 45%, var(--surface)), color-mix(in srgb, var(--cat-hair) 15%, var(--surface))); }
+.kvh-pname { color: var(--text); font-size: 12px; font-weight: 600; line-height: 1.3; }
+.kvh-price { color: var(--text); font: 600 13px/1 var(--font-mono); }
+
+.kvh-phone-wrap { position: absolute; right: -6px; bottom: 0; z-index: 4; width: min(42%, 220px); }
+.kvh-phone {
+  display: grid;
+  gap: 8px;
+  padding: 14px 12px 16px;
+  border: 6px solid var(--bg-1);
+  border-radius: 28px;
+  background: var(--surface-raised);
+  box-shadow: var(--e5);
+  outline: 1px solid var(--border);
+}
+.kvh-phone-head { display: flex; align-items: center; gap: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+.kvh-phone-head strong { color: var(--text); font-size: 12px; }
+.kvh-bubble { max-width: 92%; padding: 7px 10px; border-radius: 12px; font-size: 11.5px; line-height: 1.35; }
+.kvh-bubble.in { background: var(--surface); color: var(--text); border-top-left-radius: 4px; }
+.kvh-bubble.out { justify-self: end; background: var(--primary); color: var(--on-primary); border-top-right-radius: 4px; }
+.kvh-wa {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 9px 10px;
+  border-radius: 999px;
+  background: var(--green);
+  color: var(--on-green);
+  font-size: 12px;
+  font-weight: 700;
+}
+@media (max-width: 479px) {
+  .kvh-products { grid-template-columns: repeat(2, 1fr); }
+  .kvh-product:nth-child(3) { display: none; }
+  .kvh-phone-wrap { width: 48%; right: -4px; }
+}
+
+/* scene band below the hero */
+.lx-scene-band { min-height: min(80vh, 720px); }
+
+/* More gold (owner, 21 Nov 2026) */
+.kvh-checks li { border-color: color-mix(in srgb, var(--gold-fill) 40%, var(--border)); }
+.kvh-frame { box-shadow: var(--e4), 0 30px 80px -30px color-mix(in srgb, var(--gold-fill) 35%, transparent); }

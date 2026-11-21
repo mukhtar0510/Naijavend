@@ -1,3 +1,4 @@
+import { BRAND } from '@idevtenancy/shared';
 import Link from 'next/link';
 
 export const metadata = {
@@ -18,7 +19,8 @@ export default function LegalIndex() {
         <li><Link href="/legal/cookies">Cookies Policy</Link> — the cookies and local storage we use and why.</li>
       </ul>
       <p className="muted" style={{ fontSize: 14 }}>
-        Questions about anything here? Contact us through the in-app chat.
+        Questions about anything here? Contact us through the in-app chat or email{' '}
+        <a href={`mailto:${BRAND.supportEmail}`}>{BRAND.supportEmail}</a>.
       </p>
     </div>
   );

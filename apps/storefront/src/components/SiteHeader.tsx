@@ -109,7 +109,7 @@ export function SiteHeader() {
             <UserRound size={17} aria-hidden />
             <span>Account</span>
           </Link>
-          <Link href="/dashboard" className="btn btn-black btn-sm nv-header-sell">
+          <Link href="/dashboard" className="btn btn-cta btn-sm nv-header-sell">
             <Store size={15} aria-hidden />
             Sell free
           </Link>

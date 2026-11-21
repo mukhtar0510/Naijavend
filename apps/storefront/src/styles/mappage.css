@@ -160,7 +160,7 @@
   position: absolute;
   inset: -7px;
   border-radius: 50%;
-  border: 2px solid var(--accent);
+  border: 2px solid var(--green);
   opacity: 0;
   animation: fm-pulse 2.4s ease-out infinite;
 }
@@ -172,8 +172,8 @@
 .fm-pin.is-selected { z-index: 5; }
 .fm-pin.is-selected .fm-pin-face {
   transform: scale(1.32);
-  border-color: var(--primary);
-  box-shadow: 0 0 0 6px color-mix(in srgb, var(--primary) 32%, transparent), var(--shadow-lg);
+  border-color: var(--gold-fill);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--gold-fill) 35%, transparent), 0 0 26px color-mix(in srgb, var(--gold-fill) 45%, transparent), var(--shadow-lg);
 }
 .fm-pin:focus-visible .fm-pin-face { box-shadow: var(--focus-ring), var(--shadow-md); }
 .fm-pin-label {
@@ -474,3 +474,18 @@
 .fm-lm.is-town .fm-lm-label { opacity: 1; font-size: 11.5px; }
 .fm.show-labels .fm-lm-label, .fm-lm:hover .fm-lm-label, .fm-lm:focus-visible .fm-lm-label { opacity: 1; }
 .fm-lm:focus-visible .fm-lm-dot { box-shadow: var(--focus-ring); }
+
+/* V2 §7.1: open stores get a small green dot (colour is never the only
+   signal: the pin's label and the sheet say "Open now"). */
+.fm-pin.is-open .fm-pin-face::before {
+  content: '';
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--green);
+  border: 2px solid var(--surface);
+  z-index: 1;
+}

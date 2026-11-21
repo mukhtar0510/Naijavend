@@ -11,7 +11,7 @@
    Collecting page data ...
    Generating static pages (0/72) ...
    Generating static pages (10/72) 
-[Naijavend] chat-conversations: n [Error]: Dynamic server usage: Route /api/chat/conversations couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[Kwaravend] chat-conversations: n [Error]: Dynamic server usage: Route /api/chat/conversations couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
     at l (C:\Users\mukhtar\Desktop\llm\apps\storefront\.next\server\chunks\3867.js:1:37221)
     at f (C:\Users\mukhtar\Desktop\llm\apps\storefront\.next\server\chunks\3865.js:1:1758)
     at v (C:\Users\mukhtar\Desktop\llm\apps\storefront\.next\server\app\(seller-auth)\dashboard\signout\route.js:1:4228)

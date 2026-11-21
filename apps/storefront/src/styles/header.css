@@ -122,12 +122,10 @@
 
 .nv-header-top-link:hover { color: var(--blue); text-decoration: none; }
 
-.nv-header-top-link.is-active { color: var(--blue); background: var(--blue-tint); }
+.nv-header-top-link.is-active { color: var(--text); background: var(--gold-tint); box-shadow: inset 0 -2px 0 var(--gold-fill); }
 
 /* Seller CTA in Naija green so it reads as the commercial action, not chrome. */
-.nv-header-sell { background: var(--naija); border-color: var(--naija); color: var(--on-primary); }
 
-.nv-header-sell:hover { background: var(--naija-deep); border-color: var(--naija-deep); color: var(--on-primary); }
 
 .nv-header-account {
   display: inline-flex;

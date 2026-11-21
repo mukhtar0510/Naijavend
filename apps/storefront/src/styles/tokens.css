@@ -1,88 +1,122 @@
-/* Kwaravend design tokens — the ONE place colours, motion, z-index and depth
-   are defined. Components reference these variables, never hex values.
-   Documented in docs/DESIGN.md (palette, contrast table, legacy aliases).
+/* Kwaravend design tokens — the ONE place colours, motion, z-index, depth and
+   elevation are defined. Components reference these variables, never hex
+   values. Documented in docs/DESIGN.md.
 
-   Palette (owner decision, 21 Nov 2026, revised): WHITE, BLUE and GOLD are the
-   main colours, BLACK in dark mode, with some GREEN. Light theme = white
-   surfaces, near-black text, blue brand, gold accent. Dark theme = black
-   surfaces, bright blue brand, gold accent. Green = success, open now and
-   money in (--success / --naija).
-   Every text pair passes WCAG 2.2 AA (4.5:1) — see docs/DESIGN.md before
-   changing a value, and re-check the ratios if you do.
+   Palette: REDESIGN_V2 §2, adjusted by the owner on 21 Nov 2026: dark mode
+   is black (not navy) with blue only for actions; light mode carries more
+   gold (warm ivory page, gold-tinted raised surfaces). Black canvas, blue structure and
+   actions, gold for the ONE focal highlight per viewport, green only for
+   open / live / success / growth, white text on dark. Values are the V2
+   tables verbatim. `scripts/check-contrast.mjs` (run by `pnpm build`) fails
+   if a listed pair drops under 4.5:1 for text or 3:1 for large text / UI.
+
+   shadcn/ui reads these through tailwind.config.js (Tailwind 3 has no
+   `@theme inline`), e.g. bg-primary, bg-gold, text-green.
 
    Theme: [data-theme] is set pre-paint by the inline script in app/layout.tsx
    (saved choice, else the system setting). */
 
 :root {
-  /* ---- Surfaces & text (light: white + black) ---- */
-  --bg-0: #f5f8ff;            /* page background (blue-white) */
+  /* ---- Surfaces & text (light theme) ---- */
+  --bg-0: #fbf9f3;            /* page: warm ivory (owner, 21 Nov: more gold in light) */
   --bg-1: #ffffff;            /* large panels */
   --surface: #ffffff;         /* cards, sheets */
-  --surface-raised: #eef3ff;  /* popovers, hovered cards */
-  --elevated: #f5f8ff;
-  --elevated-1: #eef3ff;
-  --elevated-2: #e8effc;
-  --surface-2: #e8effc;
-  --text: #0a0f1a;            /* near-black (18.0:1 on page) */
-  --text-muted: #4b5568;      /* 7.1:1 */
-  --border: #dce3f0;
-  --border-strong: #c3cee3;
-  --border-inset: #e8edf7;
+  --surface-raised: #f7f0dc;  /* hovered cards, popovers: soft gold */
+  --elevated: #fbf9f3;        /* legacy: subtle panels */
+  --elevated-1: #f7f0dc;
+  --elevated-2: #f7f0dc;
+  --surface-2: #f7f0dc;
+  --text: #0a1226;
+  --text-muted: #4b5a78;
+  --border: rgba(10, 18, 38, 0.1);
+  --border-strong: #e2d3a8;
+  --border-inset: #f3ecd8;
 
-  /* ---- Brand: blue main, gold accent, green support ---- */
-  --primary: #1d4ed8;         /* blue — brand, links, main buttons (6.7:1 on white) */
-  --primary-hover: #1e40af;
-  --primary-tint: #eaf1fe;
-  --primary-tint-2: #dbe7fd;
+  /* ---- Blue: brand, buttons, links, selected, info, in transit ---- */
+  --primary: #1456e0;
+  --primary-hover: #0f45b8;
+  --primary-tint: #e8effd;
+  --primary-tint-2: #d6e3fb;
   --on-primary: #ffffff;
-  --accent: #a16207;          /* gold — highlights, featured, selected (4.9:1 on white) */
-  --accent-bright: #e0a106;   /* decorative only, never small text */
-  --accent-tint: #fdf4df;
-  --on-accent: #ffffff;       /* 4.9:1 */
-  --green: #047857;           /* green — open now, money in (5.5:1 on white) */
-  --green-tint: #e6f7ef;
-  --info: #0369a1;            /* sky — neutral info, in transit (5.9:1) */
-  --info-tint: #e0f2fe;
-  --star: #a16207;            /* rating stars (gold) */
+
+  /* ---- Gold: the focal moment. Text/icons use --gold, fills --gold-fill ---- */
+  --gold: #8a5f00;
+  --gold-fill: #f5b301;
+  --on-gold: #1a1100;
+  --gold-tint: #fbefc8;
+
+  /* ---- Green: open, live, success, money in, growth. Never decoration ---- */
+  --green: #0b7a4b;
+  --on-green: #ffffff;
+  --green-tint: #e3f6ec;
 
   /* ---- Status ---- */
-  --success: #047857;
-  --success-tint: #e6f7ef;
-  --warning: #92400e;
-  --warning-tint: #fef3c7;
-  --danger: #c62828;
-  --danger-tint: #fdecec;
+  --success: var(--green);
+  --success-tint: var(--green-tint);
+  --warning: #8a5f00;
+  --warning-tint: #fdf4dc;
+  --danger: #c62839;
+  --on-danger: #ffffff;
+  --danger-tint: #fdecee;
+  --info: var(--primary);
+  --info-tint: var(--primary-tint);
+  --star: var(--gold);
   --whatsapp: #25d366;
 
-  /* ---- Category colours (REDESIGN 2.6; each 4.5:1+ on its surface) ---- */
-  --cat-food: #b45309;
+  /* ---- Legacy "accent" = gold, for older CSS. NOT shadcn's accent ---- */
+  --accent: var(--gold);
+  --accent-bright: var(--gold-fill);
+  --accent-tint: var(--gold-tint);
+  --on-accent: #ffffff;       /* white on #8A5F00 = 5.3:1 */
+
+  /* ---- Category colours (V2 §2.5: small marks only, always icon + label) ---- */
+  --cat-food: #a94a08;
   --cat-cakes: #be185d;
   --cat-beauty: #7e22ce;
   --cat-hair: #5b3fd1;
-  --cat-fashion: #1d5fd1;
-  --cat-accessories: #0e7490;
-  --cat-gadgets: #15803d;
-  --cat-groceries: #4d7c0f;
-  --cat-home: #8a5a00;
-  --cat-tutors: #c62828;
-  --cat-other: #4b5568;
+  --cat-fashion: #1456e0;
+  --cat-accessories: #0d6f8a;
+  --cat-gadgets: #137a39;
+  --cat-groceries: #476f0e;
+  --cat-home: #8a5f00;
+  --cat-tutors: #c62839;
+  --cat-other: #4b5a78;
 
-  /* ---- Glass ---- */
+  /* ---- Charts (shadcn --chart-1..5): blue, gold, green, violet, slate ---- */
+  --chart-1: var(--primary);
+  --chart-2: var(--gold-fill);
+  --chart-3: var(--green);
+  --chart-4: #5b3fd1;
+  --chart-5: #4b5a78;
+
+  /* ---- Glass (V2 §2.8: floating things only, never long text or forms) ---- */
   --glass-bg: rgba(255, 255, 255, 0.72);
-  --glass-border: rgba(10, 15, 26, 0.08);
-  --glass-blur: blur(16px) saturate(140%);
+  --glass-border: rgba(10, 18, 38, 0.08);
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --glass-blur: blur(18px) saturate(140%);
 
-  /* ---- Gradients (decorative only; never behind light text) ---- */
-  --grad-sun: linear-gradient(135deg, #1d4ed8, #e0a106); /* blue → gold */
-  --hero-glow: radial-gradient(60% 60% at 50% 0%, rgba(29, 78, 216, 0.1), transparent 70%);
+  /* ---- Gradients (V2 §2.7: decorative; dark text or no text on top) ---- */
+  --grad-brand: linear-gradient(135deg, #4d94ff, #34e39b);
+  --grad-gold: linear-gradient(135deg, #ffe08a, #ffc83d, #e8a300);
+  --grad-skyline: linear-gradient(180deg, #fff1c7 0%, #fdf6e2 50%, #fbf9f3 100%);
+  --grad-sun: var(--grad-brand);
+  --glow-blue: radial-gradient(closest-side, rgba(20, 86, 224, 0.18), transparent);
+  --glow-gold-rim: 0 0 0 1px rgba(245, 179, 1, 0.55);
+  --hero-glow: radial-gradient(60% 60% at 70% 80%, rgba(245, 179, 1, 0.18), transparent 70%);
+  --grid-line: rgba(138, 95, 0, 0.07);
 
-  /* ---- Elevation ---- */
-  --shadow-xs: 0 1px 2px rgba(10, 15, 26, 0.05);
-  --shadow-sm: 0 2px 8px rgba(10, 15, 26, 0.07);
-  --shadow-md: 0 8px 24px rgba(10, 15, 26, 0.09);
-  --shadow-lg: 0 16px 48px rgba(10, 15, 26, 0.14);
+  /* ---- Elevation e1–e5 (V2 §3.3): soft blue-grey shadows in light ---- */
+  --e1: 0 1px 2px rgba(10, 18, 38, 0.06);
+  --e2: 0 2px 8px rgba(10, 18, 38, 0.07), 0 1px 2px rgba(10, 18, 38, 0.05);
+  --e3: 0 8px 24px rgba(20, 50, 110, 0.1), 0 2px 6px rgba(10, 18, 38, 0.05);
+  --e4: 0 16px 40px rgba(20, 50, 110, 0.14), 0 4px 10px rgba(10, 18, 38, 0.06);
+  --e5: 0 28px 64px rgba(20, 50, 110, 0.2), 0 8px 18px rgba(10, 18, 38, 0.08);
+  --shadow-xs: var(--e1);
+  --shadow-sm: var(--e2);
+  --shadow-md: var(--e3);
+  --shadow-lg: var(--e4);
 
-  /* ---- Motion ---- */
+  /* ---- Motion (mirrored in lib/motion.ts) ---- */
   --dur-1: 120ms;
   --dur-2: 200ms;
   --dur-3: 320ms;
@@ -104,7 +138,7 @@
   --z-modal: 950;
   --z-toast: 1000;
 
-  /* ---- Depth scale (landing scene, far → near) ---- */
+  /* ---- Depth scale (landing scene far → near) ---- */
   --depth-sky: -1000;
   --depth-far: -600;
   --depth-mid: -300;
@@ -112,23 +146,20 @@
   --depth-ui: 200;
   --depth-fore: 400;
 
-  /* ---- Legacy aliases (kept so existing CSS re-skins; migrate to the
-         semantic names above, then delete). ---- */
+  /* ---- Legacy aliases (migrate to the semantic names, then delete) ---- */
   --blue: var(--primary);
   --blue-deep: var(--primary-hover);
   --blue-soft: var(--primary);
   --blue-tint: var(--primary-tint);
   --blue-tint-2: var(--primary-tint-2);
-  --naija: var(--green);        /* green: money in, open now */
-  --naija-deep: #065f46;
-  --naija-bright: #10b981;
+  --naija: var(--green);
+  --naija-deep: #075c38;
+  --naija-bright: #12a565;
   --naija-tint: var(--green-tint);
-  --gold: var(--accent);        /* gold: ratings, featured, example tags */
-  --gold-bright: var(--accent-bright);
-  --gold-tint: var(--accent-tint);
+  --gold-bright: var(--gold-fill);
   --amber: var(--warning);
-  --black: #0a0f1a;
-  --ink-2: #1f2937;
+  --black: #0a1226;
+  --ink-2: #1f2a44;
   --line: var(--border);
   --muted: var(--text-muted);
   --bg: var(--surface);
@@ -137,70 +168,81 @@
   --dur-slow: var(--dur-3);
 }
 
-/* ---- Dark theme (default when the system prefers dark) ---- */
+/* ---- Dark theme (the default look for the landing page and screenshots) ---- */
 [data-theme='dark'] {
-  /* black surfaces, bright blue brand, gold accent, green support */
-  --bg-0: #05070b;
-  --bg-1: #0a0d14;
-  --surface: #0a0d14;         /* page / map land */
-  --surface-raised: #1a2030;
-  --elevated: #11151f;        /* cards, sheets */
-  --elevated-1: #1a2030;
-  --elevated-2: #1a2030;
-  --surface-2: #11151f;
-  --text: #eef2fa;            /* 17.3:1 */
-  --text-muted: #9aa6bd;      /* 7.4:1 on cards */
-  --border: #1f2636;
-  --border-strong: #2e384d;
-  --border-inset: #1a2030;
+  --bg-0: #050506;            /* owner, 21 Nov: black, not navy */
+  --bg-1: #0b0b0d;
+  --surface: #121215;
+  --surface-raised: #1c1c21;
+  --elevated: #0b0b0d;
+  --elevated-1: #1c1c21;
+  --elevated-2: #1c1c21;
+  --surface-2: #0b0b0d;
+  --text: #f4f7ff;
+  --text-muted: #a8acb6;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --border-inset: rgba(255, 255, 255, 0.06);
 
-  --primary: #4f8cff;         /* bright blue (6.0:1 on page) */
-  --primary-hover: #7aa8ff;
-  --primary-tint: #0f1d3d;
-  --primary-tint-2: #15275a;
-  --on-primary: #020817;      /* near-black text on blue (6.2:1) */
-  --accent: #ffb629;          /* gold (10.9:1 on page) */
-  --accent-bright: #ffc94d;
-  --accent-tint: #2a2210;
-  --on-accent: #140d00;       /* 10.9:1 */
-  --green: #34d399;           /* 9.5:1 */
-  --green-tint: #0b2a20;
-  --info: #38bdf8;
-  --info-tint: #0c2436;
-  --star: #ffb629;
+  --primary: #4d94ff;
+  --primary-hover: #7aaeff;
+  --primary-tint: #0f1626;
+  --primary-tint-2: #16213a;
+  --on-primary: #04101f;      /* NEVER white on dark-theme blue (3.0:1 fails) */
 
-  --success: #34d399;
-  --success-tint: #0b2a20;
-  --warning: #fbbf24;
-  --warning-tint: #2a2210;
-  --danger: #ff6b6b;
-  --danger-tint: #381717;
+  --gold: #ffc83d;
+  --gold-fill: #ffc83d;
+  --on-gold: #1a1100;
+  --gold-tint: #2a2208;
 
-  --cat-food: #ff8a4c;
+  --green: #34e39b;
+  --on-green: #03140c;
+  --green-tint: #0a2a1f;
+
+  --warning: #ffd166;
+  --warning-tint: #2a2108;
+  --danger: #ff6b7a;
+  --on-danger: #1a0306;
+  --danger-tint: #3a1219;
+
+  --on-accent: #1a1100;
+
+  --cat-food: #ff9a55;
   --cat-cakes: #ff7eb6;
   --cat-beauty: #c58bff;
-  --cat-hair: #9b8cff;
-  --cat-fashion: #5aa9ff;
-  --cat-accessories: #37d6e0;
-  --cat-gadgets: #4ade80;
-  --cat-groceries: #b6e04a;
-  --cat-home: #ffb629;
-  --cat-tutors: #ff6b6b;
-  --cat-other: #9aa6bd;
+  --cat-hair: #a99bff;
+  --cat-fashion: #5ca8ff;
+  --cat-accessories: #3ddde8;
+  --cat-gadgets: #58e08a;
+  --cat-groceries: #bde84f;
+  --cat-home: #ffc83d;
+  --cat-tutors: #ff7a85;
+  --cat-other: #a8acb6;
 
-  --glass-bg: rgba(255, 255, 255, 0.06);
+  --chart-4: #a99bff;
+  --chart-5: #a8acb6;
+
+  --glass-bg: rgba(18, 18, 21, 0.62);
   --glass-border: rgba(255, 255, 255, 0.12);
-  --hero-glow: radial-gradient(60% 60% at 50% 0%, rgba(79, 140, 255, 0.2), transparent 70%);
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.45);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.55);
+  --grad-skyline: linear-gradient(180deg, #14110a 0%, #09090a 55%, #050506 100%);
+  --glow-blue: radial-gradient(closest-side, rgba(77, 148, 255, 0.14), transparent);
+  --glow-gold-rim: 0 0 0 1px rgba(255, 200, 61, 0.6);
+  --hero-glow: radial-gradient(55% 55% at 75% 80%, rgba(255, 200, 61, 0.12), transparent 70%);
+  --grid-line: rgba(255, 255, 255, 0.04);
 
-  --naija-deep: #6ee7b7;
-  --naija-bright: #34d399;
-  --black: #eef2fa;           /* "black" buttons invert in dark mode */
-  --ink-2: #c7d2e6;
+  /* faint blue-black glow + hairline top highlight */
+  --e1: 0 1px 2px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --e2: 0 4px 12px rgba(0, 4, 16, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --e3: 0 10px 28px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --e4: 0 18px 44px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  --e5: 0 30px 70px rgba(0, 0, 0, 0.7), 0 0 40px rgba(255, 200, 61, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+  --naija-deep: #7af0bd;
+  --naija-bright: #34e39b;
+  --black: #f4f7ff;           /* "black" buttons invert in dark mode */
+  --ink-2: #c9d4ea;
 
   color-scheme: dark;
 }

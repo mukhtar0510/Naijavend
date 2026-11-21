@@ -7,34 +7,30 @@ Audit and owner decisions: [DESIGN_AUDIT.md](DESIGN_AUDIT.md).
 
 ## Colour
 
-Owner decision (21 Nov 2026, revised): **white, blue and gold are the main colours, black in dark mode,
-with some green.** (Replaces the earlier emerald/amber blend.)
+**REDESIGN_V2 §2 (decided):** blue, black, gold, white and green. Values are the V2 tables, verbatim, in `tokens.css`.
 
-- **Brand (`--primary`)**: blue. `#1D4ED8` in light, bright `#4F8CFF` in dark — main buttons, links, selection.
-- **Accent (`--accent`)**: gold. `#A16207` in light (4.9:1 on white), `#FFB629` in dark (10.9:1) — highlights, featured plan, ratings, step markers.
-- **Green (`--green`, `--success`)**: `#047857` / `#34D399` — open now, paid, delivered, money in.
-- **Surfaces**: white and blue-white (`#F5F8FF` page, `#FFFFFF` cards) in light; black (`#0A0D14` page, `#11151F` cards, `#1A2030` raised) in dark.
-- **Text**: near-black `#0A0F1A` in light, `#EEF2FA` in dark.
-- **Info** sky `#0369A1` / `#38BDF8`.
-- **Map**: blue-white streets with blue water in light; black-and-navy land with blue roads and water in dark (`MAP_PALETTE` in `lib/mapFactory.ts`). Selected pins ring in blue, open-now pulses green.
+| Colour | Job | Share |
+| --- | --- | --- |
+| Black `--bg-0` `#05070D` (dark) | Canvas | ~60% |
+| Blue `--primary` `#4D94FF` / `#1456E0` | Brand, buttons, links, selected, info, in transit | ~25% |
+| White `--text` `#F4F7FF` (dark) | Text on dark; surfaces in light | — |
+| Gold `--gold` `#FFC83D` / `#8A5F00`, fills `--gold-fill` | The ONE focal highlight per viewport, featured, stars, story ring | ≤ 5% |
+| Green `--green` `#34E39B` / `#0B7A4B` | Open, live, success, paid, money in, growth. Plus the nav "Sell free" button (`cta`) | small accents |
 
-Text on brand fills uses `--on-primary` / `--on-accent` (white in light, near-black in dark), never a hard-coded white.
+Rules: at most one gold focal element per viewport (rating stars excepted); green never decorates; all primary
+buttons are blue; **never white text on dark-theme blue** (3.0:1) — use `--on-primary`.
 
-### Contrast (WCAG 2.2 AA, 4.5:1 for text)
+Contrast is enforced by `apps/storefront/scripts/check-contrast.mjs` (92 pairs, light and dark, including every
+category colour on `--surface` and `--surface-raised`). It runs in `pnpm build` and fails under 4.5:1.
 
-| Pair | Light | Dark |
-| --- | ---: | ---: |
-| Text on page | 18.0 | 17.3 |
-| Muted text on card | 7.5 | 7.4 |
-| Blue (primary) on page / card | 6.3 – 6.7 | 6.0 / 5.7 |
-| Text on blue button | 6.7 | 6.2 |
-| Gold (accent) text | 4.9 (on white), 4.6 (on gold tint) | 10.9 |
-| Text on gold fill | 4.9 (white) | 10.9 (black) |
-| Green text | 5.5 | 9.5 |
-| Info | 5.9 | 8.5 |
-| Success / warning / danger | 5.0 / 5.9 / 5.6 | 10.5 / 10.9 / 6.6 |
+shadcn names map onto our tokens in `tailwind.config.js` (Tailwind 3, so no `@theme inline`): `background`→`--bg-0`,
+`card`→`--surface`, `popover`/`secondary`/`accent`→`--surface-raised`, `muted`→`--bg-1`, `primary`, `destructive`→`--danger`,
+`ring`→`--primary`, `chart-1..5`, `sidebar*`, plus custom `gold` (`bg-gold-fill`, `text-gold`) and `green`.
 
-Re-check with any WCAG contrast tool if you change a value.
+Gradients `--grad-brand`, `--grad-gold`, `--grad-skyline`; glows `--glow-blue`, `--glow-gold-rim`; glass `.glass`
+(solid fallback under Reduce effects or no `backdrop-filter`); elevation `--e1`…`--e5` (`.e1`…`.e5`, `shadow-e3`).
+
+`--accent` stays as a legacy alias of gold for older CSS. It is **not** shadcn's accent.
 
 ### Status colours (always with an icon and a label)
 
@@ -78,6 +74,22 @@ Categories use `<CategoryIcon category="…" />`. Map pins (plain HTML) copy the
 sprite. The emoji count is tracked by `apps/storefront/scripts/design-audit.py`.
 
 ## Motion
+
+**Motion** (`motion/react`, MIT, pinned 14.10.1) is the only animation library; framer-motion was removed. Presets
+live in `src/lib/motion.ts` (`DUR`, `EASE`, `SPRING`, `PRESS`, `LIFT`, `fadeUp`, `scaleIn`, `stagger()`, `IN_VIEW`).
+`<MotionProvider>` in the root layout sets `MotionConfig reducedMotion` from `useReduceEffects()` — the OS setting OR
+the Reduce effects switch (`html.reduce-effects`, applied pre-paint on every page).
+
+## Depth components (V2 §3.3)
+
+`src/components/depth/`: `TiltCard` (≤ 6° pointer tilt, cursor light, opposite shadow, focus lift; none on touch or
+reduced), `DepthStage` + `DepthLayer` (z0–z5 with scroll parallax), `ParallaxStack`, `IsoBlock` + `IsoScene` (isometric
+SVG, theme-aware). `Model3D` is not built: it needs three.js, which waits on the owner's 3D-model decision.
+
+## Type
+
+Display: **Inter Tight** 600–800 (`--font-display`, also `--font-heading`), tracking about −0.03em on big headlines.
+Body: Inter. Numbers and prices: JetBrains Mono. All self-hosted by `next/font`.
 
 Durations `--dur-1..4` = 120 / 200 / 320 / 500 ms. Easings `--ease-standard`, `--ease-emphasised`,
 `--ease-spring`. Pressed state: `scale(var(--press-scale))` = 0.97. Animate transform and opacity only;

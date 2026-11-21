@@ -56,7 +56,34 @@ export const ILORIN_AREAS: ReadonlyArray<{ id: string; label: string; lat: numbe
   { id: 'basin', label: 'Basin', lat: 8.4725, lng: 4.5935 },
   { id: 'sango', label: 'Sango', lat: 8.4885, lng: 4.5925 },
   { id: 'adewole', label: 'Adewole', lat: 8.4718, lng: 4.5333 },
+  // Added 21 Nov 2026 (owner: "add places like Asadam"). Centres are
+  // APPROXIMATE unless noted — check each on the map and adjust. Points marked
+  // OSM reuse a real OpenStreetMap landmark from lib/landmarks.ts.
+  { id: 'asa-dam', label: 'Asa-Dam', lat: 8.464, lng: 4.52 },
+  { id: 'mandate', label: 'Mandate', lat: 8.4752, lng: 4.5058 }, // OSM: Mandate Market
+  { id: 'unity', label: 'Unity', lat: 8.4855, lng: 4.552 },
+  { id: 'ajikobi', label: 'Ajikobi', lat: 8.499, lng: 4.541 },
+  { id: 'surulere', label: 'Surulere', lat: 8.504, lng: 4.537 },
+  { id: 'pipeline', label: 'Pipeline', lat: 8.478, lng: 4.608 },
+  { id: 'kulende', label: 'Kulende', lat: 8.469, lng: 4.588 },
+  { id: 'olunlade', label: 'Olunlade', lat: 8.4935, lng: 4.5735 },
+  { id: 'ganmo', label: 'Ganmo', lat: 8.415, lng: 4.605 },
+  { id: 'sabo-oke', label: 'Sabo-Oke', lat: 8.499, lng: 4.556 },
+  { id: 'agbo-oba', label: 'Agbo-Oba', lat: 8.5015, lng: 4.545 },
+  { id: 'pakata', label: 'Pakata', lat: 8.503, lng: 4.55 },
+  { id: 'oloje', label: 'Oloje', lat: 8.515, lng: 4.532 },
+  { id: 'okelele', label: 'Okelele', lat: 8.506, lng: 4.56 },
+  { id: 'amilegbe', label: 'Amilegbe', lat: 8.488, lng: 4.56 },
+  { id: 'gaa-odota', label: 'Gaa-Odota', lat: 8.47, lng: 4.548 },
+  { id: 'irewolede', label: 'Irewolede', lat: 8.457, lng: 4.56 },
+  { id: 'airport-road', label: 'Airport Road', lat: 8.45, lng: 4.505 },
+  { id: 'eyenkorin', label: 'Eyenkorin', lat: 8.46, lng: 4.475 },
+  { id: 'unilorin', label: 'Unilorin area', lat: 8.4768, lng: 4.6585 }, // OSM: University of Ilorin
+  { id: 'kwara-poly', label: 'Kwara Poly area', lat: 8.5433, lng: 4.6343 }, // OSM: Kwara State Polytechnic
 ];
+
+/** Areas in A–Z order, for dropdowns. */
+export const ILORIN_AREAS_SORTED = [...ILORIN_AREAS].sort((a, b) => a.label.localeCompare(b.label));
 
 /** Nearest seeded area to a point (for grouping and "near …" labels). */
 export function nearestArea(lat: number, lng: number) {

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { ArrowRight, Check, ClipboardList, Map as MapIcon, MapPin, MessageCircle, PackageCheck, Store, Truck } from 'lucide-react';
+import { ArrowRight, Check, ClipboardList, Map as MapIcon, MessageCircle, PackageCheck, Star, Store, Truck } from 'lucide-react';
+import { HeroMockup } from '@/components/landing/HeroMockup';
 
 import { BRAND, STARTER_TEMPLATE_COUNT } from '@idevtenancy/shared';
 import { KwaravendLogoMark } from '@/components/KwaravendLogo';
@@ -103,51 +104,59 @@ export default function LandingPage() {
     <main className="brand">
       {/* ================================ HERO ================================ */}
       {/* The street scene is decoration (aria-hidden, lazy); every word below is real HTML. */}
-      <section className="lx-hero" aria-labelledby="hero-title">
-        <SceneMount />
-        <div className="lx-hero-inner">
-          <div className="lx-hero-copy">
-            <span className="brand-eyebrow">
-              <span className="brand-eyebrow-dot" aria-hidden>
-                <MapPin size={11} />
-              </span>
-              {BRAND.launchRegion.city}, {BRAND.launchRegion.state} State
+      {/* REDESIGN_V2 §5.1 hero reference: grid + blue glow, copy left, example
+          storefront mockup right. Copy is server HTML (the LCP element); its
+          rise-in is CSS so it paints immediately. */}
+      <section className="kvh" aria-labelledby="hero-title">
+        <div className="kvh-bg" aria-hidden />
+        <div className="kvh-inner">
+          <div className="kvh-copy">
+            <span className="kvh-badge kvh-rise" style={{ ['--i' as string]: 0 }}>
+              <Star size={13} aria-hidden className="kvh-star" />
+              {BRAND.name}, built in {BRAND.launchRegion.city}
             </span>
-            <h1 id="hero-title">
-              Your business deserves more than a <span className="lx-grad">WhatsApp catalogue.</span>
+            <h1 id="hero-title" className="kvh-title">
+              <span className="kvh-rise" style={{ ['--i' as string]: 1 }}>Every Ilorin business</span>{' '}
+              <span className="kvh-rise" style={{ ['--i' as string]: 2 }}>deserves a storefront</span>{' '}
+              <span className="kvh-rise" style={{ ['--i' as string]: 3 }}>as good as its</span>{' '}
+              <span className="kvh-rise" style={{ ['--i' as string]: 4 }}>
+                <span className="kvh-gold">hustle.</span>
+              </span>
             </h1>
-            <p>
-              Create an online store, take orders and deliveries, and let customers near you in{' '}
-              {BRAND.launchRegion.city} find you. Start free, upgrade when it pays for itself.
+            <p className="kvh-sub kvh-rise" style={{ ['--i' as string]: 5 }}>
+              Turn your WhatsApp catalogue into a real store, take orders and deliveries, and let customers near you
+              find you.
             </p>
-            <div className="lx-hero-actions">
+            <div className="kvh-actions kvh-rise" style={{ ['--i' as string]: 6 }}>
               <Link href="/dashboard" className="btn btn-primary btn-lg">
-                Open your store, free <ArrowRight size={17} />
+                Open your store, free <ArrowRight size={17} aria-hidden />
               </Link>
-              <Link href="/s/example-fate-cake-studio" className="btn btn-outline btn-lg">
-                See an example store
+              <Link href="/map" className="btn btn-outline btn-lg">
+                Explore stores near you
               </Link>
             </div>
-            <div className="lx-trust">
-              <span className="badge badge-success">
-                <Check size={13} /> No card to start
-              </span>
-              <span className="badge badge-primary">
-                <Check size={13} /> No commission
-              </span>
-              <span className="badge badge-warning">
-                <Check size={13} /> Pickup or delivery
-              </span>
-            </div>
+            <Link href="/about" className="kvh-story kvh-rise" style={{ ['--i' as string]: 7 }}>
+              Read the {BRAND.name} story <ArrowRight size={15} aria-hidden />
+            </Link>
+            <ul className="kvh-checks kvh-rise" style={{ ['--i' as string]: 8 }}>
+              {['No card to start', 'No commission', 'Pickup or delivery'].map((c) => (
+                <li key={c}>
+                  <Check size={14} aria-hidden /> {c}
+                </li>
+              ))}
+            </ul>
           </div>
-        </div>
-        <div className="lx-tools">
-          <ReduceEffectsMount />
+          <HeroMockup />
         </div>
       </section>
 
       {/* ============================ HOW IT WORKS =========================== */}
-      <section className="mx-auto w-full max-w-6xl px-5 py-12 sm:px-7 lg:py-14" aria-labelledby="how-title">
+      {/* The 100-layer street scene ("Ilorin at blue hour") unfolds here, below
+          the hero, so the hero stays as clean as the reference. */}
+      <section className="lx-hero lx-scene-band" aria-labelledby="how-title">
+        <SceneMount />
+        <div className="lx-hero-inner">
+          <div className="lx-hero-copy">
         <h2
           id="how-title"
           className="mb-6 max-w-[560px] font-heading text-[clamp(22px,3.2vw,30px)] font-extrabold leading-[1.1] tracking-[-0.03em] text-foreground"
@@ -164,6 +173,11 @@ export default function LandingPage() {
               <p>{text}</p>
             </div>
           ))}
+        </div>
+          </div>
+        </div>
+        <div className="lx-tools">
+          <ReduceEffectsMount />
         </div>
       </section>
 

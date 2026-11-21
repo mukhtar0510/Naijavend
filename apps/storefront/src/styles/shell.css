@@ -1,0 +1,121 @@
+/* App shell (REDESIGN_V2 §4): buyer bottom nav, area chip, bottom sheet.
+   Tokens only. */
+
+/* ---- Bottom navigation (phones) ---- */
+.kv-bottomnav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--z-header);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+  background: var(--glass-bg);
+  border-top: 1px solid var(--glass-border);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+.kv-bottomnav-item {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-height: 52px;
+  padding: 6px 0 8px;
+  color: var(--text-muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 12px;
+  transition: color var(--dur-2) var(--ease-standard), transform var(--dur-1) var(--ease-standard);
+}
+.kv-bottomnav-item:active { transform: scale(var(--press-scale)); }
+.kv-bottomnav-item.is-active { color: var(--primary); }
+.kv-bottomnav-bar {
+  position: absolute;
+  bottom: 2px;
+  width: 22px;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--grad-gold);
+}
+@media (min-width: 768px) { .kv-bottomnav { display: none; } }
+@media (max-width: 767px) {
+  .kv-has-bottomnav { padding-bottom: calc(68px + env(safe-area-inset-bottom)); }
+}
+
+/* ---- Area dropdown (a native select styled as a pill) ---- */
+.kv-area { display: grid; gap: 4px; justify-items: start; }
+.kv-area-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 42px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--gold-fill) 45%, var(--border));
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  color: var(--text);
+  cursor: pointer;
+}
+.kv-area-pill:focus-within { box-shadow: var(--focus-ring); }
+.kv-area-pin { position: absolute; left: 14px; color: var(--gold); pointer-events: none; }
+.kv-area-chev { position: absolute; right: 14px; color: var(--text-muted); pointer-events: none; }
+.kv-area select.kv-area-select:not([multiple]):not([size]) {
+  appearance: none;
+  -webkit-appearance: none;
+  min-height: 42px;
+  max-width: 260px;
+  margin: 0;
+  padding: 0 38px 0 38px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  background-image: none;
+  color: var(--text);
+  font: 600 14.5px/1 var(--font-body);
+  cursor: pointer;
+  box-shadow: none;
+}
+.kv-area select.kv-area-select:not([multiple]):not([size]):focus,
+.kv-area select.kv-area-select:not([multiple]):not([size]):hover { outline: none; box-shadow: none; }
+.kv-area-select option, .kv-area-select optgroup { background: var(--surface); color: var(--text); }
+.kv-area-note { margin: 0; color: var(--text-muted); font-size: 12.5px; }
+
+/* ---- Bottom sheet (phones) / centred panel (desktop) ---- */
+.kv-sheet-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: color-mix(in srgb, var(--bg-0) 55%, transparent);
+}
+.kv-sheet {
+  width: 100%;
+  max-width: 560px;
+  max-height: 85vh;
+  overflow: auto;
+  padding: 10px 18px calc(22px + env(safe-area-inset-bottom));
+  border-radius: 24px 24px 0 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--e5);
+}
+@media (min-width: 768px) {
+  .kv-sheet-scrim { align-items: center; }
+  .kv-sheet { border-radius: 24px; }
+}
+.kv-sheet-handle { width: 40px; height: 4px; margin: 0 auto 10px; border-radius: 4px; background: var(--border-strong); }
+.kv-sheet-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.kv-sheet-head h2 { margin: 0; font-size: 20px; }
+.kv-sheet-note { margin: 8px 0 14px; color: var(--text-muted); font-size: 13.5px; }
+.kv-area-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Keep the cookie banner above the bottom nav on phones. */
+@media (max-width: 767px) {
+  .kv-has-bottomnav .cookie-banner { bottom: calc(76px + env(safe-area-inset-bottom)); }
+}

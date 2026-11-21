@@ -125,3 +125,33 @@ No test runner is configured for the storefront; `packages/shared` has vitest te
 ## 9. Bottom line
 
 The storefront is a real, working product with a strong store-page and seller-dashboard base. It is **not** the product the landing page describes: the marketplace is Lagos-centred with no area model, order status conflates payment and fulfilment, there is no cart, no delivery tracking, and the demo data is unlabelled. The BUILD.md order (audit → rename → honest page → flags → order/payment model → cart → map locked to Ilorin) correctly starts by fixing the story before adding the new machinery.
+
+---
+
+## V0 addendum (REDESIGN_V2) — 21 November 2026
+
+### Routes (confirmed against REDESIGN_V2 §0)
+
+| V2 name | Real route | Folder |
+| --- | --- | --- |
+| `/` public landing | `/` | `src/app/(landing)/page.tsx` (own layout, no marketplace CSS) |
+| `/home` buyer home | `/home` | `src/app/(marketplace)/home/page.tsx` |
+| Map | `/map` (full-screen) and the map tab of `/discover` | `src/app/(fullmap)/map`, `src/components/map/*` |
+| Seller dashboard | `/dashboard` | `src/app/dashboard/*` (sign-in and onboarding under `(seller-auth)`) |
+| Pricing | `/pricing` | `src/app/(landing)/pricing` |
+| Admin | `/admin` | `src/app/admin` |
+
+The repo's names match the V2 assumptions; no renaming needed.
+
+### Stack fit for the V2 libraries (§0.1)
+
+| Requirement | State |
+| --- | --- |
+| React | Yes, React 18.3 on Next 14 App Router |
+| Tailwind | Yes, Tailwind **3.4** (not v4). shadcn's `@theme inline` is a v4 feature, so the token mapping lives in `tailwind.config.js` instead. Preflight stays off because the hand-written CSS owns base styles |
+| shadcn/ui | Already initialised (`components.json`, style new-york, `src/components/ui`). V2 says `shared/ui`; the repo keeps `src/components/ui` (no feature-sliced folders exist yet) |
+| Motion | `framer-motion@11` was installed (4 files in `components/brand`). Replaced by `motion` (same library under its new name, MIT). One animation library, no GSAP |
+| Map | MapLibre GL 6.17 (Leaflet still installed for older embeds) |
+| WebGL | None shipped. The landing "3D" layers are CSS 3D. three.js is **not** added yet: it is a new dependency and the owner question in V2 §16 (models built in code or supplied) is still open |
+
+Licences: `motion` MIT, `lucide-react` ISC, Radix (shadcn) MIT, Tailwind MIT.

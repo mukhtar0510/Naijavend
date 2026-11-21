@@ -1,0 +1,297 @@
+/* /home buyer home (REDESIGN_V2 §6). Tokens only. */
+
+.kvhome { background: var(--bg-0); }
+
+/* ---- Header + diorama ---- */
+.kvhome-hero {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--grad-skyline);
+  border-bottom: 1px solid var(--border);
+}
+.kvhome-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--hero-glow);
+}
+.kvhome-hero-inner { display: grid; gap: 8px; padding-top: 22px; padding-bottom: 8px; }
+@media (min-width: 1024px) {
+  .kvhome-hero-inner { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 32px; padding-top: 40px; padding-bottom: 24px; }
+}
+.kvhome-copy { display: grid; justify-items: start; gap: 12px; }
+.kvhome-title {
+  margin: 6px 0 0;
+  font: 800 clamp(32px, 5vw, 54px)/1.04 var(--font-display);
+  letter-spacing: -0.035em;
+  color: var(--text);
+}
+.kvhome-gold { color: var(--gold); }
+.kvhome-sub { margin: 0; max-width: 46ch; color: var(--text-muted); font-size: 16px; line-height: 1.55; }
+.kvhome-search { width: 100%; max-width: 560px; }
+
+.kvd { position: relative; width: 100%; max-width: 560px; justify-self: center; }
+.kvd-stage { position: relative; }
+.kvd-svg { filter: drop-shadow(0 24px 30px color-mix(in srgb, var(--primary) 18%, transparent)); }
+.kvd-pin {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.kvd-pin-dot {
+  display: grid;
+  place-items: center;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--on-primary);
+  font: 800 13px/1 var(--font-body);
+  box-shadow: 0 0 0 3px var(--gold-fill), var(--e3);
+}
+.kvd-pin.is-active .kvd-pin-dot { box-shadow: 0 0 0 4px var(--gold-fill), 0 0 22px color-mix(in srgb, var(--gold-fill) 60%, transparent); }
+.kvd-pin-label {
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.kvd-pin:focus-visible { outline: none; }
+.kvd-pin:focus-visible .kvd-pin-dot { box-shadow: 0 0 0 3px var(--gold-fill), var(--focus-ring); }
+.kvd-empty {
+  position: absolute;
+  left: 50%;
+  top: 18%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ---- Chip row (horizontal scroll, sticky under the header) ---- */
+.kvhome-chips-wrap {
+  position: sticky;
+  top: 113px; /* phone header: logo row + search row */
+  z-index: var(--z-sticky);
+  padding: 10px 0;
+  background: color-mix(in srgb, var(--bg-0) 88%, transparent);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--border);
+}
+@media (min-width: 861px) { .kvhome-chips-wrap { top: 75px; } } /* header.css breakpoint */
+.kvhome-chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; scroll-snap-type: x proximity; }
+.kvhome-chips::-webkit-scrollbar { display: none; }
+.kvhome-chips .chip { flex: none; scroll-snap-align: start; }
+
+/* ---- Sections ---- */
+.kvhome-body { padding-top: 8px; padding-bottom: 32px; }
+.kvhome-section { margin-top: 32px; }
+.kvhome-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.kvhome-head h2 { margin: 0 0 4px; font: 800 clamp(20px, 2.6vw, 26px)/1.15 var(--font-display); letter-spacing: -0.02em; }
+.kvhome-head p { margin: 0; color: var(--text-muted); font-size: 14px; }
+.kvhome-link { display: inline-flex; align-items: center; gap: 4px; flex: none; color: var(--primary); font-weight: 600; font-size: 14px; text-decoration: none; }
+
+/* ---- Open-now carousel ---- */
+.kvhome-rail {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(260px, 78%);
+  gap: 14px;
+  overflow-x: auto;
+  padding: 6px 4px 18px;
+  margin: 0 -4px;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+}
+@media (min-width: 640px) { .kvhome-rail { grid-auto-columns: minmax(260px, 44%); } }
+@media (min-width: 1024px) { .kvhome-rail { grid-auto-columns: calc((100% - 42px) / 4); } }
+.kvhome-rail > * { scroll-snap-align: start; }
+.kvhome-rail:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: 16px; }
+.kvhome-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+
+/* ---- Store card ---- */
+.kvs-card {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--e2);
+  transition: border-color var(--dur-2) var(--ease-standard);
+}
+.kvs-card.is-highlighted { border-color: var(--gold-fill); box-shadow: var(--glow-gold-rim), var(--e3); }
+.kvs-card:focus-within { box-shadow: var(--focus-ring), var(--e3); }
+.kvs-banner {
+  position: relative;
+  aspect-ratio: 16 / 8;
+  background: linear-gradient(135deg, var(--primary-tint-2), var(--surface-raised));
+  background-size: cover;
+  background-position: center;
+}
+.kvs-cat, .kvs-open {
+  position: absolute;
+  top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.kvs-cat { left: 10px; background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
+.kvs-open { right: 10px; background: var(--surface); color: var(--green); }
+.kvs-open i { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 0 color-mix(in srgb, var(--green) 60%, transparent); animation: kvs-pulse 2s ease-out infinite; }
+@keyframes kvs-pulse { 70% { box-shadow: 0 0 0 6px transparent; } }
+@media (prefers-reduced-motion: reduce) { .kvs-open i { animation: none; } }
+html.reduce-effects .kvs-open i { animation: none; }
+.kvs-body { display: grid; gap: 12px; padding: 12px 14px 14px; }
+.kvs-head { display: flex; gap: 10px; align-items: center; min-width: 0; }
+.kvs-logo { width: 44px; height: 44px; flex: none; margin-top: -30px; border-radius: 13px; border: 3px solid var(--surface); object-fit: cover; background: var(--surface-raised); position: relative; z-index: 2; }
+.kvs-logo-fallback { display: grid; place-items: center; color: var(--primary); font: 800 17px/1 var(--font-display); }
+.kvs-id { display: grid; gap: 3px; min-width: 0; }
+.kvs-id h3 { display: flex; align-items: center; gap: 5px; margin: 0; font-size: 15.5px; line-height: 1.25; min-width: 0; }
+.kvs-link { color: var(--text); text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kvs-link::after { content: ''; position: absolute; inset: 0; z-index: 1; border-radius: inherit; }
+.kvs-link:focus-visible { outline: none; }
+.kvs-meta { display: flex; flex-wrap: wrap; gap: 4px 10px; color: var(--text-muted); font-size: 12.5px; }
+.kvs-meta em { font-style: normal; }
+.kvs-rating { display: inline-flex; align-items: center; gap: 3px; color: var(--text); font-weight: 700; }
+.kvs-rating svg { color: var(--gold); fill: currentColor; }
+.kvs-rating em { color: var(--text-muted); font-weight: 500; }
+.kvs-area { display: inline-flex; align-items: center; gap: 3px; }
+.kvs-order { justify-self: start; position: relative; z-index: 2; }
+.kvs-skeleton { min-height: 230px; background: linear-gradient(100deg, var(--surface) 30%, var(--surface-raised) 50%, var(--surface) 70%); background-size: 200% 100%; animation: kvs-shimmer 1.6s linear infinite; }
+@keyframes kvs-shimmer { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .kvs-skeleton { animation: none; } }
+
+/* ---- Mini-map card (tilted 2.5D) ---- */
+.kvmini {
+  display: grid;
+  gap: 18px;
+  align-items: center;
+  overflow: hidden;
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: var(--hero-glow), var(--surface);
+  color: inherit;
+  text-decoration: none;
+  box-shadow: var(--e2);
+}
+@media (min-width: 768px) { .kvmini { grid-template-columns: 1fr 1fr; padding: 28px 32px; } }
+.kvmini-copy { display: grid; justify-items: start; gap: 8px; }
+.kvmini-copy h2 { margin: 4px 0 0; font: 800 clamp(20px, 2.6vw, 26px)/1.15 var(--font-display); letter-spacing: -0.02em; color: var(--text); }
+.kvmini-copy p { margin: 0 0 6px; color: var(--text-muted); font-size: 14.5px; max-width: 44ch; }
+.kvmini-map { perspective: 900px; }
+.kvmini-plane {
+  position: relative;
+  height: 190px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background:
+    linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0 / 28px 28px,
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 0 0 / 28px 28px,
+    var(--bg-1);
+  transform: rotateX(38deg) rotateZ(-8deg);
+  transform-origin: 50% 70%;
+  box-shadow: var(--e4);
+  transition: transform var(--dur-3) var(--ease-standard);
+}
+.kvmini:hover .kvmini-plane, .kvmini:focus-visible .kvmini-plane { transform: rotateX(30deg) rotateZ(-5deg) translateY(-4px); }
+html.reduce-effects .kvmini-plane { transform: none; }
+@media (prefers-reduced-motion: reduce) { .kvmini-plane { transition: none; } }
+.kvmini-road { position: absolute; height: 6px; border-radius: 6px; background: var(--surface-raised); }
+.kvmini-road.r1 { left: -5%; right: -5%; top: 45%; transform: rotate(-6deg); }
+.kvmini-road.r2 { left: 30%; width: 6px; height: auto; top: -5%; bottom: -5%; transform: rotate(12deg); }
+.kvmini-road.r3 { left: 10%; right: 30%; top: 72%; transform: rotate(18deg); }
+.kvmini-pin {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 0 3px var(--surface), 0 6px 12px rgba(0, 8, 30, 0.35);
+}
+.kvmini-pin.is-active { box-shadow: 0 0 0 3px var(--gold-fill), 0 0 18px color-mix(in srgb, var(--gold-fill) 60%, transparent); }
+
+/* ---- Empty, error, invite ---- */
+.kvhome-state, .kvhome-invite {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 28px 20px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 18px;
+  background: var(--surface);
+  text-align: center;
+}
+.kvhome-state h2, .kvhome-state h3, .kvhome-invite h3 { margin: 0; font-size: 18px; }
+.kvhome-state p, .kvhome-invite p { margin: 0; max-width: 46ch; color: var(--text-muted); font-size: 14px; }
+.kvhome-state-ico { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 14px; background: var(--primary-tint); color: var(--primary); }
+.kvhome-state-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 6px; }
+@media (min-width: 768px) {
+  .kvhome-invite { grid-template-columns: 1fr auto; justify-items: start; text-align: left; }
+}
+.kvhome-areas { display: flex; flex-wrap: wrap; gap: 8px; }
+.kvhome-sell {
+  display: grid;
+  gap: 14px;
+  align-items: center;
+  margin-top: 40px;
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+}
+.kvhome-sell h2 { margin: 0 0 4px; font: 800 20px/1.2 var(--font-display); }
+.kvhome-sell p { margin: 0; color: var(--text-muted); font-size: 14px; }
+@media (min-width: 768px) { .kvhome-sell { grid-template-columns: 1fr auto; } }
+
+/* Grid children must be allowed to shrink, or the search card widens the column. */
+.kvhome-hero-inner > * { min-width: 0; }
+.kvhome-copy { width: 100%; }
+/* Phones already have a full search row in the header; don't repeat it. */
+@media (max-width: 860px) { .kvhome-search { display: none; } }
+
+/* Jumping to a section clears the sticky header and chip row. */
+.kvhome-section { scroll-margin-top: 190px; }
+@media (min-width: 861px) { .kvhome-section { scroll-margin-top: 150px; } }
+
+/* More gold (owner, 21 Nov 2026): a short gold bar over every section
+   heading, gold hover rings on store cards. */
+.kvhome-head h2::before,
+.kvhome-sell h2::before,
+.kvmini-copy h2::before {
+  content: '';
+  display: block;
+  width: 30px;
+  height: 4px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  background: var(--grad-gold);
+}
+.kvs-card:hover { border-color: color-mix(in srgb, var(--gold-fill) 70%, transparent); }
+.kvhome-chips .chip.is-active .chip-count { background: var(--gold-fill); color: var(--on-gold); }

@@ -6,7 +6,7 @@
 // Everything respects prefers-reduced-motion via usePrefersReducedMotion().
 
 import * as React from 'react';
-import { motion, useInView, useScroll, useSpring, useTransform } from 'framer-motion';
+import { motion, useInView, useScroll, useSpring, useTransform } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { usePrefersReducedMotion } from '@/lib/usePrefersReducedMotion';
 

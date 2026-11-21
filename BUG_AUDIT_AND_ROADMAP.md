@@ -1,4 +1,4 @@
-# Naijavend — Bug Audit & Roadmap
+# Kwaravend — Bug Audit & Roadmap
 
 _Audit date: 2026-09-24 · Scope: full storefront codebase (`apps/storefront`), Supabase schema, deployment posture._
 _This document is a **plan**, not a changelog — nothing here has been fixed yet unless explicitly marked otherwise._
@@ -126,7 +126,7 @@ Ordered by impact; each item lists scope and why.
 
 ## Part 3 — AI roadmap (researched, not built)
 
-_Naijavend already has an AI abstraction: `packages/ai` exposes `aiComplete()` behind an `AiProvider` interface (currently a deterministic "dummy" provider) with features `store_setup`, `listing_description`, `style_store`, and every call logged to `ai_usage_log`. The plan below keeps that architecture: each new feature is an `AiFeature` enum entry + a provider method + a server route + a UI hook, so a real LLM/image provider can be swapped in without touching call sites._
+_Kwaravend already has an AI abstraction: `packages/ai` exposes `aiComplete()` behind an `AiProvider` interface (currently a deterministic "dummy" provider) with features `store_setup`, `listing_description`, `style_store`, and every call logged to `ai_usage_log`. The plan below keeps that architecture: each new feature is an `AiFeature` enum entry + a provider method + a server route + a UI hook, so a real LLM/image provider can be swapped in without touching call sites._
 
 ### Foundation first (AI-0, prerequisite for everything below)
 - **Real provider adapter.** Implement `OpenAiProvider` / `AnthropicProvider` behind `AiProvider`; pick via `AI_PROVIDER` env. Model: GPT-4o-mini or Claude Haiku class for text (cheap, fast), DALL·E 3 / Flux-class for images.
@@ -150,7 +150,7 @@ The "AI images to post on social media when I have a new listing" feature, plus 
 
 ### AI-3 — Conversational sales (the WhatsApp superpower) · *high, differentiator*
 Nigeria's commerce runs on WhatsApp — the research consistently shows AI chatbots there drive 24/7 conversion (flowcart, TextYess, Chati all sell exactly this to small businesses):
-- **AI reply suggestions in Naijavend chat.** Not a bot — the seller stays human. When a buyer message arrives, AI drafts 2–3 contextual replies (price, availability, delivery info pulled live from the store's listings) for one-tap send.
+- **AI reply suggestions in Kwaravend chat.** Not a bot — the seller stays human. When a buyer message arrives, AI drafts 2–3 contextual replies (price, availability, delivery info pulled live from the store's listings) for one-tap send.
 - **Out-of-hours auto-responder (opt-in).** If the seller enables it, unanswered buyer chats get a helpful auto-reply built from the store's real catalogue + hours, with the promise "the owner will reply in the morning." Always labelled as automated; never closes a sale by itself.
 - **Buyer-side store Q&A.** On the store site, an "Ask about this product" mini-assistant grounded strictly in that store's listing data (prices, stock, hours, delivery info) with a hard refusal + WhatsApp handoff for anything else — no hallucinated prices ever.
 
@@ -161,7 +161,7 @@ Nigeria's commerce runs on WhatsApp — the research consistently shows AI chatb
 - **SEO blurb per store.** Generated meta description + FAQ schema (3–5 real questions from chat history) for better Google visibility of store sites.
 
 ### AI-5 — Later / speculative
-- **Dynamic pricing suggestions** (researched: standard at enterprise, plausible for later): suggest price bands from category demand signals *inside Naijavend's own marketplace data* — only viable once there's real transaction volume; never automatic.
+- **Dynamic pricing suggestions** (researched: standard at enterprise, plausible for later): suggest price bands from category demand signals *inside Kwaravend's own marketplace data* — only viable once there's real transaction volume; never automatic.
 - **Inventory forecasting** for stocked products ("you'll run out of item X in ~10 days based on the last month") — same data-volume caveat.
 - **Voice-first onboarding** for sellers who'd rather talk than type (Whisper-class STT → the existing store_setup flow).
 - **AI-generated bundle ideas** ("buy A + B together" from co-purchase data) once order data is dense.

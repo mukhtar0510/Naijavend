@@ -17,7 +17,7 @@ export const BRAND = {
     'Kwaravend gives Nigerian sellers a real storefront — catalogue, orders, delivery tracking and a map — starting in Ilorin, Kwara State.',
   domain: 'kwaravend.com',
   supportWhatsApp: '',
-  supportEmail: '',
+  supportEmail: 'kwaravend@gmail.com',
   socials: {
     instagram: '',
     facebook: '',

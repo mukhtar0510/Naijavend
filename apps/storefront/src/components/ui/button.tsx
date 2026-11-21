@@ -4,7 +4,8 @@
 // classes from styles/system.css, so plain `className="btn btn-primary"`
 // markup and <Button> look and behave identically.
 //
-// Variants: primary · secondary · tertiary · destructive · link (+ whatsapp).
+// Variants: primary (blue) · secondary · tertiary · destructive · link · cta
+// (green, nav "Sell free" only) · whatsapp.
 // Sizes: sm · md · lg (touch target stays ≥ 44px on touch screens).
 // States: hover, focus-visible, pressed (scale 0.97), loading (keeps width), disabled.
 
@@ -13,7 +14,7 @@ import Link from 'next/link';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'destructive' | 'link' | 'whatsapp';
+export type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'destructive' | 'link' | 'whatsapp' | 'cta';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 // Older shadcn-style names still accepted (default/outline/ghost/icon).
@@ -30,6 +31,7 @@ const VARIANT_CLASS: Record<ButtonVariant | LegacyVariant, string> = {
   destructive: 'btn-danger',
   link: 'btn-link',
   whatsapp: 'btn-whatsapp',
+  cta: 'btn-cta',
 };
 const SIZE_CLASS: Record<ButtonSize | LegacySize, string> = {
   sm: 'btn-sm',

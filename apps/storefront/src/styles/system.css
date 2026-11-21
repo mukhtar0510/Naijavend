@@ -88,6 +88,16 @@
 [data-theme='dark'] .btn-danger, [data-theme='dark'] .btn-destructive { --btn-fg: #1a0505; --btn-fg-hover: #1a0505; }
 .btn-danger:hover, .btn-destructive:hover { filter: brightness(1.06); border-color: var(--danger); }
 .btn-link { --btn-bg: transparent; --btn-border: transparent; --btn-fg: var(--primary); min-height: 0; padding: 0; text-decoration: underline !important; text-underline-offset: 3px; }
+/* V2 §0.1 "cta": the green seller call to action (nav "Sell free") — the one
+   place green is a button. Dark text on green in both themes passes AA. */
+.btn-cta {
+  --btn-bg: var(--green);
+  --btn-fg: var(--on-green);
+  --btn-border: var(--green);
+  --btn-fg-hover: var(--on-green);
+  box-shadow: 0 6px 18px -8px color-mix(in srgb, var(--green) 70%, transparent);
+}
+.btn-cta:hover { filter: brightness(1.06); border-color: var(--green); }
 .btn-whatsapp { --btn-bg: var(--whatsapp); --btn-fg: #06130a; --btn-border: var(--whatsapp); --btn-fg-hover: #06130a; }
 .btn-whatsapp:hover { filter: brightness(1.06); border-color: var(--whatsapp); }
 /* On-photo / on-brand-band buttons */

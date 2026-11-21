@@ -31,13 +31,16 @@ export type BaseLayerId = 'streets' | 'satellite';
 const STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
 
 const MAP_PALETTE = {
+  // REDESIGN_V2 §2.9, adjusted by the owner on 21 Nov 2026: warm ivory and
+  // gold-tinted casings in light; true black land and grey roads in dark
+  // (blue is kept for water only, so it doesn't overpower the black).
   light: {
-    land: '#EEF3FB', water: '#B9D3F7', park: '#D4EEDF', building: '#E1E8F4',
-    road: '#FFFFFF', casing: '#C9D5EA', rail: '#B8C6DE', label: '#0A0F1A', halo: '#FFFFFF', waterLabel: '#1E4FAF',
+    land: '#F4F0E4', water: '#BBD9F5', park: '#CDEBD8', building: '#E6DFCB',
+    road: '#FFFFFF', casing: '#DCCFAE', rail: '#C9BC98', label: '#0A1226', halo: '#FFFFFF', waterLabel: '#1456E0',
   },
   dark: {
-    land: '#06080F', water: '#0A1E45', park: '#0A1A16', building: '#0F1626',
-    road: '#16264A', casing: '#04060C', rail: '#1C2B4D', label: '#DCE6FA', halo: '#06080F', waterLabel: '#7AA8FF',
+    land: '#0A0A0C', water: '#0B2447', park: '#0C1E17', building: '#17181C',
+    road: '#26282F', casing: '#060607', rail: '#2C2E35', label: '#F4F7FF', halo: '#0A0A0C', waterLabel: '#7AA8FF',
   },
 } as const;
 
@@ -90,7 +93,30 @@ export function canShow3D(): boolean {
 /** Toggle the extruded-buildings layer and tilt the camera to show it. */
 export function setBuildings3D(map: MlMap, on: boolean) {
   if (map.getLayer('building-3d')) map.setLayoutProperty('building-3d', 'visibility', on ? 'visible' : 'none');
-  map.easeTo({ pitch: on ? 50 : 0, duration: 600 });
+}
+
+/**
+ * Tilt view (REDESIGN_V2 §7.3): pitch the camera to about 50° with a smooth
+ * ease, and add a soft fog at the horizon (black in dark, warm in light).
+ * `effects` false (lite / Reduce effects) skips the fog and the animation.
+ */
+export function setTilt(map: MlMap, on: boolean, dark: boolean, effects: boolean) {
+  map.easeTo({ pitch: on ? 50 : 0, duration: effects ? 700 : 0 });
+  try {
+    const m = map as MlMap & { setSky?: (sky: Record<string, unknown> | undefined) => void };
+    if (!m.setSky) return;
+    if (!on || !effects) {
+      m.setSky(undefined);
+      return;
+    }
+    m.setSky(
+      dark
+        ? { 'sky-color': '#050506', 'horizon-color': '#0b1a3d', 'fog-color': '#050506', 'sky-horizon-blend': 0.6, 'horizon-fog-blend': 0.6, 'fog-ground-blend': 0.4 }
+        : { 'sky-color': '#cfe0ff', 'horizon-color': '#fff1c7', 'fog-color': '#fbf9f3', 'sky-horizon-blend': 0.6, 'horizon-fog-blend': 0.6, 'fog-ground-blend': 0.4 },
+    );
+  } catch {
+    /* older engine without sky support: tilt still works */
+  }
 }
 
 // Esri World Imagery — keyless satellite raster. Inserted *under* the label

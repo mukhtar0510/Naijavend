@@ -8,7 +8,7 @@ const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '';
 if (!url || !anonKey) {
   // Fail loudly in dev so misconfiguration is obvious; app.json extra is the fallback.
   console.warn(
-    '[Naijavend] Missing EXPO_PUBLIC_SUPABASE_URL / EXPO_PUBLIC_SUPABASE_ANON_KEY. ' +
+    '[Kwaravend] Missing EXPO_PUBLIC_SUPABASE_URL / EXPO_PUBLIC_SUPABASE_ANON_KEY. ' +
       'Create apps/seller/.env with your Supabase project values.'
   );
 }

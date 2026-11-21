@@ -2,6 +2,7 @@ import '../../styles/header.css';
 import '../../styles/system.css';
 import '../../styles/store-designer.css';
 import '../../styles/scene.css';
+import '../../styles/hero.css';
 import { SiteHeader } from '@/components/SiteHeader';
 import { CookieBanner } from '@/components/CookieBanner';
 import { SiteFooter } from '@/components/SiteFooter';

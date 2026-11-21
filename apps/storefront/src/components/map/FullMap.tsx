@@ -23,6 +23,7 @@ import {
   MapPin,
   MessageCircle,
   Navigation,
+  Rotate3d,
   RotateCcw,
   Search,
   Star,
@@ -32,7 +33,9 @@ import {
 } from 'lucide-react';
 import { directionsUrl, formatDistance, haversineKm, isOpenNow, todayHoursLabel } from '@idevtenancy/shared';
 import { useViewerLocation } from '@/lib/useViewerLocation';
-import { applyKwaraStyle, canShow3D, circlePolygon, createThemedMap, ll, prefersDarkMap, setBuildings3D, type ThemedMap } from '@/lib/mapFactory';
+import { applyKwaraStyle, canShow3D, circlePolygon, createThemedMap, ll, prefersDarkMap, setBuildings3D, setTilt, type ThemedMap } from '@/lib/mapFactory';
+import { AreaSelector } from '@/components/shell/AreaSelector';
+import { useReduceEffects } from '@/lib/useReduceEffects';
 import { ILORIN_AREAS, ILORIN_CENTER, KWARA_BOUNDS, KWARA_MIN_ZOOM, inIlorin, inKwara, nearestArea } from '@/lib/ilorin';
 import { LANDMARKS, searchLandmarks, type Landmark as LandmarkT, type LandmarkKind } from '@/lib/landmarks';
 import { CategoryIcon, categoryColor, categoryMeta } from '@/lib/categories';
@@ -132,6 +135,8 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
   const [heatOn, setHeatOn] = useState(false);
   const [heatCount, setHeatCount] = useState<number | null>(null);
   const [b3d, setB3d] = useState(false);
+  const [tilt, setTiltOn] = useState(false);
+  const reduceFx = useReduceEffects();
   const [can3d, setCan3d] = useState(false);
   const [base, setBase] = useState<'streets' | 'satellite'>('streets');
   const [layersOpen, setLayersOpen] = useState(false);
@@ -326,7 +331,13 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
 
   useEffect(() => {
     if (ready && mapRef.current) setBuildings3D(mapRef.current, b3d);
+    if (b3d) setTiltOn(true); // buildings read best from an angle
   }, [b3d, ready]);
+
+  // Tilt view (2.5D): pitch + horizon fog. Pins are DOM markers, so they stay upright.
+  useEffect(() => {
+    if (ready && mapRef.current) setTilt(mapRef.current, tilt, prefersDarkMap(), !reduceFx);
+  }, [tilt, ready, reduceFx]);
 
   // Heat data (fetched once, only when the layer is on).
   useEffect(() => {
@@ -504,6 +515,16 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
   const flyArea = useCallback((lat: number, lng: number, z = 15) => {
     mapRef.current?.flyTo({ center: ll(lat, lng), zoom: z, duration: 800, essential: true });
   }, []);
+  // /map?area=<id> (from the /home mini-map card) opens on that Ilorin area.
+  const areaDone = useRef(false);
+  useEffect(() => {
+    if (!ready || areaDone.current) return;
+    areaDone.current = true;
+    const id = new URLSearchParams(window.location.search).get('area');
+    const hit = ILORIN_AREAS.find((a) => a.id === id);
+    if (hit && !selected) flyArea(hit.lat, hit.lng, 15);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, when the map is ready
+  }, [ready]);
   const resetIlorin = () => {
     setSelected(null);
     flyArea(ILORIN_CENTER[0], ILORIN_CENTER[1], 13);
@@ -887,6 +908,15 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
             </div>
           )}
         </div>
+        <FAB
+          icon={Rotate3d}
+          label={tilt ? 'Flat view' : 'Tilt view'}
+          active={tilt}
+          onClick={() => {
+            setTiltOn((v) => !v);
+            track('tilt_toggled');
+          }}
+        />
         <FAB icon={RotateCcw} label="Reset to Ilorin" onClick={resetIlorin} />
       </div>
 
@@ -966,11 +996,15 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
               )}
               <section className="fm-areas" aria-label="Jump to an area">
                 <h2>Areas in Ilorin</h2>
-                <div className="fm-chips is-wrap">
-                  {ILORIN_AREAS.map((a) => (
-                    <Chip key={a.id} label={a.label} icon={MapPin} onClick={() => flyArea(a.lat, a.lng)} />
-                  ))}
-                </div>
+                {/* Owner, 21 Nov 2026: a simple dropdown, shared with /home. */}
+                <AreaSelector
+                  label="Fly to an Ilorin area"
+                  onChange={(id) => {
+                    const a = ILORIN_AREAS.find((x) => x.id === id);
+                    if (a) flyArea(a.lat, a.lng);
+                    else flyArea(ILORIN_CENTER[0], ILORIN_CENTER[1], 13);
+                  }}
+                />
               </section>
               <section className="fm-areas" aria-label="Places across Kwara">
                 <h2>Across Kwara</h2>

@@ -8,6 +8,7 @@ import '../../styles/base.css';
 import '../../styles/components.css';
 import '../../styles/interactions.css';
 import '../../styles/system.css';
+import '../../styles/shell.css';
 import '../../styles/mappage.css';
 
 export default function FullScreenLayout({ children }: { children: React.ReactNode }) {

@@ -69,3 +69,33 @@ Tokens live in `styles/base.css` (`--blue` is the de-facto brand colour, plus `-
 3. `Icon`, `Button`, `Chip` components in `components/ui`.
 4. Emoji check script (`scripts/check-emoji.mjs`) — report mode now, failing mode once the count reaches zero.
 5. Sweep the worst files above, then the long tail; migrate raw buttons file by file.
+
+---
+
+## V0 re-audit for REDESIGN_V2 — 21 November 2026
+
+Re-run with `python apps/storefront/scripts/design-audit.py`.
+
+| Item | R0 (20 Nov) | Now |
+| --- | ---: | ---: |
+| Emojis in the UI | 224 in 74 files | **0** (build fails if one returns: `scripts/check-emoji.mjs`) |
+| Raw `<button>` elements | 224 in 78 files | 240 in 84 files |
+| Button class names | 24 | 29 (`btn`, `btn-sm`, `btn-outline`, `btn-primary` cover ~90%) |
+| Raw hex values in CSS (outside `tokens.css`) | ~344 | ~530 (biggest: `components.css` 133, `marketplace-v2.css` 84, `chrome.css` 83, `interactions.css` 79, `store-designer.css` 56) |
+| `.tsx` files with a raw hex | — | 21 |
+
+### Colour scheme
+
+R1 shipped a blue / gold / green palette on white and black, but with different values from REDESIGN_V2 §2 (for example dark `--primary` `#4F8CFF` instead of `#4D94FF`, light gold `#A16207` instead of `#8A5F00`, gold reused as `--accent`). V1 replaces the values with the V2 tables, separates `--gold` from shadcn's `--accent`, and adds `--gold-fill`, `--on-gold`, `--on-green`, `--on-danger`, the V2 gradients, glass and elevation `e1`–`e5`.
+
+### Button and chip
+
+`Button`, `IconButton`, `FAB`, `Chip`, `Badge`, `SegmentedControl`, `Toggle` exist in `src/components/ui` and render the shared `.btn` / `.chip` classes. V2 asks for a `cta` (green) variant for the nav "Sell free" button, Motion press feedback, and migration of the 240 raw buttons.
+
+### Order of V1 fixes
+
+1. Tokens to the V2 values, mapped to shadcn names; contrast check in the build.
+2. Motion: install, presets (`lib/motion.ts`), one `MotionConfig` tied to Reduce effects.
+3. Depth components: `DepthStage`, `TiltCard`, `ParallaxStack`, `IsoBlock`. `Model3D` waits for the three.js decision.
+4. Display font (Inter Tight) and mono for prices.
+5. Then the long tail: raw buttons and raw hex, file by file, worst first.

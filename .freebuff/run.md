@@ -1,4 +1,4 @@
-# Naijavend — dev server run doc
+# Kwaravend — dev server run doc
 
 Monorepo (pnpm workspaces). The web storefront is the previewable app: Next.js 14 App Router at `apps/storefront`, backed by a hosted Supabase project (data lives remotely; no local DB needed).
 
@@ -32,7 +32,7 @@ Monorepo (pnpm workspaces). The web storefront is the previewable app: Next.js 1
 - The service worker registers in PRODUCTION builds only. In dev, `PwaRegister` unregisters any leftover SW and clears caches (stale dev SWs used to break client navigations with 404s).
 
 ## Brand & features (September 2026)
-- The app is **Naijavend** (formerly Shopfront). Brand strings live in `SiteHeader`, `(marketplace)/layout.tsx` footer, `layout.tsx` metadata and `manifest.ts`.
+- The app is **Kwaravend** (formerly Shopfront). Brand strings live in `SiteHeader`, `(marketplace)/layout.tsx` footer, `layout.tsx` metadata and `manifest.ts`.
 - Map tab on `/discover`: Leaflet 1.9 + OpenStreetMap tiles (deps: `leaflet`, `@types/leaflet` in apps/storefront). Component: `src/components/StoreMap.tsx` (client-only, map initialised in useEffect).
 - Blue-tick verification: `stores.verification_status` + `verified_at` (migration `20260920000001_store_verification.sql`). Rule: 30+ reviews averaging 4.0+. Apply via `POST /api/verification/apply`; dashboard card `dashboard/VerifyCard.tsx`; badge component `VerifiedTick.tsx`. Demo: `zaras-cake-studio` is grandfathered as verified.
 
@@ -65,8 +65,8 @@ Monorepo (pnpm workspaces). The web storefront is the previewable app: Next.js 1
 - Working on prod: all pages, store sites, catalogue, sign-in (anon auth), map, discovery. Blocked pending service key: /api/create-order, /api/create-booking, /api/checkout-summary, /api/submit-rating, /api/mock-pay, /api/account/auth/signup (they call supabaseService()).
 - After adding the key: add https://naijavend-roan.vercel.app in Supabase → Authentication → URL Configuration (Site URL + Redirect URLs) so magic links/Google work in prod.
 
-## Naijavend rebrand (September 2026)
-- Full rename Naijacart → Naijavend across all surfaces (wordmark, manifest, SW, legal, FAQ, Expo app, handles). Contact email everywhere: naijavend2026@gmail.com.
+## Kwaravend rebrand (September 2026)
+- Full rename to Kwaravend across all surfaces (wordmark, manifest, SW, legal, FAQ, Expo app, handles). Contact email everywhere: kwaravend@gmail.com (BRAND.supportEmail, set 21 Nov 2026). The admin login account is still naijavend2026@gmail.com.
 - Vercel project/URL intentionally still `naijacart-roan.vercel.app` (renaming changes prod URL + breaks NEXT_PUBLIC_SITE_URL + Supabase redirects). Rename together with the user when they're ready.
 - 25 API routes verified: clean 4xx JSON on bad input, zero 500s. All dashboard pages 200 signed-in. 16/16 shared tests pass.
 

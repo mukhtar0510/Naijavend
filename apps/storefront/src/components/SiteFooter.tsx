@@ -52,10 +52,11 @@ export function SiteFooter() {
             <Link href="/legal/privacy">Privacy policy</Link>
             <Link href="/legal/terms">User agreement</Link>
             <Link href="/legal/cookies">Cookies policy</Link>
+            {BRAND.supportEmail && <a href={`mailto:${BRAND.supportEmail}`}>{BRAND.supportEmail}</a>}
           </nav>
         </div>
         <div className="footer-base">
-          <span>© {new Date().getFullYear()} Kwaravend. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} {BRAND.name}. All rights reserved.</span>
           <span>Made in Nigeria </span>
         </div>
       </div>

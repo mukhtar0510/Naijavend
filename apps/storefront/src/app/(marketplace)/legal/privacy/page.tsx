@@ -1,3 +1,4 @@
+import { BRAND } from '@idevtenancy/shared';
 export const metadata = {
   title: 'Privacy Policy',
   description: 'How Kwaravend collects, uses and protects your personal data.',
@@ -49,7 +50,7 @@ const SECTIONS: Array<{ h: string; p: string[] }> = [
   {
     h: '6. Your rights',
     p: [
-      'You may request a copy of your data, correct it, or delete your account at any time. Sellers can edit or remove their store content from the dashboard. Customers can contact a store directly to resolve an order, and can ask us to delete reviews they posted. To exercise any right, contact us through the in-app chat.',
+      `You may request a copy of your data, correct it, or delete your account at any time. Sellers can edit or remove their store content from the dashboard. Customers can contact a store directly to resolve an order, and can ask us to delete reviews they posted. To exercise any right, contact us through the in-app chat or email ${BRAND.supportEmail}.`,
     ],
   },
   {
