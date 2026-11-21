@@ -37,6 +37,7 @@ import { directionsUrl, formatDistance, haversineKm, isOpenNow, todayHoursLabel 
 import { useViewerLocation } from '@/lib/useViewerLocation';
 import { applyKwaraStyle, canShow3D, circlePolygon, createThemedMap, ll, prefersDarkMap, setBuildings3D, setTilt, type ThemedMap } from '@/lib/mapFactory';
 import { AreaSelector } from '@/components/shell/AreaSelector';
+import { PROFILES, fetchRoute, type Profile, type RouteInfo } from '@/lib/routing';
 import { useReduceEffects } from '@/lib/useReduceEffects';
 import { ILORIN_AREAS, ILORIN_CENTER, KWARA_BOUNDS, KWARA_MIN_ZOOM, inIlorin, inKwara, nearestArea } from '@/lib/ilorin';
 import { LANDMARKS, searchLandmarks, type Landmark as LandmarkT, type LandmarkKind } from '@/lib/landmarks';
@@ -132,7 +133,7 @@ function waLink(num: string, store: string) {
 }
 
 export function FullMap({ stores }: { stores: FullMapStore[] }) {
-  const { origin, label: originLabel, state: locState, source: locSource, accuracy, locate } = useViewerLocation({ live: true });
+  const { origin, label: originLabel, state: locState, source: locSource, accuracy, locate, pickCity } = useViewerLocation({ live: true });
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
   const [query, setQuery] = useState('');
@@ -142,6 +143,11 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
   const [heatCount, setHeatCount] = useState<number | null>(null);
   const [b3d, setB3d] = useState(false);
   const [tilt, setTiltOn] = useState(false);
+  // Directions on the map (owner, 21 Nov 2026): only fetched when asked for.
+  const [routeProfile, setRouteProfile] = useState<Profile>('driving');
+  const [routeWanted, setRouteWanted] = useState(false);
+  const [route, setRoute] = useState<RouteInfo | null>(null);
+  const [routing, setRouting] = useState(false);
   const reduceFx = useReduceEffects();
   const [can3d, setCan3d] = useState(false);
   const [base, setBase] = useState<'streets' | 'satellite'>('streets');
@@ -297,6 +303,34 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
         map.addSource('nv-accuracy', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
         map.addLayer({ id: 'nv-accuracy-fill', type: 'fill', source: 'nv-accuracy', paint: { 'fill-color': '#4F8CFF', 'fill-opacity': 0.12 } });
         map.addLayer({ id: 'nv-accuracy-line', type: 'line', source: 'nv-accuracy', paint: { 'line-color': '#4F8CFF', 'line-width': 1.5, 'line-opacity': 0.6 } });
+
+        // Route to the selected store: solid for a road route, dashed for the
+        // straight-line fallback. Blue = "on the way" (REDESIGN_V2 §2.6).
+        map.addSource('fm-route', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+        map.addLayer({
+          id: 'fm-route-casing',
+          type: 'line',
+          source: 'fm-route',
+          filter: ['==', ['get', 'real'], true],
+          layout: { 'line-cap': 'round', 'line-join': 'round' },
+          paint: { 'line-color': '#050506', 'line-width': 9, 'line-opacity': 0.55 },
+        });
+        map.addLayer({
+          id: 'fm-route-line',
+          type: 'line',
+          source: 'fm-route',
+          filter: ['==', ['get', 'real'], true],
+          layout: { 'line-cap': 'round', 'line-join': 'round' },
+          paint: { 'line-color': '#4D94FF', 'line-width': 5, 'line-opacity': 0.95 },
+        });
+        map.addLayer({
+          id: 'fm-route-dash',
+          type: 'line',
+          source: 'fm-route',
+          filter: ['==', ['get', 'real'], false],
+          layout: { 'line-cap': 'round' },
+          paint: { 'line-color': '#4D94FF', 'line-width': 4, 'line-opacity': 0.9, 'line-dasharray': [1.5, 2] },
+        });
 
         const sync = () => setZoom(Math.round(map.getZoom() * 2) / 2);
         map.on('moveend', sync);
@@ -517,6 +551,46 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
         : { type: 'FeatureCollection', features: [] },
     );
   }, [ready, distOrigin, locSource, accuracy, originLabel]);
+
+  // ------------------------------------------------------------- route
+  // A new store, or no starting point, clears the route.
+  useEffect(() => {
+    setRouteWanted(false);
+    setRoute(null);
+  }, [selected]);
+  useEffect(() => {
+    const map = mapRef.current;
+    const lib = libRef.current;
+    const src = map?.getSource('fm-route') as GeoJSONSource | undefined;
+    if (!ready || !map || !lib || !src) return;
+    if (!routeWanted || !sel || !distOrigin) {
+      src.setData({ type: 'FeatureCollection', features: [] });
+      setRouting(false);
+      if (!routeWanted) setRoute(null);
+      return;
+    }
+    const ctrl = new AbortController();
+    setRouting(true);
+    fetchRoute(distOrigin, { lat: sel.lat, lng: sel.lng }, routeProfile, ctrl.signal)
+      .then((r) => {
+        setRoute(r);
+        setRouting(false);
+        src.setData({
+          type: 'Feature',
+          properties: { real: r.real },
+          geometry: { type: 'LineString', coordinates: r.coords.map(([la, ln]) => ll(la, ln)) },
+        });
+        const b = new lib.LngLatBounds();
+        for (const [la, ln] of r.coords) b.extend(ll(la, ln));
+        map.fitBounds(b, { padding: desktop ? { top: 90, bottom: 60, left: 460, right: 80 } : { top: 140, bottom: Math.round(window.innerHeight * 0.55), left: 40, right: 70 }, maxZoom: 16, duration: 700 });
+        track('route_shown', sel.id);
+      })
+      .catch(() => {
+        /* aborted: a newer request took over */
+      });
+    return () => ctrl.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch only when these change
+  }, [ready, routeWanted, routeProfile, sel?.slug, distOrigin?.lat, distOrigin?.lng]);
 
   // ------------------------------------------------------------ controls
   const flyArea = useCallback((lat: number, lng: number, z = 15) => {
@@ -773,6 +847,60 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
         >
           Directions
         </ButtonLink>
+      </div>
+      <div className="fm-route" aria-live="polite">
+        <h3>
+          <Navigation size={15} aria-hidden /> The way here
+        </h3>
+        {!distOrigin ? (
+          <p className="fm-route-note">
+            Tap <strong>Locate me</strong> or pick your area to see the route on the map.
+          </p>
+        ) : (
+          <>
+            <SegmentedControl
+              label="How are you going?"
+              value={routeProfile}
+              onChange={(v) => setRouteProfile(v)}
+              options={(Object.keys(PROFILES) as Profile[]).map((k) => ({ value: k, label: PROFILES[k].label }))}
+            />
+            {!routeWanted ? (
+              <button type="button" className="btn btn-primary btn-sm fm-route-go" onClick={() => setRouteWanted(true)}>
+                <Navigation size={15} aria-hidden /> Show the way here
+              </button>
+            ) : routing ? (
+              <p className="fm-route-note">Finding the way…</p>
+            ) : route ? (
+              <>
+                <p className="fm-route-sum">
+                  <strong>
+                    About {route.min} min {PROFILES[route.profile].verb}
+                  </strong>{' '}
+                  · {formatDistance(route.km)}
+                  {!route.real && ' in a straight line (the road route couldn’t load)'}
+                </p>
+                {route.steps.length > 0 && (
+                  <ol className="fm-route-steps">
+                    {route.steps.slice(0, 6).map((st, i) => (
+                      <li key={i}>
+                        {st.text}
+                        {st.m > 0 && <em> · {st.m >= 1000 ? `${(st.m / 1000).toFixed(1)} km` : `${st.m} m`}</em>}
+                      </li>
+                    ))}
+                    {route.steps.length > 6 && <li className="fm-route-more">Open Directions for the full turn-by-turn.</li>}
+                  </ol>
+                )}
+                <button type="button" className="btn btn-ghost btn-sm" onClick={() => setRouteWanted(false)}>
+                  <X size={15} aria-hidden /> Hide route
+                </button>
+              </>
+            ) : null}
+            <p className="fm-route-privacy">
+              From {locSource === 'gps' ? 'your location' : (originLabel ?? 'your area')}. The route is worked out by
+              OpenStreetMap&apos;s routing service, which receives the two points only when you tap the button.
+            </p>
+          </>
+        )}
       </div>
     </div>
   );
@@ -1045,6 +1173,9 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
                   label="Fly to an Ilorin area"
                   onChange={(id) => {
                     const a = ILORIN_AREAS.find((x) => x.id === id);
+                    // The chosen area becomes the starting point for distances
+                    // and routes, unless the buyer already shared their GPS.
+                    if (a && locSource !== 'gps') pickCity(a.label, a.lat, a.lng);
                     if (a) flyArea(a.lat, a.lng);
                     else flyArea(ILORIN_CENTER[0], ILORIN_CENTER[1], 13);
                   }}

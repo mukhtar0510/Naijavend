@@ -787,3 +787,10 @@ label { font-weight: 650; }
 .pw-links .btn-link { font-size: 13px; }
 .auth-divider-or { display: flex; align-items: center; gap: 10px; margin: 14px 0 6px; color: var(--text-muted); font-size: 12.5px; font-weight: 650; }
 .auth-divider-or::before, .auth-divider-or::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* Seller orders: delivery details saved at checkout */
+.ord-delivery { display: grid; gap: 6px; margin-top: 8px; font-size: 13.5px; }
+.ord-delivery p { margin: 0; }
+.ord-delivery svg { vertical-align: -2px; color: var(--text-muted); }
+.ord-delivery-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.ord-delivery-actions svg { color: currentColor; }

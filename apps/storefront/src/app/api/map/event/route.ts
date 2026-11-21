@@ -13,6 +13,8 @@ const EVENTS = new Set([
   'heat_toggled',
   'store_directions_clicked',
   'store_order_clicked',
+  'tilt_toggled',
+  'route_shown',
 ]);
 
 export async function POST(req: NextRequest) {

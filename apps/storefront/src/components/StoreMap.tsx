@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { PROFILES, stepText, type Profile, type RouteInfo, type RouteStep } from '@/lib/routing';
 import Link from 'next/link';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { GeoJSONSource, Marker, Popup } from 'maplibre-gl';
@@ -59,33 +60,14 @@ export interface MapStore {
 // Ilorin-only: centred on the city, panning held to the metro area, and only
 // stores inside it are plotted (see lib/ilorin).
 
-type Profile = 'foot' | 'bike' | 'driving';
 type SortKey = 'near' | 'rating' | 'name';
 
-const PROFILES: Record<Profile, { label: string; verb: string; kmh: number; router: string }> = {
-  foot: { label: 'Walk', verb: 'walk', kmh: 4.8, router: 'routed-foot' },
-  bike: { label: 'Okada', verb: 'ride', kmh: 18, router: 'routed-bike' },
-  driving: { label: 'Drive', verb: 'drive', kmh: 22, router: 'routed-car' },
-};
 const RADII = [1, 3, 5, 10] as const;
 /** Pins closer than this (screen px) merge into a cluster bubble. */
 const CLUSTER_PX = 52;
 /** At or above this zoom every store gets its own pin. */
 const CLUSTER_OFF_ZOOM = 16;
 
-interface RouteStep {
-  text: string;
-  m: number;
-}
-/** A fetched road route (FOSSGIS OSRM) or the straight-line fallback. */
-interface RouteInfo {
-  km: number;
-  min: number;
-  real: boolean; // false → haversine fallback line
-  profile: Profile;
-  coords: [number, number][];
-  steps: RouteStep[];
-}
 
 const EMPTY_FC: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] };
 
@@ -1123,36 +1105,3 @@ function categoriesOf(stores: MapStore[]): string[] {
 }
 
 /** OSRM step → short English instruction ("Turn left onto Unity Road"). */
-function stepText(step: {
-  distance?: number;
-  name?: string;
-  maneuver?: { type?: string; modifier?: string };
-}): RouteStep | null {
-  const type = step.maneuver?.type ?? '';
-  const mod = step.maneuver?.modifier ?? '';
-  const road = step.name ? ` onto ${step.name}` : '';
-  const m = Math.round(step.distance ?? 0);
-  const dir = mod;
-  switch (type) {
-    case 'depart':
-      return { text: `Head out${step.name ? ` on ${step.name}` : ''}`, m };
-    case 'arrive':
-      return { text: 'Arrive at the store', m: 0 };
-    case 'roundabout':
-    case 'rotary':
-      return { text: `Take the roundabout${road}`, m };
-    case 'continue':
-    case 'new name':
-      return { text: `Continue${dir && dir !== 'straight' ? ` ${dir}` : ''}${road}`, m };
-    case 'merge':
-    case 'on ramp':
-    case 'off ramp':
-    case 'fork':
-    case 'end of road':
-    case 'turn':
-      if (mod === 'uturn') return { text: `Make a U-turn${road}`, m };
-      return { text: `${dir === 'straight' ? 'Go straight' : `Turn ${dir || 'ahead'}`}${road}`, m };
-    default:
-      return step.name ? { text: `Continue${road}`, m } : null;
-  }
-}

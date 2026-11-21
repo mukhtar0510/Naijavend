@@ -11,6 +11,7 @@ import { apiError, apiOk, internalError } from '@/lib/api';
 import { mintPayToken } from '@/lib/paytoken';
 import { parseCartLines, sanitizeText, isValidPhone } from '@idevtenancy/shared';
 import { isZoneId, zoneLabel, zonesOf } from '@/lib/deliveryZones';
+import { ILORIN_AREAS, inIlorin } from '@/lib/ilorin';
 
 // Idempotency cache keyed by CALLER IP + the client-supplied key — the raw key
 // alone would let anyone replay another buyer's key and receive their orderId.
@@ -42,12 +43,31 @@ export async function POST(req: NextRequest) {
   const deliveryZone = sanitizeText(b.deliveryZone, 40); // landmark id when deliveryMethod = 'zone'
   const paymentMethod = sanitizeText(b.paymentMethod, 24);
   const lines = parseCartLines(b.items);
+  // Delivery details (T05/T08). The pin is optional and only sent when the
+  // buyer drops one at checkout; it must be inside Ilorin.
+  const deliveryArea = sanitizeText(b.deliveryArea, 40);
+  const deliveryAddress = sanitizeText(b.deliveryAddress, 200);
+  const deliveryLandmark = sanitizeText(b.deliveryLandmark, 120);
+  const deliveryNote = sanitizeText(b.note, 300);
+  const pinLat = typeof b.dropLat === 'number' && Number.isFinite(b.dropLat) ? b.dropLat : null;
+  const pinLng = typeof b.dropLng === 'number' && Number.isFinite(b.dropLng) ? b.dropLng : null;
 
   if (deliveryMethod && !['pickup', 'rider', 'courier', 'zone'].includes(deliveryMethod)) {
     return apiError(422, 'invalid_delivery', 'Pick a valid delivery option.');
   }
   if (deliveryMethod === 'zone' && !isZoneId(deliveryZone)) {
     return apiError(422, 'invalid_zone', 'Pick a delivery zone.');
+  }
+
+  const delivering = deliveryMethod === 'rider' || deliveryMethod === 'courier';
+  if (delivering && !ILORIN_AREAS.some((a) => a.id === deliveryArea)) {
+    return apiError(422, 'invalid_area', 'Pick your Ilorin area for delivery. Kwaravend only delivers in Ilorin for now.');
+  }
+  if (delivering && deliveryAddress.length < 4 && deliveryLandmark.length < 4 && pinLat == null) {
+    return apiError(422, 'missing_address', 'Tell the rider where to come: an address, a landmark or a pin on the map.');
+  }
+  if ((pinLat == null) !== (pinLng == null) || (pinLat != null && !inIlorin(pinLat, pinLng!))) {
+    return apiError(422, 'invalid_pin', 'The map pin must be inside Ilorin.');
   }
 
   const PAYMENT_METHODS = ['', 'cash_on_delivery', 'bank_transfer', 'pay_on_pickup', 'other'];
@@ -180,6 +200,26 @@ export async function POST(req: NextRequest) {
     if (deliveryMethod === 'zone') {
       const { error: zoneErr } = await sb.from('orders').update({ delivery_zone: deliveryZone }).eq('id', atomicOrderId);
       if (zoneErr) console.warn('[create-order] delivery_zone not stored:', zoneErr.message);
+    }
+
+    // Where to deliver. Best-effort until the 20261121110000 migration is
+    // applied: a missing column must not cost the buyer their order.
+    if (deliveryMethod && deliveryMethod !== 'pickup') {
+      const { error: dropErr } = await sb
+        .from('orders')
+        .update({
+          delivery_area: delivering ? deliveryArea : '',
+          delivery_address: deliveryAddress,
+          delivery_landmark: deliveryLandmark,
+          drop_lat: pinLat,
+          drop_lng: pinLng,
+        })
+        .eq('id', atomicOrderId);
+      if (dropErr) console.warn('[create-order] delivery details not stored:', dropErr.message);
+    }
+    if (deliveryNote) {
+      const { error: noteErr } = await sb.from('orders').update({ delivery_note: deliveryNote }).eq('id', atomicOrderId);
+      if (noteErr) console.warn('[create-order] note not stored:', noteErr.message);
     }
 
     if (paymentMethod) {

@@ -41,7 +41,7 @@ const SOCIAL_FIELDS: Array<{ key: string; label: string; placeholder: string }> 
 const DELIVERY_METHODS: Array<{ key: string; label: string; hint: string }> = [
   { key: 'pickup', label: 'Pickup', hint: 'Customer collects from your shop' },
   { key: 'rider', label: 'Same-city rider', hint: 'Dispatch within your city' },
-  { key: 'courier', label: 'Nationwide courier', hint: 'GIG, Fez or similar' },
+  { key: 'courier', label: 'Courier', hint: 'GIG, Fez or similar, within Ilorin' },
 ];
 
 function feeNairaInput(kobo: number): string {

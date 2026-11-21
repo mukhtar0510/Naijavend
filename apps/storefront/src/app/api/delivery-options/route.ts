@@ -14,7 +14,7 @@ type DeliveryMethod = (typeof METHODS)[number];
 const METHOD_LABELS: Record<DeliveryMethod, string> = {
   pickup: 'Pickup',
   rider: 'Same-city rider',
-  courier: 'Nationwide courier',
+  courier: 'Courier (GIG, Fez...)',
 };
 
 export async function GET(req: NextRequest) {
