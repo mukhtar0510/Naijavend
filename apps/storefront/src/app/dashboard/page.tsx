@@ -1,5 +1,23 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import {
+  ArrowDownRight,
+  ArrowUpRight,
+  BadgeCheck,
+  CalendarClock,
+  CircleCheck,
+  Eye,
+  ExternalLink,
+  MapPin,
+  Package,
+  Plus,
+  Receipt,
+  Settings,
+  ShoppingBag,
+  Star,
+  Wallet,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { getSellerClient, getOwnStore } from '@/lib/auth';
 import { redirectStaffToPos } from '@/lib/staff';
 import { siteUrl } from '@/lib/site';
@@ -7,9 +25,9 @@ import { Stars } from '@/components/Stars';
 import { VerifyCard } from './VerifyCard';
 import { SetupChecklist } from './SetupChecklist';
 import { StoreQrCode } from '@/components/StoreQrCode';
-import { formatNaira } from '@idevtenancy/shared';
+import { CategoryIcon } from '@/lib/categories';
+import { categoryLabel, formatNaira, isOpenNow, orderRef } from '@idevtenancy/shared';
 import type { Store, StoreRatingStats, StoreTheme } from '@idevtenancy/shared';
-import { Eye as IcEye, MapPin as IcMapPin, Star as IcStar } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +36,44 @@ function one<T>(v: T | T[] | null | undefined): T | null {
   if (v == null) return null;
   return Array.isArray(v) ? (v[0] ?? null) : v;
 }
+
+const DAY = 24 * 60 * 60 * 1000;
+
+function greeting(): string {
+  const h = Number(new Intl.DateTimeFormat('en-GB', { hour: 'numeric', hour12: false, timeZone: 'Africa/Lagos' }).format(new Date()));
+  return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+}
+
+function ago(iso: string): string {
+  const m = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return `${m} min ago`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `${h} h ago`;
+  const d = Math.round(h / 24);
+  return d === 1 ? 'yesterday' : `${d} days ago`;
+}
+
+/** Honest trend: only shown when there is a previous period to compare with. */
+function Trend({ now, prev }: { now: number; prev: number }) {
+  if (prev <= 0) return now > 0 ? <span className="dh-trend is-flat">New this month</span> : null;
+  const pct = Math.round(((now - prev) / prev) * 100);
+  if (pct === 0) return <span className="dh-trend is-flat">Same as last 30 days</span>;
+  const up = pct > 0;
+  return (
+    <span className={`dh-trend ${up ? 'is-up' : 'is-down'}`}>
+      {up ? <ArrowUpRight size={13} aria-hidden /> : <ArrowDownRight size={13} aria-hidden />}
+      {Math.abs(pct)}% vs previous 30 days
+    </span>
+  );
+}
+
+const STATUS: Record<string, { label: string; tone: string; icon: LucideIcon }> = {
+  pending: { label: 'Pending', tone: 'warning', icon: CalendarClock },
+  paid: { label: 'Paid (confirmed)', tone: 'success', icon: CircleCheck },
+  fulfilled: { label: 'Completed', tone: 'success', icon: Package },
+  cancelled: { label: 'Cancelled', tone: 'danger', icon: Receipt },
+};
 
 export default async function DashboardHome({
   searchParams,
@@ -33,13 +89,18 @@ export default async function DashboardHome({
 
   if (!store) {
     return (
-      <main>
-        {searchParams.created && (
-          <div className="alert alert-success">Store created. Finish setup below.</div>
-        )}
-        <h1>Welcome!</h1>
-        <p className="muted">You're signed in but haven't created a store yet.</p>
-        <Link href="/dashboard/onboarding" className="btn btn-primary">Set up my store</Link>
+      <main className="dh">
+        {searchParams.created && <div className="alert alert-success">Store created. Finish setup below.</div>}
+        <section className="dh-empty">
+          <span className="dh-empty-ico" aria-hidden>
+            <ShoppingBag size={28} />
+          </span>
+          <h1>Welcome to Kwaravend</h1>
+          <p className="muted">You&apos;re signed in but haven&apos;t created a store yet. It takes a few minutes and it&apos;s free.</p>
+          <Link href="/dashboard/onboarding" className="btn btn-primary btn-lg">
+            <Plus size={18} aria-hidden /> Set up my store
+          </Link>
+        </section>
       </main>
     );
   }
@@ -51,226 +112,282 @@ export default async function DashboardHome({
   const stats = one(s.store_rating_stats);
   const theme = one(s.store_themes);
   const logo = theme?.logo_url ?? theme?.favicon_url ?? null;
-  const banner = theme?.banner_url ?? theme?.subheader_url ?? null;
 
-  const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-  const [{ count: pendingOrders }, { count: paidOrders }, { count: pendingBookings }, { count: reviewCount }, { count: visitsAll }, { count: visits30 }, salesRes, { count: listingCount }] = await Promise.all([
+  const since30 = new Date(Date.now() - 30 * DAY).toISOString();
+  const since60 = new Date(Date.now() - 60 * DAY).toISOString();
+  const listingIds = (await sb.from('listings').select('id').eq('store_id', s.id)).data?.map((l) => l.id) ?? [];
+
+  const [
+    { count: pendingOrders },
+    { count: awaitingPayment },
+    { count: paidOrders },
+    { count: pendingBookings },
+    { count: visitsAll },
+    { count: visits30 },
+    { count: visitsPrev },
+    sales60,
+    recentRes,
+  ] = await Promise.all([
     sb.from('orders').select('*', { count: 'exact', head: true }).eq('store_id', s.id).eq('status', 'pending'),
-    // All-time money-in orders. Fulfilled orders were paid first, so both count
-    // toward the first-10 milestone.
+    sb.from('orders').select('*', { count: 'exact', head: true }).eq('store_id', s.id).eq('payment_status', 'awaiting_confirmation'),
+    // All-time money-in orders. Fulfilled orders were paid first, so both count toward the first-10 milestone.
     sb.from('orders').select('*', { count: 'exact', head: true }).eq('store_id', s.id).in('status', ['paid', 'fulfilled']),
-    sb.from('bookings').select('*', { count: 'exact', head: true })
-      .in('listing_id', (await sb.from('listings').select('id').eq('store_id', s.id)).data?.map((l) => l.id) ?? [])
-      .eq('status', 'pending'),
-    sb.from('store_ratings').select('*', { count: 'exact', head: true }).eq('store_id', s.id),
+    sb.from('bookings').select('*', { count: 'exact', head: true }).in('listing_id', listingIds).eq('status', 'pending'),
     sb.from('store_events').select('*', { count: 'exact', head: true }).eq('store_id', s.id).eq('event_type', 'view'),
     sb.from('store_events').select('*', { count: 'exact', head: true }).eq('store_id', s.id).eq('event_type', 'view').gte('created_at', since30),
-    sb.from('store_sales_daily').select('revenue_kobo').eq('store_id', s.id).gte('day', since30.slice(0, 10)),
-    sb.from('listings').select('*', { count: 'exact', head: true }).eq('store_id', s.id),
+    sb.from('store_events').select('*', { count: 'exact', head: true }).eq('store_id', s.id).eq('event_type', 'view').gte('created_at', since60).lt('created_at', since30),
+    sb.from('store_sales_daily').select('day, revenue_kobo').eq('store_id', s.id).gte('day', since60.slice(0, 10)),
+    sb
+      .from('orders')
+      .select('id, customer_name, total_kobo, status, payment_status, created_at')
+      .eq('store_id', s.id)
+      .order('created_at', { ascending: false })
+      .limit(5),
   ]);
-  const revenueKobo = (salesRes.data ?? []).reduce((sum, r) => sum + Number(r.revenue_kobo ?? 0), 0);
+
+  const cut = since30.slice(0, 10);
+  let revenue30 = 0;
+  let revenuePrev = 0;
+  for (const r of sales60.data ?? []) {
+    if (String(r.day) >= cut) revenue30 += Number(r.revenue_kobo ?? 0);
+    else revenuePrev += Number(r.revenue_kobo ?? 0);
+  }
   const paidOrderCount = paidOrders ?? 0;
-  const hasFirstTenBadge = paidOrderCount >= 10;
+  const reviewCount = stats?.review_count ?? 0;
+  const avg = stats?.avg_stars != null ? Number(stats.avg_stars) : 0;
+  const open = isOpenNow(s.business_hours);
+  const recent = recentRes.data ?? [];
+
+  const queue: Array<{ label: string; hint: string; count: number; href: string; icon: LucideIcon; tone: string }> = [
+    { label: 'Orders to confirm', hint: 'New orders waiting for you', count: pendingOrders ?? 0, href: '/dashboard/orders', icon: ShoppingBag, tone: 'primary' },
+    { label: 'Payments to check', hint: 'Buyers sent a transfer receipt', count: awaitingPayment ?? 0, href: '/dashboard/orders', icon: Wallet, tone: 'accent' },
+    { label: 'Booking requests', hint: 'Appointments to accept', count: pendingBookings ?? 0, href: '/dashboard/bookings', icon: CalendarClock, tone: 'info' },
+  ];
+  const needsYou = queue.some((q) => q.count > 0);
+
+  const checklist = [
+    { label: 'Store created', done: true, href: `/s/${s.slug}`, cta: 'View' },
+    { label: 'Add your first 3 products', done: listingIds.length >= 3, href: '/dashboard/listings/bulk', cta: 'Bulk add' },
+    { label: 'Add a logo', done: Boolean(logo), href: '/dashboard/settings', cta: 'Add logo' },
+    { label: 'Set your WhatsApp number', done: Boolean(s.whatsapp_number), href: '/dashboard/settings', cta: 'Set number' },
+    {
+      label: 'Get your first order',
+      done: paidOrderCount > 0 || (pendingOrders ?? 0) > 0,
+      href: '/dashboard/settings',
+      cta: 'Share store',
+    },
+  ];
+  const setupDone = checklist.every((c) => c.done);
 
   return (
-    <main>
-      <h1>{s.name}</h1>
-      <p className="dash-sub">
-        Your public page:{' '}
-        <Link href={`/s/${s.slug}`} target="_blank">
-          /s/{s.slug}
-        </Link>
-      </p>
+    <main className="dh">
+      {searchParams.created && <div className="alert alert-success">Store created. Finish setup below.</div>}
 
-      <SetupChecklist
-        steps={[
-          { label: 'Store created', done: true, href: `/s/${s.slug}`, cta: 'View' },
-          {
-            label: 'Add your first 3 products',
-            done: (listingCount ?? 0) >= 3,
-            href: '/dashboard/listings/bulk',
-            cta: 'Bulk add',
-          },
-          { label: 'Add a logo', done: Boolean(logo), href: '/dashboard/settings', cta: 'Add logo' },
-          {
-            label: 'Set your WhatsApp number',
-            done: Boolean(s.whatsapp_number),
-            href: '/dashboard/settings',
-            cta: 'Set number',
-          },
-          {
-            label: 'Get your first order',
-            done: (paidOrderCount ?? 0) > 0 || (pendingOrders ?? 0) > 0,
-            href: '/dashboard/settings',
-            cta: 'Share store',
-          },
-        ]}
-      />
-
-      {/* ——— Section 1: Storefront preview ——— */}
-      <section className="dash-section" aria-labelledby="sec-storefront" style={{ marginTop: 12 }}>
-        <div className="dash-section-head">
-          <h2 id="sec-storefront">Your storefront</h2>
-          <Link className="muted" href="/dashboard/settings">Customise appearance →</Link>
-        </div>
-        {/* Showcase — a miniature of the seller's own website */}
-        <div
-          className="store-showcase tilt-card"
-          style={{ '--showcase-tint': `${theme?.accent_color ?? '#1D4ED8'}22` } as React.CSSProperties}
-        >
-          <div
-            className="store-showcase-banner"
-            style={
-              banner
-                ? { backgroundImage: `url('${banner}')` }
-                : {
-                    background:
-                      'radial-gradient(400px 140px at 80% -30%, color-mix(in srgb, var(--showcase-tint, var(--blue-tint)) 100%, transparent), transparent 70%), var(--elevated)',
-                  }
-            }
-          />
-          <div style={{ padding: '0 24px 24px' }}>
-            <div style={{ display: 'flex', gap: 18, alignItems: 'flex-end', marginTop: -34, flexWrap: 'wrap' }}>
-              {logo ? (
-                // eslint-disable-next-line @next/next/no-img-element -- seller-supplied remote URL
-                <img className="store-showcase-logo" src={logo} alt={`${s.name} logo`} />
-              ) : (
-                <div className="ring-3d" style={{ width: 84, height: 84 }}>
-                  <div
-                    style={{
-                      width: '100%', height: '100%', borderRadius: 'inherit',
-                      display: 'grid', placeItems: 'center',
-                      background: 'var(--surface)',
-                      fontFamily: 'var(--font-heading)', fontSize: 30, fontWeight: 800,
-                      color: theme?.accent_color ?? 'var(--blue)',
-                    }}
-                  >
-                    {s.name.charAt(0).toUpperCase()}
-                  </div>
-                </div>
+      {/* ---------------------------------------------------------- header */}
+      <header className="dh-hero">
+        <div className="dh-hero-id">
+          {logo ? (
+            // eslint-disable-next-line @next/next/no-img-element -- seller-supplied remote URL
+            <img className="dh-logo" src={logo} alt="" />
+          ) : (
+            <span className="dh-logo is-fallback" aria-hidden>
+              {s.name.charAt(0).toUpperCase()}
+            </span>
+          )}
+          <div>
+            <p className="dh-greet">{greeting()}</p>
+            <h1>{s.name}</h1>
+            <div className="dh-chips">
+              <span className={`badge ${open ? 'badge-success' : ''}`}>
+                <span className={`dh-dot${open ? ' is-open' : ''}`} aria-hidden /> {open ? 'Open now' : s.business_hours ? 'Closed now' : 'Hours not set'}
+              </span>
+              <span className="badge">
+                <CategoryIcon category={s.category} size={13} /> {categoryLabel(s.category)}
+              </span>
+              {s.verification_status === 'verified' && (
+                <span className="badge badge-primary">
+                  <BadgeCheck size={13} aria-hidden /> Verified
+                </span>
               )}
-              <div style={{ flex: 1, minWidth: 220, paddingBottom: 4 }}>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                  <h3 style={{ margin: 0, fontSize: 24 }}>{s.name}</h3>
-                  <span className="badge badge-blue">{s.category}</span>
-                  <span className="badge">{s.business_type}</span>
-                  {s.plan === 'growth' && <span className="badge badge-black">Growth</span>}
-                  {hasFirstTenBadge && (
-                    <span
-                      className="achievement-badge"
-                      title={`First 10 paid orders reached — ${paidOrderCount} so far`}
-                    >
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                        <circle cx="12" cy="9" r="6" stroke="currentColor" strokeWidth="2" />
-                        <path d="M8.5 14.2 7 22l5-2.6L17 22l-1.5-7.8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                      First 10 orders
-                    </span>
-                  )}
-                </div>
-                <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginTop: 6 }}>
-                  <Stars value={Number(stats?.avg_stars ?? 0)} />
-                  <span className="muted" style={{ fontSize: 14 }}>
-                    {stats?.review_count ?? 0} review{(stats?.review_count ?? 0) === 1 ? '' : 's'}
-                    {stats?.overall_rank && (stats?.review_count ?? 0) >= 3
-                      ? ` · #${stats.overall_rank} overall · #${stats.category_rank} in ${s.category}`
-                      : ''}
-                  </span>
-                </div>
-                {s.address && (
-                  <p className="muted" style={{ margin: '6px 0 0', fontSize: 14 }}><IcMapPin className="ico-inline" aria-hidden /> {s.address}</p>
-                )}
-              </div>
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', paddingBottom: 4 }}>
-                <Link className="btn btn-primary" href={`/s/${s.slug}`} target="_blank">
-                  View live site ↗
-                </Link>
-              </div>
+              {paidOrderCount >= 10 && (
+                <span className="badge badge-warning" title={`${paidOrderCount} paid orders so far`}>
+                  <Star size={13} aria-hidden /> First 10 orders
+                </span>
+              )}
+              {s.address && (
+                <span className="badge">
+                  <MapPin size={13} aria-hidden /> {s.address}
+                </span>
+              )}
             </div>
           </div>
         </div>
-      </section>
-
-      {/* ——— Section 1b: Share kit — QR for flyers, tags, shop window ——— */}
-      <section className="dash-section" aria-labelledby="sec-qr">
-        <div className="dash-section-head">
-          <h2 id="sec-qr">Share kit</h2>
-          <span className="muted">Your shop, one QR sticker away</span>
+        <div className="dh-actions">
+          <Link className="btn btn-primary" href="/dashboard/listings">
+            <Plus size={17} aria-hidden /> Add product
+          </Link>
+          <Link className="btn btn-outline" href={`/s/${s.slug}`} target="_blank">
+            <ExternalLink size={16} aria-hidden /> View live store
+          </Link>
+          <Link className="btn btn-ghost" href="/dashboard/settings">
+            <Settings size={16} aria-hidden /> Settings
+          </Link>
         </div>
-        <StoreQrCode
-          url={`${siteUrl()}/s/${s.slug}`}
-          storeName={s.name}
-          accent={theme?.accent_color ?? null}
-          logoUrl={logo}
-          variant="card"
-          title="Store QR code"
-        />
-      </section>
+      </header>
 
-      {/* ——— Section 2: Snapshot ——— */}
-      <section className="dash-section" aria-labelledby="sec-snapshot">
-        <div className="dash-section-head">
-          <h2 id="sec-snapshot">Snapshot</h2>
-          <span className="muted">Things that need you first</span>
+      {/* ------------------------------------------------------- needs you */}
+      <section aria-labelledby="dh-queue" className="dh-section">
+        <div className="dh-section-head">
+          <h2 id="dh-queue">Needs you now</h2>
+          {!needsYou && (
+            <span className="badge badge-success">
+              <CircleCheck size={13} aria-hidden /> All caught up
+            </span>
+          )}
         </div>
-        <div className="listing-grid" style={{ margin: 0 }}>
-          <div className="card card-elevated">
-            <p className="muted" style={{ margin: 0, fontSize: 14 }}>Paid in last 30 days</p>
-            <p className="money-value" style={{ fontSize: 32, margin: 0 }}>{formatNaira(revenueKobo)}</p>
-            <Link href="/dashboard/analytics">See analytics →</Link>
-          </div>
-          <div className="card card-elevated">
-            <p className="muted" style={{ margin: 0, fontSize: 14 }}>Pending orders</p>
-            <p style={{ fontSize: 32, margin: 0, fontFamily: 'var(--font-mono)' }}>{pendingOrders ?? 0}</p>
-            <Link href="/dashboard/orders">Manage orders →</Link>
-          </div>
-          <div className="card card-elevated">
-            <p className="muted" style={{ margin: 0, fontSize: 14 }}>Booking requests</p>
-            <p style={{ fontSize: 32, margin: 0, fontFamily: 'var(--font-mono)' }}>{pendingBookings ?? 0}</p>
-            <Link href="/dashboard/bookings">Review bookings →</Link>
-          </div>
-          <div className="card card-elevated">
-            <p className="muted" style={{ margin: 0, fontSize: 14 }}>Your rank</p>
-            {stats && stats.overall_rank ? (
-              <>
-                <p className="mono" style={{ fontSize: 32, margin: 0, color: 'var(--amber)' }}>#{stats.overall_rank}</p>
-                <span className="muted" style={{ fontSize: 14, display: 'block', margin: '2px 0 6px' }}>
-                  #{stats.category_rank} in {s.category}
-                </span>
-              </>
-            ) : (
-              <p className="muted" style={{ fontSize: 14 }}>Get your first review to enter the rankings.</p>
-            )}
-            <Link href="/dashboard/ratings">See reviews →</Link>
-          </div>
-          <div className="card card-elevated">
-            <p className="muted" style={{ margin: 0, fontSize: 14 }}>Total reviews</p>
-            <p style={{ fontSize: 32, margin: 0, fontFamily: 'var(--font-mono)' }}>{reviewCount ?? 0}</p>
-            <Link href={`/s/${s.slug}/rate`}>Share your review link →</Link>
-          </div>
-          <div className="card card-elevated">
-            <p className="muted" style={{ margin: 0, fontSize: 14 }}>Store visits <IcEye className="ico-inline" aria-hidden /></p>
-            <p style={{ fontSize: 32, margin: 0, fontFamily: 'var(--font-mono)' }}>{visitsAll ?? 0}</p>
-            <span className="muted" style={{ fontSize: 13.5, display: 'block', margin: '2px 0 6px' }}>+{visits30 ?? 0} in the last 30 days</span>
-            <Link href="/dashboard/analytics">Full analytics →</Link>
-          </div>
+        <div className="dh-queue">
+          {queue.map((q) => (
+            <Link key={q.label} href={q.href} className={`dh-queue-item tone-${q.tone}${q.count > 0 ? ' has-items' : ''}`}>
+              <span className="dh-queue-ico" aria-hidden>
+                <q.icon size={20} />
+              </span>
+              <span className="dh-queue-body">
+                <strong>{q.label}</strong>
+                <em>{q.hint}</em>
+              </span>
+              <span className="dh-queue-count" aria-label={`${q.count} ${q.label.toLowerCase()}`}>
+                {q.count}
+              </span>
+            </Link>
+          ))}
         </div>
       </section>
 
-      {/* ——— Section 3: Verification ——— */}
-      <section className="dash-section" aria-labelledby="sec-verify">
-        <div className="dash-section-head">
-          <h2 id="sec-verify">Verification</h2>
-          <span className="muted">30+ reviews at 4<IcStar className="ico-inline" aria-hidden /> average earns the blue tick</span>
+      {/* ------------------------------------------------------------ KPIs */}
+      <section aria-labelledby="dh-kpis" className="dh-section">
+        <div className="dh-section-head">
+          <h2 id="dh-kpis">Last 30 days</h2>
+          <Link href="/dashboard/analytics" className="dh-more">
+            Full analytics <ArrowUpRight size={14} aria-hidden />
+          </Link>
         </div>
-        <div className="dash-panel">
-          <VerifyCard
-            reviewCount={stats?.review_count ?? 0}
-            avgStars={stats?.avg_stars != null ? Number(stats.avg_stars) : null}
-            status={(s.verification_status ?? 'unverified') as 'unverified' | 'verified'}
-          />
+        <div className="dh-kpis">
+          <div className="dh-kpi">
+            <span className="dh-kpi-ico tone-green" aria-hidden>
+              <Wallet size={18} />
+            </span>
+            <span className="dh-kpi-label">Paid (confirmed by you)</span>
+            <strong className="dh-kpi-value money-value">{formatNaira(revenue30)}</strong>
+            <Trend now={revenue30} prev={revenuePrev} />
+          </div>
+          <div className="dh-kpi">
+            <span className="dh-kpi-ico tone-primary" aria-hidden>
+              <Eye size={18} />
+            </span>
+            <span className="dh-kpi-label">Store visits</span>
+            <strong className="dh-kpi-value">{visits30 ?? 0}</strong>
+            <Trend now={visits30 ?? 0} prev={visitsPrev ?? 0} />
+            <span className="dh-kpi-foot">{visitsAll ?? 0} all time</span>
+          </div>
+          <div className="dh-kpi">
+            <span className="dh-kpi-ico tone-accent" aria-hidden>
+              <Star size={18} />
+            </span>
+            <span className="dh-kpi-label">Reviews</span>
+            <strong className="dh-kpi-value">{reviewCount > 0 ? avg.toFixed(1) : '—'}</strong>
+            {reviewCount > 0 ? <Stars value={avg} showNumeric={false} /> : null}
+            <span className="dh-kpi-foot">
+              {reviewCount > 0 ? `${reviewCount} review${reviewCount === 1 ? '' : 's'}` : 'No reviews yet'}
+              {stats?.overall_rank && reviewCount >= 3 ? ` · #${stats.overall_rank} overall` : ''}
+            </span>
+          </div>
+          <div className="dh-kpi">
+            <span className="dh-kpi-ico tone-info" aria-hidden>
+              <Receipt size={18} />
+            </span>
+            <span className="dh-kpi-label">Paid orders, all time</span>
+            <strong className="dh-kpi-value">{paidOrderCount}</strong>
+            <span className="dh-kpi-foot">{listingIds.length} listing{listingIds.length === 1 ? '' : 's'} live</span>
+          </div>
         </div>
       </section>
+
+      <div className="dh-grid">
+        {/* ------------------------------------------------- recent orders */}
+        <section aria-labelledby="dh-recent" className="dh-section dh-card">
+          <div className="dh-section-head">
+            <h2 id="dh-recent">Recent orders</h2>
+            <Link href="/dashboard/orders" className="dh-more">
+              All orders <ArrowUpRight size={14} aria-hidden />
+            </Link>
+          </div>
+          {recent.length === 0 ? (
+            <div className="dh-empty-inline">
+              <ShoppingBag size={22} aria-hidden />
+              <p>No orders yet. Share your store link or QR code to get your first one.</p>
+            </div>
+          ) : (
+            <ul className="dh-orders">
+              {recent.map((o) => {
+                const st = o.payment_status === 'awaiting_confirmation' ? { label: 'Check payment', tone: 'warning', icon: Wallet } : STATUS[o.status] ?? STATUS.pending;
+                return (
+                  <li key={o.id}>
+                    <Link href="/dashboard/orders" className="dh-order">
+                      <span className="dh-order-main">
+                        <strong>{o.customer_name}</strong>
+                        <em>
+                          <code>{orderRef(o.id)}</code> · {ago(o.created_at)}
+                        </em>
+                      </span>
+                      <span className={`badge badge-${st.tone}`}>
+                        <st.icon size={12} aria-hidden /> {st.label}
+                      </span>
+                      <span className="dh-order-total">{formatNaira(Number(o.total_kobo))}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+
+        {/* -------------------------------------------------- side column */}
+        <div className="dh-side">
+          {!setupDone && (
+            <section aria-label="Setup checklist" className="dh-card">
+              <SetupChecklist steps={checklist} />
+            </section>
+          )}
+          <section aria-labelledby="dh-share" className="dh-card">
+            <div className="dh-section-head">
+              <h2 id="dh-share">Share kit</h2>
+            </div>
+            <p className="muted dh-link-line">
+              <Link href={`/s/${s.slug}`} target="_blank">
+                {siteUrl().replace(/^https?:\/\//, '')}/s/{s.slug}
+              </Link>
+            </p>
+            <StoreQrCode
+              url={`${siteUrl()}/s/${s.slug}`}
+              storeName={s.name}
+              accent={theme?.accent_color ?? null}
+              logoUrl={logo}
+              variant="card"
+              title="Store QR code"
+            />
+          </section>
+          <section aria-labelledby="dh-verify" className="dh-card">
+            <div className="dh-section-head">
+              <h2 id="dh-verify">Blue tick</h2>
+            </div>
+            <VerifyCard
+              reviewCount={reviewCount}
+              avgStars={stats?.avg_stars != null ? Number(stats.avg_stars) : null}
+              status={(s.verification_status ?? 'unverified') as 'unverified' | 'verified'}
+            />
+          </section>
+        </div>
+      </div>
     </main>
   );
 }
