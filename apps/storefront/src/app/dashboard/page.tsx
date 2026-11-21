@@ -25,9 +25,6 @@ import { Stars } from '@/components/Stars';
 import { VerifyCard } from './VerifyCard';
 import { SetupChecklist } from './SetupChecklist';
 import { StoreQrCode } from '@/components/StoreQrCode';
-import { SitePreview } from '@/components/preview/SitePreview';
-import { inIlorin, nearestArea } from '@/lib/ilorin';
-import '../../styles/site-preview.css';
 import { CategoryIcon } from '@/lib/categories';
 import { categoryLabel, formatNaira, isOpenNow, orderRef } from '@idevtenancy/shared';
 import type { Store, StoreRatingStats, StoreTheme } from '@idevtenancy/shared';
@@ -161,28 +158,6 @@ export default async function DashboardHome({
   const open = isOpenNow(s.business_hours);
   const recent = recentRes.data ?? [];
 
-  // Site preview (same frame as the "/" hero), filled with this store's real data.
-  const { data: newest } = await sb
-    .from('listings')
-    .select('title, price_kobo, image_urls')
-    .eq('store_id', s.id)
-    .order('created_at', { ascending: false })
-    .limit(3);
-  const previewProducts = (newest ?? []).map((l) => ({
-    name: String(l.title),
-    price: formatNaira(Number(l.price_kobo)),
-    image: ((l.image_urls as string[] | null) ?? [])[0] ?? null,
-  }));
-  const nowIso = new Date().toISOString();
-  const announcementLive =
-    Boolean(s.announcement?.trim()) &&
-    (!s.announcement_starts_at || s.announcement_starts_at <= nowIso) &&
-    (!s.announcement_ends_at || s.announcement_ends_at >= nowIso);
-  const previewArea =
-    s.latitude != null && s.longitude != null && inIlorin(Number(s.latitude), Number(s.longitude))
-      ? `${nearestArea(Number(s.latitude), Number(s.longitude)).label}, Ilorin`
-      : s.address?.trim() || null;
-  const storeUrl = `${siteUrl().replace(/^https?:\/\//, '')}/s/${s.slug}`;
 
   const queue: Array<{ label: string; hint: string; count: number; href: string; icon: LucideIcon; tone: string }> = [
     { label: 'Orders to confirm', hint: 'New orders waiting for you', count: pendingOrders ?? 0, href: '/dashboard/orders', icon: ShoppingBag, tone: 'primary' },
@@ -255,72 +230,11 @@ export default async function DashboardHome({
           <Link className="btn btn-outline" href={`/s/${s.slug}`} target="_blank">
             <ExternalLink size={16} aria-hidden /> View live store
           </Link>
-          <Link className="btn btn-ghost" href="/dashboard/settings">
-            <Settings size={16} aria-hidden /> Settings
+          <Link className="btn btn-ghost" href="/dashboard/settings?tab=appearance">
+            <Settings size={16} aria-hidden /> Look &amp; feel
           </Link>
         </div>
       </header>
-
-      {/* ---------------------------------------------------- site preview */}
-      <section aria-labelledby="dh-preview" className="dh-section dh-preview">
-        <div className="dh-section-head">
-          <h2 id="dh-preview">Your store, as buyers see it</h2>
-          <div className="dh-preview-links">
-            <Link href={`/s/${s.slug}`} target="_blank" className="dh-more">
-              Open live store <ExternalLink size={14} aria-hidden />
-            </Link>
-            <Link href="/dashboard/settings" className="dh-more">
-              Edit look <ArrowUpRight size={14} aria-hidden />
-            </Link>
-          </div>
-        </div>
-        <div className="dh-preview-body">
-          <SitePreview
-            label="Your store, live"
-            url={storeUrl}
-            name={s.name}
-            logo={logo}
-            verified={s.verification_status === 'verified'}
-            area={previewArea}
-            hours={s.business_hours}
-            promo={announcementLive ? { title: s.announcement!.trim() } : null}
-            accent={theme?.accent_color ?? null}
-            products={previewProducts}
-            emptyProducts="Add products and they appear here"
-            description={`Preview of your store page, ${s.name}`}
-          />
-          <ul className="dh-preview-tips">
-            {listingIds.length < 3 && (
-              <li>
-                <Link href="/dashboard/listings/bulk">Add {3 - listingIds.length} more product{3 - listingIds.length === 1 ? '' : 's'}</Link> so the
-                page looks full.
-              </li>
-            )}
-            {!logo && (
-              <li>
-                <Link href="/dashboard/settings">Add a logo</Link> to replace the letters.
-              </li>
-            )}
-            {!announcementLive && (
-              <li>
-                <Link href="/dashboard/settings">Add an announcement</Link> to show a banner like &ldquo;Weekend orders open&rdquo;.
-              </li>
-            )}
-            {!s.business_hours && (
-              <li>
-                <Link href="/dashboard/settings">Set your hours</Link> so buyers see &ldquo;Open now&rdquo;.
-              </li>
-            )}
-            <li>
-              Buyers see the real page at{' '}
-              <Link href={`/s/${s.slug}`} target="_blank">
-                {storeUrl}
-              </Link>
-              .
-            </li>
-          </ul>
-        </div>
-      </section>
 
       {/* ------------------------------------------------------- needs you */}
       <section aria-labelledby="dh-queue" className="dh-section">

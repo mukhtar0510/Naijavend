@@ -119,3 +119,135 @@
 @media (max-width: 767px) {
   .kv-has-bottomnav .cookie-banner { bottom: calc(76px + env(safe-area-inset-bottom)); }
 }
+
+/* ---- Header: desktop seller login (hidden where the bar is full) ---- */
+.nv-header-sellerlogin { white-space: nowrap; }
+@media (max-width: 1180px) { .nv-header-sellerlogin { display: none; } }
+
+/* ---- Phone menu: slide-in panel (owner, 21 Nov 2026) ---- */
+.kv-mmenu-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  background: color-mix(in srgb, var(--bg-0) 60%, transparent);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+.kv-mmenu {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: min(100%, 400px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: calc(14px + env(safe-area-inset-top)) 16px calc(20px + env(safe-area-inset-bottom));
+  background: var(--bg-0);
+  border-left: 1px solid var(--border);
+  box-shadow: var(--e5);
+}
+.kv-mmenu-head { display: flex; align-items: center; justify-content: space-between; }
+.kv-mmenu-brand { font: 800 20px/1 var(--font-display); letter-spacing: -0.02em; color: var(--text); }
+.kv-mmenu-brand em { font-style: normal; color: var(--gold); }
+.kv-mmenu-x {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+.kv-mmenu-x:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+.kv-mmenu-accounts { display: grid; gap: 10px; }
+.kv-mmenu-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+}
+.kv-mmenu-card.is-seller {
+  border-color: color-mix(in srgb, var(--gold-fill) 55%, var(--border));
+  background: linear-gradient(160deg, var(--gold-tint), var(--surface) 60%);
+}
+.kv-mmenu-card-ico {
+  grid-row: span 2;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: var(--gold-fill);
+  color: var(--on-gold);
+}
+.kv-mmenu-card-ico.is-buyer { background: var(--primary-tint); color: var(--primary); }
+.kv-mmenu-card-body { display: grid; gap: 2px; }
+.kv-mmenu-card-body strong { color: var(--text); font-size: 15.5px; }
+.kv-mmenu-card-body span { color: var(--text-muted); font-size: 13px; line-height: 1.4; }
+.kv-mmenu-card-actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.kv-mmenu-card-actions .btn { flex: 1 1 auto; justify-content: center; }
+
+.kv-mmenu-links { display: grid; gap: 2px; }
+.kv-mmenu-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 0 12px;
+  border-radius: 12px;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 15.5px;
+  text-decoration: none;
+}
+.kv-mmenu-link svg:first-child { color: var(--text-muted); }
+.kv-mmenu-link:hover { background: var(--surface-raised); text-decoration: none; }
+.kv-mmenu-link.is-active { background: var(--gold-tint); box-shadow: inset 3px 0 0 var(--gold-fill); }
+.kv-mmenu-link.is-active svg:first-child { color: var(--gold); }
+.kv-mmenu-arrow { margin-left: auto; color: var(--text-muted); }
+
+.kv-mmenu-block { display: grid; gap: 10px; }
+.kv-mmenu-title { margin: 0; color: var(--text-muted); font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.kv-mmenu-trades { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.kv-mmenu-trade {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13.5px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.kv-mmenu-trade span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kv-mmenu-all { display: inline-flex; align-items: center; gap: 4px; color: var(--primary); font-weight: 700; font-size: 14px; text-decoration: none; }
+
+.kv-mmenu-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; padding-top: 14px; border-top: 1px solid var(--border); }
+.kv-mmenu-theme {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font: 600 14px/1 var(--font-body);
+  cursor: pointer;
+}
+.kv-mmenu-mail { color: var(--text-muted); font-size: 13px; }
+.kv-mmenu a:focus-visible, .kv-mmenu-theme:focus-visible { outline: none; box-shadow: var(--focus-ring); }

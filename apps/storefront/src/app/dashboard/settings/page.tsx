@@ -11,6 +11,7 @@ import { SettingsTabs } from './SettingsTabs';
 import { ThemeSetting } from '@/components/ThemeSetting';
 import { LocationsCard, type LocationRow } from './LocationsCard';
 import { GalleryCard } from './GalleryCard';
+import { OwnStorePreview } from '@/components/preview/OwnStorePreview';
 import type { Store, StoreSocialLinks, StoreTheme, WhatsAppSettings } from '@idevtenancy/shared';
 
 export const dynamic = 'force-dynamic';
@@ -21,7 +22,9 @@ function one<T>(v: T | T[] | null | undefined): T | null {
   return Array.isArray(v) ? (v[0] ?? null) : v;
 }
 
-export default async function SettingsPage() {
+export default async function SettingsPage({ searchParams }: { searchParams?: { tab?: string } }) {
+  const tab = searchParams?.tab;
+  const initialTab = tab === 'appearance' || tab === 'announcement' ? tab : 'business';
   const sb = await getSellerClient();
   if (!sb) redirect('/dashboard/signin'); // layout redirect races this page — guard here too
   await redirectStaffToPos(sb); // R4: settings are owner-only
@@ -64,6 +67,7 @@ export default async function SettingsPage() {
       <p className="dash-sub">Everything about how your store presents to buyers.</p>
 
       <SettingsTabs
+        initial={initialTab}
         business={
           <section className="dash-section" aria-label="Business basics" style={{ marginTop: 12 }}>
             <div className="dash-section-head">
@@ -113,6 +117,8 @@ export default async function SettingsPage() {
               <h2>Look &amp; feel</h2>
               <span className="muted">Logo, accent colour and template</span>
             </div>
+            {/* The live store preview sits with the controls that change it. */}
+            <OwnStorePreview sb={sb} store={s} theme={theme} />
             {/* App UI theme — separate from the storefront branding below. */}
             <div className="dash-subsection" style={{ marginBottom: 20 }}>
               <h3 style={{ margin: '0 0 4px', fontSize: 15 }}>Your dashboard theme</h3>
