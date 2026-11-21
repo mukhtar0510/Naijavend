@@ -39,7 +39,7 @@ export default async function SignInPage({
           Kwara<span>vend</span>
         </Link>
         <div style={{ position: 'relative' }}>
-          <h2>Sell to Nigeria from your own corner of the web.</h2>
+          <h2>Sell to Ilorin from your own corner of the web.</h2>
           <p className="auth-tagline">Real businesses, real locations, verified reviews — your store site is minutes away.</p>
         </div>
         <ul className="auth-points">
