@@ -2,10 +2,11 @@
    are defined. Components reference these variables, never hex values.
    Documented in docs/DESIGN.md (palette, contrast table, legacy aliases).
 
-   Palette (owner decision, 21 Nov 2026): BLUE is the main colour, with white,
-   green and black. Light theme = white/blue-white surfaces, black text, blue
-   brand, green accent. Dark theme = near-black surfaces, bright blue brand,
-   green accent. Amber is kept only for warnings and rating stars.
+   Palette (owner decision, 21 Nov 2026, revised): WHITE, BLUE and GOLD are the
+   main colours, BLACK in dark mode, with some GREEN. Light theme = white
+   surfaces, near-black text, blue brand, gold accent. Dark theme = black
+   surfaces, bright blue brand, gold accent. Green = success, open now and
+   money in (--success / --naija).
    Every text pair passes WCAG 2.2 AA (4.5:1) — see docs/DESIGN.md before
    changing a value, and re-check the ratios if you do.
 
@@ -28,23 +29,25 @@
   --border-strong: #c3cee3;
   --border-inset: #e8edf7;
 
-  /* ---- Brand: blue main, green accent ---- */
+  /* ---- Brand: blue main, gold accent, green support ---- */
   --primary: #1d4ed8;         /* blue — brand, links, main buttons (6.7:1 on white) */
   --primary-hover: #1e40af;
   --primary-tint: #eaf1fe;
   --primary-tint-2: #dbe7fd;
   --on-primary: #ffffff;
-  --accent: #047857;          /* green — open now, money in, highlights (5.5:1 on white) */
-  --accent-bright: #10b981;   /* decorative only, never small text */
-  --accent-tint: #e6f7ef;
-  --on-accent: #ffffff;
+  --accent: #a16207;          /* gold — highlights, featured, selected (4.9:1 on white) */
+  --accent-bright: #e0a106;   /* decorative only, never small text */
+  --accent-tint: #fdf4df;
+  --on-accent: #ffffff;       /* 4.9:1 */
+  --green: #047857;           /* green — open now, money in (5.5:1 on white) */
+  --green-tint: #e6f7ef;
   --info: #0369a1;            /* sky — neutral info, in transit (5.9:1) */
   --info-tint: #e0f2fe;
-  --star: #b45309;            /* rating stars only */
+  --star: #a16207;            /* rating stars (gold) */
 
   /* ---- Status ---- */
-  --success: #15803d;
-  --success-tint: #e8f6ee;
+  --success: #047857;
+  --success-tint: #e6f7ef;
   --warning: #92400e;
   --warning-tint: #fef3c7;
   --danger: #c62828;
@@ -70,7 +73,7 @@
   --glass-blur: blur(16px) saturate(140%);
 
   /* ---- Gradients (decorative only; never behind light text) ---- */
-  --grad-sun: linear-gradient(135deg, #1d4ed8, #10b981); /* blue → green */
+  --grad-sun: linear-gradient(135deg, #1d4ed8, #e0a106); /* blue → gold */
   --hero-glow: radial-gradient(60% 60% at 50% 0%, rgba(29, 78, 216, 0.1), transparent 70%);
 
   /* ---- Elevation ---- */
@@ -116,13 +119,13 @@
   --blue-soft: var(--primary);
   --blue-tint: var(--primary-tint);
   --blue-tint-2: var(--primary-tint-2);
-  --naija: var(--accent);       /* green */
+  --naija: var(--green);        /* green: money in, open now */
   --naija-deep: #065f46;
-  --naija-bright: var(--accent-bright);
-  --naija-tint: var(--accent-tint);
-  --gold: var(--star);          /* ratings, example tags */
-  --gold-bright: #f59e0b;
-  --gold-tint: var(--warning-tint);
+  --naija-bright: #10b981;
+  --naija-tint: var(--green-tint);
+  --gold: var(--accent);        /* gold: ratings, featured, example tags */
+  --gold-bright: var(--accent-bright);
+  --gold-tint: var(--accent-tint);
   --amber: var(--warning);
   --black: #0a0f1a;
   --ink-2: #1f2937;
@@ -136,7 +139,7 @@
 
 /* ---- Dark theme (default when the system prefers dark) ---- */
 [data-theme='dark'] {
-  /* black surfaces, bright blue brand, green accent */
+  /* black surfaces, bright blue brand, gold accent, green support */
   --bg-0: #05070b;
   --bg-1: #0a0d14;
   --surface: #0a0d14;         /* page / map land */
@@ -156,16 +159,18 @@
   --primary-tint: #0f1d3d;
   --primary-tint-2: #15275a;
   --on-primary: #020817;      /* near-black text on blue (6.2:1) */
-  --accent: #34d399;          /* green (10.1:1) */
-  --accent-bright: #6ee7b7;
-  --accent-tint: #0b2a20;
-  --on-accent: #03140d;
+  --accent: #ffb629;          /* gold (10.9:1 on page) */
+  --accent-bright: #ffc94d;
+  --accent-tint: #2a2210;
+  --on-accent: #140d00;       /* 10.9:1 */
+  --green: #34d399;           /* 9.5:1 */
+  --green-tint: #0b2a20;
   --info: #38bdf8;
   --info-tint: #0c2436;
-  --star: #fbbf24;
+  --star: #ffb629;
 
-  --success: #4ade80;
-  --success-tint: #0f2a1c;
+  --success: #34d399;
+  --success-tint: #0b2a20;
   --warning: #fbbf24;
   --warning-tint: #2a2210;
   --danger: #ff6b6b;
@@ -193,7 +198,7 @@
   --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.55);
 
   --naija-deep: #6ee7b7;
-  --gold-bright: #fbbf24;
+  --naija-bright: #34d399;
   --black: #eef2fa;           /* "black" buttons invert in dark mode */
   --ink-2: #c7d2e6;
 

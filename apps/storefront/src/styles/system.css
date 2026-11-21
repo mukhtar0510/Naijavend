@@ -263,3 +263,146 @@ h2 { font-size: clamp(22px, 2vw + 14px, 30px); letter-spacing: -0.02em; }
 
 /* Lucide icons sitting inline with text (replaced emojis) */
 .ico-inline { display: inline-block; width: 1em; height: 1em; vertical-align: -0.14em; flex: none; }
+
+/* ======================================================= dropdowns & menus
+   One look for every select, dropdown, popover menu and accordion
+   (owner request: buttons AND dropdowns match everywhere). Visual properties
+   only — positions stay with each component's own CSS. */
+
+/* Native <select>: pill field, token-drawn chevron, 44px touch target */
+select:not([multiple]):not([size]) {
+  -webkit-appearance: none;
+  appearance: none;
+  min-height: 44px;
+  padding: 0 40px 0 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  background-color: var(--surface);
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--text-muted) 50%),
+    linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
+  background-position:
+    calc(100% - 20px) 50%,
+    calc(100% - 14px) 50%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  color: var(--text);
+  font: 600 15px/1.2 var(--font-body);
+  cursor: pointer;
+}
+select:not([multiple]):not([size]):hover { border-color: var(--primary); }
+select:not([multiple]):not([size]):focus-visible { border-color: var(--primary); box-shadow: var(--focus-ring); outline: none; }
+select:disabled { opacity: 0.55; cursor: not-allowed; }
+select option { background: var(--surface); color: var(--text); }
+.nv-map-sort select, .fm select { min-height: 36px; border-radius: 999px; font-size: 13px; }
+
+/* Dropdown triggers look like secondary buttons */
+.ob-cat-trigger,
+.lang-dock-toggle,
+.nv-header-burger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font: 650 14px var(--font-body);
+  cursor: pointer;
+  transition: border-color var(--dur-2) var(--ease-standard), color var(--dur-2) var(--ease-standard), transform var(--dur-1) var(--ease-standard);
+}
+.ob-cat-trigger:hover, .lang-dock-toggle:hover, .nv-header-burger:hover { border-color: var(--primary); color: var(--primary); }
+.ob-cat-trigger:active, .lang-dock-toggle:active, .nv-header-burger:active { transform: scale(var(--press-scale)); }
+.ob-cat-trigger[aria-expanded='true'], .lang-dock-toggle[aria-expanded='true'], .nv-header-burger[aria-expanded='true'] {
+  border-color: var(--primary);
+  box-shadow: var(--focus-ring);
+}
+.ob-cat-caret { transition: transform var(--dur-2) var(--ease-standard); }
+[aria-expanded='true'] > .ob-cat-caret { transform: rotate(180deg); }
+
+/* Popover panels */
+.cat-more-panel,
+.ob-cat-panel,
+.lang-dock-menu,
+.nv-mobile-menu,
+.fm-layers {
+  border: 1px solid var(--border) !important;
+  border-radius: 18px !important;
+  background: var(--surface) !important;
+  color: var(--text);
+  box-shadow: var(--shadow-lg) !important;
+  animation: menu-in var(--dur-2) var(--ease-emphasised);
+}
+@keyframes menu-in { from { opacity: 0; transform: translateY(-6px) scale(0.98); } }
+
+/* Menu rows */
+.lang-dock-item,
+.nv-mobile-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text);
+  font: 600 14.5px var(--font-body);
+  text-align: left;
+  text-decoration: none !important;
+  cursor: pointer;
+  transition: background-color var(--dur-2) var(--ease-standard), color var(--dur-2) var(--ease-standard);
+}
+.lang-dock-item:hover, .nv-mobile-link:hover { background: var(--surface-raised); color: var(--primary); }
+.lang-dock-item[aria-current='true'], .lang-dock-item[aria-selected='true'], .lang-dock-item.is-active,
+.nv-mobile-link[aria-current='page'], .nv-mobile-link.is-active {
+  background: var(--primary-tint);
+  color: var(--primary);
+}
+
+/* Accordions (<details> dropdowns: FAQ, steps, filters) */
+details > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  list-style: none;
+  cursor: pointer;
+}
+details > summary::-webkit-details-marker { display: none; }
+details > summary::after {
+  content: '';
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--text-muted);
+  border-bottom: 2px solid var(--text-muted);
+  transform: rotate(45deg) translateY(-2px);
+  transition: transform var(--dur-2) var(--ease-standard), border-color var(--dur-2) var(--ease-standard);
+}
+details[open] > summary::after { transform: rotate(225deg) translateY(-2px); border-color: var(--primary); }
+details > summary:hover::after { border-color: var(--primary); }
+
+@media (prefers-reduced-motion: reduce) {
+  .cat-more-panel, .ob-cat-panel, .lang-dock-menu, .nv-mobile-menu, .fm-layers { animation: none; }
+}
+
+/* Any <button> that still has no class gets the secondary look, so no
+   browser-default grey button can appear anywhere in the app. */
+:where(button:not([class])) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font: 650 14px var(--font-body);
+  cursor: pointer;
+}
+:where(button:not([class])):hover { border-color: var(--primary); color: var(--primary); }
+:where(button:not([class])):active { transform: scale(var(--press-scale)); }

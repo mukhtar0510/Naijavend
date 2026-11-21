@@ -1,9 +1,11 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { ArrowRight, Check, ClipboardList, MapPin, MessageCircle, PackageCheck, Store, Truck } from 'lucide-react';
+import { ArrowRight, Check, ClipboardList, Map as MapIcon, MapPin, MessageCircle, PackageCheck, Store, Truck } from 'lucide-react';
 
 import { BRAND } from '@idevtenancy/shared';
 import { KwaravendLogoMark } from '@/components/KwaravendLogo';
+import { SceneMount, ReduceEffectsMount } from '@/components/landing/SceneMount';
+import { PlanCards } from '@/components/landing/PlanCards';
 
 export const metadata: Metadata = {
   title: { absolute: `${BRAND.name} — storefronts in ${BRAND.launchRegion.city}` },
@@ -99,82 +101,48 @@ export default function LandingPage() {
   return (
     <main className="brand">
       {/* ================================ HERO ================================ */}
-      <section className="brand-hero">
-        <div className="brand-hero-grid" aria-hidden />
-        <div className="relative mx-auto grid w-full max-w-6xl items-center gap-10 px-5 pb-16 pt-12 sm:px-7 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:pb-20 lg:pt-16">
-          <div className="relative z-10">
+      {/* The street scene is decoration (aria-hidden, lazy); every word below is real HTML. */}
+      <section className="lx-hero" aria-labelledby="hero-title">
+        <SceneMount />
+        <div className="lx-hero-inner">
+          <div className="lx-hero-copy">
             <span className="brand-eyebrow">
               <span className="brand-eyebrow-dot" aria-hidden>
                 <MapPin size={11} />
               </span>
               {BRAND.launchRegion.city}, {BRAND.launchRegion.state} State
             </span>
-
-            <h1 className="mb-4 mt-5 font-heading text-[clamp(32px,5.2vw,56px)] font-extrabold leading-[1.08] tracking-[-0.04em] text-foreground">
-              Your business deserves more than a <span className="brand-grad">WhatsApp catalogue.</span>
+            <h1 id="hero-title">
+              Your business deserves more than a <span className="lx-grad">WhatsApp catalogue.</span>
             </h1>
-
-            <p className="brand-hero-lede mb-7">
-              Kwaravend gives {BRAND.launchRegion.city} sellers a real store page buyers can find nearby — with
-              prices, pickup or delivery, and a tracking link. Start free, upgrade when it pays for itself.
+            <p>
+              Create an online store, take orders and deliveries, and let customers near you in{' '}
+              {BRAND.launchRegion.city} find you. Start free, upgrade when it pays for itself.
             </p>
-
-            <div className="flex flex-wrap gap-3">
+            <div className="lx-hero-actions">
               <Link href="/dashboard" className="btn btn-primary btn-lg">
                 Open your store, free <ArrowRight size={17} />
               </Link>
-              <Link href="/discover" className="btn btn-outline btn-lg">
-                Browse stores
+              <Link href="/s/example-fate-cake-studio" className="btn btn-outline btn-lg">
+                See an example store
               </Link>
             </div>
-
-            <div className="brand-trust-cards mt-6">
-              <span className="brand-trust-card">
-                <Check size={14} /> No card to start
+            <div className="lx-trust">
+              <span className="badge badge-success">
+                <Check size={13} /> No card to start
               </span>
-              <span className="brand-trust-card">
-                <Check size={14} /> No commission
+              <span className="badge badge-primary">
+                <Check size={13} /> No commission
               </span>
-              <span className="brand-trust-card">
-                <Check size={14} /> Pickup or delivery
+              <span className="badge badge-warning">
+                <Check size={13} /> Pickup or delivery
               </span>
-            </div>
-          </div>
-
-          <div className="relative z-0">
-            {/* A plain illustrative card, not a screenshot of a live store. */}
-            <div className="rounded-[20px] border border-border bg-card p-5 shadow-[0_26px_60px_-34px_rgba(15,23,42,0.45)]">
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <span className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                  Buyer view
-                </span>
-                <span className="badge badge-blue">Ilorin</span>
-              </div>
-              <h3 className="mb-1 font-heading text-[17px] font-bold tracking-tight text-foreground">
-                What a buyer sees
-              </h3>
-              <p className="mb-4 text-[13.5px] leading-relaxed text-muted-foreground">
-                Your catalogue, your prices, your area — and one button to order or ask on WhatsApp.
-              </p>
-              <div className="grid gap-2">
-                {['Products with prices', 'Pickup or delivery fee', 'Order status link'].map((line) => (
-                  <div
-                    key={line}
-                    className="flex items-center gap-2.5 rounded-[10px] border border-border bg-[var(--elevated)] px-3 py-2 text-[12.5px] font-semibold text-foreground"
-                  >
-                    <Check size={14} style={{ color: 'var(--success)' }} />
-                    {line}
-                  </div>
-                ))}
-              </div>
-              <p className="mt-4 text-[12px] text-muted-foreground">
-                Orders are created on our server, so prices and stock are checked again before anything is
-                confirmed.
-              </p>
             </div>
           </div>
         </div>
-        <div className="brand-hero-fade" aria-hidden />
+        <div className="lx-tools">
+          <ReduceEffectsMount />
+        </div>
       </section>
 
       {/* ============================ HOW IT WORKS =========================== */}
@@ -237,60 +205,33 @@ export default function LandingPage() {
         </section>
       ) : null}
 
+      {/* ======================== FIND STORES NEAR YOU ======================= */}
+      <section className="lx-chapter mx-auto w-full max-w-6xl px-5 py-10 sm:px-7" aria-labelledby="near-title">
+        <div className="lx-map-card">
+          <div>
+            <span className="badge badge-primary">
+              <MapIcon size={13} /> Live map
+            </span>
+            <h2 id="near-title" className="mb-2 mt-3 font-heading text-[clamp(22px,3vw,30px)] font-extrabold tracking-[-0.03em] text-foreground">
+              Find stores near you in {BRAND.launchRegion.city}
+            </h2>
+            <p className="m-0 max-w-[56ch] text-[15px] leading-relaxed text-muted-foreground">
+              Open now, distance from your exact spot, directions and WhatsApp in one tap. Stores marked Example
+              show sample data until real sellers join.
+            </p>
+          </div>
+          <Link href="/map" className="btn btn-primary btn-lg">
+            Open the map <ArrowRight size={17} />
+          </Link>
+        </div>
+      </section>
+
       {/* =============================== PRICING ============================== */}
       <section className="mx-auto w-full max-w-6xl px-5 py-14 sm:px-7 lg:py-16">
         <SectionHead eyebrow={<span className="badge badge-gold">Pricing</span>} title="Monthly plans. No commission.">
           Priced in naira, billed per month, with no cut of your sales. Online billing is not switched on yet.
         </SectionHead>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-[16px] border border-border bg-card p-5">
-            <h3 className="mb-1 font-heading text-[16px] font-bold text-foreground">Free</h3>
-            <p className="mb-1 font-mono text-[26px] font-bold text-foreground">₦0</p>
-            <p className="mb-3 text-[12px] font-semibold text-muted-foreground">forever, no card</p>
-            <ul className="m-0 grid list-none gap-2 p-0 text-[13px] text-muted-foreground">
-              {[
-                'Store page and share link',
-                'Up to 25 listings',
-                'Guest orders and pickup/delivery',
-                'Bank transfer confirmation',
-                'Order tracking link',
-              ].map((item) => (
-                <li key={item} className="flex items-start gap-2">
-                  <Check size={14} className="mt-0.5 shrink-0" style={{ color: 'var(--success)' }} />
-                  {item}
-                </li>
-              ))}
-            </ul>
-            <Link href="/dashboard" className="btn btn-primary mt-5 w-full justify-center">
-              Open your store
-            </Link>
-          </div>
-          <div className="rounded-[16px] border border-border bg-card p-5">
-            <h3 className="mb-1 font-heading text-[16px] font-bold text-foreground">Business</h3>
-            <p className="mb-1 font-mono text-[26px] font-bold text-foreground">₦3,000</p>
-            <p className="mb-2 text-[12px] font-semibold text-muted-foreground">per month · not yet on sale</p>
-            <p className="m-0 text-[13px] leading-relaxed text-muted-foreground">
-              For a shop selling every week: up to 100 listings, staff accounts, deeper analytics. Nothing is charged
-              today.
-            </p>
-          </div>
-          <div className="rounded-[16px] border border-dashed border-border-strong bg-[var(--elevated)] p-5">
-            <h3 className="mb-1 font-heading text-[16px] font-bold text-foreground">Business Plus</h3>
-            <p className="mb-1 font-mono text-[26px] font-bold text-foreground">₦8,000</p>
-            <p className="mb-2 text-[12px] font-semibold text-muted-foreground">per month · not yet on sale</p>
-            <p className="m-0 text-[13px] leading-relaxed text-muted-foreground">
-              Customer CRM, multiple locations and more rider tools. Nothing is charged today.
-            </p>
-          </div>
-          <div className="rounded-[16px] border border-dashed border-border-strong bg-[var(--elevated)] p-5">
-            <h3 className="mb-1 font-heading text-[16px] font-bold text-foreground">Business Pro</h3>
-            <p className="mb-1 font-mono text-[26px] font-bold text-foreground">₦15,000</p>
-            <p className="mb-2 text-[12px] font-semibold text-muted-foreground">per month · not yet on sale</p>
-            <p className="m-0 text-[13px] leading-relaxed text-muted-foreground">
-              Custom domain, unlimited listings and advanced dispatch. Nothing is charged today.
-            </p>
-          </div>
-        </div>
+        <PlanCards />
         <Link href="/pricing" className="btn btn-outline mt-5">
           See the full plan comparison <ArrowRight size={16} />
         </Link>
@@ -337,7 +278,7 @@ export default function LandingPage() {
             </Link>
           </div>
           <p className="mt-5 text-[12px] text-muted-foreground">
-            Made in Nigeria  · free to start · no commission
+            Made in Nigeria · free to start · no commission
           </p>
         </div>
       </section>

@@ -7,14 +7,15 @@ Audit and owner decisions: [DESIGN_AUDIT.md](DESIGN_AUDIT.md).
 
 ## Colour
 
-Owner decision (21 Nov 2026): **blue is the main colour, with white, green and black.**
-(This replaces the earlier emerald/amber blend.)
+Owner decision (21 Nov 2026, revised): **white, blue and gold are the main colours, black in dark mode,
+with some green.** (Replaces the earlier emerald/amber blend.)
 
-- **Brand (`--primary`)**: blue. `#1D4ED8` in light, bright `#4F8CFF` in dark.
-- **Accent (`--accent`)**: green. `#047857` in light, `#34D399` in dark (open now, money in, highlights).
+- **Brand (`--primary`)**: blue. `#1D4ED8` in light, bright `#4F8CFF` in dark — main buttons, links, selection.
+- **Accent (`--accent`)**: gold. `#A16207` in light (4.9:1 on white), `#FFB629` in dark (10.9:1) — highlights, featured plan, ratings, step markers.
+- **Green (`--green`, `--success`)**: `#047857` / `#34D399` — open now, paid, delivered, money in.
 - **Surfaces**: white and blue-white (`#F5F8FF` page, `#FFFFFF` cards) in light; black (`#0A0D14` page, `#11151F` cards, `#1A2030` raised) in dark.
 - **Text**: near-black `#0A0F1A` in light, `#EEF2FA` in dark.
-- **Info** sky `#0369A1` / `#38BDF8`. Amber is kept only for warnings and rating stars (`--star`).
+- **Info** sky `#0369A1` / `#38BDF8`.
 - **Map**: blue-white streets with blue water in light; black-and-navy land with blue roads and water in dark (`MAP_PALETTE` in `lib/mapFactory.ts`). Selected pins ring in blue, open-now pulses green.
 
 Text on brand fills uses `--on-primary` / `--on-accent` (white in light, near-black in dark), never a hard-coded white.
@@ -27,8 +28,9 @@ Text on brand fills uses `--on-primary` / `--on-accent` (white in light, near-bl
 | Muted text on card | 7.5 | 7.4 |
 | Blue (primary) on page / card | 6.3 – 6.7 | 6.0 / 5.7 |
 | Text on blue button | 6.7 | 6.2 |
-| Green (accent) text | 5.5 (on white), 4.9 (on green tint) | 10.1 |
-| Text on green fill | 5.5 | 9.8 |
+| Gold (accent) text | 4.9 (on white), 4.6 (on gold tint) | 10.9 |
+| Text on gold fill | 4.9 (white) | 10.9 (black) |
+| Green text | 5.5 | 9.5 |
 | Info | 5.9 | 8.5 |
 | Success / warning / danger | 5.0 / 5.9 / 5.6 | 10.5 / 10.9 / 6.6 |
 
@@ -60,6 +62,14 @@ semantic names when you touch them; delete the aliases once nothing uses them.
 
 **Open item:** about 344 raw hex values remain in older stylesheets. The "no raw hex outside tokens" lint
 rule will be switched on once they are migrated.
+
+## Dropdowns and menus
+
+One look everywhere (`styles/system.css`): native `<select>` is a pill field with a token-drawn chevron and a
+44px touch target; dropdown triggers (category picker, language, mobile menu) look like secondary buttons; every
+popover panel (category "more", category picker, language menu, mobile menu, map layers) uses the same surface,
+radius, shadow and entry animation, with 44px menu rows; `<details>` accordions get one rotating chevron. Any
+`<button>` without a class falls back to the secondary button look, so no browser-default button can appear.
 
 ## Icons
 
