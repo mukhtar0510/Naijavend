@@ -2,9 +2,10 @@
    are defined. Components reference these variables, never hex values.
    Documented in docs/DESIGN.md (palette, contrast table, legacy aliases).
 
-   Palette: a blend of REDESIGN.md 2.6 (emerald + sun amber, dark-first,
-   green-tinted surfaces) with the original Kwaravend colours (Naija green,
-   gold, blue). Brand = green, accent = gold/amber, info = blue.
+   Palette (owner decision, 21 Nov 2026): BLUE is the main colour, with white,
+   green and black. Light theme = white/blue-white surfaces, black text, blue
+   brand, green accent. Dark theme = near-black surfaces, bright blue brand,
+   green accent. Amber is kept only for warnings and rating stars.
    Every text pair passes WCAG 2.2 AA (4.5:1) — see docs/DESIGN.md before
    changing a value, and re-check the ratios if you do.
 
@@ -12,39 +13,40 @@
    (saved choice, else the system setting). */
 
 :root {
-  /* ---- Surfaces & text (light) ---- */
-  --bg-0: #f4faf7;            /* page background */
+  /* ---- Surfaces & text (light: white + black) ---- */
+  --bg-0: #f5f8ff;            /* page background (blue-white) */
   --bg-1: #ffffff;            /* large panels */
   --surface: #ffffff;         /* cards, sheets */
-  --surface-raised: #eef6f2;  /* popovers, hovered cards */
-  --elevated: #f4faf7;
-  --elevated-1: #eef6f2;
-  --elevated-2: #e6f0eb;
-  --surface-2: #e6f0eb;
-  --text: #0b1f1a;
-  --text-muted: #4a635b;
-  --border: #dbe7e1;
-  --border-strong: #c2d4cb;
-  --border-inset: #e6efea;
+  --surface-raised: #eef3ff;  /* popovers, hovered cards */
+  --elevated: #f5f8ff;
+  --elevated-1: #eef3ff;
+  --elevated-2: #e8effc;
+  --surface-2: #e8effc;
+  --text: #0a0f1a;            /* near-black (18.0:1 on page) */
+  --text-muted: #4b5568;      /* 7.1:1 */
+  --border: #dce3f0;
+  --border-strong: #c3cee3;
+  --border-inset: #e8edf7;
 
-  /* ---- Brand ---- */
-  --primary: #007a4a;         /* Naija green — brand, links, main buttons (5.4:1 on white) */
-  --primary-hover: #00633c;
-  --primary-tint: #e7f6ee;
-  --primary-tint-2: #d3eee0;
+  /* ---- Brand: blue main, green accent ---- */
+  --primary: #1d4ed8;         /* blue — brand, links, main buttons (6.7:1 on white) */
+  --primary-hover: #1e40af;
+  --primary-tint: #eaf1fe;
+  --primary-tint-2: #dbe7fd;
   --on-primary: #ffffff;
-  --accent: #a16207;          /* gold — highlights, open-now, ratings (4.9:1 on white) */
-  --accent-bright: #e0a106;   /* decorative only, never small text */
-  --accent-tint: #fdf4df;
+  --accent: #047857;          /* green — open now, money in, highlights (5.5:1 on white) */
+  --accent-bright: #10b981;   /* decorative only, never small text */
+  --accent-tint: #e6f7ef;
   --on-accent: #ffffff;
-  --info: #1d4ed8;            /* blue — neutral info, in transit (6.7:1) */
-  --info-tint: #eaf1fe;
+  --info: #0369a1;            /* sky — neutral info, in transit (5.9:1) */
+  --info-tint: #e0f2fe;
+  --star: #b45309;            /* rating stars only */
 
   /* ---- Status ---- */
   --success: #15803d;
   --success-tint: #e8f6ee;
-  --warning: #8a5a00;
-  --warning-tint: #fdf4df;
+  --warning: #92400e;
+  --warning-tint: #fef3c7;
   --danger: #c62828;
   --danger-tint: #fdecec;
   --whatsapp: #25d366;
@@ -60,22 +62,22 @@
   --cat-groceries: #4d7c0f;
   --cat-home: #8a5a00;
   --cat-tutors: #c62828;
-  --cat-other: #4a635b;
+  --cat-other: #4b5568;
 
   /* ---- Glass ---- */
   --glass-bg: rgba(255, 255, 255, 0.72);
-  --glass-border: rgba(11, 31, 26, 0.08);
+  --glass-border: rgba(10, 15, 26, 0.08);
   --glass-blur: blur(16px) saturate(140%);
 
   /* ---- Gradients (decorative only; never behind light text) ---- */
-  --grad-sun: linear-gradient(135deg, #2bd9a0, #ffb629);
-  --hero-glow: radial-gradient(60% 60% at 50% 0%, rgba(0, 122, 74, 0.1), transparent 70%);
+  --grad-sun: linear-gradient(135deg, #1d4ed8, #10b981); /* blue → green */
+  --hero-glow: radial-gradient(60% 60% at 50% 0%, rgba(29, 78, 216, 0.1), transparent 70%);
 
   /* ---- Elevation ---- */
-  --shadow-xs: 0 1px 2px rgba(11, 31, 26, 0.05);
-  --shadow-sm: 0 2px 8px rgba(11, 31, 26, 0.07);
-  --shadow-md: 0 8px 24px rgba(11, 31, 26, 0.09);
-  --shadow-lg: 0 16px 48px rgba(11, 31, 26, 0.14);
+  --shadow-xs: 0 1px 2px rgba(10, 15, 26, 0.05);
+  --shadow-sm: 0 2px 8px rgba(10, 15, 26, 0.07);
+  --shadow-md: 0 8px 24px rgba(10, 15, 26, 0.09);
+  --shadow-lg: 0 16px 48px rgba(10, 15, 26, 0.14);
 
   /* ---- Motion ---- */
   --dur-1: 120ms;
@@ -114,16 +116,16 @@
   --blue-soft: var(--primary);
   --blue-tint: var(--primary-tint);
   --blue-tint-2: var(--primary-tint-2);
-  --naija: var(--primary);
-  --naija-deep: var(--primary-hover);
-  --naija-bright: #00a860;
-  --naija-tint: var(--primary-tint);
-  --gold: var(--accent);
-  --gold-bright: var(--accent-bright);
-  --gold-tint: var(--accent-tint);
-  --amber: var(--accent);
-  --black: #0b1f1a;
-  --ink-2: #1d332c;
+  --naija: var(--accent);       /* green */
+  --naija-deep: #065f46;
+  --naija-bright: var(--accent-bright);
+  --naija-tint: var(--accent-tint);
+  --gold: var(--star);          /* ratings, example tags */
+  --gold-bright: #f59e0b;
+  --gold-tint: var(--warning-tint);
+  --amber: var(--warning);
+  --black: #0a0f1a;
+  --ink-2: #1f2937;
   --line: var(--border);
   --muted: var(--text-muted);
   --bg: var(--surface);
@@ -134,36 +136,38 @@
 
 /* ---- Dark theme (default when the system prefers dark) ---- */
 [data-theme='dark'] {
-  --bg-0: #07110f;
-  --bg-1: #0c1a17;
-  --surface: #0c1a17;         /* page / map land */
-  --surface-raised: #17302a;
-  --elevated: #112420;        /* cards, sheets */
-  --elevated-1: #17302a;
-  --elevated-2: #17302a;
-  --surface-2: #112420;
-  --text: #eaf5f1;
-  --text-muted: #9db5ad;
-  --border: #1f3a33;
-  --border-strong: #2d4b43;
-  --border-inset: #17302a;
+  /* black surfaces, bright blue brand, green accent */
+  --bg-0: #05070b;
+  --bg-1: #0a0d14;
+  --surface: #0a0d14;         /* page / map land */
+  --surface-raised: #1a2030;
+  --elevated: #11151f;        /* cards, sheets */
+  --elevated-1: #1a2030;
+  --elevated-2: #1a2030;
+  --surface-2: #11151f;
+  --text: #eef2fa;            /* 17.3:1 */
+  --text-muted: #9aa6bd;      /* 7.4:1 on cards */
+  --border: #1f2636;
+  --border-strong: #2e384d;
+  --border-inset: #1a2030;
 
-  --primary: #2bd9a0;         /* emerald (9.8:1 on page) */
-  --primary-hover: #5be6b6;
-  --primary-tint: #0f3328;
-  --primary-tint-2: #144235;
-  --on-primary: #04130e;      /* dark text on emerald (10.4:1) */
-  --accent: #ffb629;          /* sun amber (10.2:1) */
-  --accent-bright: #ffc247;
-  --accent-tint: #2b2410;
-  --on-accent: #1a1100;
-  --info: #5aa9ff;
-  --info-tint: #13284a;
+  --primary: #4f8cff;         /* bright blue (6.0:1 on page) */
+  --primary-hover: #7aa8ff;
+  --primary-tint: #0f1d3d;
+  --primary-tint-2: #15275a;
+  --on-primary: #020817;      /* near-black text on blue (6.2:1) */
+  --accent: #34d399;          /* green (10.1:1) */
+  --accent-bright: #6ee7b7;
+  --accent-tint: #0b2a20;
+  --on-accent: #03140d;
+  --info: #38bdf8;
+  --info-tint: #0c2436;
+  --star: #fbbf24;
 
-  --success: #3ddc84;
-  --success-tint: #12301f;
-  --warning: #ffc247;
-  --warning-tint: #2b2410;
+  --success: #4ade80;
+  --success-tint: #0f2a1c;
+  --warning: #fbbf24;
+  --warning-tint: #2a2210;
   --danger: #ff6b6b;
   --danger-tint: #381717;
 
@@ -177,20 +181,21 @@
   --cat-groceries: #b6e04a;
   --cat-home: #ffb629;
   --cat-tutors: #ff6b6b;
-  --cat-other: #9db5ad;
+  --cat-other: #9aa6bd;
 
   --glass-bg: rgba(255, 255, 255, 0.06);
   --glass-border: rgba(255, 255, 255, 0.12);
-  --hero-glow: radial-gradient(60% 60% at 50% 0%, rgba(43, 217, 160, 0.18), transparent 70%);
+  --hero-glow: radial-gradient(60% 60% at 50% 0%, rgba(79, 140, 255, 0.2), transparent 70%);
 
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.45);
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
   --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.55);
 
-  --naija-bright: #3ddc84;
-  --black: #eaf5f1;           /* "black" buttons invert in dark mode */
-  --ink-2: #c9ddd5;
+  --naija-deep: #6ee7b7;
+  --gold-bright: #fbbf24;
+  --black: #eef2fa;           /* "black" buttons invert in dark mode */
+  --ink-2: #c7d2e6;
 
   color-scheme: dark;
 }

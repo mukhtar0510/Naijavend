@@ -31,7 +31,7 @@ import {
 } from 'lucide-react';
 import { directionsUrl, formatDistance, haversineKm, isOpenNow, todayHoursLabel } from '@idevtenancy/shared';
 import { useViewerLocation } from '@/lib/useViewerLocation';
-import { applyKwaraStyle, canShow3D, createThemedMap, ll, prefersDarkMap, setBuildings3D, type ThemedMap } from '@/lib/mapFactory';
+import { applyKwaraStyle, canShow3D, circlePolygon, createThemedMap, ll, prefersDarkMap, setBuildings3D, type ThemedMap } from '@/lib/mapFactory';
 import { ILORIN_AREAS, ILORIN_BOUNDS, ILORIN_CENTER, ILORIN_MIN_ZOOM, inIlorin, nearestArea } from '@/lib/ilorin';
 import { CategoryIcon, categoryColor, categoryMeta } from '@/lib/categories';
 import { Chip, SegmentedControl } from '@/components/ui/chip';
@@ -104,7 +104,7 @@ function waLink(num: string, store: string) {
 }
 
 export function FullMap({ stores }: { stores: FullMapStore[] }) {
-  const { origin, label: originLabel, state: locState, locate } = useViewerLocation();
+  const { origin, label: originLabel, state: locState, source: locSource, accuracy, locate } = useViewerLocation({ live: true });
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
   const [query, setQuery] = useState('');
@@ -250,15 +250,20 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
               'heatmap-opacity': 0.75,
               'heatmap-color': [
                 'interpolate', ['linear'], ['heatmap-density'],
-                0, 'rgba(43,217,160,0)',
-                0.25, 'rgba(43,217,160,0.35)',
-                0.6, '#FFB629',
+                0, 'rgba(79,140,255,0)',
+                0.25, 'rgba(79,140,255,0.4)',
+                0.6, '#34D399',
                 1, '#FF6B6B',
               ],
             },
           },
           map.getStyle().layers?.find((l) => l.type === 'symbol')?.id,
         );
+
+        // GPS accuracy ring around the viewer's exact position.
+        map.addSource('nv-accuracy', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+        map.addLayer({ id: 'nv-accuracy-fill', type: 'fill', source: 'nv-accuracy', paint: { 'fill-color': '#4F8CFF', 'fill-opacity': 0.12 } });
+        map.addLayer({ id: 'nv-accuracy-line', type: 'line', source: 'nv-accuracy', paint: { 'line-color': '#4F8CFF', 'line-width': 1.5, 'line-opacity': 0.6 } });
 
         const sync = () => setZoom(Math.round(map.getZoom() * 2) / 2);
         map.on('moveend', sync);
@@ -415,15 +420,30 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
     const map = mapRef.current;
     const lib = libRef.current;
     if (!ready || !map || !lib) return;
-    meRef.current?.remove();
-    meRef.current = null;
-    if (!distOrigin) return;
-    const el = document.createElement('span');
-    el.className = 'map-me-wrap';
-    el.innerHTML = '<span class="map-me"><i></i></span>';
-    el.style.pointerEvents = 'none';
-    meRef.current = new lib.Marker({ element: el, anchor: 'center' }).setLngLat(ll(distOrigin.lat, distOrigin.lng)).addTo(map);
-  }, [ready, distOrigin]);
+    const ring = map.getSource('nv-accuracy') as GeoJSONSource | undefined;
+    if (!distOrigin) {
+      meRef.current?.remove();
+      meRef.current = null;
+      ring?.setData({ type: 'FeatureCollection', features: [] });
+      return;
+    }
+    // Live GPS updates move the same marker instead of re-creating it.
+    if (meRef.current) meRef.current.setLngLat(ll(distOrigin.lat, distOrigin.lng));
+    else {
+      const el = document.createElement('span');
+      el.className = `map-me-wrap${locSource === 'gps' ? ' is-gps' : ''}`;
+      el.innerHTML = '<span class="map-me"><i></i></span>';
+      el.style.pointerEvents = 'none';
+      el.setAttribute('aria-label', locSource === 'gps' ? 'Your exact location' : `Your chosen area: ${originLabel ?? ''}`);
+      meRef.current = new lib.Marker({ element: el, anchor: 'center' }).setLngLat(ll(distOrigin.lat, distOrigin.lng)).addTo(map);
+    }
+    meRef.current.getElement().classList.toggle('is-gps', locSource === 'gps');
+    ring?.setData(
+      locSource === 'gps' && accuracy && accuracy > 5
+        ? circlePolygon(distOrigin.lat, distOrigin.lng, Math.min(accuracy, 2000) / 1000)
+        : { type: 'FeatureCollection', features: [] },
+    );
+  }, [ready, distOrigin, locSource, accuracy, originLabel]);
 
   // ------------------------------------------------------------ controls
   const flyArea = useCallback((lat: number, lng: number, z = 15) => {
@@ -433,14 +453,20 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
     setSelected(null);
     flyArea(ILORIN_CENTER[0], ILORIN_CENTER[1], 13);
   };
+  // Locate me always asks the device for a fresh, high-accuracy fix (a picked
+  // area or an old save is never treated as "you"), then flies close in.
+  const wantFly = useRef(false);
   const locateMe = () => {
-    if (distOrigin) flyArea(distOrigin.lat, distOrigin.lng, 15);
-    else locate();
+    wantFly.current = true;
+    if (locSource === 'gps' && distOrigin) flyArea(distOrigin.lat, distOrigin.lng, 17);
+    locate();
   };
   useEffect(() => {
-    if (locState === 'ready' && distOrigin) flyArea(distOrigin.lat, distOrigin.lng, 15);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- when location arrives
-  }, [locState]);
+    if (locState !== 'ready' || locSource !== 'gps' || !distOrigin || !wantFly.current) return;
+    wantFly.current = false;
+    flyArea(distOrigin.lat, distOrigin.lng, 17);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- first fix after a tap
+  }, [locState, locSource, distOrigin]);
 
   const toggleHeat = () => {
     setHeatOn((v) => {
@@ -772,7 +798,14 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
         )}
         {outside && (
           <p className="fm-note glass" role="status">
-            You&apos;re outside Ilorin, so we&apos;re showing Ilorin. Pick an area below to explore.
+            Your exact location is outside Ilorin, so we&apos;re showing Ilorin. Pick an area below to explore.
+          </p>
+        )}
+        {(locState === 'denied' || locState === 'error') && (
+          <p className="fm-note glass" role="status">
+            {locState === 'denied'
+              ? 'Location is blocked for this site. Allow it in your browser settings to see your exact spot.'
+              : 'Couldn’t get a GPS fix. Move near a window or outdoors and tap Locate me again.'}
           </p>
         )}
       </div>
@@ -834,7 +867,11 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
             {rows.length} store{rows.length === 1 ? '' : 's'} in Ilorin
           </h1>
           <p>
-            {distOrigin ? `Near ${originLabel ?? 'you'}` : 'Tap Locate me for distances'}
+            {distOrigin
+              ? locSource === 'gps'
+                ? `Distances from your exact location${accuracy ? ` (within ${accuracy} m)` : ''}`
+                : `Distances from ${originLabel ?? 'your area'} · tap Locate me for your exact spot`
+              : 'Tap Locate me for distances'}
             {stores.some((s) => s.isExample) ? ' · stores marked Example show sample data' : ''}
           </p>
         </div>

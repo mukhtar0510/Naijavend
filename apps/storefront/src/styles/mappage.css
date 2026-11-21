@@ -11,6 +11,10 @@
 }
 /* Beat maplibre-gl.css's `.maplibregl-map { position: relative }`. */
 .fm .fm-map, .fm .fm-map.maplibregl-map { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
+/* Viewer dot: blue, bigger and pulsing when it's the live GPS position. */
+.fm .map-me-wrap .map-me i { background: var(--primary); }
+.fm .map-me-wrap.is-gps .map-me { width: 20px; height: 20px; }
+.fm .map-me-wrap:not(.is-gps) .map-me::after { animation: none; opacity: 0.25; }
 .fm-map-loading {
   position: absolute;
   inset: 0;
@@ -168,8 +172,8 @@
 .fm-pin.is-selected { z-index: 5; }
 .fm-pin.is-selected .fm-pin-face {
   transform: scale(1.32);
-  border-color: var(--accent);
-  box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 30%, transparent), var(--shadow-lg);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--primary) 32%, transparent), var(--shadow-lg);
 }
 .fm-pin:focus-visible .fm-pin-face { box-shadow: var(--focus-ring), var(--shadow-md); }
 .fm-pin-label {
@@ -284,7 +288,7 @@
 }
 .fm-card:hover { border-color: var(--border-strong); background: var(--surface-raised); }
 .fm-card:active { transform: scale(var(--press-scale)); }
-.fm-card.is-active { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
+.fm-card.is-active { border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent); }
 .fm-card.is-compact { width: 270px; }
 .fm-card-logo {
   --ring: var(--primary);
@@ -307,7 +311,7 @@
 .fm-card-meta { display: flex; align-items: center; gap: 4px; color: var(--text-muted); font-size: 11.5px; font-weight: 650; }
 .fm-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-muted); }
 .fm-dot.is-open { background: var(--success); box-shadow: 0 0 0 3px color-mix(in srgb, var(--success) 25%, transparent); }
-.fm-star { color: var(--accent); fill: currentColor; }
+.fm-star { color: var(--star); fill: currentColor; }
 
 /* detail card */
 .fm-detail-wrap { margin-bottom: 10px; }

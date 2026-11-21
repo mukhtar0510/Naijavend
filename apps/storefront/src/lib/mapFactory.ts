@@ -26,17 +26,18 @@ export type BaseLayerId = 'streets' | 'satellite';
 
 // OpenFreeMap "liberty": free, keyless OpenStreetMap vector tiles. One style
 // for both themes, recoloured on load to the Kwaravend map palette
-// (REDESIGN 2.6 "Map colours") — soft pastel land and water, clear roads.
+// Blue and black (owner decision): a clean blue-white map in light mode, a
+// black-and-navy map with blue roads and water in dark mode.
 const STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
 
 const MAP_PALETTE = {
   light: {
-    land: '#EEF6F2', water: '#BFE3F2', park: '#CFEBD9', building: '#E3ECE7',
-    road: '#FFFFFF', casing: '#D5E4DD', rail: '#C2D4CB', label: '#0B1F1A', halo: '#FFFFFF', waterLabel: '#2F6F8F',
+    land: '#EEF3FB', water: '#B9D3F7', park: '#D4EEDF', building: '#E1E8F4',
+    road: '#FFFFFF', casing: '#C9D5EA', rail: '#B8C6DE', label: '#0A0F1A', halo: '#FFFFFF', waterLabel: '#1E4FAF',
   },
   dark: {
-    land: '#0C1A17', water: '#0F2A3A', park: '#123026', building: '#14281F',
-    road: '#1B3A33', casing: '#0A1512', rail: '#21423A', label: '#EAF5F1', halo: '#0C1A17', waterLabel: '#7FB8D6',
+    land: '#06080F', water: '#0A1E45', park: '#0A1A16', building: '#0F1626',
+    road: '#16264A', casing: '#04060C', rail: '#1C2B4D', label: '#DCE6FA', halo: '#06080F', waterLabel: '#7AA8FF',
   },
 } as const;
 

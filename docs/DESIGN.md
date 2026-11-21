@@ -7,27 +7,30 @@ Audit and owner decisions: [DESIGN_AUDIT.md](DESIGN_AUDIT.md).
 
 ## Colour
 
-The owner asked for a **blend** of REDESIGN.md 2.6 and the original Kwaravend palette:
+Owner decision (21 Nov 2026): **blue is the main colour, with white, green and black.**
+(This replaces the earlier emerald/amber blend.)
 
-- **Brand (`--primary`)**: green. Naija green `#007A4A` in light, emerald `#2BD9A0` in dark.
-- **Accent (`--accent`)**: gold / sun amber. `#A16207` in light, `#FFB629` in dark.
-- **Info (`--info`)**: the original blue. `#1D4ED8` in light, `#5AA9FF` in dark.
-- **Surfaces**: green-tinted. `#F4FAF7` page and white cards in light; near-black green `#0C1A17` / `#112420` / `#17302A` in dark.
+- **Brand (`--primary`)**: blue. `#1D4ED8` in light, bright `#4F8CFF` in dark.
+- **Accent (`--accent`)**: green. `#047857` in light, `#34D399` in dark (open now, money in, highlights).
+- **Surfaces**: white and blue-white (`#F5F8FF` page, `#FFFFFF` cards) in light; black (`#0A0D14` page, `#11151F` cards, `#1A2030` raised) in dark.
+- **Text**: near-black `#0A0F1A` in light, `#EEF2FA` in dark.
+- **Info** sky `#0369A1` / `#38BDF8`. Amber is kept only for warnings and rating stars (`--star`).
+- **Map**: blue-white streets with blue water in light; black-and-navy land with blue roads and water in dark (`MAP_PALETTE` in `lib/mapFactory.ts`). Selected pins ring in blue, open-now pulses green.
 
-Text on brand fills uses `--on-primary` / `--on-accent` (white in light, dark ink in dark), never a hard-coded white.
+Text on brand fills uses `--on-primary` / `--on-accent` (white in light, near-black in dark), never a hard-coded white.
 
 ### Contrast (WCAG 2.2 AA, 4.5:1 for text)
 
 | Pair | Light | Dark |
 | --- | ---: | ---: |
-| Text on page | 16.2 | 16.0 |
-| Muted text on card | 6.5 | 7.4 |
-| Primary on page / card | 5.1 – 5.4 | 9.8 |
-| Text on primary button | 5.4 | 10.4 |
-| Accent text | 4.9 (on white), 4.5 (on accent tint) | 10.2 |
-| Text on accent fill | — | 10.7 |
-| Info | 6.7 | 7.3 |
-| Success / warning / danger | 5.0 / 5.9 / 5.6 | 9.1 / 10.1 / 5.8 |
+| Text on page | 18.0 | 17.3 |
+| Muted text on card | 7.5 | 7.4 |
+| Blue (primary) on page / card | 6.3 – 6.7 | 6.0 / 5.7 |
+| Text on blue button | 6.7 | 6.2 |
+| Green (accent) text | 5.5 (on white), 4.9 (on green tint) | 10.1 |
+| Text on green fill | 5.5 | 9.8 |
+| Info | 5.9 | 8.5 |
+| Success / warning / danger | 5.0 / 5.9 / 5.6 | 10.5 / 10.9 / 6.6 |
 
 Re-check with any WCAG contrast tool if you change a value.
 
