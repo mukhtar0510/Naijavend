@@ -29,7 +29,10 @@ export default function OrderPage() {
   const [payToken, setPayToken] = useState<string | null>(null);
   // Delivery options configured by the seller (pickup / rider / courier).
   const [deliveryOptions, setDeliveryOptions] = useState<Array<{ method: string; label: string; feeKobo: number }>>([]);
+  // Value is a method (pickup/rider/courier) or "zone:<landmarkId>".
   const [deliveryMethod, setDeliveryMethod] = useState('');
+  const [zones, setZones] = useState<Array<{ id: string; label: string; feeKobo: number }>>([]);
+  const zoneId = deliveryMethod.startsWith('zone:') ? deliveryMethod.slice(5) : '';
   // No gateway: the buyer picks how they will pay and the seller confirms it.
   const [paymentMethod, setPaymentMethod] = useState<'cash_on_delivery' | 'bank_transfer' | 'pay_on_pickup'>('cash_on_delivery');
 
@@ -39,9 +42,14 @@ export default function OrderPage() {
       try {
         const res = await fetch(`/api/delivery-options?slug=${encodeURIComponent(slug)}`, { cache: 'no-store' });
         if (!res.ok) return;
-        const json = (await res.json()) as { options: Array<{ method: string; label: string; feeKobo: number }> };
+        const json = (await res.json()) as {
+          options: Array<{ method: string; label: string; feeKobo: number }>;
+          zones?: Array<{ id: string; label: string; feeKobo: number }>;
+        };
         if (!alive) return;
         setDeliveryOptions(json.options);
+        setZones(json.zones ?? []);
+        if (json.options.length === 0 && (json.zones?.length ?? 0) > 0) setDeliveryMethod((m) => m || `zone:${json.zones![0].id}`);
         // Default to the first available option (usually pickup).
         if (json.options.length > 0) setDeliveryMethod((m) => m || json.options[0].method);
       } catch {
@@ -66,7 +74,7 @@ export default function OrderPage() {
         const res = await fetch('/api/validate-promo', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ slug, code: code.trim() }),
+          body: JSON.stringify({ slug, code: code.trim(), zone: zoneId || undefined }),
         });
         const body = await res.json();
         if (body?.valid) setPromoState({ kind: 'valid', percentOff: body.percentOff });
@@ -92,7 +100,8 @@ export default function OrderPage() {
           customerName: name,
           customerPhone: phone,
           promoCode: promo.trim() || undefined,
-          deliveryMethod: deliveryMethod || undefined,
+          deliveryMethod: zoneId ? 'zone' : deliveryMethod || undefined,
+          deliveryZone: zoneId || undefined,
           paymentMethod,
         }),
       });
@@ -167,7 +176,7 @@ export default function OrderPage() {
           />
           <p className="hint">International format, e.g. +2348012345678. Used for this order only.</p>
         </div>
-        {deliveryOptions.length > 0 && (
+        {(deliveryOptions.length > 0 || zones.length > 0) && (
           <div className="field">
             <label>Delivery option</label>
             <div style={{ display: 'grid', gap: 8 }}>
@@ -195,8 +204,40 @@ export default function OrderPage() {
                   <strong style={{ fontSize: 14 }}>{naira(o.feeKobo)}</strong>
                 </label>
               ))}
+              {zones.length > 0 && (
+                <p className="hint" style={{ margin: '6px 0 0', fontWeight: 700 }}>
+                  Delivery to a campus or landmark
+                </p>
+              )}
+              {zones.map((z) => (
+                <label
+                  key={z.id}
+                  className="card"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '10px 12px',
+                    cursor: 'pointer',
+                    borderColor: deliveryMethod === `zone:${z.id}` ? 'var(--blue)' : undefined,
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="delivery"
+                    value={`zone:${z.id}`}
+                    checked={deliveryMethod === `zone:${z.id}`}
+                    onChange={() => setDeliveryMethod(`zone:${z.id}`)}
+                  />
+                  <span style={{ flex: 1, fontSize: 14.5 }}>{z.label}</span>
+                  <strong style={{ fontSize: 14 }}>{naira(z.feeKobo)}</strong>
+                </label>
+              ))}
             </div>
-            <p className="hint">Fee is set by the store and added to your total before payment.</p>
+            <p className="hint">
+              Fee is set by the store and added to your total before payment. Some discount codes only work for one
+              delivery zone.
+            </p>
           </div>
         )}
         <div className="field">

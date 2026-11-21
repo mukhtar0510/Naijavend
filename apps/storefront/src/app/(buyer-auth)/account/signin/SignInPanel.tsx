@@ -6,6 +6,7 @@ import { ArrowLeft, BadgeCheck, Heart, Package, ShieldCheck, Sparkles, Zap } fro
 import { GoogleSignInButton } from '@/components/GoogleSignInButton';
 import { InAppBrowserWarning } from '@/components/InAppBrowserWarning';
 import { RefCapture } from '@/components/RefCapture';
+import { EmailPasswordForm } from '@/components/auth/EmailPasswordForm';
 
 export type AuthMode = 'signin' | 'create';
 
@@ -57,8 +58,8 @@ export function SignInPanel({ next, initialMode }: { next: string; initialMode: 
         <h1>{mode === 'signin' ? 'Welcome back to Kwaravend' : 'Create your free Kwaravend account'}</h1>
         <p>
           {mode === 'signin'
-            ? 'One tap and you are in. No password to forget, no forms to fill.'
-            : 'Shop from verified Nigerian stores, track every order and keep your favourites everywhere.'}
+            ? 'One tap with Google, or sign in with your email and password.'
+            : 'Shop from Ilorin stores, track every order and keep your favourites everywhere.'}
         </p>
       </div>
 
@@ -81,15 +82,18 @@ export function SignInPanel({ next, initialMode }: { next: string; initialMode: 
         label={mode === 'create' ? 'Create account with Google' : 'Continue with Google'}
       />
 
+      <div className="auth-divider-or">or use your email</div>
+      <EmailPasswordForm role="customer" />
+
       <p className="nv-auth-note">
         {mode === 'create'
-          ? 'Your account is created automatically the first time you continue with Google.'
-          : 'New here? Switch to “Create account” — it takes the same five seconds.'}
+          ? 'Your account is created the first time you continue with Google, or with your email and a password.'
+          : 'New here? Use “Create account” with Google or with your email.'}
       </p>
 
       <div className="nv-auth-trust">
         <span>
-          <ShieldCheck size={14} aria-hidden /> Secure by Google
+          <ShieldCheck size={14} aria-hidden /> Secure sign-in
         </span>
         <span>
           <Zap size={14} aria-hidden /> Takes 5 seconds

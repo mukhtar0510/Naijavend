@@ -2,10 +2,11 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { ArrowRight, Check, ClipboardList, Map as MapIcon, MapPin, MessageCircle, PackageCheck, Store, Truck } from 'lucide-react';
 
-import { BRAND } from '@idevtenancy/shared';
+import { BRAND, STARTER_TEMPLATE_COUNT } from '@idevtenancy/shared';
 import { KwaravendLogoMark } from '@/components/KwaravendLogo';
 import { SceneMount, ReduceEffectsMount } from '@/components/landing/SceneMount';
 import { PlanCards } from '@/components/landing/PlanCards';
+import { StoreDesigner } from '@/components/brand/StoreDesigner';
 
 export const metadata: Metadata = {
   title: { absolute: `${BRAND.name} — storefronts in ${BRAND.launchRegion.city}` },
@@ -204,6 +205,29 @@ export default function LandingPage() {
           </div>
         </section>
       ) : null}
+
+      {/* ======================== STOREFRONT DESIGNER ====================== */}
+      {/* Sample designer (illustrative only: never reads or writes a real store). */}
+      <section className="lx-chapter mx-auto w-full max-w-6xl px-5 py-12 sm:px-7" id="designer" aria-labelledby="designer-title">
+        <div className="sdg-band">
+          <div className="nv-section-head sdg-band-head">
+            <div>
+              <span className="badge badge-warning">Storefront designer</span>
+              <h2 id="designer-title" className="mb-2 mt-3 font-heading text-[clamp(22px,3vw,30px)] font-extrabold tracking-[-0.03em] text-foreground">
+                Preview your store page and pick a template
+              </h2>
+              <p className="m-0 max-w-[60ch] text-[15px] leading-relaxed text-muted-foreground">
+                Every plan starts with {STARTER_TEMPLATE_COUNT} templates. Type a vibe and the AI theme designer drafts
+                the colours, fonts and layout. This is a sample: open your free store to save a design.
+              </p>
+            </div>
+            <Link href="/dashboard" className="btn btn-primary">
+              Design my store <ArrowRight size={16} />
+            </Link>
+          </div>
+          <StoreDesigner />
+        </div>
+      </section>
 
       {/* ======================== FIND STORES NEAR YOU ======================= */}
       <section className="lx-chapter mx-auto w-full max-w-6xl px-5 py-10 sm:px-7" aria-labelledby="near-title">

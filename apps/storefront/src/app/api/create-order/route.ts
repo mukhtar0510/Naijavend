@@ -10,6 +10,7 @@ import { rateLimit, clientIp } from '@/lib/ratelimit';
 import { apiError, apiOk, internalError } from '@/lib/api';
 import { mintPayToken } from '@/lib/paytoken';
 import { parseCartLines, sanitizeText, isValidPhone } from '@idevtenancy/shared';
+import { isZoneId, zoneLabel, zonesOf } from '@/lib/deliveryZones';
 
 // Idempotency cache keyed by CALLER IP + the client-supplied key — the raw key
 // alone would let anyone replay another buyer's key and receive their orderId.
@@ -37,12 +38,16 @@ export async function POST(req: NextRequest) {
   const customerName = sanitizeText(b.customerName, 120);
   const customerPhone = sanitizeText(b.customerPhone, 16);
   const promoInput = sanitizeText(b.promoCode, 40).toUpperCase();
-  const deliveryMethod = sanitizeText(b.deliveryMethod, 20); // '', pickup, rider or courier
+  const deliveryMethod = sanitizeText(b.deliveryMethod, 20); // '', pickup, rider, courier or zone
+  const deliveryZone = sanitizeText(b.deliveryZone, 40); // landmark id when deliveryMethod = 'zone'
   const paymentMethod = sanitizeText(b.paymentMethod, 24);
   const lines = parseCartLines(b.items);
 
-  if (deliveryMethod && !['pickup', 'rider', 'courier'].includes(deliveryMethod)) {
+  if (deliveryMethod && !['pickup', 'rider', 'courier', 'zone'].includes(deliveryMethod)) {
     return apiError(422, 'invalid_delivery', 'Pick a valid delivery option.');
+  }
+  if (deliveryMethod === 'zone' && !isZoneId(deliveryZone)) {
+    return apiError(422, 'invalid_zone', 'Pick a delivery zone.');
   }
 
   const PAYMENT_METHODS = ['', 'cash_on_delivery', 'bank_transfer', 'pay_on_pickup', 'other'];
@@ -106,20 +111,30 @@ export async function POST(req: NextRequest) {
     if (promoInput) {
       const { data: promo } = await sb
         .from('discount_codes')
-        .select('code, percent_off, active, usage_count, max_uses')
+        .select('code, percent_off, active, usage_count, max_uses, zone_id')
         .eq('store_id', store.id)
         .eq('code', promoInput)
         .maybeSingle();
-      const p = promo as { code: string; percent_off: number; active: boolean; usage_count: number; max_uses: number | null } | null;
+      const p = promo as { code: string; percent_off: number; active: boolean; usage_count: number; max_uses: number | null; zone_id?: string | null } | null;
       if (!p || !p.active || (p.max_uses != null && p.usage_count >= p.max_uses)) {
         return apiError(422, 'invalid_promo', 'That discount code is not valid for this store.');
+      }
+      // Zone-limited code (e.g. UNILORIN10): only for delivery to that landmark.
+      if (p.zone_id && (deliveryMethod !== 'zone' || deliveryZone !== p.zone_id)) {
+        return apiError(422, 'promo_zone', `That code only works for delivery to ${zoneLabel(p.zone_id) || 'its zone'}.`);
       }
       discountKobo = Math.round((grossKobo * p.percent_off) / 100);
       appliedCode = p.code;
     }
     // Delivery: fee comes from the store's own options — never from the client.
     let deliveryFeeKobo = 0;
-    if (deliveryMethod) {
+    if (deliveryMethod === 'zone') {
+      const zone = zonesOf(store.delivery_options)[deliveryZone];
+      if (!zone?.enabled) {
+        return apiError(422, 'invalid_zone', 'This store does not deliver to that zone.');
+      }
+      deliveryFeeKobo = zone.fee_kobo;
+    } else if (deliveryMethod) {
       const opts = store.delivery_options as Record<string, { enabled?: boolean; fee_kobo?: number }> | null;
       const opt = opts?.[deliveryMethod];
       if (!opt?.enabled) {
@@ -162,6 +177,11 @@ export async function POST(req: NextRequest) {
     // Record how the buyer intends to pay. Best-effort until the T04 migration
     // (payment_method column) has been applied — a missing column must not cost
     // the buyer their order.
+    if (deliveryMethod === 'zone') {
+      const { error: zoneErr } = await sb.from('orders').update({ delivery_zone: deliveryZone }).eq('id', atomicOrderId);
+      if (zoneErr) console.warn('[create-order] delivery_zone not stored:', zoneErr.message);
+    }
+
     if (paymentMethod) {
       const { error: payMethodErr } = await sb
         .from('orders')

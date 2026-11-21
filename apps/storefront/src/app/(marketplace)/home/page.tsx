@@ -5,14 +5,12 @@ import {
   BadgeCheck,
   MapPin,
   MessageCircle,
-  Palette,
   ShieldCheck,
   Sparkles,
   Star,
   Store as StoreIcon,
-  Wand2,
 } from 'lucide-react';
-import { BRAND, STARTER_TEMPLATE_COUNT } from '@idevtenancy/shared';
+import { BRAND } from '@idevtenancy/shared';
 import { supabaseAnon } from '@/lib/supabase';
 import { categoryClass, categoryLabel, isOpenNow, STORE_CATEGORIES } from '@idevtenancy/shared';
 import { Stars } from '@/components/Stars';
@@ -23,7 +21,6 @@ import { ProductCard, type ProductCardItem } from '@/components/ProductCard';
 import { RecentlyViewed } from '@/components/RecentlyViewed';
 import { HeroSearch } from '@/components/HeroSearch';
 import { Reveal, Stagger, StaggerItem } from '@/components/brand/Motion';
-import { StoreDesigner } from '@/components/brand/StoreDesigner';
 import type { Store, StoreRatingStats, StoreTheme } from '@idevtenancy/shared';
 import { LISTED_EXAMPLE_VALUES } from '@/lib/flags';
 import { CategoryIcon } from '@/lib/categories';
@@ -503,28 +500,6 @@ export default async function HomePage() {
           </section>
         )}
 
-        {/* ========================= STORE DESIGNER ========================= */}
-        <section className="nv-section" id="designer" aria-labelledby="nv-designer-title">
-          <div className="sdg-band">
-            <div className="nv-section-head sdg-band-head">
-              <div>
-                <span className="sdg-eyebrow">
-                  <Palette size={13} aria-hidden /> Storefront designer
-                </span>
-                <h2 id="nv-designer-title">Preview your page and pick a template</h2>
-                <p>
-                  Every plan starts with {STARTER_TEMPLATE_COUNT} templates. Type a vibe and the AI
-                  theme designer drafts the colours, fonts and layout — then open your free store
-                  to save it.
-                </p>
-              </div>
-              <Link href="/dashboard" className="btn btn-primary">
-                <Wand2 size={16} aria-hidden /> Design my store
-              </Link>
-            </div>
-            <StoreDesigner />
-          </div>
-        </section>
       </div>
 
       {/* ================================ MAP BAND ============================ */}

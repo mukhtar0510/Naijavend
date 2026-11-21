@@ -4,6 +4,7 @@ import { BackToMarket } from '@/components/BackToMarket';
 
 import Link from 'next/link';
 import { Bot as IcBot, Lock as IcLock, MessageCircle as IcMessageCircle, Store as IcStore, TrendingUp as IcTrendingUp, Zap as IcZap } from 'lucide-react';
+import { EmailPasswordForm } from '@/components/auth/EmailPasswordForm';
 
 const POINTS = [
   { ico: <IcStore className="ico-inline" aria-hidden />, text: 'Your own store website at /s/your-name — styled your way.' },
@@ -56,20 +57,21 @@ export default async function SignInPage({
         <div className="card auth-card google-only">
           <h1>Seller sign in</h1>
           <p className="auth-sub">
-            Your store, orders and analytics — one Google account, zero passwords.
+            Your store, orders and analytics. Sign in with Google or with your email and password.
           </p>
 
           <InAppBrowserWarning />
           <GoogleSignInButton next={next} label="Continue with Google" />
 
-          <div className="auth-divider-or">or</div>
+          <div className="auth-divider-or">or use your email</div>
+          <EmailPasswordForm role="seller" />
           <p className="auth-switch" style={{ marginTop: 0 }}>
-            First time? Google creates your seller account automatically.
+            First time? Google or "Create account" sets up your seller account.
           </p>
 
           <div className="auth-trust">
             <span><IcStore className="ico-inline" aria-hidden /> Free to start</span>
-            <span><IcLock className="ico-inline" aria-hidden /> Secure by Google</span>
+            <span><IcLock className="ico-inline" aria-hidden /> Secure sign-in</span>
             <span><IcZap className="ico-inline" aria-hidden /> 5-second setup</span>
           </div>
 

@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server';
 import { getSellerClient, getOwnStore } from '@/lib/auth';
 import { apiError, apiOk, internalError } from '@/lib/api';
 import { sanitizeText } from '@idevtenancy/shared';
+import { isZoneId } from '@/lib/deliveryZones';
 
 export async function GET() {
   const sb = await getSellerClient();
@@ -13,7 +14,7 @@ export async function GET() {
   try {
     const { data, error } = await sb
       .from('discount_codes')
-      .select('id, code, percent_off, active, usage_count, max_uses, created_at')
+      .select('id, code, percent_off, active, usage_count, max_uses, zone_id, created_at')
       .eq('store_id', (store as { id: string }).id)
       .order('created_at', { ascending: false });
     if (error) throw error;
@@ -40,6 +41,9 @@ export async function POST(req: NextRequest) {
   const code = sanitizeText(b.code, 40).toUpperCase().replace(/[^A-Z0-9_-]/g, '');
   const percentOff = Math.round(Number(b.percentOff));
   const maxUses = b.maxUses == null || b.maxUses === '' ? null : Math.round(Number(b.maxUses));
+  // Optional: limit the code to one landmark delivery zone (e.g. unilorin).
+  const zoneId = b.zoneId == null || b.zoneId === '' ? null : String(b.zoneId);
+  if (zoneId !== null && !isZoneId(zoneId)) return apiError(422, 'invalid_zone', 'Pick a valid delivery zone.');
 
   if (code.length < 3) return apiError(422, 'invalid_code', 'Codes need at least 3 letters, numbers or dashes.');
   if (!Number.isFinite(percentOff) || percentOff < 1 || percentOff > 90) {
@@ -50,7 +54,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { error } = await sb.from('discount_codes').insert({ store_id: storeId, code, percent_off: percentOff, max_uses: maxUses });
+    const { error } = await sb.from('discount_codes').insert({ store_id: storeId, code, percent_off: percentOff, max_uses: maxUses, zone_id: zoneId });
     if (error) {
       if (String(error.message).includes('duplicate key')) {
         return apiError(409, 'code_exists', 'You already have a code with that name.');

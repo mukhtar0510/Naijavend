@@ -27,8 +27,29 @@ export default function OAuthCallbackPage() {
     const next = decodeNext(search.get('next'));
     const role = next.startsWith('/dashboard') ? 'seller' : 'customer';
 
+    // Email confirmation links (password sign-up) arrive with the session in
+    // the URL hash instead of a PKCE code. Verify it on the server like OAuth.
     if (!code) {
-      setError('No sign-in code came back from Google. Please try again.');
+      const hash = new URLSearchParams(window.location.hash.slice(1));
+      const accessToken = hash.get('access_token');
+      const refreshToken = hash.get('refresh_token');
+      if (!accessToken || !refreshToken) {
+        setError('No sign-in code came back. Please try again.');
+        return;
+      }
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      void fetch('/api/auth/oauth-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accessToken, refreshToken, role }),
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error('session_save_failed');
+          purgeSupabaseBrowserState();
+          router.replace(next);
+          router.refresh();
+        })
+        .catch(() => setError('We could not confirm your email sign-in. Please sign in with your email and password.'));
       return;
     }
 

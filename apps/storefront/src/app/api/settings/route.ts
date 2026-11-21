@@ -5,6 +5,7 @@ import { getSellerClient, getOwnStore } from '@/lib/auth';
 import { revalidateStore } from '@/lib/revalidate';
 import { apiError, apiOk, internalError } from '@/lib/api';
 import { sanitizeText, isValidPhone, isValidHexColor, isStoreCategory, categoryLabel, isStoreFont, isStoreLayout, LISTING_STYLES, HOVER_ANIMS, isBackgroundGradient, BACKGROUND_IMAGE_STYLES, BACKGROUND_OVERLAYS, CONTENT_WIDTHS } from '@idevtenancy/shared';
+import { zonesOf } from '@/lib/deliveryZones';
 
 const HEX = /^#[0-9a-fA-F]{6}$/;
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -47,11 +48,14 @@ function safeHours(v: unknown): Record<string, [string, string]> | undefined {
 
 // Structured delivery options ({pickup|rider|courier: {enabled, fee_kobo}}).
 // Only known methods survive; fees clamp to 0..100,000,000 kobo (₦1m). null clears.
-function safeDeliveryOptions(v: unknown): Record<string, { enabled: boolean; fee_kobo: number }> | null {
+function safeDeliveryOptions(v: unknown): Record<string, unknown> | null {
   if (v === null) return null;
   if (typeof v !== 'object') return null;
   const raw = v as Record<string, unknown>;
-  const out: Record<string, { enabled: boolean; fee_kobo: number }> = {};
+  const out: Record<string, unknown> = {};
+  // Landmark delivery zones: only known zone ids, fees clamped (lib/deliveryZones).
+  const zones = zonesOf(raw);
+  if (Object.keys(zones).length) out.zones = zones;
   for (const method of ['pickup', 'rider', 'courier']) {
     const opt = raw[method];
     if (opt == null || typeof opt !== 'object') continue;

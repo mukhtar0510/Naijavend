@@ -41,7 +41,7 @@ export default async function ListingsPage({ searchParams }: { searchParams: Pro
   }
 
   const { data: listings } = await sb.from('listings').select('*').eq('store_id', (store as Store).id).order('created_at', { ascending: false });
-  const { data: promoRows } = await sb.from('discount_codes').select('id, code, percent_off, active, usage_count, max_uses').eq('store_id', (store as Store).id).order('created_at', { ascending: false });
+  const { data: promoRows } = await sb.from('discount_codes').select('id, code, percent_off, active, usage_count, max_uses, zone_id').eq('store_id', (store as Store).id).order('created_at', { ascending: false });
 
   return (
     <main>

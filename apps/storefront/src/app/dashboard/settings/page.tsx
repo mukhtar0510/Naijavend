@@ -171,6 +171,7 @@ export default async function SettingsPage() {
                 initialLogoUrl={theme?.logo_url ?? null}
                 initialAccent={theme?.accent_color ?? '#1D4ED8'}
                 initialLayout={theme?.layout ?? 'modern'}
+                initialButtonShape={(theme?.button_shape as 'pill' | 'rounded' | 'square' | undefined) ?? 'rounded'}
               />
             )}
           </section>

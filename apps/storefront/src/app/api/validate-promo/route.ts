@@ -8,6 +8,7 @@ import { supabaseService } from '@/lib/supabase';
 import { rateLimit, clientIp } from '@/lib/ratelimit';
 import { apiError, apiOk, internalError } from '@/lib/api';
 import { sanitizeText } from '@idevtenancy/shared';
+import { zoneLabel } from '@/lib/deliveryZones';
 
 export async function POST(req: NextRequest) {
   const rl = rateLimit(`validate-promo:${clientIp(req)}`, 20, 60_000);
@@ -24,6 +25,7 @@ export async function POST(req: NextRequest) {
   const b = body as Record<string, unknown>;
   const slug = sanitizeText(b.slug, 80);
   const code = sanitizeText(b.code, 40).toUpperCase();
+  const zone = sanitizeText(b.zone, 40); // chosen delivery zone, if any
 
   if (!slug || !code) return apiError(400, 'missing_fields', 'Store and code are required.');
 
@@ -35,18 +37,26 @@ export async function POST(req: NextRequest) {
 
     const { data: promo } = await sb
       .from('discount_codes')
-      .select('code, percent_off, active, usage_count, max_uses')
+      .select('code, percent_off, active, usage_count, max_uses, zone_id')
       .eq('store_id', store.id)
       .eq('code', code)
       .maybeSingle();
 
-    const p = promo as { code: string; percent_off: number; active: boolean; usage_count: number; max_uses: number | null } | null;
+    const p = promo as { code: string; percent_off: number; active: boolean; usage_count: number; max_uses: number | null; zone_id?: string | null } | null;
     if (!p || !p.active || (p.max_uses != null && p.usage_count >= p.max_uses)) {
       // Same message for "doesn't exist" and "exhausted" — don't leak which.
       return apiOk({ valid: false, message: 'That code is not valid for this store.' });
     }
 
-    return apiOk({ valid: true, percentOff: p.percent_off });
+    // Zone-limited codes mirror create-order: only for delivery to that landmark.
+    if (p.zone_id && zone !== p.zone_id) {
+      return apiOk({
+        valid: false,
+        zoneId: p.zone_id,
+        message: `This code only works for delivery to ${zoneLabel(p.zone_id) || 'its zone'}. Pick that delivery zone first.`,
+      });
+    }
+    return apiOk({ valid: true, percentOff: p.percent_off, zoneId: p.zone_id ?? null });
   } catch (err) {
     return internalError('validate-promo', err);
   }

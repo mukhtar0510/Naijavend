@@ -7,6 +7,7 @@ import { CategoryPicker } from '@/components/CategoryPicker';
 import { FEATURES } from '@/lib/flags';
 import { BUSINESS_DAYS, categoryLabel, type BusinessHours } from '@idevtenancy/shared';
 import { CategoryIcon } from '@/lib/categories';
+import { ZONE_LANDMARKS, zonesOf } from '@/lib/deliveryZones';
 
 interface StoreSettings {
   name: string;
@@ -20,7 +21,7 @@ interface StoreSettings {
   business_hours: BusinessHours | null;
   announcement: string | null;
   delivery_info: string | null;
-  delivery_options: Record<string, { enabled: boolean; fee_kobo: number }> | null;
+  delivery_options: (Record<string, { enabled: boolean; fee_kobo: number }> & { zones?: Record<string, { enabled: boolean; fee_kobo: number }> }) | null;
   is_dropshipper: boolean;
   dropship_info: string | null;
 }
@@ -75,6 +76,13 @@ export function SettingsForm({ store, whatsapp }: { store: StoreSettings; whatsa
     }
     return out;
   });
+  // Campus / landmark delivery zones (fee in naira while editing).
+  const [zones, setZones] = useState<Record<string, { enabled: boolean; feeNaira: string }>>(() => {
+    const saved = zonesOf(store.delivery_options);
+    return Object.fromEntries(
+      ZONE_LANDMARKS.map((l) => [l.id, { enabled: saved[l.id]?.enabled ?? false, feeNaira: feeNairaInput(saved[l.id]?.fee_kobo ?? 0) }]),
+    );
+  });
   const [isDropshipper, setIsDropshipper] = useState(store.is_dropshipper);
   const [dropshipInfo, setDropshipInfo] = useState(store.dropship_info ?? '');
   const [busy, setBusy] = useState(false);
@@ -101,12 +109,19 @@ export function SettingsForm({ store, whatsapp }: { store: StoreSettings; whatsa
           socialLinks: socials,
           announcement,
           deliveryInfo,
-          deliveryOptions: Object.fromEntries(
-            DELIVERY_METHODS.filter((m) => deliveryOpts[m.key].enabled).map((m) => [
-              m.key,
-              { enabled: true, fee_kobo: Math.max(0, Math.round((Number(deliveryOpts[m.key].feeNaira) || 0) * 100)) },
-            ])
-          ),
+          deliveryOptions: {
+            ...Object.fromEntries(
+              DELIVERY_METHODS.filter((m) => deliveryOpts[m.key].enabled).map((m) => [
+                m.key,
+                { enabled: true, fee_kobo: Math.max(0, Math.round((Number(deliveryOpts[m.key].feeNaira) || 0) * 100)) },
+              ])
+            ),
+            zones: Object.fromEntries(
+              Object.entries(zones)
+                .filter(([, z]) => z.enabled)
+                .map(([id, z]) => [id, { enabled: true, fee_kobo: Math.max(0, Math.round((Number(z.feeNaira) || 0) * 100)) }])
+            ),
+          },
           businessHours: hours,
           isDropshipper,
           dropshipInfo,
@@ -328,6 +343,51 @@ export function SettingsForm({ store, whatsapp }: { store: StoreSettings; whatsa
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      <div className="card" style={{ marginBottom: 16 }}>
+        <h2 style={{ fontSize: 18 }}>Campus &amp; landmark delivery zones</h2>
+        <p className="hint" style={{ marginTop: 0 }}>
+          Deliver to universities, malls and markets at your own fee. Buyers pick the zone at checkout, and you can
+          make discount codes that only work for one zone (Listings &gt; Discount codes).
+        </p>
+        <div className="zone-grid">
+          {ZONE_LANDMARKS.map((l) => {
+            const z = zones[l.id];
+            return (
+              <div key={l.id} className={`zone-row${z.enabled ? ' is-on' : ''}`}>
+                <label className="zone-toggle">
+                  <input
+                    type="checkbox"
+                    checked={z.enabled}
+                    onChange={(e) => setZones((prev) => ({ ...prev, [l.id]: { ...prev[l.id], enabled: e.target.checked } }))}
+                    style={{ width: 'auto' }}
+                  />
+                  <span>
+                    <strong>{l.short ?? l.name}</strong>
+                    <em>
+                      {l.place}
+                      {l.precision === 'town' ? ' (approximate location)' : ''}
+                    </em>
+                  </span>
+                </label>
+                {z.enabled && (
+                  <label className="zone-fee">
+                    Fee ₦
+                    <input
+                      type="number"
+                      min={0}
+                      max={1_000_000}
+                      value={z.feeNaira}
+                      onChange={(e) => setZones((prev) => ({ ...prev, [l.id]: { ...prev[l.id], feeNaira: e.target.value } }))}
+                      placeholder="0"
+                    />
+                  </label>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 

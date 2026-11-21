@@ -685,7 +685,7 @@ export function AppearanceCard({
                 }
                 onClick={() => set('button_shape', s)}
               >
-                {s === 'pill' ? '〇 Pill' : s === 'rounded' ? '▢ Rounded' : 'Square'}
+                {s === 'pill' ? 'Round' : s === 'rounded' ? 'Soft rectangle' : 'Rectangle'}
               </button>
             ))
             }

@@ -24,16 +24,25 @@ function softAccent(hex: string): string {
   return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
 }
 
+type ButtonShape = 'pill' | 'rounded' | 'square';
+const BUTTON_SHAPES: Array<{ id: ButtonShape; label: string; hint: string; radius: number }> = [
+  { id: 'pill', label: 'Round', hint: 'Fully rounded ends', radius: 999 },
+  { id: 'rounded', label: 'Soft rectangle', hint: 'Gently rounded corners', radius: 10 },
+  { id: 'square', label: 'Rectangle', hint: 'Sharp, square corners', radius: 2 },
+];
+
 export function SimpleBrandCard({
   slug,
   initialLogoUrl,
   initialAccent,
   initialLayout,
+  initialButtonShape = 'rounded',
 }: {
   slug: string;
   initialLogoUrl: string | null;
   initialAccent: string;
   initialLayout: StoreLayout;
+  initialButtonShape?: ButtonShape;
 }) {
   const router = useRouter();
   const [logoUrl, setLogoUrl] = useState(initialLogoUrl ?? '');
@@ -41,6 +50,7 @@ export function SimpleBrandCard({
   const [layout, setLayout] = useState<StoreLayout>(
     TEMPLATE_IDS.includes(initialLayout) ? initialLayout : 'modern'
   );
+  const [buttonShape, setButtonShape] = useState<ButtonShape>(initialButtonShape);
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -85,6 +95,7 @@ export function SimpleBrandCard({
           accentColor: accent,
           accentSoft: softAccent(accent),
           layout,
+          buttonShape,
         }),
       });
       const body = await res.json();
@@ -102,7 +113,7 @@ export function SimpleBrandCard({
     <div className="card" style={{ marginBottom: 16 }}>
       <h2 style={{ fontSize: 18 }}>Store branding</h2>
       <p className="hint" style={{ marginTop: 0 }}>
-        Three things buyers notice: your logo, your accent colour and how the page is laid out.
+        What buyers notice first: your logo, your accent colour, your button style and how the page is laid out.
       </p>
 
       <div className="field">
@@ -163,6 +174,29 @@ export function SimpleBrandCard({
             style={{ width: 44, height: 36, padding: 2, borderRadius: 8 }}
           />
         </div>
+      </div>
+
+      <div className="field">
+        <label id="btn-shape-label">Button style</label>
+        <div className="shape-picker" role="radiogroup" aria-labelledby="btn-shape-label">
+          {BUTTON_SHAPES.map((o) => (
+            <button
+              key={o.id}
+              type="button"
+              role="radio"
+              aria-checked={buttonShape === o.id}
+              className={`shape-option${buttonShape === o.id ? ' is-active' : ''}`}
+              onClick={() => setButtonShape(o.id)}
+            >
+              <span className="shape-sample" style={{ borderRadius: o.radius, background: accent }}>
+                Order
+              </span>
+              <strong>{o.label}</strong>
+              <em>{o.hint}</em>
+            </button>
+          ))}
+        </div>
+        <p className="hint">Changes every button on your store site.</p>
       </div>
 
       <div className="field">

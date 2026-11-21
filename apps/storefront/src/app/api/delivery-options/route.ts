@@ -4,6 +4,7 @@
 import { NextRequest } from 'next/server';
 import { supabaseAnon } from '@/lib/supabase';
 import { apiError, apiOk, internalError } from '@/lib/api';
+import { enabledZones } from '@/lib/deliveryZones';
 
 // Not exported: Next.js route files may only export HTTP handlers + route
 // config, so `next build`'s type validation rejects extra exports.
@@ -31,14 +32,15 @@ export async function GET(req: NextRequest) {
     if (!store) return apiError(404, 'store_not_found', 'Store not found.');
 
     const raw = store.delivery_options as Record<string, { enabled?: boolean; fee_kobo?: number }> | null;
-    if (!raw || typeof raw !== 'object') return apiOk({ options: [] });
+    if (!raw || typeof raw !== 'object') return apiOk({ options: [], zones: [] });
 
     const options = METHODS.filter((m) => raw[m]?.enabled).map((m) => ({
       method: m,
       label: METHOD_LABELS[m],
       feeKobo: Math.max(0, Number(raw[m]?.fee_kobo ?? 0)),
     }));
-    return apiOk({ options });
+    // Campus / landmark delivery zones the seller has switched on.
+    return apiOk({ options, zones: enabledZones(raw) });
   } catch (err) {
     return internalError('delivery-options', err);
   }

@@ -61,6 +61,7 @@ export async function GET(req: NextRequest) {
       status: order.status,
       totalKobo: order.total_kobo,
       deliveryMethod: order.delivery_method ?? '',
+      deliveryZone: (order as { delivery_zone?: string }).delivery_zone ?? '',
       deliveryFeeKobo: order.delivery_fee_kobo ?? 0,
       paymentStatus: order.payment_status ?? undefined,
       paymentMethod: order.payment_method ?? '',

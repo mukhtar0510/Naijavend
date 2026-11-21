@@ -434,7 +434,8 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
       const el = document.createElement('button');
       el.type = 'button';
       el.className = `fm-lm kind-${l.kind}${l.kind === 'town' ? ' is-town' : ''}`;
-      el.setAttribute('aria-label', `Landmark: ${l.name}, ${l.place}`);
+      el.setAttribute('aria-label', `Landmark: ${l.name}, ${l.place}${l.precision === 'town' ? ' (approximate location, town centre)' : ''}`);
+      if (l.precision === 'town') el.title = `${l.name}: approximate location (town centre)`;
       el.innerHTML = `<span class="fm-lm-dot">${landmarkSvg(l.kind)}</span><span class="fm-lm-label">${esc(l.short ?? l.name)}</span>`;
       el.addEventListener('click', (e) => {
         e.stopPropagation();

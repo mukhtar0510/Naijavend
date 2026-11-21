@@ -7,6 +7,7 @@ import { PAYMENT_METHOD_LABEL, type PaymentMethod } from '@/lib/payments';
 import { PaymentProofUpload } from './PaymentProofUpload';
 import { ArrowLeft, CircleCheck, Download, Star, Store, Zap } from 'lucide-react';
 import { OrderStepper } from '@/components/orders/OrderStepper';
+import { zoneLabel } from '@/lib/deliveryZones';
 
 interface CheckoutData {
   orderId: string;
@@ -15,6 +16,7 @@ interface CheckoutData {
   totalKobo: number;
   status: string;
   deliveryMethod?: string;
+  deliveryZone?: string;
   deliveryFeeKobo?: number;
   paymentStatus?: string;
   paymentMethod?: string;
@@ -80,7 +82,13 @@ export default function CheckoutPage({
   const paid = data.status === 'paid' || data.status === 'fulfilled' || data.paymentStatus === 'paid';
   const closed = !paid && data.status !== 'pending';
   const deliveryLabel =
-    data.deliveryMethod === 'pickup' ? 'Pickup' : data.deliveryMethod === 'rider' ? 'Same-city rider' : 'Courier';
+    data.deliveryMethod === 'pickup'
+      ? 'Pickup'
+      : data.deliveryMethod === 'rider'
+        ? 'Same-city rider'
+        : data.deliveryMethod === 'zone'
+          ? `Delivery to ${zoneLabel(data.deliveryZone) || 'your zone'}`
+          : 'Courier';
 
   return (
     <main className="order-page">
@@ -145,7 +153,7 @@ export default function CheckoutPage({
           ))}
           {data.deliveryMethod && (
             <li>
-              <span>Delivery: {deliveryLabel}</span>
+              <span>{deliveryLabel.startsWith('Delivery to') ? deliveryLabel : `Delivery: ${deliveryLabel}`}</span>
               <span>{naira(data.deliveryFeeKobo ?? 0)}</span>
             </li>
           )}

@@ -729,3 +729,51 @@ label { font-weight: 650; }
 .nv-cat-tile { border-radius: 18px !important; }
 .nv-cat-tile:hover { border-color: var(--primary) !important; }
 @media (prefers-reduced-motion: reduce) { .nv-store-card:hover { transform: none; } }
+
+/* Button style picker (dashboard > settings > branding) */
+.shape-picker { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.shape-option {
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--dur-2) var(--ease-standard), box-shadow var(--dur-2) var(--ease-standard);
+}
+.shape-option:hover { border-color: var(--primary); }
+.shape-option.is-active { border-color: var(--primary); box-shadow: var(--focus-ring); }
+.shape-option strong { font-size: 14px; }
+.shape-option em { font-style: normal; color: var(--text-muted); font-size: 12px; }
+.shape-sample { display: inline-grid; place-items: center; height: 34px; padding: 0 18px; color: #fff; font: 700 13px var(--font-body); }
+
+/* Delivery zones editor (dashboard > settings) */
+.zone-grid { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.zone-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+.zone-row.is-on { border-color: var(--primary); background: var(--primary-tint); }
+.zone-toggle { display: flex; align-items: center; gap: 10px; font-weight: 600; cursor: pointer; }
+.zone-toggle span { display: grid; }
+.zone-toggle strong { font-size: 14px; }
+.zone-toggle em { font-style: normal; color: var(--text-muted); font-size: 12px; font-weight: 500; }
+.zone-fee { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+.zone-fee input { width: 96px; min-height: 36px; }
+
+/* Email + password form (sign-in pages, reset page) */
+.pw-form { display: grid; gap: 12px; margin: 6px 0 4px; text-align: left; }
+.pw-tabs { display: inline-flex; justify-self: start; padding: 3px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface-raised); }
+.pw-tabs button { min-height: 34px; padding: 0 14px; border: 0; border-radius: 999px; background: transparent; color: var(--text-muted); font: 700 13px var(--font-body); cursor: pointer; }
+.pw-tabs button.is-active { background: var(--primary); color: var(--on-primary); }
+.pw-field { display: grid; gap: 6px; font-weight: 650; font-size: 13.5px; }
+.pw-input { display: flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 6px 0 14px; border: 1px solid var(--border-strong); border-radius: 12px; background: var(--surface); color: var(--text-muted); }
+.pw-input:focus-within { border-color: var(--primary); box-shadow: var(--focus-ring); }
+.pw-input input { flex: 1; min-width: 0; min-height: 0 !important; height: 42px; padding: 0; border: 0 !important; background: transparent !important; box-shadow: none !important; color: var(--text); font: inherit; font-weight: 500; font-size: 16px; outline: none; }
+.pw-eye { display: grid; place-items: center; width: 36px; height: 36px; border: 0; border-radius: 10px; background: transparent; color: var(--text-muted); cursor: pointer; }
+.pw-eye:hover { color: var(--primary); background: var(--surface-raised); }
+.pw-links { display: flex; justify-content: flex-end; }
+.pw-links .btn-link { font-size: 13px; }
+.auth-divider-or { display: flex; align-items: center; gap: 10px; margin: 14px 0 6px; color: var(--text-muted); font-size: 12.5px; font-weight: 650; }
+.auth-divider-or::before, .auth-divider-or::after { content: ''; flex: 1; height: 1px; background: var(--border); }

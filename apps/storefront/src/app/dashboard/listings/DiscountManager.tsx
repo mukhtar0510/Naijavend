@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { MapPin } from 'lucide-react';
+import { ZONE_LANDMARKS, zoneLabel } from '@/lib/deliveryZones';
 
 export interface DiscountRow {
   id: string;
@@ -9,6 +11,8 @@ export interface DiscountRow {
   active: boolean;
   usage_count: number;
   max_uses: number | null;
+  /** Landmark delivery zone this code is limited to (null = any order). */
+  zone_id?: string | null;
 }
 
 // Discount-code manager (Shopify-style promos): create, pause, delete —
@@ -18,6 +22,7 @@ export function DiscountManager({ initial }: { initial: DiscountRow[] }) {
   const [code, setCode] = useState('');
   const [percent, setPercent] = useState('');
   const [maxUses, setMaxUses] = useState('');
+  const [zoneId, setZoneId] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,7 +34,7 @@ export function DiscountManager({ initial }: { initial: DiscountRow[] }) {
       const res = await fetch('/api/discounts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, percentOff: Number(percent), maxUses: maxUses === '' ? null : Number(maxUses) }),
+        body: JSON.stringify({ code, percentOff: Number(percent), maxUses: maxUses === '' ? null : Number(maxUses), zoneId: zoneId || null }),
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body?.error?.message ?? 'Could not create the code.');
@@ -38,6 +43,7 @@ export function DiscountManager({ initial }: { initial: DiscountRow[] }) {
       setCode('');
       setPercent('');
       setMaxUses('');
+      setZoneId('');
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -63,7 +69,8 @@ export function DiscountManager({ initial }: { initial: DiscountRow[] }) {
     <div className="card" style={{ maxWidth: 640 }}>
       <h2 style={{ fontSize: 18, marginBottom: 4 }}>Discount codes</h2>
       <p className="muted" style={{ fontSize: 14, marginTop: 0 }}>
-        Customers enter these at checkout. Percentage off, per store, with optional usage caps.
+        Customers enter these at checkout. Percentage off, with optional usage caps. Limit a code to a campus or
+        landmark delivery zone (for example UNILORIN10) to reward orders delivered there.
       </p>
       {error && <div className="alert alert-error">{error}</div>}
 
@@ -74,6 +81,11 @@ export function DiscountManager({ initial }: { initial: DiscountRow[] }) {
               <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                 <span className="mono" style={{ fontWeight: 700 }}>{c.code}</span>
                 <span className="badge badge-blue">{c.percent_off}% off</span>
+                {c.zone_id && (
+                  <span className="badge badge-warning">
+                    <MapPin size={12} aria-hidden /> {zoneLabel(c.zone_id)} only
+                  </span>
+                )}
                 {!c.active && <span className="badge">Paused</span>}
                 <span className="muted" style={{ fontSize: 13 }}>
                   {c.usage_count} used{c.max_uses != null ? ` / ${c.max_uses}` : ''}
@@ -104,7 +116,18 @@ export function DiscountManager({ initial }: { initial: DiscountRow[] }) {
           </div>
           <div className="field" style={{ margin: 0 }}>
             <label htmlFor="dmax">Max uses</label>
-            <input id="dmax" type="number" min={1} value={maxUses} onChange={(e) => setMaxUses(e.target.value)} placeholder="∞" />
+            <input id="dmax" type="number" min={1} value={maxUses} onChange={(e) => setMaxUses(e.target.value)} placeholder="Unlimited" />
+          </div>
+          <div className="field" style={{ margin: 0 }}>
+            <label htmlFor="dzone">Only for delivery to</label>
+            <select id="dzone" value={zoneId} onChange={(e) => setZoneId(e.target.value)}>
+              <option value="">Any order</option>
+              {ZONE_LANDMARKS.map((z) => (
+                <option key={z.id} value={z.id}>
+                  {zoneLabel(z.id)}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
         <button className="btn btn-primary" type="submit" disabled={busy}>
