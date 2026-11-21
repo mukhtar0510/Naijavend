@@ -3,7 +3,15 @@ import type { Metadata } from 'next';
 import { ArrowRight, Check, ClipboardList, Map as MapIcon, MessageCircle, PackageCheck, Star, Store, Truck } from 'lucide-react';
 import { HeroMockup } from '@/components/landing/HeroMockup';
 
-import { BRAND, STARTER_TEMPLATE_COUNT } from '@idevtenancy/shared';
+import {
+  BRAND,
+  HERO_PILLS,
+  HERO_PRIMARY_CTA,
+  HERO_SECONDARY_CTA,
+  HERO_SUB,
+  STARTER_TEMPLATE_COUNT,
+  heroHeadlineLines,
+} from '@idevtenancy/shared';
 import { KwaravendLogoMark } from '@/components/KwaravendLogo';
 import { SceneMount, ReduceEffectsMount } from '@/components/landing/SceneMount';
 import { PlanCards } from '@/components/landing/PlanCards';
@@ -116,30 +124,36 @@ export default function LandingPage() {
               {BRAND.name}, built in {BRAND.launchRegion.city}
             </span>
             <h1 id="hero-title" className="kvh-title">
-              <span className="kvh-rise" style={{ ['--i' as string]: 1 }}>Every Ilorin business</span>{' '}
-              <span className="kvh-rise" style={{ ['--i' as string]: 2 }}>deserves a storefront</span>{' '}
-              <span className="kvh-rise" style={{ ['--i' as string]: 3 }}>as good as its</span>{' '}
-              <span className="kvh-rise" style={{ ['--i' as string]: 4 }}>
-                <span className="kvh-gold">hustle.</span>
-              </span>
+              {/* Locked copy (packages/shared/src/locked-copy.ts): HERO_HEADLINE with a gold "more". */}
+              {heroHeadlineLines().map((line, li) => (
+                <span key={li}>
+                  <span className="kvh-rise" style={{ ['--i' as string]: li + 1 }}>
+                    {line.map((w, wi) => (
+                      <span key={wi}>
+                        {wi > 0 ? ' ' : ''}
+                        {w.gold ? <span className="kvh-gold">{w.text}</span> : w.text}
+                      </span>
+                    ))}
+                  </span>{' '}
+                </span>
+              ))}
             </h1>
             <p className="kvh-sub kvh-rise" style={{ ['--i' as string]: 5 }}>
-              Turn your WhatsApp catalogue into a real store, take orders and deliveries, and let customers near you
-              find you.
+              {HERO_SUB}
             </p>
             <div className="kvh-actions kvh-rise" style={{ ['--i' as string]: 6 }}>
               <Link href="/dashboard" className="btn btn-primary btn-lg">
-                Open your store, free <ArrowRight size={17} aria-hidden />
+                {HERO_PRIMARY_CTA} <ArrowRight size={17} aria-hidden />
               </Link>
               <Link href="/map" className="btn btn-outline btn-lg">
-                Explore stores near you
+                {HERO_SECONDARY_CTA}
               </Link>
             </div>
             <Link href="/about" className="kvh-story kvh-rise" style={{ ['--i' as string]: 7 }}>
               Read the {BRAND.name} story <ArrowRight size={15} aria-hidden />
             </Link>
             <ul className="kvh-checks kvh-rise" style={{ ['--i' as string]: 8 }}>
-              {['No card to start', 'No commission', 'Pickup or delivery'].map((c) => (
+              {HERO_PILLS.map((c) => (
                 <li key={c}>
                   <Check size={14} aria-hidden /> {c}
                 </li>

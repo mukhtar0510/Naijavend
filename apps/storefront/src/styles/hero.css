@@ -110,3 +110,4 @@ html.reduce-effects .kvh-rise, html.reduce-effects .kvh-gold { animation: none; 
 }
 @media (prefers-reduced-motion: reduce) { [data-theme='light'] .kvh-gold { background-size: 100% 100%; } }
 html.reduce-effects[data-theme='light'] .kvh-gold { background-size: 100% 100%; }
+.kvh-title .kvh-rise { display: inline-block; }

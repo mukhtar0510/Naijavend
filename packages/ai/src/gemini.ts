@@ -296,7 +296,7 @@ const FEATURES: Record<AiRequest['feature'], FeatureSpec> = {
   translation: {
     system: [
       'You are a professional translator for a Nigerian marketplace.',
-      'The target languages are Nigerian English, Naija Pidgin, Yoruba, Hausa and Igbo.',
+      'The target languages are Nigerian English, Naija Pidgin and Yoruba.',
       'Translate faithfully: keep names, prices, product terms and tone (conversational),',
       'shorten naturally when Nigerian speech would say it differently, and keep any phone number or link untouched.',
       'Never add commentary or transliterate names. Always reply with a single valid JSON object and nothing else.',

@@ -38,7 +38,7 @@ Output a short report: stack, routes, data model, auth, map library, hosting, ex
 ### T02: Honest landing page
 - Label the demo store and sample order **"Example store / Sample data"**. Add `SHOW_DEMO_STORE` flag.
 - Fix or remove the broken counters ("0 Link…", "0 Layers…").
-- Rewrite the hero: "Your business deserves more than a WhatsApp catalogue." with sub copy about orders, delivery and being found nearby in Ilorin. CTAs: **Open your store, free** and **See an example store**.
+- Rewrite the hero: "Your storefront deserves more than a WhatsApp catalogue." with sub copy about orders, delivery and being found nearby in Ilorin. CTAs: **Open your store, free** and **See an example store**.
 - New section order: hero, 3-step how-it-works, product demo, outcomes (Sell, Manage, Deliver), seller stories (hidden when empty), pricing, FAQ.
 - Cut the five-layer explainer, long timeline and long story blocks. Keep a short story on `/about`.
 - Audit every claim against the code; fix copy to match reality. Write `docs/CLAIMS_AUDIT.md` (claim, true/false, action).
@@ -138,7 +138,7 @@ Add flags, default **off** in production: dropshipper mode, rankings page and al
 **Done when:** the dashboard renders from real events.
 
 ### T11: Plans and gating (billing off)
-- Plan config: Starter (free), Business Plus, Business Pro, with configurable prices.
+- Plan config: Starter (free), Emirates Plus, Business Pro, with configurable prices.
 - `hasFeature(store, key)` helper; gate CRM, rider and dispatch tools, reports and custom domain.
 - No billing code. Do not change the "free POS and staff" promise without asking the owner.
 **Done when:** features can be switched per plan from config.

@@ -6,7 +6,7 @@ Date: 17 November 2026. Every claim that appeared on the old landing page, check
 
 | Old claim | True? | Evidence | Action |
 | --- | --- | --- | --- |
-| "Every Nigerian business deserves a storefront…" (implies nationwide) | **False** | No city/area model exists; the map defaults to Lagos; BUILD.md limits launch to Ilorin. | Replaced with Ilorin-specific hero: "Your business deserves more than a WhatsApp catalogue." Sub copy names Ilorin and Kwara State. |
+| "Every Nigerian store deserves a storefront…" (old copy) (implies nationwide) | **False** | No city/area model exists; the map defaults to Lagos; BUILD.md limits launch to Ilorin. | Replaced with Ilorin-specific hero: "Your storefront deserves more than a WhatsApp catalogue." Sub copy names Ilorin and Kwara State. |
 | Five-layer explainer ("Five layers deep, one storefront… every layer is already live") | **Partly false** | Some layers (POS, staff, branches) are live; delivery zones, rider dispatch and tracking are not built. | Section deleted from the page. Outcomes described as three plain jobs (Sell, Manage, Deliver). |
 | "0 Link…", "0 Layers…" counters | **Broken** | `CountUp` starts at 0; the labels read as broken stats. | Section deleted. No animated counters on the page. |
 | "4.6 average · 38 reviews · purchases only" | **Invented** | No such store or review set exists in the repo. | Removed. Reviews are described as a rule ("only after a real order"), with no numbers. |
@@ -16,7 +16,7 @@ Date: 17 November 2026. Every claim that appeared on the old landing page, check
 | "Get paid and reviewed" (3-step) | **Misleading** | Payment is not collected online; reviews require an order. | Step now says "Take orders" and explains confirming orders and marking paid when money lands. |
 | "Dropshipper mode" feature card | **True but ungated** | `is_dropshipper` exists on stores. | Removed from the landing page (feature flag default off). |
 | "Location never leaves your browser" | **Mostly true** | `useViewerLocation` is client-side; delivery addresses are text today. | Not claimed on the new landing page. Kept in the FAQ only as a future delivery-pin rule is not stated. |
-| Pricing | **Prices set by owner 2026-11-18** | No billing code exists; nothing can be charged. | Pricing section and `/pricing`: Free ₦0, Business ₦3,000/mo, Emirates ₦8,000/mo (renamed from Business Plus, 2026-11-21), Business Pro ₦15,000/mo; the paid tiers are labelled "not yet on sale". |
+| Pricing | **Prices set by owner 2026-11-18** | No billing code exists; nothing can be charged. | Pricing section and `/pricing`: Free ₦0, Business ₦3,000/mo, Emirates Plus ₦8,000/mo (middle plan renamed 2026-11-21), Business Pro ₦15,000/mo; the paid tiers are labelled "not yet on sale". |
 | "Real storefront websites, verified blue ticks, chat, bookings and honest reviews" in meta description | **Mostly true** | Each exists in code, but the blue tick has no admin revoke UI in the storefront and review integrity is app-enforced, not DB-enforced. | Meta description replaced by `BRAND.description` (storefront, orders, delivery tracking, map, Ilorin). |
 
 ## Claims kept (with evidence)

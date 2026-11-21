@@ -109,7 +109,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <MotionProvider>{children}</MotionProvider>
         <PwaRegister />
-        {/* Language + interface translation (EN / Pidgin / Yoruba / Hausa / Igbo). */}
+        {/* Language + interface translation (EN / Pidgin / Yoruba). */}
         <LanguageDock />
       </body>
     </html>

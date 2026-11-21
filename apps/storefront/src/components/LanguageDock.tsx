@@ -1,6 +1,6 @@
 'use client';
 
-// Language dock — English / Naija Pidgin / Yoruba / Hausa / Igbo.
+// Language dock — English / Naija Pidgin / Yoruba.
 //
 // It does two jobs in one component because they share state:
 //  1. pick the language (persisted in a 1-year cookie so it survives reloads);
@@ -25,7 +25,7 @@ import { Check as IcCheck, Globe as IcGlobe } from 'lucide-react';
 
 const COOKIE = 'nv_lang';
 // BCP-47 codes for <html lang>; Nigerian Pidgin is `pcm`, not `pid`.
-const HTML_LANG: Record<LanguageCode, string> = { en: 'en-NG', pid: 'pcm', yo: 'yo', ha: 'ha', ig: 'ig' };
+const HTML_LANG: Record<LanguageCode, string> = { en: 'en-NG', pid: 'pcm', yo: 'yo' };
 const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEMPLATE', 'TEXTAREA', 'INPUT', 'SELECT', 'OPTION', 'CODE', 'PRE', 'SVG']);
 const MAX_NODES = 240;
 
@@ -276,7 +276,7 @@ export function LanguageDock() {
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-haspopup="menu"
-        title="Change language — English, Pidgin, Yoruba, Hausa, Igbo"
+        title="Change language — English, Pidgin, Yoruba"
       >
         <IcGlobe className="ico-inline" aria-hidden /> <span className="lang-dock-label">{current?.native}</span>
         {busy && <span className="lang-dock-busy" aria-label="Translating" />}

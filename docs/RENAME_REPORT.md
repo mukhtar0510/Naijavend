@@ -12,7 +12,7 @@ The brand name is now **Kwaravend**, read from one config:
 | --- | --- |
 | `name` | `Kwaravend` |
 | `wordmark` | `Kwara` + `vend` |
-| `tagline` | "Your business deserves more than a WhatsApp catalogue." |
+| `tagline` | "Your storefront deserves more than a WhatsApp catalogue." |
 | `domain` | `kwaravend.com` (config only — **not registered by this change**) |
 | `supportWhatsApp` | `''` — owner must supply |
 | `supportEmail` | `''` — owner must supply |

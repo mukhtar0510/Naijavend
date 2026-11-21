@@ -12,7 +12,7 @@ export const BRAND = {
   name: 'Kwaravend',
   /** Two-part wordmark split point: "Kwara" + "vend". */
   wordmark: { first: 'Kwara', second: 'vend' },
-  tagline: 'Your business deserves more than a WhatsApp catalogue.',
+  tagline: 'Your storefront deserves more than a WhatsApp catalogue.', // = HERO_HEADLINE (locked-copy.ts)
   description:
     'Kwaravend gives Nigerian sellers a real storefront — catalogue, orders, delivery tracking and a map — starting in Ilorin, Kwara State.',
   domain: 'kwaravend.ng',

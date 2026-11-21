@@ -20,14 +20,14 @@ export type AiFeature =
   | 'moderation';
 
 /** Interface + chat languages supported by Kwaravend translation. */
-export type LanguageCode = 'en' | 'pid' | 'yo' | 'ha' | 'ig';
+// Two languages were removed on 21 Nov 2026 (docs/KWARAVEND_REBRAND_CHANGES.md R3):
+// launch is Ilorin only. A saved old code fails isLanguageCode and falls back to English.
+export type LanguageCode = 'en' | 'pid' | 'yo';
 
 export const LANGUAGES: ReadonlyArray<{ code: LanguageCode; label: string; native: string }> = [
   { code: 'en', label: 'English', native: 'English' },
   { code: 'pid', label: 'Pidgin', native: 'Naijá Pidgin' },
   { code: 'yo', label: 'Yoruba', native: 'Yorùbá' },
-  { code: 'ha', label: 'Hausa', native: 'Hausa' },
-  { code: 'ig', label: 'Igbo', native: 'Igbo' },
 ];
 
 export function isLanguageCode(v: unknown): v is LanguageCode {

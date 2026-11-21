@@ -1,4 +1,4 @@
-// Translation between English, Pidgin, Yoruba, Hausa and Igbo — used for chat
+// Translation between English, Pidgin and Yoruba — used for chat
 // bubbles and, in batches, for the visible interface text.
 //
 // Shape: { texts: string[], lang } → { texts: string[], provider }. Batches

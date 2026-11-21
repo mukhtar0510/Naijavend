@@ -176,7 +176,7 @@ Write `docs/ARCHITECTURE.md` (with Mermaid diagrams) and short decision records 
 - **PWA:** installable, offline app shell, cached storefront pages and last-seen orders, a friendly offline banner, safe service-worker update flow (never trap users on an old version).
 - **Images:** responsive sizes (`srcset`), modern formats, blurhash or dominant-colour placeholders, explicit width and height, lazy loading, upload-time compression and EXIF stripping.
 - **Error handling:** error boundaries per feature, retry with backoff, user-friendly messages, error tracking.
-- **i18n-ready:** all UI strings in a catalogue (English first; Pidgin, Yoruba and Hausa later). No hard-coded strings in components.
+- **i18n-ready:** all UI strings in a catalogue (English first; Pidgin and Yoruba later). No hard-coded strings in components.
 - **Accessibility:** WCAG 2.2 AA, full keyboard use, focus management in drawers, sheets and modals, screen-reader labels, live regions for status changes.
 
 ### 3.2 System design
@@ -250,7 +250,7 @@ The scene must pick a tier automatically and let the visitor change it ("Reduce 
 ### 4.5 Chapters (the page stays short even though the scene is deep)
 Keep to **at most 7 chapters**. Each chapter is one screen or two of scroll.
 
-1. **Hero:** headline, one line, two buttons (**Open your store, free** and **See an example store**), the street scene settling into place. Suggested headline: "Your business deserves more than a WhatsApp catalogue." Sub: "Create an online store, take orders and deliveries, and let customers near you in Ilorin find you."
+1. **Hero:** headline, one line, two buttons (**Open your store, free** and **See an example store**), the street scene settling into place. Suggested headline: "Your storefront deserves more than a WhatsApp catalogue." Sub: "Create an online store, take orders and deliveries, and let customers near you in Ilorin find you."
 2. **How it works:** three steps (create your store, share one link, get orders), with the phone model showing each step.
 3. **Sell, Manage, Deliver:** three cards tied to scene objects (storefront, order board, scooter).
 4. **Find stores near you:** a small live map of **example** stores, clearly labelled as examples until real stores exist, linking to the map page.
@@ -261,7 +261,7 @@ Keep to **at most 7 chapters**. Each chapter is one screen or two of scroll.
 Copy rules from T02 stay: no fake counters, no fake testimonials, no claims the code can't back up. Run the claims audit again after the redesign.
 
 ### 4.6 Hoverable plans
-Three cards from the plan config (T11): **Starter**, **Business Plus**, **Business Pro**.
+Three cards from the plan config (T11): **Starter**, **Emirates Plus**, **Business Pro**.
 
 - **Hover and keyboard focus (same behaviour):** the card lifts with a gentle 3D tilt (6 degrees at most) that follows the pointer, a soft light glow follows the cursor, the feature list expands with icon animations, and the other cards dim slightly.
 - **Touch devices (no hover):** tap to expand a card. No tilt.

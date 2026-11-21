@@ -76,7 +76,7 @@ Output a table: claim, verified yes/no, file, action. Change copy to match reali
 
 ### 4.1 Landing page
 - Hero around one outcome. Suggested copy (adapt to the brand):
-  - Headline: "Your business deserves more than a WhatsApp catalogue."
+  - Headline: "Your storefront deserves more than a WhatsApp catalogue."
   - Sub: "Create an online store, take orders and deliveries, and let customers near you find you. All in one link."
 - CTAs: **Open your store, free** and **See an example store**.
 - Section order: hero, 3-step how-it-works, short real product demo (screenshots or short video of the actual dashboard), outcomes (**Sell, Manage, Deliver**), real seller stories (hide when empty), simple pricing, FAQ and trust.
@@ -124,7 +124,7 @@ Build the plan model and feature gating only. No billing code.
 | Plan | Contents | Price to test |
 |---|---|---|
 | Starter | Storefront, catalogue, cart, orders, basic stock, WhatsApp handoff, status tracking | Free |
-| Business Plus | Light CRM, sales reports, rider/dispatch tools, notifications, inventory alerts | ₦1,500 to ₦5,000/month (configurable) |
+| Emirates Plus | Light CRM, sales reports, rider/dispatch tools, notifications, inventory alerts | ₦1,500 to ₦5,000/month (configurable) |
 | Business Pro | Custom domain, staff permissions, multi-branch reporting, integrations | ₦8,000 to ₦15,000/month (configurable) |
 
 - Prices live in config or the database, not hard-coded.
@@ -280,7 +280,7 @@ Scale **city by city, only after the previous stage hits its trigger.** Do not m
 
 ### Stage 2: Deepen in the home city
 - Add delivery zones, riders and tracking (section 7 Phase B) as the main reason to stay.
-- Launch paid plans (Business Plus) with a pilot discount, then consider enabling online payments **once the owner is ready**.
+- Launch paid plans (Emirates Plus) with a pilot discount, then consider enabling online payments **once the owner is ready**.
 - Start buyer-side discovery: city map, "open now", category pages, repeat-buyer reminders for sellers.
 
 ### Stage 3: Nearby cities
@@ -290,7 +290,7 @@ Scale **city by city, only after the previous stage hits its trigger.** Do not m
 
 ### Stage 4: Multi-city platform
 - Rankings and marketplace discovery switch on per city once the supply threshold is met.
-- Language support (English first, then Pidgin, Yoruba and Hausa where useful) through an i18n layer.
+- Language support (English first, then Pidgin and Yoruba where useful) through an i18n layer.
 - Partner integrations with logistics providers and (later) payment providers.
 - Seller support: help centre, in-app chat to the team, onboarding video.
 

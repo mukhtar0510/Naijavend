@@ -355,7 +355,7 @@ Mobile (390px)                          Desktop (1280px)
 +--------------------------+            +----------------------------------------------+
 ```
 
-1. **Hero.** Built to the reference look in "Hero reference look" below. Headline: "Every Ilorin business deserves a storefront as good as its hustle." with the last word, **hustle.**, in gold. Sub: "Turn your WhatsApp catalogue into a real store, take orders and deliveries, and let customers near you find you." Buttons: **Open your store, free** (blue, with an arrow icon) and **Explore stores near you** (outlined). The street scene unfolds behind and below the hero as the visitor scrolls.
+1. **Hero.** Built to the reference look in "Hero reference look" below. Headline: "Your storefront deserves more than a WhatsApp catalogue." with the word more in gold (superseded by docs/KWARAVEND_REBRAND_CHANGES.md R1). Sub: "Create an online store, take orders and deliveries, and let customers near you in Ilorin find you." Buttons: **Open your store, free** (blue, with an arrow icon) and **Explore stores near you** (outlined). The street scene unfolds behind and below the hero as the visitor scrolls.
 2. **How it works.** A sticky phone model (3D on standard and full, a 2.5D image on lite) that changes screen across three steps: create your store, share one link, get orders. Steps scroll on the left, the phone stays.
 3. **Sell, Manage, Deliver.** Three **different-sized** tiles (one large, two small) tied to scene objects: the storefront, the order board, the scooter. Hover or focus tilts each.
 4. **Find stores near you.** A tilted 2.5D mini-map card of **example** stores (labelled "Example stores") with a button to the real map. If real stores exist, show real ones.
@@ -366,7 +366,7 @@ Mobile (390px)                          Desktop (1280px)
 Copy rules: no fake counters, testimonials or claims. Re-run the claims audit after the redesign.
 
 ### 5.2 Hoverable plans (on "/", "/pricing" and in-app)
-Three cards from the plan config: **Starter**, **Business Plus**, **Business Pro**. Business Plus is the gold-highlighted "featured" card (gold ring and glow), which is the one gold focal element in that viewport.
+Three cards from the plan config: **Starter**, **Emirates Plus**, **Business Pro**. Emirates Plus is the gold-highlighted "featured" card (gold ring and glow), which is the one gold focal element in that viewport.
 
 - **Hover and keyboard focus (same behaviour):** the card lifts and tilts up to 6 degrees following the pointer, a soft blue light follows the cursor, the feature list expands with icon animations, the other cards dim slightly.
 - **Touch:** tap to expand; no tilt. **Reduced motion:** no tilt or glow movement; expansion still works.
@@ -659,7 +659,7 @@ After each step: lint, type-check, tests, build, the relevant Playwright test, t
 - Do you approve the colour scheme in section 2 (black canvas, blue actions, gold highlights, green for live and success, white text)? Any logo ideas?
 - Is `/home` the buyer's home screen, and `/dashboard` the seller dashboard, as assumed in section 0?
 - Dark mode as the default look on the landing page and app, with a light theme available?
-- Is the hero reference (section 5.1: gold last word in the headline, blue main button, green "Sell free" in the nav) the look you want? Is "Every Ilorin business deserves a storefront as good as its hustle." the right headline?
+- Is the hero reference (section 5.1: gold last word in the headline, blue main button, green "Sell free" in the nav) the look you want? Headline now locked as "Your storefront deserves more than a WhatsApp catalogue." (KWARAVEND_REBRAND_CHANGES.md R1).
 - Are you happy for the AI to add shadcn/ui and Motion to the repo (both need React and Tailwind)?
 - 3D models: should the AI build simple low-poly models in code, or will you supply or commission them?
 - Is it fine for pages to start in the **lite** tier on unknown devices?

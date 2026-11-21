@@ -821,7 +821,7 @@ class DummyProvider implements AiProvider {
 
     if (req.feature === 'translation') {
       // Deliberate identity fallback: a template can never honestly translate
-      // Yoruba/Hausa/Igbo. Return the original text and let the route report
+      // Yoruba. Return the original text and let the route report
       // `provider: dummy` so the UI never claims a translation that did not happen.
       const lang = (tagged(req.input, 'Lang') || 'en') as LanguageCode;
       const text = tagged(req.input, 'Text') || req.input;
