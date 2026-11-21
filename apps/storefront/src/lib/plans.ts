@@ -1,7 +1,7 @@
 // Plans and limits — the single source of truth for what a seller's plan lets
 // them do. This is a MOCK setup: there is no billing, no card form and no gateway.
 // The `stores.plan` column maps to these public plan names.
-// Prices were set on 2026-11-18: Free (₦0), Business (₦3,000/mo), Business Plus (₦8,000/mo),
+// Prices were set on 2026-11-18: Free (₦0), Business (₦3,000/mo), Emirates (₦8,000/mo; renamed from Business Plus on 2026-11-21),
 // Business Pro (₦15,000/mo). Billing is not switched on yet, so no plan can be paid for.
 // Rider delivery fees are additional monthly fees on top of the base plan price.
 
@@ -80,7 +80,7 @@ export const PLANS: PlanDef[] = [
   },
   {
     id: 'plus',
-    name: 'Business Plus',
+    name: 'Emirates',
     priceLabel: '₦8,000/mo',
     riderPriceLabel: '₦1,000/mo rider',
     available: false,
@@ -104,7 +104,7 @@ export const PLANS: PlanDef[] = [
     tagline: 'For multi-branch retailers and delivery-heavy catalogues, with Same-day Kwaravend rider delivery.',
     limits: { listings: null, staff: 25, locations: 10, templates: null, rider: 'same-day', riderPrice: 2000 },
     includes: [
-      'Everything in Business Plus',
+      'Everything in Emirates',
       'Unlimited listings',
       'Up to 25 staff seats',
       'Up to 10 locations',

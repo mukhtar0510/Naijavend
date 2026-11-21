@@ -431,3 +431,46 @@
   .fm-pin.is-open .fm-pin-face::after, .fm-map-loading { animation: none; }
   .fm-detail, .fm.is-desktop .fm-detail-wrap { animation: none; }
 }
+
+/* Kwara landmarks: small labelled reference markers (not stores) */
+.fm-lm {
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.fm-lm-dot {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  border: 2px solid var(--surface);
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: var(--shadow-sm);
+  transform: rotate(45deg);
+}
+.fm-lm-dot svg { transform: rotate(-45deg); }
+.fm-lm.kind-university .fm-lm-dot, .fm-lm.kind-polytechnic .fm-lm-dot { background: var(--primary); color: var(--on-primary); }
+.fm-lm.kind-hospital .fm-lm-dot { background: var(--danger); color: #fff; }
+.fm-lm.kind-town .fm-lm-dot { width: 18px; height: 18px; border-radius: 50%; background: var(--text); color: var(--surface); transform: none; }
+.fm-lm.kind-town .fm-lm-dot svg { display: none; }
+.fm-lm-label {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  color: var(--text);
+  font: 700 10.5px/1.5 var(--font-body);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity var(--dur-2) var(--ease-standard);
+}
+.fm-lm.is-town .fm-lm-label { opacity: 1; font-size: 11.5px; }
+.fm.show-labels .fm-lm-label, .fm-lm:hover .fm-lm-label, .fm-lm:focus-visible .fm-lm-label { opacity: 1; }
+.fm-lm:focus-visible .fm-lm-dot { box-shadow: var(--focus-ring); }

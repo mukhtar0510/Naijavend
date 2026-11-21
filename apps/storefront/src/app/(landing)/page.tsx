@@ -216,8 +216,9 @@ export default function LandingPage() {
               Find stores near you in {BRAND.launchRegion.city}
             </h2>
             <p className="m-0 max-w-[56ch] text-[15px] leading-relaxed text-muted-foreground">
-              Open now, distance from your exact spot, directions and WhatsApp in one tap. Stores marked Example
-              show sample data until real sellers join.
+              Open now, distance from your exact spot, directions and WhatsApp in one tap, with landmarks across
+              Kwara: Unilorin, Al-Hikmah, KWASU, Kwara Mall, Offa and more. Stores marked Example show sample data
+              until real sellers join.
             </p>
           </div>
           <Link href="/map" className="btn btn-primary btn-lg">

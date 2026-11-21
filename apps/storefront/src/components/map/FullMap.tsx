@@ -27,12 +27,14 @@ import {
   Search,
   Star,
   Store as StoreIcon,
+  Landmark,
   X,
 } from 'lucide-react';
 import { directionsUrl, formatDistance, haversineKm, isOpenNow, todayHoursLabel } from '@idevtenancy/shared';
 import { useViewerLocation } from '@/lib/useViewerLocation';
 import { applyKwaraStyle, canShow3D, circlePolygon, createThemedMap, ll, prefersDarkMap, setBuildings3D, type ThemedMap } from '@/lib/mapFactory';
-import { ILORIN_AREAS, ILORIN_BOUNDS, ILORIN_CENTER, ILORIN_MIN_ZOOM, inIlorin, nearestArea } from '@/lib/ilorin';
+import { ILORIN_AREAS, ILORIN_CENTER, KWARA_BOUNDS, KWARA_MIN_ZOOM, inIlorin, inKwara, nearestArea } from '@/lib/ilorin';
+import { LANDMARKS, searchLandmarks, type Landmark as LandmarkT, type LandmarkKind } from '@/lib/landmarks';
 import { CategoryIcon, categoryColor, categoryMeta } from '@/lib/categories';
 import { Chip, SegmentedControl } from '@/components/ui/chip';
 import { ButtonLink, FAB } from '@/components/ui/button';
@@ -68,6 +70,23 @@ const TRENDING_MIN_REAL_STORES = 12; // hide "Trending" until there's enough rea
 
 const esc = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+
+// Lucide (ISC) glyphs as strings for landmark markers (plain HTML).
+const LM_PATHS: Record<LandmarkKind, string> = {
+  university: '<path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>',
+  polytechnic: '<path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>',
+  palace: '<path d="M10 18v-7"/><path d="M11.12 2.198a2 2 0 0 1 1.76.006l7.866 3.847c.476.233.31.949-.22.949H3.474c-.53 0-.695-.716-.22-.949z"/><path d="M14 18v-7"/><path d="M18 18v-7"/><path d="M3 22h18"/><path d="M6 18v-7"/>',
+  mall: '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>',
+  market: '<path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M2 7h20"/>',
+  airport: '<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>',
+  hospital: '<path d="M12 6v4"/><path d="M14 14h-4"/><path d="M14 18h-4"/><path d="M14 8h-4"/><path d="M18 12h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h2"/><path d="M18 22V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v18"/>',
+  stadium: '<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>',
+  hill: '<path d="m8 3 4 8 5-5 5 15H2L8 3z"/>',
+  town: '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
+  museum: '<path d="M10 18v-7"/><path d="M11.12 2.198a2 2 0 0 1 1.76.006l7.866 3.847c.476.233.31.949-.22.949H3.474c-.53 0-.695-.716-.22-.949z"/><path d="M3 22h18"/><path d="M14 18v-7"/>',
+};
+const landmarkSvg = (k: LandmarkKind) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${LM_PATHS[k]}</svg>`;
 
 function track(event: string, storeId?: string) {
   try {
@@ -121,6 +140,9 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
   const [zoom, setZoom] = useState(13);
   const [desktop, setDesktop] = useState(false);
   const [sort, setSort] = useState<'near' | 'rating' | 'name'>('near');
+  const [showLandmarks, setShowLandmarks] = useState(true);
+  const landmarkMarkers = useRef<Marker[]>([]);
+  const landmarkHits = useMemo(() => searchLandmarks(query), [query]);
 
   const mapEl = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<ThemedMap | null>(null);
@@ -137,7 +159,7 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
   selectedRef.current = selected;
 
   // ---------------------------------------------------------------- data
-  const outside = !!origin && !inIlorin(origin.lat, origin.lng);
+  const outside = !!origin && !inKwara(origin.lat, origin.lng);
   const distOrigin = origin && !outside ? origin : null;
 
   const rows: Row[] = useMemo(() => {
@@ -224,8 +246,8 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
           zoom: 13,
           zoomControl: false,
           scrollWheelZoom: true,
-          maxBounds: ILORIN_BOUNDS,
-          minZoom: ILORIN_MIN_ZOOM,
+          maxBounds: KWARA_BOUNDS,
+          minZoom: KWARA_MIN_ZOOM,
         });
         const [map, lib] = await Promise.all([initRef.current, import('maplibre-gl')]);
         if (cancelled) return;
@@ -399,6 +421,38 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- pinSvg reads a ref
   }, [ready, rows, zoom, selected]);
+
+  // Kwara landmarks: small labelled reference markers (not stores).
+  useEffect(() => {
+    const map = mapRef.current;
+    const lib = libRef.current;
+    if (!ready || !map || !lib) return;
+    for (const m of landmarkMarkers.current) m.remove();
+    landmarkMarkers.current = [];
+    if (!showLandmarks) return;
+    for (const l of LANDMARKS) {
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.className = `fm-lm kind-${l.kind}${l.kind === 'town' ? ' is-town' : ''}`;
+      el.setAttribute('aria-label', `Landmark: ${l.name}, ${l.place}`);
+      el.innerHTML = `<span class="fm-lm-dot">${landmarkSvg(l.kind)}</span><span class="fm-lm-label">${esc(l.short ?? l.name)}</span>`;
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        map.flyTo({ center: ll(l.lat, l.lng), zoom: Math.max(map.getZoom(), l.kind === 'town' ? 13 : 15.5), duration: 800, essential: true });
+      });
+      landmarkMarkers.current.push(new lib.Marker({ element: el, anchor: 'center' }).setLngLat(ll(l.lat, l.lng)).addTo(map));
+    }
+    return () => {
+      for (const m of landmarkMarkers.current) m.remove();
+      landmarkMarkers.current = [];
+    };
+  }, [ready, showLandmarks]);
+
+  const flyLandmark = (l: LandmarkT) => {
+    setSelected(null);
+    mapRef.current?.flyTo({ center: ll(l.lat, l.lng), zoom: l.kind === 'town' ? 13 : 15.5, duration: 900, essential: true });
+    if (!desktop) setSheet('peek');
+  };
 
   // Fly to a selected store (spring-grown pin is handled in CSS).
   useEffect(() => {
@@ -786,6 +840,7 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
         <div className="fm-chips" role="group" aria-label="Filters">
           <Chip label="Open now" icon={Clock} selected={openOnly} onClick={() => setOpenOnly((v) => !v)} />
           <Chip label="Heat" icon={Flame} selected={heatOn} onClick={toggleHeat} />
+          <Chip label="Landmarks" icon={Landmark} selected={showLandmarks} onClick={() => setShowLandmarks((v) => !v)} />
           <Chip label="All" selected={cat === null} onClick={() => setCat(null)} />
           {cats.map((c) => (
             <Chip key={c} label={categoryMeta(c).label} category={c} selected={cat === c} onClick={() => setCat(cat === c ? null : c)} />
@@ -798,7 +853,7 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
         )}
         {outside && (
           <p className="fm-note glass" role="status">
-            Your exact location is outside Ilorin, so we&apos;re showing Ilorin. Pick an area below to explore.
+            Your exact location is outside Kwara, so we&apos;re showing Ilorin. Pick an area or place below to explore.
           </p>
         )}
         {(locState === 'denied' || locState === 'error') && (
@@ -898,11 +953,29 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
                   <div className="fm-peek">{trending.map((r) => card(r, true))}</div>
                 </section>
               )}
+              {landmarkHits.length > 0 && (
+                <section className="fm-areas" aria-label="Landmarks matching your search">
+                  <h2>Landmarks</h2>
+                  <div className="fm-chips is-wrap">
+                    {landmarkHits.map((l) => (
+                      <Chip key={l.id} label={`${l.short ?? l.name} · ${l.place}`} icon={Landmark} onClick={() => flyLandmark(l)} />
+                    ))}
+                  </div>
+                </section>
+              )}
               <section className="fm-areas" aria-label="Jump to an area">
-                <h2>Areas</h2>
+                <h2>Areas in Ilorin</h2>
                 <div className="fm-chips is-wrap">
                   {ILORIN_AREAS.map((a) => (
                     <Chip key={a.id} label={a.label} icon={MapPin} onClick={() => flyArea(a.lat, a.lng)} />
+                  ))}
+                </div>
+              </section>
+              <section className="fm-areas" aria-label="Places across Kwara">
+                <h2>Across Kwara</h2>
+                <div className="fm-chips is-wrap">
+                  {LANDMARKS.filter((l) => l.place !== 'Ilorin').map((l) => (
+                    <Chip key={l.id} label={l.short ?? l.name} icon={Landmark} onClick={() => flyLandmark(l)} />
                   ))}
                 </div>
               </section>

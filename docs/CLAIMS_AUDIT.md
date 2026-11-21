@@ -16,7 +16,7 @@ Date: 17 November 2026. Every claim that appeared on the old landing page, check
 | "Get paid and reviewed" (3-step) | **Misleading** | Payment is not collected online; reviews require an order. | Step now says "Take orders" and explains confirming orders and marking paid when money lands. |
 | "Dropshipper mode" feature card | **True but ungated** | `is_dropshipper` exists on stores. | Removed from the landing page (feature flag default off). |
 | "Location never leaves your browser" | **Mostly true** | `useViewerLocation` is client-side; delivery addresses are text today. | Not claimed on the new landing page. Kept in the FAQ only as a future delivery-pin rule is not stated. |
-| Pricing | **Prices set by owner 2026-11-18** | No billing code exists; nothing can be charged. | Pricing section and `/pricing`: Free ₦0, Business ₦3,000/mo, Business Plus ₦8,000/mo, Business Pro ₦15,000/mo; the paid tiers are labelled "not yet on sale". |
+| Pricing | **Prices set by owner 2026-11-18** | No billing code exists; nothing can be charged. | Pricing section and `/pricing`: Free ₦0, Business ₦3,000/mo, Emirates ₦8,000/mo (renamed from Business Plus, 2026-11-21), Business Pro ₦15,000/mo; the paid tiers are labelled "not yet on sale". |
 | "Real storefront websites, verified blue ticks, chat, bookings and honest reviews" in meta description | **Mostly true** | Each exists in code, but the blue tick has no admin revoke UI in the storefront and review integrity is app-enforced, not DB-enforced. | Meta description replaced by `BRAND.description` (storefront, orders, delivery tracking, map, Ilorin). |
 
 ## Claims kept (with evidence)

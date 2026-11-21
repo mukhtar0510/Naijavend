@@ -36,7 +36,7 @@ import { QUICK_CITIES, useViewerLocation } from '@/lib/useViewerLocation';
 import { circlePolygon, createThemedMap, ll, type BaseLayerId, type ThemedMap } from '@/lib/mapFactory';
 import { VerifiedTick } from '@/components/VerifiedTick';
 import { ExampleTag } from '@/components/ExampleStoreBanner';
-import { ILORIN_BOUNDS, ILORIN_CENTER, ILORIN_MIN_ZOOM, inIlorin } from '@/lib/ilorin';
+import { ILORIN_CENTER, KWARA_BOUNDS, KWARA_MIN_ZOOM, inIlorin } from '@/lib/ilorin';
 import { CategoryIcon, categoryColor } from '@/lib/categories';
 
 export interface MapStore {
@@ -239,8 +239,8 @@ export function StoreMap({ stores }: { stores: MapStore[] }) {
         zoom: 12,
         scrollWheelZoom: false, // don't hijack page scroll; double-click/pinch zooms
         zoomControl: true,
-        maxBounds: ILORIN_BOUNDS,
-        minZoom: ILORIN_MIN_ZOOM,
+        maxBounds: KWARA_BOUNDS,
+        minZoom: KWARA_MIN_ZOOM,
       });
       const [map, lib] = await Promise.all([initRef.current, import('maplibre-gl')]);
       // A cancelled run leaves the map for the remount that awaits the same promise.

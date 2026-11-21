@@ -14,6 +14,22 @@ export const ILORIN_BOUNDS: [[number, number], [number, number]] = [
 /** Lowest zoom the map allows: the whole city fits, nothing beyond it. */
 export const ILORIN_MIN_ZOOM = 10.5;
 
+/**
+ * Kwara State (owner decision, 21 Nov 2026): the store MAP may pan across
+ * Kwara so state landmarks (KWASU Malete, Offa, Jebba...) are visible. STORES
+ * stay Ilorin-only (inIlorin); the map still opens on Ilorin.
+ */
+export const KWARA_BOUNDS: [[number, number], [number, number]] = [
+  [7.75, 2.65],
+  [10.2, 6.25],
+];
+export const KWARA_MIN_ZOOM = 7;
+
+export function inKwara(lat: number, lng: number): boolean {
+  const [[s, w], [n, e]] = KWARA_BOUNDS;
+  return lat >= s && lat <= n && lng >= w && lng <= e;
+}
+
 export function inIlorin(lat: number, lng: number): boolean {
   const [[s, w], [n, e]] = ILORIN_BOUNDS;
   return lat >= s && lat <= n && lng >= w && lng <= e;

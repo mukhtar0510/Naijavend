@@ -137,14 +137,14 @@ const uiFlat: Array<[Kind, string]> = [
   ['connector', 'Connector line 2'], ['step', 'Step marker 1'], ['step', 'Step marker 2'], ['step', 'Step marker 3'],
 ];
 uiFlat.forEach(([kind, name], i) =>
-  layers.push(L({ name, type: '2d', band: 'E', kind, depth: 180 + i * 4, parallaxSpeed: 0.95, scrollRange: [i * 0.08, 1], tier: i < 3 ? 'lite' : 'standard', interaction: 'scroll', cost: 'low', x: 6 + i * 11, y: 20 + (i % 4) * 12, w: kind === 'connector' ? 140 : 44, h: 44, variant: i, label: name })),
+  layers.push(L({ name, type: '2d', band: 'E', kind, depth: 180 + i * 4, parallaxSpeed: 0.95, scrollRange: [i * 0.08, 1], tier: i < 3 ? 'lite' : 'standard', interaction: 'scroll', cost: 'low', x: 50 + i * 6, y: 20 + (i % 4) * 12, w: kind === 'connector' ? 140 : 44, h: 44, variant: i, label: name })),
 );
 const uiCards: Array<[string, string]> = [
   ['New order', 'info'], ['Awaiting your confirmation', 'warning'], ['Paid (confirmed by seller)', 'success'], ['Out for delivery', 'info'],
   ['Ready for pickup', 'primary'], ['Delivered', 'success'], ['Share your store link', 'primary'], ['Open now', 'accent'],
 ];
 uiCards.forEach(([label, tone], i) =>
-  layers.push(L({ name: `Floating card: ${label}`, type: '2.5d', band: 'E', kind: 'card', depth: 200 + i * 6, parallaxSpeed: 1.0 + (i % 3) * 0.06, scrollRange: [i * 0.07, 1], tier: i < 2 ? 'lite' : i < 5 ? 'standard' : 'full', interaction: 'hover', cost: 'low', x: [4, 40, 14, 48, 6, 32, 54, 24][i], y: [14, 10, 40, 38, 64, 58, 70, 86][i], w: 190, h: 52, tone, label })),
+  layers.push(L({ name: `Floating card: ${label}`, type: '2.5d', band: 'E', kind: 'card', depth: 200 + i * 6, parallaxSpeed: 1.0 + (i % 3) * 0.06, scrollRange: [i * 0.07, 1], tier: i < 2 ? 'lite' : i < 5 ? 'standard' : 'full', interaction: 'hover', cost: 'low', x: [56, 74, 60, 80, 54, 72, 84, 64][i], y: [12, 8, 34, 30, 58, 52, 72, 84][i], w: 190, h: 52, tone, label })),
 );
 
 // ---------------------------------------------------------------- F. Foreground (12 × 2D)

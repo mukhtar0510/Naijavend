@@ -27,6 +27,7 @@ import { StoreDesigner } from '@/components/brand/StoreDesigner';
 import type { Store, StoreRatingStats, StoreTheme } from '@idevtenancy/shared';
 import { LISTED_EXAMPLE_VALUES } from '@/lib/flags';
 import { CategoryIcon } from '@/lib/categories';
+import { LANDMARKS } from '@/lib/landmarks';
 import { Shirt as IcShirt, ShoppingBag as IcShoppingBag, Smartphone as IcSmartphone, Sparkles as IcSparkles, Store as IcStore, Truck as IcTruck, Utensils as IcUtensils } from 'lucide-react';
 
 export const revalidate = 60; // ISR — static-fast, invalidated on seller writes via revalidatePath
@@ -51,7 +52,9 @@ const HOME_CATEGORIES = [
 
 // Real Ilorin neighbourhoods, so the map band points at places a buyer can
 // actually walk to instead of cities the product does not serve yet.
-const ILORIN_AREAS = ['Tanke', 'Fate', 'Taiwo Road', 'Unity', 'GRA', 'Sango'];
+// Landmark quick-jumps for the map band (real OSM points, lib/landmarks.ts).
+const MAP_LANDMARKS = LANDMARKS.filter((l) => ['unilorin', 'alhikmah', 'kwasu', 'kwara-mall', 'emirate-mall', 'emirs-palace', 'offa'].includes(l.id));
+const HERO_CATEGORIES = ['food', 'beauty', 'fashion', 'electronics', 'groceries', 'home-services'];
 
 // PostgREST one-to-one embeds return objects, one-to-many arrays — normalise both.
 function one<T>(v: T | T[] | null | undefined): T | null {
@@ -62,8 +65,8 @@ function one<T>(v: T | T[] | null | undefined): T | null {
 const TRUST = [
   {
     icon: ShieldCheck,
-    title: 'Real Ilorin businesses',
-    text: 'Every store is a Kwara business with a public site and a pinned Ilorin address.',
+    title: 'Ilorin businesses',
+    text: 'Stores have a public site and a pinned Ilorin address. Stores marked Example show sample data.',
   },
   {
     icon: MapPin,
@@ -205,14 +208,21 @@ export default async function HomePage() {
 
             <Reveal delay={0.12}>
               <p className="nv-hero-sub">
-                Compare verified Kwara stores, see exactly where they are in Ilorin and what they
-                sell in naira, then order, book or chat on WhatsApp — without leaving the page.
+                Compare Ilorin stores, see exactly where they are and what they sell in naira, then
+                order, book or chat on WhatsApp without leaving the page.
               </p>
             </Reveal>
 
             <Reveal delay={0.18}>
               <div className="nv-hero-search">
                 <HeroSearch trending={trending} />
+              </div>
+              <div className="nv-hero-cats" role="list" aria-label="Popular categories">
+                {HERO_CATEGORIES.map((c) => (
+                  <Link key={c} role="listitem" href={`/discover?category=${c}`} className="chip">
+                    <CategoryIcon category={c} size={15} /> {categoryLabel(c)}
+                  </Link>
+                ))}
               </div>
             </Reveal>
 
@@ -221,8 +231,8 @@ export default async function HomePage() {
                 <Link href="/discover" className="btn btn-primary btn-lg">
                   Browse stores <ArrowRight size={17} />
                 </Link>
-                <Link href="/discover?open=1" className="btn btn-outline btn-lg">
-                  Open right now
+                <Link href="/map" className="btn btn-outline btn-lg">
+                  <MapPin size={17} aria-hidden /> Open the map
                 </Link>
               </div>
             </Reveal>
@@ -236,7 +246,7 @@ export default async function HomePage() {
                   <span><IcShirt className="ico-inline" aria-hidden /></span>
                 </span>
                 <p>
-                  <strong>Verified sellers, honest reviews</strong>
+                  <strong>Reviews only from real orders</strong>
                   <span>Naira prices · street-level map · no fake stars</span>
                 </p>
               </div>
@@ -527,18 +537,18 @@ export default async function HomePage() {
               </span>
               <h2 id="nv-map-title">Find out who&apos;s open near you</h2>
               <p>
-                Real addresses, live open-now status and walking or driving routes across Ilorin.
-                Share your location once — it stays in your browser.
+                Real addresses, live open-now status and directions from your exact spot, with
+                landmarks across Kwara. Your location stays in your browser.
               </p>
               <div className="nv-mapband-chips">
-                {ILORIN_AREAS.map((area) => (
-                  <Link key={area} href="/discover?view=map" className="nv-mapband-chip">
-                    {area}
+                {MAP_LANDMARKS.map((l) => (
+                  <Link key={l.id} href="/map" className="nv-mapband-chip">
+                    <MapPin size={12} aria-hidden /> {l.short ?? l.name}
                   </Link>
                 ))}
               </div>
               <div className="nv-mapband-actions">
-                <Link href="/discover?view=map" className="btn btn-white btn-lg">
+                <Link href="/map" className="btn btn-white btn-lg">
                   Open the map <ArrowRight size={16} />
                 </Link>
                 <Link href="/discover" className="btn btn-ghost-light btn-lg">
@@ -557,7 +567,7 @@ export default async function HomePage() {
               <span className="nv-mb-pin p3"><IcShirt className="ico-inline" aria-hidden /></span>
               <span className="nv-mb-pin p4"><IcSmartphone className="ico-inline" aria-hidden /></span>
               <span className="nv-mb-tag t1">Open now</span>
-              <span className="nv-mb-tag t2">1.2 km · 14 min walk</span>
+              <span className="nv-mb-tag t2">Directions in one tap</span>
             </div>
           </div>
         </div>

@@ -691,3 +691,41 @@ label { font-weight: 650; }
 .dh-empty-inline p { margin: 0; max-width: 36ch; }
 .dh-empty { display: grid; justify-items: center; gap: 10px; padding: 48px 20px; border: 1px solid var(--border); border-radius: 24px; background: var(--hero-glow), var(--surface); text-align: center; }
 .dh-empty-ico { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 20px; background: var(--primary-tint); color: var(--primary); }
+
+/* ======================================================= /home marketplace */
+.nv-hero {
+  background:
+    radial-gradient(700px 320px at 90% -10%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 70%),
+    radial-gradient(800px 360px at 0% 0%, color-mix(in srgb, var(--primary) 16%, transparent), transparent 70%),
+    var(--bg-0) !important;
+}
+[data-theme='dark'] .nv-hero {
+  background:
+    radial-gradient(700px 320px at 90% -10%, rgba(255, 182, 41, 0.14), transparent 70%),
+    radial-gradient(800px 360px at 0% 0%, rgba(79, 140, 255, 0.2), transparent 70%),
+    var(--surface) !important;
+}
+.nv-grad, .brand-grad { background: var(--grad-sun) !important; -webkit-background-clip: text !important; background-clip: text !important; color: transparent !important; }
+.nv-hero-cats { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 4px; }
+.nv-hero-cats .chip { background: var(--surface); }
+.nv-pill-dot { background: var(--accent) !important; box-shadow: 0 0 0 4px var(--accent-tint) !important; }
+.nv-avatars > span { background: var(--primary-tint) !important; color: var(--primary) !important; border-color: var(--surface) !important; }
+.nv-trust-ico, .nv-step-ico { background: var(--primary-tint) !important; color: var(--primary) !important; }
+.nv-step-num { color: var(--accent) !important; }
+.nv-mapband {
+  background:
+    radial-gradient(520px 300px at 100% 0%, rgba(255, 182, 41, 0.22), transparent 65%),
+    radial-gradient(600px 360px at 0% 100%, rgba(79, 140, 255, 0.35), transparent 65%),
+    linear-gradient(150deg, #05070b, #0b1226 60%, #0f1a36) !important;
+}
+.nv-mapband-chip { display: inline-flex; align-items: center; gap: 5px; }
+.nv-cta {
+  background:
+    radial-gradient(520px 260px at 100% 0%, rgba(255, 182, 41, 0.24), transparent 65%),
+    linear-gradient(140deg, #1d4ed8, #1e3a8a 70%, #0b1226) !important;
+}
+.nv-store-card { border-radius: 20px !important; transition: transform var(--dur-2) var(--ease-standard), box-shadow var(--dur-2) var(--ease-standard), border-color var(--dur-2) var(--ease-standard) !important; }
+.nv-store-card:hover { transform: translateY(-3px); border-color: var(--primary) !important; box-shadow: var(--shadow-md); }
+.nv-cat-tile { border-radius: 18px !important; }
+.nv-cat-tile:hover { border-color: var(--primary) !important; }
+@media (prefers-reduced-motion: reduce) { .nv-store-card:hover { transform: none; } }
