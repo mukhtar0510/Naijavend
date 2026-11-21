@@ -16,9 +16,11 @@ import type { GeoJSONSource, Marker } from 'maplibre-gl';
 import {
   ArrowLeft,
   Box,
+  ChevronDown,
   Clock,
   Flame,
   Layers,
+  List,
   LocateFixed,
   MapPin,
   MessageCircle,
@@ -61,7 +63,9 @@ export interface FullMapStore {
   hours: Record<string, [string, string] | null | undefined> | null;
 }
 
-type Sheet = 'peek' | 'half' | 'full';
+// 'closed' = fully hidden (owner, 21 Nov 2026: the sheet must be fully exitable);
+// a 'Show stores' pill brings it back.
+type Sheet = 'closed' | 'peek' | 'half' | 'full';
 type Row = FullMapStore & { km: number | null; open: boolean; hoursToday: string | null; area: string };
 
 const CLUSTER_PX = 50;
@@ -76,6 +80,8 @@ const esc = (s: string) =>
 
 // Lucide (ISC) glyphs as strings for landmark markers (plain HTML).
 const LM_PATHS: Record<LandmarkKind, string> = {
+  // Ilorin areas as landmarks: a simple map-pin.
+  area: '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>',
   university: '<path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>',
   polytechnic: '<path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>',
   palace: '<path d="M10 18v-7"/><path d="M11.12 2.198a2 2 0 0 1 1.76.006l7.866 3.847c.476.233.31.949-.22.949H3.474c-.53 0-.695-.716-.22-.949z"/><path d="M14 18v-7"/><path d="M18 18v-7"/><path d="M3 22h18"/><path d="M6 18v-7"/>',
@@ -217,7 +223,7 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
     const s = p.get('store');
     if (s && stores.some((x) => x.slug === s)) setSelected(s);
     const sh = p.get('sheet');
-    if (sh === 'half' || sh === 'full' || sh === 'peek') setSheet(sh);
+    if (sh === 'half' || sh === 'full' || sh === 'peek' || sh === 'closed') setSheet(sh);
     track('map_opened');
     return () => mq.removeEventListener('change', on);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once
@@ -445,7 +451,8 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
       const el = document.createElement('button');
       el.type = 'button';
       el.className = `fm-lm kind-${l.kind}${l.kind === 'town' ? ' is-town' : ''}`;
-      el.setAttribute('aria-label', `Landmark: ${l.name}, ${l.place}${l.precision === 'town' ? ' (approximate location, town centre)' : ''}`);
+      const approx = l.precision === 'town' ? ' (approximate location, town centre)' : l.precision === 'approx' ? ' (area centre, approximate)' : '';
+      el.setAttribute('aria-label', `${l.kind === 'area' ? 'Area' : 'Landmark'}: ${l.name}, ${l.place}${approx}`);
       if (l.precision === 'town') el.title = `${l.name}: approximate location (town centre)`;
       el.innerHTML = `<span class="fm-lm-dot">${landmarkSvg(l.kind)}</span><span class="fm-lm-label">${esc(l.short ?? l.name)}</span>`;
       el.addEventListener('click', (e) => {
@@ -563,7 +570,7 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
       } else if (e.key === 'Escape') {
         if (layersOpen) setLayersOpen(false);
         else if (selectedRef.current) setSelected(null);
-        else if (!desktop) setSheet('peek');
+        else if (!desktop) setSheet((s) => (s === 'peek' ? 'closed' : 'peek'));
         (document.activeElement as HTMLElement | null)?.blur?.();
       } else if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && !typing && rows.length) {
         e.preventDefault();
@@ -579,14 +586,22 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
 
   // ------------------------------------------------------- bottom sheet drag
   const drag = useRef<{ startY: number; startT: number; lastY: number; lastT: number; base: number } | null>(null);
+  // Snap points follow the real viewport (rotation, mobile browser bars).
+  const [vh, setVh] = useState(800);
+  useEffect(() => {
+    const on = () => setVh(window.innerHeight);
+    on();
+    window.addEventListener('resize', on);
+    return () => window.removeEventListener('resize', on);
+  }, []);
   const snapY = useCallback(
     (s: Sheet) => {
-      const h = typeof window === 'undefined' ? 800 : window.innerHeight;
       if (s === 'full') return 64;
-      if (s === 'half') return Math.round(h * 0.48);
-      return h - PEEK_PX;
+      if (s === 'half') return Math.round(vh * 0.48);
+      if (s === 'closed') return vh + 12; // fully off screen
+      return vh - PEEK_PX;
     },
-    [],
+    [vh],
   );
   const onDragStart = (e: React.PointerEvent) => {
     if (desktop) return;
@@ -600,7 +615,7 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
     const d = drag.current;
     const el = sheetRef.current;
     if (!d || !el) return;
-    const y = Math.max(snapY('full'), d.base + (e.clientY - d.startY));
+    const y = Math.min(vh, Math.max(snapY('full'), d.base + (e.clientY - d.startY)));
     el.style.transform = `translateY(${y}px)`;
     d.lastY = e.clientY;
     d.lastT = performance.now();
@@ -612,18 +627,22 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
     if (!d || !el) return;
     el.style.transition = '';
     const moved = e.clientY - d.startY;
+    // Always write the target position: if the snap point doesn't change,
+    // React won't re-apply the same inline style, and a cleared transform
+    // used to leave the sheet stuck at the top of the screen.
+    const go = (next: Sheet) => {
+      el.style.transform = `translateY(${snapY(next)}px)`;
+      setSheet(next);
+    };
     if (Math.abs(moved) < 6) {
       // a tap on the handle cycles up
-      setSheet((s) => (s === 'peek' ? 'half' : s === 'half' ? 'full' : 'half'));
-      el.style.transform = '';
+      go(sheet === 'peek' ? 'half' : sheet === 'half' ? 'full' : 'half');
       return;
     }
     const v = (e.clientY - d.lastY) / Math.max(1, performance.now() - d.lastT) + moved / Math.max(1, performance.now() - d.startT);
     const projected = d.base + moved + v * 220; // momentum
-    const opts: Sheet[] = ['full', 'half', 'peek'];
-    const best = opts.reduce((a, b) => (Math.abs(snapY(b) - projected) < Math.abs(snapY(a) - projected) ? b : a));
-    el.style.transform = '';
-    setSheet(best);
+    const opts: Sheet[] = ['full', 'half', 'peek', 'closed'];
+    go(opts.reduce((a, b) => (Math.abs(snapY(b) - projected) < Math.abs(snapY(a) - projected) ? b : a)));
   };
 
   // ----------------------------------------------------------------- render
@@ -845,7 +864,7 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onFocus={() => !desktop && setSheet((s) => (s === 'peek' ? 'half' : s))}
+            onFocus={() => !desktop && setSheet((s) => (s === 'peek' || s === 'closed' ? 'half' : s))}
             placeholder="Search a store, area or landmark"
             aria-label="Search stores, areas or landmarks in Ilorin"
             enterKeyHint="search"
@@ -920,6 +939,13 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
         <FAB icon={RotateCcw} label="Reset to Ilorin" onClick={resetIlorin} />
       </div>
 
+      {/* Sheet hidden: one pill brings it back (and the map is fully free). */}
+      {!desktop && sheet === 'closed' && (
+        <button type="button" className="fm-reopen glass" onClick={() => setSheet('peek')}>
+          <List size={17} aria-hidden /> Show {rows.length} store{rows.length === 1 ? '' : 's'}
+        </button>
+      )}
+
       {/* ------------------------------------- bottom sheet / desktop panel */}
       <aside
         ref={sheetRef}
@@ -932,7 +958,7 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
             className="fm-handle"
             role="button"
             tabIndex={0}
-            aria-label={`Store list, ${sheet === 'peek' ? 'collapsed' : sheet === 'half' ? 'half open' : 'expanded'}. Activate to expand.`}
+            aria-label={`Store list, ${sheet === 'peek' ? 'collapsed' : sheet === 'half' ? 'half open' : 'expanded'}. ${sheet === 'full' ? 'Activate to collapse.' : 'Activate to expand.'} Drag down to hide.`}
             onPointerDown={onDragStart}
             onPointerMove={onDragMove}
             onPointerUp={onDragEnd}
@@ -948,7 +974,25 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
           </div>
         )}
 
-        <div className="fm-sheet-head">
+        <div
+          className="fm-sheet-head"
+          onPointerDown={desktop ? undefined : onDragStart}
+          onPointerMove={desktop ? undefined : onDragMove}
+          onPointerUp={desktop ? undefined : onDragEnd}
+          onPointerCancel={desktop ? undefined : onDragEnd}
+        >
+          {!desktop && (
+            <button
+              type="button"
+              className="fm-sheet-close"
+              aria-label="Hide the store list"
+              title="Hide the store list"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={() => setSheet('closed')}
+            >
+              <X size={18} aria-hidden />
+            </button>
+          )}
           <h1>
             {rows.length} store{rows.length === 1 ? '' : 's'} in Ilorin
           </h1>
@@ -974,7 +1018,7 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
           </div>
         )}
 
-        {(desktop || sheet !== 'peek' || sel) && (
+        {(desktop || (sheet !== 'peek' && sheet !== 'closed') || sel) && (
           <div className="fm-sheet-body">
             {sel && <div className="fm-detail-wrap">{detail}</div>}
             <div className={`fm-browse${sel ? ' is-covered' : ''}`} aria-hidden={sel && desktop ? true : undefined}>
@@ -1006,12 +1050,51 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
                   }}
                 />
               </section>
-              <section className="fm-areas" aria-label="Places across Kwara">
-                <h2>Across Kwara</h2>
-                <div className="fm-chips is-wrap">
-                  {LANDMARKS.filter((l) => l.place !== 'Ilorin').map((l) => (
-                    <Chip key={l.id} label={l.short ?? l.name} icon={Landmark} onClick={() => flyLandmark(l)} />
-                  ))}
+              <section className="fm-areas" aria-label="Landmarks">
+                <h2>Landmarks</h2>
+                {/* Owner, 21 Nov 2026: landmarks in a dropdown too. A jump
+                    menu: pick one to fly there. */}
+                <div className="kv-area">
+                  <label className="kv-area-pill">
+                    <Landmark size={16} aria-hidden className="kv-area-pin" />
+                    <span className="sr-only">Fly to a landmark</span>
+                    <select
+                      className="kv-area-select"
+                      defaultValue=""
+                      onChange={(e) => {
+                        const l = LANDMARKS.find((x) => x.id === e.target.value);
+                        e.target.value = ''; // a jump menu: back to "Pick a landmark"
+                        if (l) flyLandmark(l);
+                      }}
+                    >
+                      <option value="">Pick a landmark</option>
+                      <optgroup label="Ilorin places">
+                        {LANDMARKS.filter((l) => l.place === 'Ilorin' && l.kind !== 'area').map((l) => (
+                          <option key={l.id} value={l.id}>
+                            {l.short ?? l.name}
+                          </option>
+                        ))}
+                      </optgroup>
+                      <optgroup label="Ilorin areas">
+                        {LANDMARKS.filter((l) => l.kind === 'area')
+                          .slice()
+                          .sort((a, b) => a.name.localeCompare(b.name))
+                          .map((l) => (
+                            <option key={l.id} value={l.id}>
+                              {l.name}
+                            </option>
+                          ))}
+                      </optgroup>
+                      <optgroup label="Across Kwara">
+                        {LANDMARKS.filter((l) => l.place !== 'Ilorin').map((l) => (
+                          <option key={l.id} value={l.id}>
+                            {(l.short ?? l.name) + ((l.short ?? l.name) === l.place ? '' : ` · ${l.place}`)}
+                          </option>
+                        ))}
+                      </optgroup>
+                    </select>
+                    <ChevronDown size={15} aria-hidden className="kv-area-chev" />
+                  </label>
                 </div>
               </section>
               <div className="fm-sort">

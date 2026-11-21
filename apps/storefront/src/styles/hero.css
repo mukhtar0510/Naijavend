@@ -235,3 +235,11 @@ html.reduce-effects .kvh-rise, html.reduce-effects .kvh-gold { animation: none; 
 /* More gold (owner, 21 Nov 2026) */
 .kvh-checks li { border-color: color-mix(in srgb, var(--gold-fill) 40%, var(--border)); }
 .kvh-frame { box-shadow: var(--e4), 0 30px 80px -30px color-mix(in srgb, var(--gold-fill) 35%, transparent); }
+
+/* Light mode: a solid gold highlighter under "hustle." (the sweep animates it in). */
+[data-theme='light'] .kvh-gold {
+  background-image: linear-gradient(transparent 58%, color-mix(in srgb, var(--gold-fill) 60%, transparent) 58%);
+  padding: 0 0.06em;
+}
+@media (prefers-reduced-motion: reduce) { [data-theme='light'] .kvh-gold { background-size: 100% 100%; } }
+html.reduce-effects[data-theme='light'] .kvh-gold { background-size: 100% 100%; }

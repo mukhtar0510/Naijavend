@@ -15,7 +15,7 @@ export const BRAND = {
   tagline: 'Your business deserves more than a WhatsApp catalogue.',
   description:
     'Kwaravend gives Nigerian sellers a real storefront — catalogue, orders, delivery tracking and a map — starting in Ilorin, Kwara State.',
-  domain: 'kwaravend.com',
+  domain: 'kwaravend.ng',
   supportWhatsApp: '',
   supportEmail: 'kwaravend@gmail.com',
   socials: {

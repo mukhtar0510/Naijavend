@@ -5,7 +5,9 @@
 // Patigi) are left out rather than guessed. Landmarks are reference points
 // only — stores stay Ilorin-only.
 
-export type LandmarkKind = 'university' | 'polytechnic' | 'palace' | 'mall' | 'market' | 'airport' | 'hospital' | 'stadium' | 'hill' | 'town' | 'museum';
+import { ILORIN_AREAS } from './ilorin';
+
+export type LandmarkKind = 'university' | 'polytechnic' | 'palace' | 'mall' | 'market' | 'airport' | 'hospital' | 'stadium' | 'hill' | 'town' | 'museum' | 'area';
 
 export interface Landmark {
   id: string;
@@ -16,13 +18,14 @@ export interface Landmark {
   lng: number;
   /** City/town it belongs to, for the label and search. */
   place: string;
-  /** 'town' = placed at the town centre because the exact campus isn't mapped in OSM. */
-  precision?: 'exact' | 'town';
+  /** 'town' = placed at the town centre because the exact campus isn't mapped in OSM.
+   *  'approx' = an Ilorin area centre (see lib/ilorin.ts), not an exact point. */
+  precision?: 'exact' | 'town' | 'approx';
   /** Campuses and big landmarks can be offered by sellers as delivery zones. */
   deliveryZone?: boolean;
 }
 
-export const LANDMARKS: readonly Landmark[] = [
+const PLACES: readonly Landmark[] = [
   // ---- Ilorin
   { id: 'unilorin', name: 'University of Ilorin', short: 'Unilorin', kind: 'university', lat: 8.47677, lng: 4.65851, place: 'Ilorin', deliveryZone: true },
   { id: 'alhikmah', name: 'Al-Hikmah University', short: 'Al-Hikmah', kind: 'university', lat: 8.48139, lng: 4.50383, place: 'Ilorin', deliveryZone: true },
@@ -51,6 +54,23 @@ export const LANDMARKS: readonly Landmark[] = [
   { id: 'tau', name: 'Thomas Adewumi University (TAU)', short: 'TAU', kind: 'university', lat: 8.15935, lng: 5.16111, place: 'Oko-Irese', precision: 'town', deliveryZone: true },
   { id: 'pategi', name: 'Pategi', kind: 'town', lat: 8.67046, lng: 5.81727, place: 'Pategi' },
 ];
+
+/**
+ * Ilorin areas (Taiwo Road, Asa-Dam, Eyenkorin, Tanke...) as landmarks too
+ * (owner, 21 Nov 2026), generated from the one area list in lib/ilorin.ts so
+ * the two never drift apart. Area centres are approximate.
+ */
+const AREA_LANDMARKS: readonly Landmark[] = ILORIN_AREAS.filter((a) => a.id !== 'centre').map((a) => ({
+  id: `area-${a.id}`,
+  name: a.label,
+  kind: 'area' as const,
+  lat: a.lat,
+  lng: a.lng,
+  place: 'Ilorin',
+  precision: 'approx' as const,
+}));
+
+export const LANDMARKS: readonly Landmark[] = [...PLACES, ...AREA_LANDMARKS];
 
 export function searchLandmarks(q: string): Landmark[] {
   const s = q.trim().toLowerCase();

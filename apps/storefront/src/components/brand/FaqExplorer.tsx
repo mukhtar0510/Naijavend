@@ -73,7 +73,7 @@ const FAQS: FaqItem[] = [
     text: 'cost price free commission subscription fees selling',
     answer: (
       <>
-        Free. Your own store website (<em>kwaravend.com/s/your-name</em>), catalogue, bookings, chat and analytics cost
+        Free. Your own store website (<em>kwaravend.ng/s/your-name</em>), catalogue, bookings, chat and analytics cost
         nothing to start. Create an account from the <Link href="/dashboard/signin">seller sign-in</Link> page.
       </>
     ),

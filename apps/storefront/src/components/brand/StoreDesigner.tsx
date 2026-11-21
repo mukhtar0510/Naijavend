@@ -340,7 +340,7 @@ export function StoreDesigner({ compact = false }: { compact?: boolean }) {
               <i />
               <i />
             </span>
-            <span className="sdg-browser-url">kwaravend.com/s/kwara-fashions</span>
+            <span className="sdg-browser-url">kwaravend.ng/s/kwara-fashions</span>
           </div>
 
           <div

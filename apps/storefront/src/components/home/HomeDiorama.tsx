@@ -18,15 +18,20 @@ import { useReduceEffects } from '@/lib/useReduceEffects';
 
 const COS = Math.cos(Math.PI / 6);
 const VB = { x: -190, y: -80, w: 380, h: 300 };
-const lats = ILORIN_AREAS.map((a) => a.lat);
-const lngs = ILORIN_AREAS.map((a) => a.lng);
-const [minLat, maxLat, minLng, maxLng] = [Math.min(...lats), Math.max(...lats), Math.min(...lngs), Math.max(...lngs)];
+// The diorama shows the city core. Areas far out (Unilorin, Ganmo,
+// Eyenkorin...) would squash everything else into the middle, so the scale is
+// set by this core box; outer areas get no block and their pins sit on the
+// nearest edge.
+const CORE = { minLat: 8.445, maxLat: 8.52, minLng: 4.5, maxLng: 4.625 };
+const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+const inCore = (lat: number, lng: number) =>
+  lat >= CORE.minLat && lat <= CORE.maxLat && lng >= CORE.minLng && lng <= CORE.maxLng;
 
 /** Area → iso grid position (0..200), north toward the back. */
 function grid(lat: number, lng: number) {
   return {
-    gx: 20 + ((lng - minLng) / (maxLng - minLng)) * 160,
-    gy: 20 + ((maxLat - lat) / (maxLat - minLat)) * 160,
+    gx: 20 + clamp01((lng - CORE.minLng) / (CORE.maxLng - CORE.minLng)) * 160,
+    gy: 20 + clamp01((CORE.maxLat - lat) / (CORE.maxLat - CORE.minLat)) * 160,
   };
 }
 function project(gx: number, gy: number, z: number) {
@@ -34,11 +39,13 @@ function project(gx: number, gy: number, z: number) {
 }
 
 // Deterministic heights so server and client draw the same scene.
-const BLOCKS = ILORIN_AREAS.map((a, i) => {
-  const { gx, gy } = grid(a.lat, a.lng);
-  const h = 14 + ((i * 37) % 26);
-  return { id: a.id, gx: gx - 7, gy: gy - 7, h, kind: (i % 5 === 2 ? 'stall' : 'building') as 'stall' | 'building' };
-}).sort((p, q) => p.gx + p.gy - (q.gx + q.gy));
+const BLOCKS = ILORIN_AREAS.filter((a) => inCore(a.lat, a.lng))
+  .map((a, i) => {
+    const { gx, gy } = grid(a.lat, a.lng);
+    const h = 14 + ((i * 37) % 26);
+    return { id: a.id, gx: gx - 5, gy: gy - 5, h, kind: (i % 5 === 2 ? 'stall' : 'building') as 'stall' | 'building' };
+  })
+  .sort((p, q) => p.gx + p.gy - (q.gx + q.gy));
 
 export interface DioramaPin {
   areaId: string;
@@ -69,7 +76,7 @@ export function HomeDiorama({
           {/* ground slab */}
           <IsoBlock x={0} y={0} w={200} d={200} h={4} kind="building" />
           {BLOCKS.map((b) => (
-            <IsoBlock key={b.id} x={b.gx} y={b.gy} w={14} d={14} h={b.h} kind={b.kind} windows={b.h > 24 ? 2 : 1} lit={0.55} />
+            <IsoBlock key={b.id} x={b.gx} y={b.gy} w={10} d={10} h={b.h} kind={b.kind} windows={b.h > 24 ? 2 : 1} lit={0.55} />
           ))}
         </IsoScene>
 

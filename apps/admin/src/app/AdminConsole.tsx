@@ -192,7 +192,7 @@ function labelTitle(code: string): string {
   return FLAG_LABEL_TEXT[code] ?? code.replace(/_/g, ' ');
 }
 
-const MARKETPLACE_URL = process.env.NEXT_PUBLIC_MARKETPLACE_URL || 'https://naijacart-roan.vercel.app';
+const MARKETPLACE_URL = process.env.NEXT_PUBLIC_MARKETPLACE_URL || 'https://kwaravend.ng';
 
 /* ------------------------------- Icons ---------------------------------- */
 // Inline 1.7px stroke icons keep the console dependency-free while giving the

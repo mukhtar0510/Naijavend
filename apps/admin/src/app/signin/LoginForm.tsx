@@ -43,7 +43,7 @@ export function LoginForm() {
           onChange={(e) => setEmail(e.target.value)}
           autoComplete="username"
           required
-          placeholder="you@kwaravend.com"
+          placeholder="you@kwaravend.ng"
         />
       </label>
       <label>

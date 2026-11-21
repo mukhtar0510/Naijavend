@@ -124,7 +124,7 @@ export default async function HomePage() {
 
   return (
     <main className="kvhome">
-      <HomeBrowser stores={stores} trending={trending} loadError={loadError} />
+      <HomeBrowser stores={stores} loadError={loadError} />
 
       <div className="container kvhome-body">
         <RecentlyViewed />

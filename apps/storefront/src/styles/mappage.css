@@ -456,7 +456,7 @@
 }
 .fm-lm-dot svg { transform: rotate(-45deg); }
 .fm-lm.kind-university .fm-lm-dot, .fm-lm.kind-polytechnic .fm-lm-dot { background: var(--primary); color: var(--on-primary); }
-.fm-lm.kind-hospital .fm-lm-dot { background: var(--danger); color: #fff; }
+.fm-lm.kind-hospital .fm-lm-dot { background: var(--danger); color: var(--on-danger); }
 .fm-lm.kind-town .fm-lm-dot { width: 18px; height: 18px; border-radius: 50%; background: var(--text); color: var(--surface); transform: none; }
 .fm-lm.kind-town .fm-lm-dot svg { display: none; }
 .fm-lm-label {
@@ -489,3 +489,50 @@
   border: 2px solid var(--surface);
   z-index: 1;
 }
+
+/* Ilorin areas as landmarks (Taiwo Road, Asa-Dam...): a small gold pin with
+   the area name shown once zoomed in, so buyers can orient by district. */
+.fm-lm.kind-area .fm-lm-dot { width: 22px; height: 22px; border-radius: 50%; transform: none; background: var(--gold-fill); color: var(--on-gold); }
+.fm-lm.kind-area .fm-lm-dot svg { transform: none; width: 12px; height: 12px; }
+.fm-lm.kind-area .fm-lm-label { font-weight: 800; }
+/* names appear with the zoom-in label switch (.show-labels), on hover and on focus */
+
+/* ---- Sheet can be fully hidden (owner, 21 Nov 2026) ---- */
+.fm:not(.is-desktop) .fm-sheet-head { position: relative; touch-action: none; cursor: grab; padding-right: 56px; }
+.fm-sheet-close {
+  position: absolute;
+  top: -4px;
+  right: 14px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+.fm-sheet-close:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.fm:not(.is-desktop) .fm-sheet.is-closed { visibility: hidden; transition: transform var(--dur-3) var(--ease-standard), visibility 0s linear var(--dur-3); }
+.fm-reopen {
+  position: fixed;
+  left: 50%;
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  z-index: 30;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--gold-fill) 55%, var(--glass-border));
+  color: var(--text);
+  font: 700 14.5px/1 var(--font-body);
+  box-shadow: var(--e4);
+  cursor: pointer;
+}
+.fm-reopen svg { color: var(--gold); }
+.fm-reopen:active { transform: translateX(-50%) scale(var(--press-scale)); }
+.fm-reopen:focus-visible { outline: none; box-shadow: var(--focus-ring), var(--e4); }

@@ -15,8 +15,6 @@ import { CategoryIcon } from '@/lib/categories';
 import { ILORIN_AREAS } from '@/lib/ilorin';
 import { SPRING, fadeUp, stagger, IN_VIEW } from '@/lib/motion';
 import { AreaSelector, useArea } from '@/components/shell/AreaSelector';
-import { HeroSearch } from '@/components/HeroSearch';
-import type { ProductCardItem } from '@/components/ProductCard';
 import { HomeDiorama, type DioramaPin } from './HomeDiorama';
 import { StoreCard } from './StoreCard';
 import type { HomeStore } from './types';
@@ -33,11 +31,9 @@ function areaDistance(a: string | null, b: string | null): number {
 
 export function HomeBrowser({
   stores,
-  trending,
   loadError,
 }: {
   stores: HomeStore[];
-  trending: ProductCardItem[];
   loadError: boolean;
 }) {
   const [area, setArea] = useArea();
@@ -79,6 +75,11 @@ export function HomeBrowser({
       .slice(0, 12);
   }, [inCategory, area, pinArea, isOpen]);
   const openCount = nearby.filter(isOpen).length;
+  // Open stores in the chosen area (or all of Ilorin) for the live line.
+  const openTotal = React.useMemo(
+    () => stores.filter((s) => isOpen(s) && (!area || s.areaId === area || areaDistance(s.areaId, area) < 0.0009)).length,
+    [stores, area, isOpen],
+  );
 
   const pins: DioramaPin[] = React.useMemo(() => {
     const byArea = new Map<string, number>();
@@ -117,8 +118,30 @@ export function HomeBrowser({
             <p className="kvhome-sub">
               Ilorin stores with real prices in naira. Order, book or chat on WhatsApp.
             </p>
-            <div className="kvhome-search">
-              <HeroSearch trending={trending} />
+            {/* Owner, 21 Nov 2026: no second search bar here (the header has
+                one). A live open-now line and two quick actions instead. */}
+            <p className="kvhome-live" aria-live="polite">
+              {now === null ? (
+                <span className="kvhome-live-text">Checking who is open…</span>
+              ) : openTotal > 0 ? (
+                <>
+                  <i className="kvhome-live-dot" aria-hidden />
+                  <span className="kvhome-live-text">
+                    <strong>{openTotal}</strong> {openTotal === 1 ? 'store is' : 'stores are'} open right now
+                    {areaLabel ? ` around ${areaLabel}` : ' in Ilorin'}
+                  </span>
+                </>
+              ) : (
+                <span className="kvhome-live-text">Nothing is open right now. You can still order for later.</span>
+              )}
+            </p>
+            <div className="kvhome-actions">
+              <Link href={area ? `/map?area=${area}` : '/map'} className="btn btn-primary btn-lg">
+                <MapIcon size={18} aria-hidden /> Explore the map
+              </Link>
+              <Link href="/discover" className="btn btn-outline btn-lg">
+                Browse all stores <ArrowRight size={17} aria-hidden />
+              </Link>
             </div>
           </div>
           <HomeDiorama

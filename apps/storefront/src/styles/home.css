@@ -30,7 +30,6 @@
 }
 .kvhome-gold { color: var(--gold); }
 .kvhome-sub { margin: 0; max-width: 46ch; color: var(--text-muted); font-size: 16px; line-height: 1.55; }
-.kvhome-search { width: 100%; max-width: 560px; }
 
 .kvd { position: relative; width: 100%; max-width: 560px; justify-self: center; }
 .kvd-stage { position: relative; }
@@ -273,8 +272,6 @@ html.reduce-effects .kvmini-plane { transform: none; }
 /* Grid children must be allowed to shrink, or the search card widens the column. */
 .kvhome-hero-inner > * { min-width: 0; }
 .kvhome-copy { width: 100%; }
-/* Phones already have a full search row in the header; don't repeat it. */
-@media (max-width: 860px) { .kvhome-search { display: none; } }
 
 /* Jumping to a section clears the sticky header and chip row. */
 .kvhome-section { scroll-margin-top: 190px; }
@@ -295,3 +292,27 @@ html.reduce-effects .kvmini-plane { transform: none; }
 }
 .kvs-card:hover { border-color: color-mix(in srgb, var(--gold-fill) 70%, transparent); }
 .kvhome-chips .chip.is-active .chip-count { background: var(--gold-fill); color: var(--on-gold); }
+
+/* Live open-now line + quick actions (replaced the second search bar). */
+.kvhome-live { display: inline-flex; align-items: center; gap: 8px; margin: 2px 0 0; color: var(--text); font-size: 15px; }
+.kvhome-live strong { font: 700 16px/1 var(--font-mono); }
+.kvhome-live-dot {
+  width: 9px;
+  height: 9px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--green) 60%, transparent);
+  animation: kvs-pulse 2s ease-out infinite;
+}
+@media (prefers-reduced-motion: reduce) { .kvhome-live-dot { animation: none; } }
+html.reduce-effects .kvhome-live-dot { animation: none; }
+.kvhome-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+@media (max-width: 479px) { .kvhome-actions .btn { flex: 1 1 100%; justify-content: center; } }
+
+/* Light mode: dark gold text alone reads brownish, so a gold highlighter sits
+   behind the key word (text stays #8A5F00 on ivory for contrast). */
+[data-theme='light'] .kvhome-gold {
+  background: linear-gradient(transparent 58%, color-mix(in srgb, var(--gold-fill) 60%, transparent) 58%) no-repeat;
+  padding: 0 0.06em;
+}
