@@ -47,6 +47,7 @@ import { ButtonLink, FAB } from '@/components/ui/button';
 import { VerifiedTick } from '@/components/VerifiedTick';
 import { ExampleTag } from '@/components/ExampleStoreBanner';
 import { StorePreview } from '@/components/map/StorePreview';
+import { storeMark } from '@/lib/store-mark';
 
 export interface FullMapStore {
   id: string;
@@ -57,6 +58,8 @@ export interface FullMapStore {
   lng: number;
   address: string | null;
   logo: string | null;
+  /** The store's theme accent colour, for its initials mark when there's no logo. */
+  accent?: string | null;
   verified: boolean;
   isExample: boolean;
   rating: number | null;
@@ -162,6 +165,21 @@ function routePulse(h: number) {
   return ['interpolate', ['linear'], ['line-progress'], ...stops.flat()];
 }
 
+/** Logo, or the store's initials on its colour (also when the logo fails to load). */
+function StoreMark({ store, large = false }: { store: Pick<FullMapStore, 'name' | 'slug' | 'logo' | 'accent'>; large?: boolean }) {
+  const [broken, setBroken] = useState(false);
+  if (store.logo && !broken) {
+    // eslint-disable-next-line @next/next/no-img-element -- seller-supplied remote URL
+    return <img src={store.logo} alt="" loading="lazy" onError={() => setBroken(true)} />;
+  }
+  const m = storeMark(store.name, store.slug, store.accent);
+  return (
+    <span className={`fm-mono${large ? ' is-lg' : ''}`} style={{ background: m.bg, color: m.fg }} aria-hidden>
+      {m.initials}
+    </span>
+  );
+}
+
 export function FullMap({ stores }: { stores: FullMapStore[] }) {
   const { origin, label: originLabel, state: locState, source: locSource, accuracy, locate, pickCity } = useViewerLocation({ live: true });
   const [ready, setReady] = useState(false);
@@ -236,7 +254,6 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
   const markersRef = useRef<Marker[]>([]);
   const markerBySlug = useRef<Map<string, Marker>>(new Map());
   const meRef = useRef<Marker | null>(null);
-  const spriteRef = useRef<HTMLDivElement | null>(null);
   const searchRef = useRef<HTMLInputElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
   const sheetRef = useRef<HTMLElement | null>(null);
@@ -481,8 +498,6 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
   }, [heatOn, ready, heatCount]);
 
   // ------------------------------------------------------- pins + clusters
-  const pinSvg = (category: string) =>
-    spriteRef.current?.querySelector(`[data-cat="${CSS.escape(category)}"]`)?.innerHTML ?? '';
 
   useEffect(() => {
     const map = mapRef.current;
@@ -538,8 +553,15 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
       el.className = `fm-pin${s.open ? ' is-open' : ''}${s.slug === selectedRef.current ? ' is-selected' : ''}`;
       el.style.setProperty('--ring', categoryColor(s.category));
       el.setAttribute('aria-label', `${s.name}, ${categoryMeta(s.category).label}${s.open ? ', open now' : ''}`);
-      const face = s.logo ? `<img src="${esc(s.logo)}" alt="" />` : pinSvg(s.category);
+      // The store's own logo; without one (or if it fails to load), its
+      // initials on its theme colour. The ring keeps the trade colour.
+      const mark = storeMark(s.name, s.slug, s.accent);
+      const mono = `<span class="fm-mono" style="background:${esc(mark.bg)};color:${esc(mark.fg)}">${esc(mark.initials)}</span>`;
+      const face = s.logo ? `<img src="${esc(s.logo)}" alt="" />` : mono;
       el.innerHTML = `<span class="fm-pin-face">${face}</span><span class="fm-pin-label">${esc(s.name)}</span>`;
+      el.querySelector('img')?.addEventListener('error', (ev) => {
+        (ev.currentTarget as HTMLElement).outerHTML = mono;
+      });
       el.addEventListener('click', (e) => {
         e.stopPropagation();
         setSelected(s.slug);
@@ -548,7 +570,6 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
       });
       markerBySlug.current.set(s.slug, add(el, s.lat, s.lng));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- pinSvg reads a ref
   }, [ready, rows, zoom, selected]);
 
   // Kwara landmarks: small labelled reference markers (not stores).
@@ -824,12 +845,7 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
       }}
     >
       <span className="fm-card-logo" style={{ ['--ring' as string]: categoryColor(s.category) }}>
-        {s.logo ? (
-          // eslint-disable-next-line @next/next/no-img-element -- seller-supplied remote URL
-          <img src={s.logo} alt="" loading="lazy" />
-        ) : (
-          <CategoryIcon category={s.category} size={20} />
-        )}
+        <StoreMark store={s} />
       </span>
       <span className="fm-card-body">
         <strong>
@@ -858,12 +874,7 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
     <div className="fm-detail" role="region" aria-label={`${sel.name} details`}>
       <div className="fm-detail-head">
         <span className="fm-card-logo is-lg" style={{ ['--ring' as string]: categoryColor(sel.category) }}>
-          {sel.logo ? (
-            // eslint-disable-next-line @next/next/no-img-element -- seller-supplied remote URL
-            <img src={sel.logo} alt="" />
-          ) : (
-            <CategoryIcon category={sel.category} size={24} />
-          )}
+          <StoreMark store={sel} large />
         </span>
         <div className="fm-detail-id">
           <h2>
@@ -1081,13 +1092,6 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
 
   return (
     <div className={`fm${desktop ? ' is-desktop' : ''}${zoom >= LABEL_ZOOM ? ' show-labels' : ''}${sel ? ' has-selection' : ''}`}>
-      <div ref={spriteRef} hidden aria-hidden>
-        {cats.map((c) => (
-          <span key={c} data-cat={c}>
-            <CategoryIcon category={c} size={20} />
-          </span>
-        ))}
-      </div>
 
       <div ref={mapEl} className="fm-map" role="application" aria-label="Map of stores in Kwara" />
       {fallback}

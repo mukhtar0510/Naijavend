@@ -48,7 +48,7 @@ const FullMap = dynamic(() => import('@/components/map/FullMap').then((m) => m.F
 
 type Row = Record<string, unknown> & {
   store_rating_stats?: Array<Pick<StoreRatingStats, 'review_count' | 'avg_stars'>> | Pick<StoreRatingStats, 'review_count' | 'avg_stars'> | null;
-  store_themes?: Array<Pick<StoreTheme, 'logo_url' | 'favicon_url'>> | Pick<StoreTheme, 'logo_url' | 'favicon_url'> | null;
+  store_themes?: Array<Pick<StoreTheme, 'logo_url' | 'favicon_url' | 'accent_color'>> | Pick<StoreTheme, 'logo_url' | 'favicon_url' | 'accent_color'> | null;
   whatsapp_settings?: Array<{ business_number: string }> | { business_number: string } | null;
 };
 const one = <T,>(v: T | T[] | null | undefined): T | null => (v == null ? null : Array.isArray(v) ? (v[0] ?? null) : v);
@@ -59,7 +59,7 @@ export default async function MapPage() {
     const { data } = await supabaseAnon()
       .from('stores')
       .select(
-        'id, slug, name, category, latitude, longitude, address, whatsapp_number, verification_status, is_example, business_hours, store_rating_stats(review_count, avg_stars), store_themes(logo_url, favicon_url), whatsapp_settings(business_number)',
+        'id, slug, name, category, latitude, longitude, address, whatsapp_number, verification_status, is_example, business_hours, store_rating_stats(review_count, avg_stars), store_themes(logo_url, favicon_url, accent_color), whatsapp_settings(business_number)',
       )
       .in('is_example', LISTED_EXAMPLE_VALUES)
       .not('latitude', 'is', null)
@@ -79,6 +79,7 @@ export default async function MapPage() {
           lng: Number(s.longitude),
           address: (s.address as string) || null,
           logo: theme?.logo_url ?? theme?.favicon_url ?? null,
+          accent: theme?.accent_color ?? null,
           verified: s.verification_status === 'verified',
           isExample: !!s.is_example,
           rating: stats?.avg_stars != null ? Number(stats.avg_stars) : null,

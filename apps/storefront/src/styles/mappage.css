@@ -655,3 +655,17 @@
 .fmp-card-price { font: 700 11.5px/1.2 var(--font-mono, monospace); color: var(--p-accent); }
 .fmp-empty { display: flex; align-items: center; gap: 6px; padding: 12px 10px 14px; font-size: 12.5px; color: var(--p-muted); }
 @media (prefers-reduced-motion: reduce) { .fmp-site { transition: none; } .fmp-site:hover { transform: none; } }
+
+/* Store initials mark (no logo uploaded): the store's own colour, not a trade icon. */
+.fm-mono {
+  display: grid; place-items: center;
+  width: 100%; height: 100%; border-radius: 50%;
+  font: 800 15px/1 var(--font-heading); letter-spacing: -0.02em;
+  user-select: none;
+}
+.fm-card-logo .fm-mono { font-size: 14px; }
+.fm-card-logo.is-lg .fm-mono, .fm-mono.is-lg { font-size: 18px; }
+/* Store pins sit above landmark markers so a landmark never hides a store's mark. */
+.maplibregl-marker.fm-pin { z-index: 3; }
+.maplibregl-marker.fm-pin.is-selected { z-index: 6; }
+.maplibregl-marker.fm-lm { z-index: 1; }
