@@ -144,7 +144,7 @@ export function ListingEditor({ storeId, listing }: { storeId: string; listing?:
         const init = await fetch('/api/listings/upload-video', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contentType: file.type }),
+          body: JSON.stringify({ contentType: file.type, size: file.size }),
         });
         const initBody = await init.json();
         if (!init.ok) throw new Error(initBody?.error?.message ?? 'Could not start the video upload.');

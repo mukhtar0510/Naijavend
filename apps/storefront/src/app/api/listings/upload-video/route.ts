@@ -9,6 +9,7 @@ import { apiError, apiOk, internalError } from '@/lib/api';
 import { rateLimit, clientIp } from '@/lib/ratelimit';
 
 const ALLOWED_VIDEO_TYPES = new Set(['video/mp4', 'video/webm', 'video/quicktime']);
+const MAX_VIDEO_BYTES = 60 * 1024 * 1024;
 const EXTENSIONS: Record<string, string> = {
   'video/mp4': 'mp4',
   'video/webm': 'webm',
@@ -35,6 +36,11 @@ export async function POST(req: NextRequest) {
 
   if (!ALLOWED_VIDEO_TYPES.has(contentType)) {
     return apiError(422, 'bad_type', 'Videos must be MP4, WebM or MOV.');
+  }
+  // The bucket also caps objects at 64 MB; this gives the seller a clear
+  // message before any bytes are sent.
+  if (typeof b.size === 'number' && (!Number.isFinite(b.size) || b.size <= 0 || b.size > MAX_VIDEO_BYTES)) {
+    return apiError(422, 'too_large', 'Videos must be 60 MB or smaller.');
   }
 
   try {

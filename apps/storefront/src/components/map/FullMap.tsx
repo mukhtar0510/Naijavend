@@ -12,7 +12,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import type { GeoJSONSource, Marker } from 'maplibre-gl';
+import type { ExpressionSpecification, GeoJSONSource, Map as MLMap, Marker } from 'maplibre-gl';
 import {
   ArrowLeft,
   Box,
@@ -46,6 +46,7 @@ import { Chip, SegmentedControl } from '@/components/ui/chip';
 import { ButtonLink, FAB } from '@/components/ui/button';
 import { VerifiedTick } from '@/components/VerifiedTick';
 import { ExampleTag } from '@/components/ExampleStoreBanner';
+import { StorePreview } from '@/components/map/StorePreview';
 
 export interface FullMapStore {
   id: string;
@@ -132,6 +133,35 @@ function waLink(num: string, store: string) {
   return `https://wa.me/${digits}?text=${text}`;
 }
 
+/* ---------------------------------------------------- route line tracer */
+const ROUTE_BLUE = '#4D94FF';
+const CLEAR = 'rgba(77, 148, 255, 0)';
+const ROUTE_FULL = ['interpolate', ['linear'], ['line-progress'], 0, ROUTE_BLUE, 1, ROUTE_BLUE] as unknown as ExpressionSpecification;
+const ROUTE_CLEAR = ['interpolate', ['linear'], ['line-progress'], 0, CLEAR, 1, CLEAR] as unknown as ExpressionSpecification;
+/** The route drawn from the start up to `p` (0..1). */
+function routeDrawn(p: number) {
+  const x = Math.min(0.999, Math.max(0.001, p));
+  return ['step', ['line-progress'], ROUTE_BLUE, x, CLEAR];
+}
+/** A bright pulse whose head is at `h` (0..1), with a fading tail behind it. */
+function routePulse(h: number) {
+  const tail = 0.16;
+  const stops: Array<[number, string]> = [];
+  const push = (at: number, c: string) => {
+    const v = Math.min(1, Math.max(0, at));
+    if (stops.length && v <= stops[stops.length - 1]![0]) return;
+    stops.push([v, c]);
+  };
+  push(0, CLEAR);
+  push(h - tail, CLEAR);
+  push(h - tail / 2, 'rgba(160, 200, 255, 0.55)');
+  push(h, 'rgba(255, 255, 255, 0.95)');
+  push(h + 0.02, CLEAR);
+  push(1, CLEAR);
+  if (stops.length < 2) return ROUTE_CLEAR;
+  return ['interpolate', ['linear'], ['line-progress'], ...stops.flat()];
+}
+
 export function FullMap({ stores }: { stores: FullMapStore[] }) {
   const { origin, label: originLabel, state: locState, source: locSource, accuracy, locate, pickCity } = useViewerLocation({ live: true });
   const [ready, setReady] = useState(false);
@@ -148,7 +178,45 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
   const [routeWanted, setRouteWanted] = useState(false);
   const [route, setRoute] = useState<RouteInfo | null>(null);
   const [routing, setRouting] = useState(false);
+  const [allSteps, setAllSteps] = useState(false);
   const reduceFx = useReduceEffects();
+  // Route line tracer: draw the route in from you to the store, then keep a
+  // bright pulse running along it. Off when effects are reduced.
+  const tracerRaf = useRef<number | null>(null);
+  const stopTracer = useCallback(() => {
+    if (tracerRaf.current != null) cancelAnimationFrame(tracerRaf.current);
+    tracerRaf.current = null;
+  }, []);
+  const startTracer = useCallback(
+    (map: MLMap, drawIn: boolean) => {
+      stopTracer();
+      const setPaint = (layer: string, v: unknown) => {
+        if (map.getLayer(layer)) map.setPaintProperty(layer, 'line-gradient', v as never);
+      };
+      if (reduceFx) {
+        setPaint('fm-route-line', ROUTE_FULL);
+        setPaint('fm-route-trace', ROUTE_CLEAR);
+        return;
+      }
+      const t0 = performance.now();
+      const DRAW = drawIn ? 900 : 0;
+      const LOOP = 2200;
+      const frame = (now: number) => {
+        const t = now - t0;
+        if (t < DRAW) {
+          setPaint('fm-route-line', routeDrawn(t / DRAW));
+          setPaint('fm-route-trace', ROUTE_CLEAR);
+        } else {
+          setPaint('fm-route-line', ROUTE_FULL);
+          setPaint('fm-route-trace', routePulse(((t - DRAW) % LOOP) / LOOP));
+        }
+        tracerRaf.current = requestAnimationFrame(frame);
+      };
+      tracerRaf.current = requestAnimationFrame(frame);
+    },
+    [reduceFx, stopTracer],
+  );
+  useEffect(() => stopTracer, [stopTracer]);
   const [can3d, setCan3d] = useState(false);
   const [base, setBase] = useState<'streets' | 'satellite'>('streets');
   const [layersOpen, setLayersOpen] = useState(false);
@@ -306,7 +374,8 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
 
         // Route to the selected store: solid for a road route, dashed for the
         // straight-line fallback. Blue = "on the way" (REDESIGN_V2 §2.6).
-        map.addSource('fm-route', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+        // lineMetrics: line-progress drives the animated tracer below.
+        map.addSource('fm-route', { type: 'geojson', lineMetrics: true, data: { type: 'FeatureCollection', features: [] } });
         map.addLayer({
           id: 'fm-route-casing',
           type: 'line',
@@ -321,7 +390,7 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
           source: 'fm-route',
           filter: ['==', ['get', 'real'], true],
           layout: { 'line-cap': 'round', 'line-join': 'round' },
-          paint: { 'line-color': '#4D94FF', 'line-width': 5, 'line-opacity': 0.95 },
+          paint: { 'line-width': 5, 'line-opacity': 0.95, 'line-gradient': ROUTE_FULL },
         });
         map.addLayer({
           id: 'fm-route-dash',
@@ -330,6 +399,15 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
           filter: ['==', ['get', 'real'], false],
           layout: { 'line-cap': 'round' },
           paint: { 'line-color': '#4D94FF', 'line-width': 4, 'line-opacity': 0.9, 'line-dasharray': [1.5, 2] },
+        });
+        // Line tracer: a bright pulse that runs along the route from you to
+        // the store (both the road route and the straight-line fallback).
+        map.addLayer({
+          id: 'fm-route-trace',
+          type: 'line',
+          source: 'fm-route',
+          layout: { 'line-cap': 'round', 'line-join': 'round' },
+          paint: { 'line-width': 9, 'line-blur': 3, 'line-gradient': ROUTE_CLEAR },
         });
 
         const sync = () => setZoom(Math.round(map.getZoom() * 2) / 2);
@@ -557,6 +635,7 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
   useEffect(() => {
     setRouteWanted(false);
     setRoute(null);
+    setAllSteps(false);
   }, [selected]);
   useEffect(() => {
     const map = mapRef.current;
@@ -564,6 +643,7 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
     const src = map?.getSource('fm-route') as GeoJSONSource | undefined;
     if (!ready || !map || !lib || !src) return;
     if (!routeWanted || !sel || !distOrigin) {
+      stopTracer();
       src.setData({ type: 'FeatureCollection', features: [] });
       setRouting(false);
       if (!routeWanted) setRoute(null);
@@ -580,6 +660,7 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
           properties: { real: r.real },
           geometry: { type: 'LineString', coordinates: r.coords.map(([la, ln]) => ll(la, ln)) },
         });
+        startTracer(map, r.real && !reduceFx);
         const b = new lib.LngLatBounds();
         for (const [la, ln] of r.coords) b.extend(ll(la, ln));
         map.fitBounds(b, { padding: desktop ? { top: 90, bottom: 60, left: 460, right: 80 } : { top: 140, bottom: Math.round(window.innerHeight * 0.55), left: 40, right: 70 }, maxZoom: 16, duration: 700 });
@@ -588,7 +669,10 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
       .catch(() => {
         /* aborted: a newer request took over */
       });
-    return () => ctrl.abort();
+    return () => {
+      ctrl.abort();
+      stopTracer();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch only when these change
   }, [ready, routeWanted, routeProfile, sel?.slug, distOrigin?.lat, distOrigin?.lng]);
 
@@ -848,14 +932,31 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
           Directions
         </ButtonLink>
       </div>
+      <StorePreview slug={sel.slug} />
       <div className="fm-route" aria-live="polite">
         <h3>
           <Navigation size={15} aria-hidden /> The way here
         </h3>
         {!distOrigin ? (
-          <p className="fm-route-note">
-            Tap <strong>Locate me</strong> or pick your area to see the route on the map.
-          </p>
+          <>
+            <p className="fm-route-note" role={locState === 'denied' || locState === 'error' ? 'alert' : undefined}>
+              {locState === 'locating'
+                ? 'Finding your location…'
+                : locState === 'denied'
+                  ? 'Location is blocked for this site, so we can’t draw the way from you. Allow location in your browser settings, or pick your area under Areas in Ilorin.'
+                  : locState === 'error'
+                    ? 'Your location isn’t available right now (no GPS fix, or this device has no location). Try again near a window, or pick your area under Areas in Ilorin.'
+                    : outside
+                      ? 'You’re outside Kwara, so the route can’t start from your location. Pick an Ilorin area under Areas in Ilorin to start from there.'
+                      : 'Share your location or pick your area to see the route, distance and time on the map.'}
+            </p>
+            {locState !== 'locating' && locState !== 'denied' && (
+              <button type="button" className="btn btn-primary btn-sm fm-route-go" onClick={locateMe}>
+                <LocateFixed size={15} aria-hidden /> {locState === 'error' ? 'Try again' : 'Use my location'}
+              </button>
+            )}
+            <p className="fm-route-privacy">Your location stays on this device. Kwaravend&apos;s servers never receive it.</p>
+          </>
         ) : (
           <>
             <SegmentedControl
@@ -881,13 +982,19 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
                 </p>
                 {route.steps.length > 0 && (
                   <ol className="fm-route-steps">
-                    {route.steps.slice(0, 6).map((st, i) => (
+                    {(allSteps ? route.steps : route.steps.slice(0, 6)).map((st, i) => (
                       <li key={i}>
                         {st.text}
                         {st.m > 0 && <em> · {st.m >= 1000 ? `${(st.m / 1000).toFixed(1)} km` : `${st.m} m`}</em>}
                       </li>
                     ))}
-                    {route.steps.length > 6 && <li className="fm-route-more">Open Directions for the full turn-by-turn.</li>}
+                    {route.steps.length > 6 && (
+                      <li className="fm-route-more">
+                        <button type="button" className="btn btn-ghost btn-sm" onClick={() => setAllSteps((v) => !v)} aria-expanded={allSteps}>
+                          {allSteps ? 'Show fewer steps' : `Show all ${route.steps.length} steps`}
+                        </button>
+                      </li>
+                    )}
                   </ol>
                 )}
                 <button type="button" className="btn btn-ghost btn-sm" onClick={() => setRouteWanted(false)}>
@@ -896,8 +1003,9 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
               </>
             ) : null}
             <p className="fm-route-privacy">
-              From {locSource === 'gps' ? 'your location' : (originLabel ?? 'your area')}. The route is worked out by
-              OpenStreetMap&apos;s routing service, which receives the two points only when you tap the button.
+              From {locSource === 'gps' ? 'your location' : (originLabel ?? 'your area')}. Your location stays on this device and is
+              never sent to Kwaravend. The route is worked out by OpenStreetMap&apos;s routing service, which receives the two points
+              only when you tap the button.
             </p>
           </>
         )}

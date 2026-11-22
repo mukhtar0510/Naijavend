@@ -22,6 +22,7 @@ import { formatHours } from '@/lib/hours';
 import { siteUrl, schemaTypeForCategory } from '@/lib/site';
 import { FEATURES } from '@/lib/flags';
 import { ExampleStoreBanner } from '@/components/ExampleStoreBanner';
+import { ListingCardMedia } from '@/components/ListingCardMedia';
 import type { Listing, Store, StoreRating, StoreRatingStats, StoreTheme } from '@idevtenancy/shared';
 import { Calendar as IcCalendar, Globe as IcGlobe, MapPin as IcMapPin, ShoppingBag as IcShoppingBag, Truck as IcTruck } from 'lucide-react';
 
@@ -352,22 +353,18 @@ export default async function StorePage({ params }: { params: { slug: string } }
               const cover = (listing.image_urls ?? []).find((u) => typeof u === 'string' && /^https?:\/\//.test(u)) ?? null;
               return (
               <div key={listing.id} className="card listing-card tilt-card">
-                {cover ? (
-                  <Link href={`/s/${store.slug}/listing/${listing.id}`} aria-label={listing.title}>
-                    {/* eslint-disable-next-line @next/next/no-img-element -- seller-supplied remote URL */}
-                    <img
-                      src={cover}
-                      alt=""
-                      className="catalogue-cover"
-                    />
-                  </Link>
-                ) : (
-                  <Link href={`/s/${store.slug}/listing/${listing.id}`} aria-label={listing.title}>
+                <ListingCardMedia
+                  href={`/s/${store.slug}/listing/${listing.id}`}
+                  cover={cover}
+                  videoUrl={listing.video_url}
+                  title={listing.title}
+                  playable
+                  fallback={
                     <div className="catalogue-cover-fallback" aria-hidden>
                       {listing.type === 'service' ? <IcCalendar className="ico-inline" aria-hidden /> : <IcShoppingBag className="ico-inline" aria-hidden />}
                     </div>
-                  </Link>
-                )}
+                  }
+                />
                 <Link href={`/s/${store.slug}/listing/${listing.id}`} style={{ color: 'inherit' }}>
                   <h3 style={{ margin: 0, fontSize: 17 }}>{listing.title}</h3>
                 </Link>

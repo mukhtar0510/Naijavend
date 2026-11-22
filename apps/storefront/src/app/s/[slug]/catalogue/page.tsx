@@ -1,3 +1,4 @@
+import { ListingCardMedia } from '@/components/ListingCardMedia';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { supabaseAnon } from '@/lib/supabase';
@@ -73,14 +74,16 @@ export default async function CataloguePage({
               const cover = (listing.image_urls ?? []).find((u) => typeof u === 'string' && /^https?:\/\//.test(u)) ?? null;
               return (
                 <Link key={listing.id} href={`/s/${s.slug}/listing/${listing.id}`} className="card catalogue-card">
-                  {cover ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- seller-supplied remote URL
-                    <img className="catalogue-cover" src={cover} alt={listing.title} loading="lazy" decoding="async" />
-                  ) : (
-                    <div className="catalogue-cover-fallback" aria-hidden>
-                      <CategoryIcon category={'general'} />
-                    </div>
-                  )}
+                  <ListingCardMedia
+                    cover={cover}
+                    videoUrl={listing.video_url}
+                    title={listing.title}
+                    fallback={
+                      <div className="catalogue-cover-fallback" aria-hidden>
+                        <CategoryIcon category={'general'} />
+                      </div>
+                    }
+                  />
                   <span className={`badge ${listing.type === 'service' ? '' : 'badge-blue'}`}>
                     {listing.type === 'service' ? 'Service' : 'Product'}
                   </span>

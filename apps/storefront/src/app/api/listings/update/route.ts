@@ -42,6 +42,9 @@ export async function POST(req: NextRequest) {
     if (okVideo) videoUrl = b.videoUrl;
   }
   if (b.videoUrl === null) videoUrl = null;
+  // Only touch video_url when the client sent the field: an edit that leaves
+  // it out must not silently delete the listing's video.
+  const videoPatch = 'videoUrl' in b ? { video_url: videoUrl } : {};
 
   // Empty strings mean "not provided" — Number('') is 0, which would
   // silently save stock 0 ("Sold out") or a 0 compare-at price.
@@ -102,7 +105,7 @@ export async function POST(req: NextRequest) {
         stock: isProduct ? stock : null,
         ai_generated_description: b.aiDescription === true,
         image_urls: imageUrls,
-        video_url: videoUrl,
+        ...videoPatch,
         ...searchPatch,
         updated_at: new Date().toISOString(),
       })
@@ -126,7 +129,7 @@ export async function POST(req: NextRequest) {
           stock: isProduct ? stock : null,
           ai_generated_description: b.aiDescription === true,
           image_urls: imageUrls,
-          video_url: videoUrl,
+          ...videoPatch,
           updated_at: new Date().toISOString(),
         })
         .eq('id', listingId)

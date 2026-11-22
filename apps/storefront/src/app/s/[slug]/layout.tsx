@@ -14,17 +14,8 @@ import { OpenBadge } from '@/components/OpenBadge';
 import { BackToMarket } from '@/components/BackToMarket';
 import { InstagramIcon, XIcon, FacebookIcon, TikTokIcon, YouTubeIcon } from '@/components/SocialIcons';
 import type { StoreSocialLinks, StoreTheme } from '@idevtenancy/shared';
-import { CURSIVE_FONTS, BACKGROUND_GRADIENTS, isBackgroundGradient, STORE_TEMPLATES } from '@idevtenancy/shared';
-import { effectivePlan } from '@/lib/plans';
-
-/** A paid template only shows while the plan that allows it is active; otherwise Modern. */
-function allowedLayout(layout: string | null | undefined, store: { plan?: string | null; plan_expires_at?: string | null }): string {
-  const l = layout ?? 'modern';
-  const limit = effectivePlan(store).limits.templates;
-  if (limit == null) return l;
-  const i = STORE_TEMPLATES.findIndex((t) => t.id === l);
-  return i >= 0 && i < limit ? l : 'modern';
-}
+import { CURSIVE_FONTS, BACKGROUND_GRADIENTS, isBackgroundGradient } from '@idevtenancy/shared';
+import { allowedLayout } from '@/lib/store-layout';
 
 const SOCIAL_META: Array<{ key: keyof StoreSocialLinks; label: string; Icon: (p: { size?: number }) => React.ReactNode; prefix: string }> = [
   { key: 'instagram', label: 'Instagram', Icon: InstagramIcon, prefix: 'https://instagram.com/' },
