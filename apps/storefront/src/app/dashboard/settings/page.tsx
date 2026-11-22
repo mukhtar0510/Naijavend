@@ -12,6 +12,7 @@ import { ThemeSetting } from '@/components/ThemeSetting';
 import { LocationsCard, type LocationRow } from './LocationsCard';
 import { GalleryCard } from './GalleryCard';
 import { OwnStorePreview } from '@/components/preview/OwnStorePreview';
+import { BankDetailsCard } from './BankCard';
 import type { Store, StoreSocialLinks, StoreTheme, WhatsAppSettings } from '@idevtenancy/shared';
 
 export const dynamic = 'force-dynamic';
@@ -57,6 +58,15 @@ export default async function SettingsPage({ searchParams }: { searchParams?: { 
     .eq('store_id', s.id)
     .order('position', { ascending: true });
   const locations = (locationRows ?? []) as unknown as LocationRow[];
+  // Bank details for transfers (owner-only table; null before the migration).
+  const { data: bankRow } = await sb
+    .from('store_bank_accounts')
+    .select('bank_name, account_name, account_number')
+    .eq('store_id', s.id)
+    .maybeSingle();
+  const bank = bankRow
+    ? { bankName: bankRow.bank_name as string, accountName: bankRow.account_name as string, accountNumber: bankRow.account_number as string }
+    : null;
   const gallery = Array.isArray(theme?.gallery_urls) ? (theme!.gallery_urls as string[]) : [];
 
   return (
@@ -96,6 +106,9 @@ export default async function SettingsPage({ searchParams }: { searchParams?: { 
               }}
               whatsapp={wa ? { businessNumber: wa.business_number, greetingMessage: wa.greeting_message, catalogEnabled: wa.catalog_enabled } : null}
             />
+            <div style={{ marginTop: 16 }}>
+              <BankDetailsCard initial={bank} />
+            </div>
           </section>
         }
         announcement={

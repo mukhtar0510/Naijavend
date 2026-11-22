@@ -5,12 +5,16 @@ import Link from 'next/link';
 import { orderRef } from '@idevtenancy/shared';
 import { PAYMENT_METHOD_LABEL, type PaymentMethod } from '@/lib/payments';
 import { PaymentProofUpload } from './PaymentProofUpload';
-import { ArrowLeft, CircleCheck, Download, Star, Store, Zap } from 'lucide-react';
+import { ArrowLeft, CircleCheck, Copy, Download, Landmark, Star, Store, Truck, Zap } from 'lucide-react';
 import { OrderStepper } from '@/components/orders/OrderStepper';
 import { zoneLabel } from '@/lib/deliveryZones';
+import '../../../../styles/checkout.css';
 
 interface CheckoutData {
   orderId: string;
+  trackingToken?: string | null;
+  deliveryStatus?: string | null;
+  bank?: { bankName: string; accountName: string; accountNumber: string } | null;
   storeName: string;
   storeSlug: string;
   totalKobo: number;
@@ -49,14 +53,15 @@ export default function CheckoutPage({
 
   useEffect(() => {
     if (!orderId) return;
-    fetch(`/api/checkout-summary?orderId=${encodeURIComponent(orderId)}`)
+    // The private pay link (?pt=) unlocks the seller's bank details for this order only.
+    fetch(`/api/checkout-summary?orderId=${encodeURIComponent(orderId)}${payToken ? `&pt=${encodeURIComponent(payToken)}` : ''}`)
       .then(async (res) => {
         const body = await res.json();
         if (!res.ok) throw new Error(body?.error?.message ?? 'Could not load this order.');
         setData(body);
       })
       .catch((err: Error) => setError(err.message));
-  }, [orderId]);
+  }, [orderId, payToken]);
 
   if (error && !data) {
     return (
@@ -171,10 +176,21 @@ export default function CheckoutPage({
           <h2 id="pay-title">How to pay</h2>
           {data.paymentMethod === 'bank_transfer' ? (
             <>
-              <p style={{ marginTop: 0 }}>
-                Transfer <strong className="mono">{naira(data.totalKobo)}</strong> to {data.storeName} using the account
-                details they gave you, then upload the receipt below so they can confirm it.
-              </p>
+              {data.bank ? (
+                <>
+                  <p style={{ marginTop: 0 }}>
+                    Transfer <strong className="mono">{naira(data.totalKobo)}</strong> to {data.storeName}, then upload the
+                    receipt below so they can confirm it.
+                  </p>
+                  <BankCard bank={data.bank} amount={naira(data.totalKobo)} reference={orderRef(data.orderId)} />
+                </>
+              ) : (
+                <p style={{ marginTop: 0 }}>
+                  Transfer <strong className="mono">{naira(data.totalKobo)}</strong> to {data.storeName} using the account
+                  details they gave you, then upload the receipt below so they can confirm it.
+                  {payToken ? '' : ' (Open this page from the link you got when you ordered to see their bank details.)'}
+                </p>
+              )}
               <PaymentProofUpload orderId={data.orderId} token={payToken} existingUrl={data.paymentProofUrl ?? null} />
             </>
           ) : data.paymentMethod === 'pay_on_pickup' ? (
@@ -212,6 +228,11 @@ export default function CheckoutPage({
       )}
 
       <div className="order-actions">
+        {data.trackingToken && (
+          <Link className="btn btn-primary" href={`/track/${data.trackingToken}`}>
+            <Truck size={16} aria-hidden /> Track your delivery
+          </Link>
+        )}
         {paid && (
           <Link className="btn btn-primary" href={`/s/${data.storeSlug}/rate`}>
             <Star size={16} aria-hidden /> Rate this store
@@ -222,5 +243,65 @@ export default function CheckoutPage({
         </Link>
       </div>
     </main>
+  );
+}
+
+/** Seller's bank details with copy buttons (only shown to this order's buyer). */
+function BankCard({
+  bank,
+  amount,
+  reference,
+}: {
+  bank: { bankName: string; accountName: string; accountNumber: string };
+  amount: string;
+  reference: string;
+}) {
+  const [copied, setCopied] = useState<string | null>(null);
+  async function copy(label: string, value: string) {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(label);
+      window.setTimeout(() => setCopied(null), 2000);
+    } catch {
+      /* clipboard blocked: the text is still visible */
+    }
+  }
+  return (
+    <div className="bank-card">
+      <div className="bank-card-head">
+        <Landmark size={18} aria-hidden /> {bank.bankName}
+      </div>
+      <dl>
+        <div>
+          <dt>Account number</dt>
+          <dd>
+            <span className="mono bank-card-num">{bank.accountNumber}</span>
+            <button type="button" className="btn btn-outline btn-sm" onClick={() => copy('number', bank.accountNumber)}>
+              <Copy size={14} aria-hidden /> {copied === 'number' ? 'Copied' : 'Copy'}
+            </button>
+          </dd>
+        </div>
+        <div>
+          <dt>Account name</dt>
+          <dd>{bank.accountName}</dd>
+        </div>
+        <div>
+          <dt>Amount</dt>
+          <dd className="mono">{amount}</dd>
+        </div>
+        <div>
+          <dt>Use this as the narration</dt>
+          <dd>
+            <span className="mono">{reference}</span>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => copy('ref', reference)}>
+              <Copy size={14} aria-hidden /> {copied === 'ref' ? 'Copied' : 'Copy'}
+            </button>
+          </dd>
+        </div>
+      </dl>
+      <p className="bank-card-note">
+        You pay the seller directly. Kwaravend never holds your money and never asks you to pay into any other account.
+      </p>
+    </div>
   );
 }

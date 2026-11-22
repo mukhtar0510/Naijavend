@@ -4,6 +4,7 @@ import { NextRequest } from 'next/server';
 import { supabaseService } from '@/lib/supabase';
 import { apiError, apiOk, internalError } from '@/lib/api';
 import { rateLimit, clientIp } from '@/lib/ratelimit';
+import { verifyPayToken } from '@/lib/paytoken';
 
 export async function GET(req: NextRequest) {
   const rl = rateLimit(`checkout-summary:${clientIp(req)}`, 30, 60_000);
@@ -56,8 +57,27 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    // Tracking link for delivered orders (T09). Best-effort before the migration.
+    const { data: delivery } = await sb.from('deliveries').select('tracking_token, status').eq('order_id', order.id).maybeSingle();
+
+    // Where to transfer: only for bank-transfer orders, and only to the holder
+    // of this order's private pay link (?pt=), never to anyone with the id.
+    let bank: { bankName: string; accountName: string; accountNumber: string } | null = null;
+    const pt = req.nextUrl.searchParams.get('pt') ?? '';
+    if (order.payment_method === 'bank_transfer' && pt && verifyPayToken(order.id, pt)) {
+      const { data: acct } = await sb
+        .from('store_bank_accounts')
+        .select('bank_name, account_name, account_number')
+        .eq('store_id', order.store_id)
+        .maybeSingle();
+      if (acct) bank = { bankName: acct.bank_name, accountName: acct.account_name, accountNumber: acct.account_number };
+    }
+
     return apiOk({
       orderId: order.id,
+      trackingToken: (delivery as { tracking_token?: string } | null)?.tracking_token ?? null,
+      deliveryStatus: (delivery as { status?: string } | null)?.status ?? null,
+      bank,
       status: order.status,
       totalKobo: order.total_kobo,
       deliveryMethod: order.delivery_method ?? '',

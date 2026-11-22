@@ -13,6 +13,8 @@ const NAV = [
   { href: '/dashboard/pos', label: 'POS' },
   { href: '/dashboard/listings', label: 'Listings' },
   { href: '/dashboard/orders', label: 'Orders' },
+  { href: '/dashboard/dispatch', label: 'Dispatch' },
+  { href: '/dashboard/riders', label: 'Riders' },
   { href: '/dashboard/bookings', label: 'Bookings' },
   { href: '/dashboard/customers', label: 'Customers' },
   { href: '/dashboard/staff', label: 'Staff' },

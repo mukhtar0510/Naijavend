@@ -1,0 +1,122 @@
+/* Delivery tracking (T09): seller dispatch board and riders, buyer tracking
+   page, rider page. Tokens only. Status colours follow REDESIGN_V2 §2.6:
+   waiting = warning, assigned/on the way = blue, delivered = green,
+   failed/returned = danger. Always with a label. */
+
+/* ---------- Riders ---------- */
+.dsp-form { display: grid; gap: 10px; padding: 16px; }
+.dsp-form-row { display: grid; gap: 8px; }
+@media (min-width: 760px) { .dsp-form-row { grid-template-columns: 1.2fr 1fr 0.8fr auto; } }
+.dsp-riders { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.dsp-rider { display: flex; align-items: center; gap: 12px; padding: 12px 14px; }
+.dsp-rider.is-off { opacity: 0.6; }
+.dsp-rider-ico { display: grid; place-items: center; width: 40px; height: 40px; flex: none; border-radius: 12px; background: var(--primary-tint); color: var(--primary); }
+.dsp-rider-main { display: grid; gap: 1px; flex: 1; min-width: 0; font-size: 13.5px; }
+.dsp-rider-main strong { font-size: 15px; }
+.dsp-rider-actions { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+
+/* ---------- Dispatch board ---------- */
+.dsp-tabs { display: flex; gap: 8px; overflow-x: auto; margin: 6px 0 12px; scrollbar-width: none; }
+.dsp-tabs .chip { flex: none; }
+.dsp-board { display: grid; gap: 14px; }
+.dsp-col { display: none; gap: 10px; align-content: start; }
+.dsp-col.is-current { display: grid; }
+.dsp-col h2 { display: none; margin: 0; font-size: 15px; align-items: center; gap: 6px; }
+@media (min-width: 1100px) {
+  .dsp-tabs { display: none; }
+  .dsp-board { grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: start; }
+  .dsp-col, .dsp-col.is-current { display: grid; padding: 10px; border-radius: 16px; background: var(--bg-1); border: 1px solid var(--border); }
+  .dsp-col h2 { display: flex; }
+}
+.dsp-empty { margin: 0; color: var(--text-muted); font-size: 13px; }
+.dsp-card { display: grid; gap: 8px; padding: 12px; border-left: 4px solid var(--border-strong); }
+.dsp-card.is-awaiting_dispatch { border-left-color: var(--warning); }
+.dsp-card.is-assigned, .dsp-card.is-picked_up, .dsp-card.is-in_transit, .dsp-card.is-arrived { border-left-color: var(--primary); }
+.dsp-card.is-delivered { border-left-color: var(--green); }
+.dsp-card.is-failed_attempt, .dsp-card.is-returned { border-left-color: var(--danger); }
+.dsp-card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.dsp-badge { font-size: 11.5px; }
+.dsp-badge.is-delivered { background: var(--green-tint); color: var(--green); }
+.dsp-badge.is-failed_attempt, .dsp-badge.is-returned { background: var(--danger-tint); color: var(--danger); }
+.dsp-badge.is-awaiting_dispatch { background: var(--warning-tint); color: var(--warning); }
+.dsp-line { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin: 0; font-size: 13.5px; }
+.dsp-line svg { color: var(--text-muted); }
+.dsp-line.is-warn { color: var(--danger); font-weight: 600; }
+.dsp-links, .dsp-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.dsp-assign { display: grid; grid-template-columns: 1fr; gap: 6px; width: 100%; }
+@media (min-width: 480px) { .dsp-assign { grid-template-columns: 1fr 1fr auto; } }
+.dsp-sub { display: grid; gap: 8px; padding: 10px; border-radius: 12px; background: var(--surface-raised); }
+.dsp-sub details { display: grid; gap: 6px; font-size: 13px; }
+.dsp-sub summary { cursor: pointer; color: var(--text-muted); }
+.dsp-field { display: grid; gap: 4px; font-size: 13px; font-weight: 600; }
+.dsp-field .input { font-size: 20px; letter-spacing: 0.3em; max-width: 160px; }
+.dsp-reasons { display: flex; flex-wrap: wrap; gap: 6px; }
+.dsp-err { margin: 0; color: var(--danger); font-size: 13px; font-weight: 600; }
+.dsp-missing { display: grid; gap: 8px; margin-bottom: 14px; padding: 14px; }
+.dsp-missing h2 { margin: 0; font-size: 15px; }
+.dsp-missing ul { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.dsp-missing li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-size: 14px; }
+
+/* ---------- Buyer tracking page ---------- */
+.trk { display: grid; gap: 14px; max-width: 640px; margin: 0 auto; padding: 20px 16px 40px; }
+.trk-head { display: flex; gap: 14px; align-items: center; padding: 18px; border-radius: 20px; background: var(--surface); border: 1px solid var(--border); }
+.trk-head-ico { display: grid; place-items: center; width: 52px; height: 52px; flex: none; border-radius: 16px; background: var(--primary-tint); color: var(--primary); }
+.trk-head.is-delivered .trk-head-ico { background: var(--green-tint); color: var(--green); }
+.trk-head.is-failed_attempt .trk-head-ico, .trk-head.is-returned .trk-head-ico { background: var(--danger-tint); color: var(--danger); }
+.trk-head h1 { margin: 2px 0 0; font: 800 clamp(22px, 5vw, 28px)/1.15 var(--font-display); letter-spacing: -0.02em; }
+.trk-ref { margin: 0; color: var(--text-muted); font-size: 13px; }
+.trk-eta { display: inline-flex; align-items: center; gap: 5px; margin: 4px 0 0; color: var(--text); font-size: 14px; font-weight: 600; }
+.trk-steps { display: grid; gap: 0; margin: 0; padding: 4px 0 4px 6px; list-style: none; }
+.trk-steps li { position: relative; display: flex; align-items: center; gap: 12px; min-height: 34px; color: var(--text-muted); font-size: 14px; }
+.trk-steps li + li::before { content: ''; position: absolute; left: 6px; top: -17px; height: 34px; width: 2px; background: var(--border-strong); z-index: 0; }
+.trk-steps li.is-done + li::before, .trk-steps li.is-current::before { background: var(--green); }
+.trk-dot { position: relative; z-index: 1; width: 14px; height: 14px; flex: none; border-radius: 50%; border: 2px solid var(--border-strong); background: var(--bg-0); }
+.trk-steps li.is-done { color: var(--text); }
+.trk-steps li.is-done .trk-dot { border-color: var(--green); background: var(--green); }
+.trk-steps li.is-current { color: var(--text); font-weight: 700; }
+.trk-steps li.is-current .trk-dot { border-color: var(--primary); background: var(--primary); box-shadow: 0 0 0 4px var(--primary-tint); }
+.trk-code { display: flex; gap: 12px; align-items: center; padding: 16px; border: 1.5px solid var(--gold-fill); background: linear-gradient(160deg, var(--gold-tint), var(--surface) 60%); }
+.trk-code > svg { color: var(--gold); flex: none; }
+.trk-code p { margin: 0; font-size: 13.5px; font-weight: 600; }
+.trk-code strong { display: block; margin: 2px 0; font-size: 30px; letter-spacing: 0.12em; }
+.trk-code span { color: var(--text-muted); font-size: 12px; }
+.trk-rider { display: flex; align-items: center; gap: 10px; padding: 14px; }
+.trk-rider > div { display: grid; flex: 1; min-width: 0; font-size: 13px; }
+.trk-rider strong { font-size: 16px; }
+.trk-rider-ico { display: grid; place-items: center; width: 42px; height: 42px; flex: none; border-radius: 50%; background: var(--primary-tint); color: var(--primary); }
+.trk-fail { display: grid; gap: 8px; padding: 16px; border-color: color-mix(in srgb, var(--danger) 40%, var(--border)); }
+.trk-fail h2 { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 16px; color: var(--danger); }
+.trk-fail p { margin: 0; font-size: 14px; }
+.trk-fail .btn { justify-self: start; }
+.trk-mapcard { display: grid; gap: 8px; padding: 10px; }
+.trk-map { height: 220px; border-radius: 14px; overflow: hidden; background: var(--bg-1); }
+.trk-map-note { margin: 0 4px; color: var(--text-muted); font-size: 12px; }
+.trk-pin { display: block; width: 22px; height: 22px; border-radius: 50%; border: 3px solid var(--surface); box-shadow: var(--e3); }
+.trk-pin.is-store { background: var(--primary); }
+.trk-pin.is-drop { background: var(--gold-fill); border-radius: 50% 50% 50% 0; transform: rotate(-45deg); }
+.trk-timeline, .trk-summary { display: grid; gap: 8px; padding: 16px; }
+.trk-timeline h2, .trk-summary h2 { margin: 0; font-size: 15px; }
+.trk-timeline ol { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.trk-timeline li { display: grid; grid-template-columns: 92px 1fr; gap: 8px; font-size: 13.5px; }
+.trk-timeline em { color: var(--text-muted); font-style: normal; }
+.trk-when { color: var(--text-muted); font-size: 12.5px; }
+.trk-summary ul { margin: 0; padding-left: 18px; font-size: 14px; }
+.trk-summary p { margin: 0; }
+.trk-store { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-weight: 600; }
+
+/* ---------- Rider page ---------- */
+.rdr { display: grid; gap: 12px; max-width: 520px; margin: 0 auto; padding: 18px 16px 40px; }
+.rdr h1 { margin: 0; font: 800 22px/1.2 var(--font-display); }
+.rdr-store { margin: 0; color: var(--text-muted); font-size: 13px; font-weight: 600; }
+.rdr-block { display: grid; gap: 8px; padding: 16px; }
+.rdr-block h2 { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 15px; }
+.rdr-block p { margin: 0; font-size: 14.5px; }
+.rdr-block.is-collect { border: 1.5px solid var(--gold-fill); background: var(--gold-tint); }
+.rdr-block.is-done { display: flex; align-items: center; gap: 8px; color: var(--green); font-weight: 700; }
+.rdr-where { font-size: 17px !important; font-weight: 700; }
+.rdr-links { display: flex; flex-wrap: wrap; gap: 8px; }
+.rdr-actions .btn-lg { width: 100%; justify-content: center; }
+.rdr-otp { display: grid; gap: 8px; }
+.rdr-otp label { display: grid; gap: 4px; font-weight: 700; font-size: 14px; }
+.rdr-otp .input { font-size: 28px; letter-spacing: 0.4em; text-align: center; }
+.rdr-foot { font-size: 13px; }

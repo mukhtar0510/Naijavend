@@ -12,6 +12,7 @@ import { mintPayToken } from '@/lib/paytoken';
 import { parseCartLines, sanitizeText, isValidPhone } from '@idevtenancy/shared';
 import { isZoneId, zoneLabel, zonesOf } from '@/lib/deliveryZones';
 import { ILORIN_AREAS, inIlorin } from '@/lib/ilorin';
+import { ensureDelivery } from '@/lib/delivery';
 
 // Idempotency cache keyed by CALLER IP + the client-supplied key — the raw key
 // alone would let anyone replay another buyer's key and receive their orderId.
@@ -230,6 +231,18 @@ export async function POST(req: NextRequest) {
       if (payMethodErr) console.warn('[create-order] payment_method not stored:', payMethodErr.message);
     }
 
+    // Delivery tracking (T09): rider, courier and campus orders get a delivery
+    // straight away so the buyer's confirmation page has a tracking link.
+    // Best-effort: a missing table must never cost the buyer their order.
+    let trackingToken: string | null = null;
+    if (delivering || deliveryMethod === 'zone') {
+      try {
+        trackingToken = (await ensureDelivery(sb, { id: atomicOrderId, store_id: store.id }))?.tracking_token ?? null;
+      } catch (e) {
+        console.warn('[create-order] delivery not created:', (e as Error).message);
+      }
+    }
+
     if (cacheKey) {
       if (idempotencyCache.size >= IDEMPOTENCY_MAX_ENTRIES) {
         const now = Date.now();
@@ -250,7 +263,7 @@ export async function POST(req: NextRequest) {
     // paid without it, so a random orderId is not enough to complete payment.
     const payToken = mintPayToken(atomicOrderId);
 
-    return apiOk({ orderId: atomicOrderId, totalKobo, discountKobo, discountCode: appliedCode, deliveryMethod, deliveryFeeKobo, payToken }, 201);
+    return apiOk({ orderId: atomicOrderId, totalKobo, discountKobo, discountCode: appliedCode, deliveryMethod, deliveryFeeKobo, payToken, trackingToken }, 201);
   } catch (err) {
     return internalError('create-order', err);
   }

@@ -7,6 +7,7 @@
 
 import * as React from 'react';
 import type { Marker } from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import { LocateFixed, MapPin, Trash2 } from 'lucide-react';
 import { createThemedMap, ll, type ThemedMap } from '@/lib/mapFactory';
 import { ILORIN_BOUNDS, ILORIN_CENTER, ILORIN_MIN_ZOOM, inIlorin } from '@/lib/ilorin';
