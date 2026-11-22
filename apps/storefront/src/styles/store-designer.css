@@ -289,3 +289,15 @@
 .nv-home .nv-cat-tile:hover { border-color: var(--gold, #a16207); }
 .nv-home .nv-store-card:hover { border-color: var(--gold, #a16207); }
 .nv-home .nv-section-link:hover { color: var(--gold, #a16207); }
+
+/* Button shape (pill / rounded / flat) — preview mirrors the live store CSS. */
+.sdg-shapes { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 12px; }
+.sdg-shapes > span { font-size: 13px; font-weight: 700; color: var(--text-2, inherit); }
+.sdg-page[data-buttons] .btn,
+.sdg-page[data-buttons] .sdg-ghost-btn { transition: border-radius .2s ease; }
+.sdg-page[data-buttons='pill'] .btn,
+.sdg-page[data-buttons='pill'] .sdg-ghost-btn { border-radius: 999px; }
+.sdg-page[data-buttons='rounded'] .btn,
+.sdg-page[data-buttons='rounded'] .sdg-ghost-btn { border-radius: 8px; }
+.sdg-page[data-buttons='square'] .btn,
+.sdg-page[data-buttons='square'] .sdg-ghost-btn { border-radius: 2px; }

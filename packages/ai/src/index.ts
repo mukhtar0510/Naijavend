@@ -13,6 +13,7 @@ import type {
 // shared, so fraud checks behave identically with and without a model key.
 import { assessReview, detectScamPhrases } from '@idevtenancy/shared';
 import { readableTextOn, isDarkHex } from './color';
+import { buttonShapeFor } from './button-shape';
 import { GeminiProvider, GEMINI_DEFAULT_MODEL } from './gemini';
 
 export interface AiRequest {
@@ -773,7 +774,11 @@ class DummyProvider implements AiProvider {
 
     if (req.feature === 'style_store') {
       const base = CATEGORY_PRESETS[category] ?? CATEGORY_PRESETS.general;
-      const draft: AiStyleDraft = refineBrief(input.toLowerCase(), base);
+      const refined = refineBrief(input.toLowerCase(), base);
+      const draft: AiStyleDraft = { ...refined, button_shape: buttonShapeFor(input, refined.layout) };
+      if (draft.button_shape === 'pill') draft.note += ' Pill-shaped buttons.';
+      else if (draft.button_shape === 'square') draft.note += ' Flat, square-cornered buttons.';
+      else draft.note += ' Softly rounded buttons.';
       return { draft, tokensUsed, provider: this.name };
     }
 
@@ -974,6 +979,8 @@ function withTimeout<T>(promise: Promise<T>): Promise<T> {
 }
 
 /** aiComplete — the one entry point the rest of the suite calls. */
+export { buttonShapeFor, explicitButtonShape, type ButtonShape } from './button-shape';
+
 export async function aiComplete(req: AiRequest): Promise<AiResponse> {
   const primary = getProvider();
   try {

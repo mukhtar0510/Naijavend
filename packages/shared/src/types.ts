@@ -332,6 +332,8 @@ export interface AiStyleDraft {
   text_color?: string | null;
   heading_color?: string | null;
   muted_color?: string | null;
+  /** Store button corners: pill, rounded or square ("flat"). */
+  button_shape?: 'pill' | 'rounded' | 'square';
   note: string;
 }
 

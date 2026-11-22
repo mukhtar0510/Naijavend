@@ -86,6 +86,7 @@ export default async function SettingsPage({ searchParams }: { searchParams?: { 
       bodyFont: `'${theme?.font_body ?? 'Inter'}', system-ui, sans-serif`,
       heroStyle: (theme?.hero_style ?? 'gradient') as DesignerSeller['theme']['heroStyle'],
       dark: lum < 110,
+      buttonShape: (['pill', 'rounded', 'square'].includes(String(theme?.button_shape)) ? theme?.button_shape : 'rounded') as DesignerSeller['theme']['buttonShape'],
     },
     templateLimit: plan.limits.templates,
     planName: plan.name,

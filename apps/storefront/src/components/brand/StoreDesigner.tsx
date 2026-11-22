@@ -5,7 +5,8 @@
 //   1. the template gallery (all 20 layouts, 7 marked as Starter),
 //   2. the AI theme designer, which turns a one-line vibe brief into colours,
 //      fonts and a layout for the live preview.
-// Everything here is illustrative: it never reads or writes a real store.
+// On "/" it is illustrative. With `seller` (Settings > Look & feel) it starts
+// from the store's look and "Save to my store" writes it, button shape included.
 
 import { useMemo, useState } from 'react';
 import { Check, Loader2, Sparkles, Wand2 } from 'lucide-react';
@@ -26,7 +27,16 @@ export interface ThemeState {
   bodyFont: string;
   heroStyle: 'gradient' | 'image' | 'solid';
   dark: boolean;
+  /** Store button corners; "square" is shown to sellers as Flat. */
+  buttonShape: ButtonShape;
 }
+
+export type ButtonShape = 'pill' | 'rounded' | 'square';
+const SHAPES: Array<{ id: ButtonShape; label: string }> = [
+  { id: 'rounded', label: 'Rounded' },
+  { id: 'pill', label: 'Pill' },
+  { id: 'square', label: 'Flat' },
+];
 
 const DEFAULT_THEME: ThemeState = {
   accent: '#a16207',
@@ -37,6 +47,7 @@ const DEFAULT_THEME: ThemeState = {
   bodyFont: "'Inter', system-ui, sans-serif",
   heroStyle: 'gradient',
   dark: false,
+  buttonShape: 'rounded',
 };
 
 // Keyless-safe presets. They use the same shape the AI returns, so the preview
@@ -47,7 +58,7 @@ const PRESETS: Array<{ label: string; theme: ThemeState; note: string }> = [
     theme: {
       accent: '#a16207', accentSoft: '#ca8a04', accentText: '#ffffff',
       bg: '#fffdf7', headingFont: "'Playfair Display', serif",
-      bodyFont: "'Inter', system-ui, sans-serif", heroStyle: 'gradient', dark: false,
+      bodyFont: "'Inter', system-ui, sans-serif", heroStyle: 'gradient', dark: false, buttonShape: 'rounded',
     },
     note: 'Warm parchment page, gold buttons, serif headlines — premium but friendly.',
   },
@@ -56,7 +67,7 @@ const PRESETS: Array<{ label: string; theme: ThemeState; note: string }> = [
     theme: {
       accent: '#007a4a', accentSoft: '#0f9d63', accentText: '#ffffff',
       bg: '#ffffff', headingFont: "'Sora', 'Inter', sans-serif",
-      bodyFont: "'Inter', system-ui, sans-serif", heroStyle: 'solid', dark: false,
+      bodyFont: "'Inter', system-ui, sans-serif", heroStyle: 'solid', dark: false, buttonShape: 'square',
     },
     note: 'Clean white storefront with Naija green calls to action.',
   },
@@ -65,7 +76,7 @@ const PRESETS: Array<{ label: string; theme: ThemeState; note: string }> = [
     theme: {
       accent: '#e0a106', accentSoft: '#f3bb2f', accentText: '#0b0c0e',
       bg: '#0b0c0e', headingFont: "'Space Grotesk', sans-serif",
-      bodyFont: "'Inter', system-ui, sans-serif", heroStyle: 'gradient', dark: true,
+      bodyFont: "'Inter', system-ui, sans-serif", heroStyle: 'gradient', dark: true, buttonShape: 'square',
     },
     note: 'Dark stage, glowing gold accents — night-market energy.',
   },
@@ -74,7 +85,7 @@ const PRESETS: Array<{ label: string; theme: ThemeState; note: string }> = [
     theme: {
       accent: '#be1e6b', accentSoft: '#e8558e', accentText: '#ffffff',
       bg: '#fff7fa', headingFont: "'Fraunces', serif",
-      bodyFont: "'DM Sans', system-ui, sans-serif", heroStyle: 'gradient', dark: false,
+      bodyFont: "'DM Sans', system-ui, sans-serif", heroStyle: 'gradient', dark: false, buttonShape: 'pill',
     },
     note: 'Soft pink wash with rounded cards — good for cakes and gifts.',
   },
@@ -101,6 +112,7 @@ interface AiStyleResult {
   hero_style: 'gradient' | 'image' | 'solid';
   background_color: string;
   text_color?: string | null;
+  button_shape?: ButtonShape;
   note: string;
 }
 
@@ -167,6 +179,7 @@ export function StoreDesigner({ compact = false, seller }: { compact?: boolean; 
           fontHeading: fontName(theme.headingFont),
           fontBody: fontName(theme.bodyFont),
           heroStyle: theme.heroStyle,
+          buttonShape: theme.buttonShape,
         }),
       });
       const body = await res.json().catch(() => null);
@@ -211,6 +224,7 @@ export function StoreDesigner({ compact = false, seller }: { compact?: boolean; 
         bodyFont: `'${style.font_body}', system-ui, sans-serif`,
         heroStyle: style.hero_style,
         dark: isDarkHex(style.background_color),
+        buttonShape: style.button_shape ?? 'rounded',
       });
       setNote(style.note);
     } catch (err) {
@@ -368,6 +382,24 @@ export function StoreDesigner({ compact = false, seller }: { compact?: boolean; 
               </button>
             ))}
           </div>
+
+          <div className="sdg-shapes">
+            <span>Buttons</span>
+            <div className="sdg-tabs" role="radiogroup" aria-label="Button shape">
+              {SHAPES.map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={theme.buttonShape === s.id}
+                  className={`sdg-tab sdg-shape-${s.id}${theme.buttonShape === s.id ? ' is-active' : ''}`}
+                  onClick={() => setTheme({ ...theme, buttonShape: s.id })}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {seller && (
@@ -416,6 +448,7 @@ export function StoreDesigner({ compact = false, seller }: { compact?: boolean; 
             className={`site-shell sdg-page${compact ? ' is-compact' : ''}`}
             data-layout={template}
             data-hero-bg={theme.heroStyle === 'solid' ? 'true' : undefined}
+            data-buttons={theme.buttonShape}
             style={previewVars}
           >
             <div className="sdg-masthead">

@@ -11,6 +11,7 @@
 //   throws; aiComplete then degrades to the deterministic dummy provider so
 //   seller flows never break on a bad AI day.
 
+import { buttonShapeFor } from './button-shape';
 import type {
   AiStoreDraft, AiListingDraft, AiStyleDraft, AiAssistantDraft, AiSocialPostDraft, AiImageDraft,
   AiSuggestRepliesDraft, AiTranslationDraft, AiInsightDraft, AiModerationDraft, LanguageCode,
@@ -133,15 +134,16 @@ const FEATURES: Record<AiRequest['feature'], FeatureSpec> = {
       [
         `Design a store theme for this brief: "${input}"`,
         'Respond as JSON with exactly these keys:',
-        '{"accent_color": "#RRGGBB", "accent_soft": "#RRGGBB", "accent_text": "#RRGGBB", "font_heading": string, "font_body": string, "layout": string, "hero_style": string, "background_color": "#RRGGBB", "note": string}',
+        '{"accent_color": "#RRGGBB", "accent_soft": "#RRGGBB", "accent_text": "#RRGGBB", "font_heading": string, "font_body": string, "layout": string, "hero_style": string, "background_color": "#RRGGBB", "button_shape": string, "note": string}',
         `- font_heading and font_body: two DIFFERENT fonts from this list: ${STORE_FONTS.join(', ')}.`,
         `- layout: exactly one of: ${STORE_LAYOUTS.join(', ')}.`,
         '- hero_style: "gradient", "image" or "solid".',
+        '- button_shape: "pill" (fully round), "rounded" (soft corners) or "square" (flat, sharp corners). Follow the brief if it mentions round, pill, flat or square buttons.',
         '- accent_color: the main brand colour; accent_soft: a lighter companion tone; accent_text: black or white — whichever is readable on accent_color.',
         '- background_color: usually near-white (#FAFAFA to #FFFFFF). Only choose a dark background if the brief explicitly asks for dark, and then keep every hex readable.',
         '- note: one friendly sentence (max 140 characters) explaining the look.',
       ].join('\n'),
-    sanitize: (parsed): AiStyleDraft => {
+    sanitize: (parsed, input): AiStyleDraft => {
       const accent_color = hexOr(parsed.accent_color, '#1D4ED8');
       const accent_soft = hexOr(parsed.accent_soft, '#3B82F6');
       const background_color = hexOr(parsed.background_color, '#FFFFFF');
@@ -164,6 +166,7 @@ const FEATURES: Record<AiRequest['feature'], FeatureSpec> = {
         layout,
         hero_style: HERO_STYLES.has(heroStyle) ? (heroStyle as AiStyleDraft['hero_style']) : 'gradient',
         background_color,
+        button_shape: buttonShapeFor(input, layout, parsed.button_shape),
         note,
       };
       // Dark backgrounds are only readable with the optional light-text trio.
