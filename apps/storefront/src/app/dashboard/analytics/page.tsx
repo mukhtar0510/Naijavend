@@ -1,3 +1,4 @@
+import '../../../styles/crm.css';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getSellerClient, getOwnStore } from '@/lib/auth';
@@ -120,6 +121,28 @@ export default async function AnalyticsPage() {
   const conversions = paidOrders + (bookingsCount ?? 0);
   const conversionRate = totalVisits > 0 ? ((conversions / totalVisits) * 100).toFixed(1) : '0.0';
 
+  // Delivery performance (T09/T10), last 30 days. Read-only for owners via RLS;
+  // empty (and hidden) before the delivery migration is applied.
+  const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const { data: dRows } = await sb
+    .from('deliveries')
+    .select('status, failure_reason, created_at, delivered_at')
+    .eq('store_id', store.id)
+    .gte('created_at', since30);
+  const dList = (dRows ?? []) as Array<{ status: string; failure_reason: string; created_at: string; delivered_at: string | null }>;
+  const dDelivered = dList.filter((d) => d.status === 'delivered');
+  const dFailedEver = dList.filter((d) => d.failure_reason).length;
+  const avgMins = dDelivered.length
+    ? Math.round(dDelivered.reduce((a, d) => a + (new Date(d.delivered_at ?? d.created_at).getTime() - new Date(d.created_at).getTime()), 0) / dDelivered.length / 60000)
+    : 0;
+  const reasons = Object.entries(
+    dList.reduce<Record<string, number>>((acc, d) => {
+      if (d.failure_reason) acc[d.failure_reason] = (acc[d.failure_reason] ?? 0) + 1;
+      return acc;
+    }, {}),
+  ).sort((a, b) => b[1] - a[1]);
+  const fmtDuration = (m: number) => (m < 60 ? `${m} min` : m < 1440 ? `${Math.round(m / 6) / 10} h` : `${Math.round(m / 144) / 10} days`);
+
   return (
     <main>
       <h1>Analytics</h1>
@@ -186,6 +209,34 @@ export default async function AnalyticsPage() {
           <TopReferrers data={topReferrers.map(([label, count]) => ({ label, count }))} total={attributedViews || 1} />
         )}
       </div>
+
+      {dList.length > 0 && (
+        <div className="card" style={{ marginTop: 16 }}>
+          <h2 style={{ fontSize: 18 }}>Deliveries — last 30 days</h2>
+          <div className="crm-kpis" style={{ marginTop: 8 }}>
+            <div>
+              <span>Delivered</span>
+              <strong>
+                {dDelivered.length} / {dList.length}
+              </strong>
+            </div>
+            <div>
+              <span>Had a failed attempt</span>
+              <strong>{Math.round((dFailedEver / dList.length) * 100)}%</strong>
+            </div>
+            <div>
+              <span>Order to door, average</span>
+              <strong>{dDelivered.length ? fmtDuration(avgMins) : '—'}</strong>
+            </div>
+          </div>
+          {reasons.length > 0 && (
+            <p className="muted" style={{ margin: '12px 0 0', fontSize: 13.5 }}>
+              Most common problem: <strong>{reasons[0]![0]}</strong> ({reasons[0]![1]}×).{' '}
+              {reasons[0]![0] === 'Wrong or unclear address' ? 'Ask buyers for a landmark or a map pin.' : reasons[0]![0] === 'Buyer not reachable' ? 'Send the tracking link so buyers know when the rider is close.' : ''}
+            </p>
+          )}
+        </div>
+      )}
     </main>
   );
 }

@@ -1,0 +1,74 @@
+/* Seller CRM (T12). Tokens only. */
+.crm-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+.crm-kpis > div { display: grid; gap: 4px; padding: 12px 14px; border: 1px solid var(--border); border-top: 3px solid var(--primary); border-radius: 14px; background: var(--surface); }
+.crm-kpis span { color: var(--text-muted); font-size: 12.5px; }
+.crm-kpis strong { font: 800 22px/1.1 var(--font-display); }
+.crm-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 14px; }
+.crm-search { display: flex; flex: 1 1 220px; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 1px solid var(--border-strong); border-radius: 999px; background: var(--surface); }
+.crm-search svg { color: var(--text-muted); flex: none; }
+.crm-search input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--text); font: inherit; font-size: 15px; outline: none; }
+.crm-search:focus-within { box-shadow: var(--focus-ring); }
+.crm-segs { display: flex; gap: 8px; overflow-x: auto; margin-top: 12px; scrollbar-width: none; }
+.crm-segs .chip { flex: none; }
+.crm-hint { margin: 8px 0 0; color: var(--text-muted); font-size: 13px; }
+.crm-list { display: grid; gap: 8px; margin: 16px 0 0; padding: 0; list-style: none; }
+.crm-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--dur-2) var(--ease-standard);
+}
+.crm-row:hover { border-color: color-mix(in srgb, var(--gold-fill) 60%, var(--border)); }
+.crm-row:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.crm-avatar { display: grid; place-items: center; width: 40px; height: 40px; flex: none; border-radius: 50%; background: var(--primary-tint); color: var(--primary); font: 800 16px/1 var(--font-display); }
+.crm-avatar.is-lg { width: 52px; height: 52px; font-size: 20px; }
+.crm-main { display: grid; gap: 2px; flex: 1; min-width: 0; }
+.crm-main strong { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 15px; }
+.crm-main .mono { color: var(--text-muted); font-size: 12.5px; }
+.crm-repeat { display: inline-flex; align-items: center; gap: 3px; padding: 1px 7px; border-radius: 999px; background: var(--gold-tint); color: var(--gold); font-size: 11px; font-weight: 800; }
+.crm-noteico { color: var(--text-muted); }
+.crm-stats { display: grid; justify-items: end; gap: 2px; font-size: 12.5px; }
+@media (max-width: 520px) { .crm-stats { display: none; } }
+
+.crm-scrim { position: fixed; inset: 0; z-index: var(--z-modal); background: color-mix(in srgb, var(--bg-0) 55%, transparent); }
+.crm-drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: min(100%, 460px);
+  overflow-y: auto;
+  padding: 18px 16px calc(24px + env(safe-area-inset-bottom));
+  background: var(--bg-0);
+  border-left: 1px solid var(--border);
+  box-shadow: var(--e5);
+  outline: none;
+}
+.crm-dhead { display: flex; align-items: center; gap: 12px; }
+.crm-dhead > div { flex: 1; min-width: 0; }
+.crm-dhead h2 { margin: 0; font-size: 19px; }
+.crm-dhead .mono { color: var(--text-muted); font-size: 13px; }
+.crm-x { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
+.crm-dstats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.crm-dstats > div { display: grid; gap: 2px; padding: 10px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); }
+.crm-dstats span { color: var(--text-muted); font-size: 12px; }
+.crm-dstats strong { font-size: 15px; }
+.crm-dactions { display: flex; flex-wrap: wrap; gap: 8px; }
+.crm-dsec { display: grid; gap: 8px; }
+.crm-dsec h3 { margin: 0; font-size: 14.5px; }
+.crm-dsec .crm-hint { margin: 0; }
+.crm-orders { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.crm-orders li { display: grid; gap: 4px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); font-size: 13.5px; }
+.crm-orders p { margin: 0; color: var(--text-muted); font-size: 13px; }
+.crm-ometa { display: flex; align-items: center; justify-content: space-between; gap: 8px; }

@@ -3,13 +3,18 @@ import { redirect } from 'next/navigation';
 import { getSellerClient, getOwnStore } from '@/lib/auth';
 import { getStaffMembership } from '@/lib/staff';
 import { CustomersClient } from './CustomersClient';
-import type { CustomerRow } from './CustomersClient';
+import type { CustomerRow, CustomerOrder } from './CustomersClient';
+import { orderRef } from '@idevtenancy/shared';
+import '../../../styles/crm.css';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata = { title: 'Customers' };
 
 interface OrderRow {
+  id: string;
+  payment_status?: string | null;
+  order_items?: Array<{ quantity: number; listings: { title: string } | Array<{ title: string }> | null }> | null;
   customer_name: string | null;
   customer_phone: string | null;
   total_kobo: number | null;
@@ -18,12 +23,10 @@ interface OrderRow {
 }
 
 /**
- * T12 — seller CRM, mock edition.
- *
- * The customers table does not exist yet, so this page derives a customer list
- * from the store's own orders: one row per phone number, with order count,
- * lifetime value and last order date. Notes live in the browser (see the client
- * component) until a real customers table ships.
+ * T12 — seller CRM. Customers are derived from the store's own orders (one
+ * row per phone number) with order count, lifetime value, last order and
+ * their recent orders for the history drawer. Notes live in
+ * store_customer_notes (owner-only).
  */
 export default async function CustomersPage() {
   const sb = await getSellerClient();
@@ -46,18 +49,34 @@ export default async function CustomersPage() {
 
   const { data } = await sb
     .from('orders')
-    .select('customer_name, customer_phone, total_kobo, status, created_at')
+    .select('id, customer_name, customer_phone, total_kobo, status, payment_status, created_at, order_items(quantity, listings(title))')
     .eq('store_id', store.id)
     .order('created_at', { ascending: false })
     .limit(500);
 
   const byPhone = new Map<string, CustomerRow>();
+  const history: Record<string, CustomerOrder[]> = {};
 
   for (const o of (data ?? []) as OrderRow[]) {
     const phone = (o.customer_phone ?? '').trim();
     const name = (o.customer_name ?? '').trim();
     // A phone number is the only stable identifier we have; skip rows without one.
     if (!phone) continue;
+    const items = (o.order_items ?? [])
+      .map((i) => {
+        const l = Array.isArray(i.listings) ? i.listings[0] : i.listings;
+        return `${i.quantity} × ${l?.title ?? 'Item'}`;
+      })
+      .join(', ');
+    (history[phone] ??= []).length < 12 &&
+      history[phone]!.push({
+        ref: orderRef(o.id),
+        at: o.created_at,
+        totalKobo: Number(o.total_kobo ?? 0),
+        status: o.status,
+        paid: o.payment_status === 'paid' || o.status === 'paid' || o.status === 'fulfilled',
+        items,
+      });
     const existing = byPhone.get(phone);
     const counted = o.status !== 'cancelled';
     if (existing) {
@@ -83,7 +102,7 @@ export default async function CustomersPage() {
 
   // Notes live in store_customer_notes. A missing table (migration not applied
   // yet) must not break the customer list — fall back to an empty set.
-  const { data: noteRows } = await sb
+  const { data: noteRows, error: notesError } = await sb
     .from('store_customer_notes')
     .select('phone, note')
     .eq('store_id', store.id);
@@ -100,7 +119,7 @@ export default async function CustomersPage() {
         between stores.
       </p>
 
-      {Object.keys(notes).length === 0 && (
+      {notesError && (
         <div className="alert" style={{ marginTop: 16 }}>
           <strong>Notes need the database update.</strong> The customer list is live from your
           orders. Saving a note falls back to this browser until the
@@ -108,7 +127,7 @@ export default async function CustomersPage() {
         </div>
       )}
 
-      <CustomersClient storeId={store.id} customers={customers} initialNotes={notes} />
+      <CustomersClient storeId={store.id} customers={customers} initialNotes={notes} history={history} notesInStore={!notesError} />
     </main>
   );
 }
