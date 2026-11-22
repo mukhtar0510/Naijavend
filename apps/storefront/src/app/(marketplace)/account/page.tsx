@@ -213,7 +213,7 @@ async function loadOrders(sb: NonNullable<Awaited<ReturnType<typeof getCustomerS
   try {
     const res = await sb
       .from('orders')
-      .select('id, total_kobo, status, created_at, discount_code, discount_kobo, stores(name, slug), order_items(listings(id, title, price_kobo, compare_at_kobo, image_urls, type, stock, stores(name, slug)))')
+      .select('id, order_code, total_kobo, status, created_at, discount_code, discount_kobo, stores(name, slug), order_items(listings(id, title, price_kobo, compare_at_kobo, image_urls, type, stock, stores(name, slug)))')
       .eq('customer_id', customerId)
       .order('created_at', { ascending: false })
       .limit(ORDERS_LIST_LIMIT);
@@ -471,7 +471,7 @@ function OrdersList({ orders, loadError }: { orders: OrderRow[]; loadError: bool
                 <div className="nv-acc-order-info">
                   <div className="nv-acc-order-tags">
                     <span className={`badge ${STATUS_BADGE[o.status] ?? ''}`}>{o.status}</span>
-                    <span className="nv-acc-order-id">#{String(o.id).slice(0, 8)}</span>
+                    <span className="nv-acc-order-id">{(o as { order_code?: string | null }).order_code ?? `#${String(o.id).slice(0, 8)}`}</span>
                   </div>
                   <strong className="nv-acc-order-title">{summary ?? 'Order'}</strong>
                   <div className="nv-acc-order-meta">

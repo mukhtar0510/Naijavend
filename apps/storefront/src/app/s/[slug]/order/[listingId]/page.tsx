@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { PAYMENT_METHODS } from '@/lib/payments';
+import { newCheckoutKey } from '@/lib/checkout-key';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Check as IcCheck } from 'lucide-react';
@@ -26,6 +27,9 @@ export default function OrderPage() {
   const [status, setStatus] = useState<'idle' | 'submitting' | 'error'>('idle');
   const [message, setMessage] = useState('');
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [orderCode, setOrderCode] = useState<string | null>(null);
+  // One key per checkout, reused on retries (see lib/checkout-key.ts).
+  const checkoutKey = useRef<string | null>(null);
   const [payToken, setPayToken] = useState<string | null>(null);
   // Delivery options configured by the seller (pickup / rider / courier).
   const [deliveryOptions, setDeliveryOptions] = useState<Array<{ method: string; label: string; feeKobo: number }>>([]);
@@ -91,9 +95,13 @@ export default function OrderPage() {
     setStatus('submitting');
     setMessage('');
     try {
+      if (!checkoutKey.current) checkoutKey.current = newCheckoutKey();
       const res = await fetch('/api/create-order', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(checkoutKey.current ? { 'idempotency-key': checkoutKey.current } : {}),
+        },
         body: JSON.stringify({
           slug,
           items: [{ listingId, quantity }],
@@ -111,7 +119,9 @@ export default function OrderPage() {
         setMessage(body?.error?.message ?? 'Could not place this order. Check your details and try again.');
         return;
       }
+      checkoutKey.current = null;
       setOrderId(body.orderId);
+      setOrderCode(body.orderCode ?? null);
       setPayToken(body.payToken ?? null);
       setStatus('idle');
     } catch {
@@ -126,7 +136,7 @@ export default function OrderPage() {
         <div className="card card-elevated" style={{ textAlign: 'center' }}>
           <h1>Order placed</h1>
           <p className="muted">Order reference</p>
-          <p className="mono" style={{ fontSize: 18, color: 'var(--blue)' }}>{orderId}</p>
+          <p className="mono" style={{ fontSize: 18, color: 'var(--blue)' }}>{orderCode ?? orderId}</p>
           <p className="muted">
             The seller has been given your order. Pay them directly — Kwaravend does not take
             card payments.

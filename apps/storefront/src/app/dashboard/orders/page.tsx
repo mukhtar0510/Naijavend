@@ -34,7 +34,7 @@ const METHOD_LABEL: Record<string, string> = {
   zone: 'Campus / landmark delivery',
 };
 
-function DeliveryInfo({ o }: { o: DeliveryFields & { customer_name: string; id: string } }) {
+function DeliveryInfo({ o }: { o: DeliveryFields & { customer_name: string; id: string; order_code?: string | null } }) {
   const method = o.delivery_method ?? '';
   const area = ILORIN_AREAS.find((a) => a.id === o.delivery_area)?.label;
   const where = [o.delivery_address, o.delivery_landmark, method === 'zone' ? zoneLabel(o.delivery_zone) : area]
@@ -68,7 +68,7 @@ function DeliveryInfo({ o }: { o: DeliveryFields & { customer_name: string; id: 
             </a>
             <a
               className="btn btn-whatsapp btn-sm"
-              href={`https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hello ${o.customer_name}, about your order ${orderRef(o.id)}`)}`}
+              href={`https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hello ${o.customer_name}, about your order ${(o.order_code ?? orderRef(o.id))}`)}`}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -135,7 +135,7 @@ export default async function OrdersPage() {
                 <div>
                   <span className={`badge ${STATUS_BADGE[o.status] ?? ''}`}>{o.status}</span>{' '}
                   <span className={`badge ${PAYMENT_STATUS_BADGE[pay]}`}>{PAYMENT_STATUS_LABEL[pay]}</span>{' '}
-                  <strong className="mono">{orderRef(o.id)}</strong>
+                  <strong className="mono">{(o.order_code ?? orderRef(o.id))}</strong>
                   <p className="muted" style={{ margin: '4px 0 0', fontSize: 14 }}>
                     {o.customer_name} · <span style={{ color: 'var(--naija)', fontWeight: 600 }}>{formatNaira(o.total_kobo)}</span> ·{' '}
                     {PAYMENT_METHOD_LABEL[(o.payment_method ?? '') as PaymentMethod]} ·{' '}

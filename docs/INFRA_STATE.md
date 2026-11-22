@@ -141,3 +141,40 @@ There is one Supabase project, and it is production. There are 0 orders, so the 
 - Add `SUPABASE_SERVICE_ROLE_KEY` to Preview if previews are used for testing (C18).
 - Approve applying the I1 migration to the live project (section 9).
 - Still open from INFRASTRUCTURE.md section 13: Paystack test keys, fee bearer, leaked-password protection, backups.
+
+## 11. I1 result (22 Nov 2026)
+
+Applied to the live project as `20261122202144_i1_server_calculated_orders` and `20261122202411_i1_order_customer_check` (local files renamed to match). The local `security_hardening` file was renamed to `20261122142901` (C17).
+
+- `create_order_v2` prices every order in the database: items from `listings` (product type, same store), fee from `stores.delivery_options`, discount from `discount_codes` (active, paid plan, under max uses, zone, new `min_order_kobo`). There is no total, fee or discount argument at all.
+- Quantity 1 to 50 per item, at most 30 items, duplicates merged. Stock is decremented in the same transaction, in a fixed order.
+- `orders.order_code` (`KV-1001` upwards) and `orders.idempotency_key` (unique). The same key returns the same order. The same key with another store or phone is refused.
+- `customer_id` comes from `auth.uid()` for direct callers. The server route passes the customer it verified, and that is only kept when the id is a real `customers` row.
+- Rate limits in the database: 5 orders per phone and 20 per IP in 10 minutes (`order_rate_events`, hashed values, server only). The IP limit is best effort: a direct caller can choose its own forwarded-for header.
+- Discount codes now always need an active paid plan in the database, even if `NEXT_PUBLIC_FLAG_PLAN_GATING` is turned off in the app.
+- `create_pos_order` replaces the POS call. It checks owner or active staff and records the sale as paid with channel `pos`. Before this, POS sales were saved as pending online orders.
+- Closed: `create_order_atomic` (anon and authenticated), `decrement_listing_stock` (authenticated). The service role keeps `create_order_atomic` until production runs the new route; drop it after the deploy.
+- Buyer alerts now say "Order KV-1042" instead of part of the uuid. The checkout page, single-item order page, buyer account and seller orders page show the code.
+
+Tests run against the live database (all inside rolled-back transactions, except the race test, whose test store, order and rate-limit row were deleted afterwards; orders are back at 0):
+
+| Check | Result |
+|---|---|
+| 1x ₦10 + 2x ₦25, rider ₦5, 10% code, min ₦30 | total 5900 kobo, items 6000, discount 600, fee 500 |
+| Second order for the sold-out unit | INSUFFICIENT_STOCK |
+| Code with max_uses 1 used again | INVALID_PROMO |
+| Same idempotency key twice (second with qty 9) | same order, `replayed: true`, total unchanged, 1 row |
+| Same key, other phone | IDEMPOTENCY_KEY_REUSED |
+| qty 51 / 31 lines / bad id | BAD_QUANTITY / TOO_MANY_LINES / INVALID_ITEMS |
+| Listing from another store | UNKNOWN_LISTING |
+| 6 orders from one phone / 21 from one IP | RATE_LIMITED after 5 / after 20 |
+| Anon passing a customer id | stored as null |
+| Signed-in caller | customer_id = caller (when a customer) |
+| Example store / delivery option not offered | EXAMPLE_STORE / INVALID_DELIVERY |
+| POS as owner / as a stranger | paid/paid/pos / NOT_AUTHORISED |
+| Two parallel orders for the last unit (separate sessions) | one order, one INSUFFICIENT_STOCK |
+| Grants | atomic: anon f, authenticated f. v2: anon t. pos: anon f, authenticated t. decrement: authenticated f |
+
+Security advisor after I1: the `create_order_atomic` warning is gone. New WARN lines are `create_order_v2` callable by anon and authenticated (as INFRASTRUCTURE.md 4.3 asks) and `create_pos_order` callable by authenticated (checks owner or staff itself). New INFO: `order_rate_events` has no policies (server only, intended). No new ERROR.
+
+Not done in I1: a tracking token for pickup orders (C7), and the spec's "client sends a lower total" case is moot because the API no longer accepts a total.

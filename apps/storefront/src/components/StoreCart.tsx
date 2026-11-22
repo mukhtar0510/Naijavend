@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { CART_EVENT, cartCount, cartSubtotalKobo, clearCart, readCart, removeFromCart, setQuantity, type CartItem } from '@/lib/cart';
 import { PAYMENT_METHODS } from '@/lib/payments';
+import { newCheckoutKey } from '@/lib/checkout-key';
 import { ILORIN_AREAS, ILORIN_AREAS_SORTED } from '@/lib/ilorin';
 import { readArea } from '@/components/shell/AreaSelector';
 import { SPRING, T } from '@/lib/motion';
@@ -190,6 +191,9 @@ export function StoreCart({ slug, storeName }: { slug: string; storeName: string
     setStep((s) => Math.min(3, s + 1) as Step);
   }
 
+  // One key per checkout, reused on retries (see lib/checkout-key.ts).
+  const checkoutKey = useRef<string | null>(null);
+
   async function placeOrder() {
     for (const s of [1, 2] as Step[]) {
       const msg = check(s);
@@ -207,12 +211,13 @@ export function StoreCart({ slug, storeName }: { slug: string; storeName: string
       } catch {
         /* private mode */
       }
+      if (!checkoutKey.current) checkoutKey.current = newCheckoutKey();
       const res = await fetch('/api/create-order', {
         method: 'POST',
         headers: {
           'content-type': 'application/json',
-          // Prevents a double-tap from creating two orders.
-          'idempotency-key': `${slug}:${items.map((i) => `${i.listingId}x${i.quantity}`).join(',')}:${Math.floor(Date.now() / 60000)}`,
+          // Same key on a retry returns the same order instead of a second one.
+          ...(checkoutKey.current ? { 'idempotency-key': checkoutKey.current } : {}),
         },
         body: JSON.stringify({
           slug,
@@ -236,6 +241,7 @@ export function StoreCart({ slug, storeName }: { slug: string; storeName: string
         setError(body.error?.message ?? 'Could not place this order. Check your details and try again.');
         return;
       }
+      checkoutKey.current = null;
       clearCart(slug);
       setOpen(false);
       setStep(0);

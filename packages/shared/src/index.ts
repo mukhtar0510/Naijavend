@@ -15,3 +15,4 @@ export * from './fraud';
 export * from './phrasebook';
 export * from './password';
 export * from './locked-copy';
+export * from './orders';

@@ -175,6 +175,8 @@ export interface Listing {
 
 export interface Order {
   id: string;
+  /** Public order code, e.g. KV-1042 (I1). Older rows may lack it. */
+  order_code?: string | null;
   store_id: string;
   customer_name: string;
   customer_phone: string;

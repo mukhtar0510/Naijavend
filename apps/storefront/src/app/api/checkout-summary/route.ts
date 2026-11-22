@@ -83,6 +83,7 @@ export async function GET(req: NextRequest) {
 
     return apiOk({
       orderId: order.id,
+      orderCode: (order as { order_code?: string | null }).order_code ?? null,
       trackingToken: (delivery as { tracking_token?: string } | null)?.tracking_token ?? null,
       deliveryStatus: (delivery as { status?: string } | null)?.status ?? null,
       bank,

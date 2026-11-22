@@ -12,6 +12,7 @@ import '../../../../styles/checkout.css';
 
 interface CheckoutData {
   orderId: string;
+  orderCode?: string | null;
   trackingToken?: string | null;
   deliveryStatus?: string | null;
   bank?: { bankName: string; accountName: string; accountNumber: string } | null;
@@ -105,7 +106,7 @@ export default function CheckoutPage({
         )}
         <h1>{paid ? 'Payment confirmed' : closed ? `Order ${data.status}` : 'Your order is in'}</h1>
         <p className="order-ref">
-          <Store size={15} aria-hidden /> {data.storeName} · Order <code>{orderRef(data.orderId)}</code>
+          <Store size={15} aria-hidden /> {data.storeName} · Order <code>{(data.orderCode ?? orderRef(data.orderId))}</code>
         </p>
         {paid && (
           <p className="muted" style={{ margin: 0 }}>
@@ -182,7 +183,7 @@ export default function CheckoutPage({
                     Transfer <strong className="mono">{naira(data.totalKobo)}</strong> to {data.storeName}, then upload the
                     receipt below so they can confirm it.
                   </p>
-                  <BankCard bank={data.bank} amount={naira(data.totalKobo)} reference={orderRef(data.orderId)} />
+                  <BankCard bank={data.bank} amount={naira(data.totalKobo)} reference={(data.orderCode ?? orderRef(data.orderId))} />
                 </>
               ) : (
                 <p style={{ marginTop: 0 }}>
