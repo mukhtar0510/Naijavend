@@ -30,7 +30,7 @@ export default async function BookingsPage() {
   }
 
   const fmt = (iso: string) =>
-    new Date(iso).toLocaleString('en-NG', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    new Date(iso).toLocaleString('en-NG', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Lagos' });
 
   return (
     <main>

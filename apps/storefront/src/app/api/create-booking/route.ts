@@ -5,7 +5,7 @@ import { supabaseService } from '@/lib/supabase';
 import { getCustomerUser } from '@/lib/auth';
 import { apiError, apiOk, internalError } from '@/lib/api';
 import { rateLimit, clientIp } from '@/lib/ratelimit';
-import { sanitizeText, isValidPhone } from '@idevtenancy/shared';
+import { sanitizeText, isValidPhone, normaliseNgPhone } from '@idevtenancy/shared';
 import { recordEvent } from '@/lib/events';
 
 const SLOT_MS = 60 * 60 * 1000; // 1-hour slots at MVP
@@ -27,14 +27,20 @@ export async function POST(req: NextRequest) {
   const slug = sanitizeText(b.slug, 80);
   const listingId = sanitizeText(b.listingId, 40);
   const customerName = sanitizeText(b.customerName, 120);
-  const customerPhone = sanitizeText(b.customerPhone, 16);
+  const customerPhone = normaliseNgPhone(sanitizeText(b.customerPhone, 24));
   const slotStartRaw = sanitizeText(b.slotStart, 40);
 
   if (!/^[0-9a-f-]{36}$/i.test(listingId)) return apiError(400, 'invalid_listing', 'Invalid listing.');
   if (customerName.length < 2) return apiError(400, 'invalid_name', 'Enter your full name.');
   if (!isValidPhone(customerPhone)) return apiError(422, 'invalid_phone', 'Enter a valid phone number, e.g. +2348012345678.');
 
-  const slotStart = new Date(slotStartRaw);
+  // The booking page sends <input type="datetime-local">, which has no zone
+  // ("2026-11-25T10:00"). new Date() would read it in the server's zone (UTC
+  // on Vercel), moving every booking an hour later for the seller. Slots are
+  // in Ilorin, so read a zoneless value as WAT (UTC+1, no daylight saving).
+  const slotStart = new Date(
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(slotStartRaw) ? `${slotStartRaw}+01:00` : slotStartRaw,
+  );
   if (Number.isNaN(slotStart.getTime())) {
     return apiError(422, 'invalid_slot', 'Pick a valid date and time.');
   }

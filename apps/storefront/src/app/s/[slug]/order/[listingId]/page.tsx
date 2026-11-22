@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { PAYMENT_METHODS } from '@/lib/payments';
 import { newCheckoutKey } from '@/lib/checkout-key';
+import { ILORIN_AREAS_SORTED } from '@/lib/ilorin';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Check as IcCheck } from 'lucide-react';
@@ -37,6 +38,12 @@ export default function OrderPage() {
   const [deliveryMethod, setDeliveryMethod] = useState('');
   const [zones, setZones] = useState<Array<{ id: string; label: string; feeKobo: number }>>([]);
   const zoneId = deliveryMethod.startsWith('zone:') ? deliveryMethod.slice(5) : '';
+  // Rider and courier orders need to know where to go (create-order rejects
+  // them without an Ilorin area and an address or landmark).
+  const delivering = deliveryMethod === 'rider' || deliveryMethod === 'courier';
+  const [area, setArea] = useState('');
+  const [address, setAddress] = useState('');
+  const [landmark, setLandmark] = useState('');
   // No gateway: the buyer picks how they will pay and the seller confirms it.
   const [paymentMethod, setPaymentMethod] = useState<'cash_on_delivery' | 'bank_transfer' | 'pay_on_pickup'>('cash_on_delivery');
 
@@ -110,6 +117,9 @@ export default function OrderPage() {
           promoCode: promo.trim() || undefined,
           deliveryMethod: zoneId ? 'zone' : deliveryMethod || undefined,
           deliveryZone: zoneId || undefined,
+          deliveryArea: delivering ? area : undefined,
+          deliveryAddress: delivering || zoneId ? address.trim() || undefined : undefined,
+          deliveryLandmark: delivering || zoneId ? landmark.trim() || undefined : undefined,
           paymentMethod,
         }),
       });
@@ -164,9 +174,9 @@ export default function OrderPage() {
             id="qty"
             type="number"
             min={1}
-            max={999}
+            max={50}
             value={quantity}
-            onChange={(e) => setQuantity(Math.max(1, Number(e.target.value) || 1))}
+            onChange={(e) => setQuantity(Math.min(50, Math.max(1, Number(e.target.value) || 1)))}
             required
           />
         </div>
@@ -249,6 +259,30 @@ export default function OrderPage() {
               delivery zone.
             </p>
           </div>
+        )}
+        {delivering && (
+          <>
+            <div className="field">
+              <label htmlFor="area">Your area in Ilorin</label>
+              <select id="area" value={area} onChange={(e) => setArea(e.target.value)} required>
+                <option value="">Pick your area</option>
+                {ILORIN_AREAS_SORTED.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label htmlFor="address">Address</label>
+              <input id="address" type="text" value={address} onChange={(e) => setAddress(e.target.value)} maxLength={200} />
+            </div>
+            <div className="field">
+              <label htmlFor="landmark">Landmark</label>
+              <input id="landmark" type="text" value={landmark} onChange={(e) => setLandmark(e.target.value)} maxLength={120} />
+              <p className="hint">Give an address, a landmark or both, so the rider can find you.</p>
+            </div>
+          </>
         )}
         <div className="field">
           <label>How will you pay?</label>

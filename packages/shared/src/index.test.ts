@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   isValidPhone,
+  normaliseNgPhone,
   isValidSlug,
   sanitizeText,
   parsePriceKobo,
@@ -22,6 +23,15 @@ describe('validation', () => {
     expect(isValidPhone('08012345678')).toBe(false); // local format without + is rejected (must be intl)
     expect(isValidPhone('+2348012345678')).toBe(true);
     expect(isValidPhone('2348012345678')).toBe(true);
+  });
+
+  it('normalises Nigerian phone input before validation', () => {
+    expect(normaliseNgPhone('08012345678')).toBe('+2348012345678');
+    expect(normaliseNgPhone('+234 801 234 5678')).toBe('+2348012345678');
+    expect(normaliseNgPhone('234-801-234-5678')).toBe('+2348012345678');
+    expect(normaliseNgPhone('(0801) 234 5678')).toBe('+2348012345678');
+    expect(normaliseNgPhone('+447700900123')).toBe('+447700900123');
+    expect(isValidPhone(normaliseNgPhone('0801 234 5678'))).toBe(true);
   });
 
   it('rejects bad slugs', () => {

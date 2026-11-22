@@ -10,7 +10,7 @@ import { getCustomerUser } from '@/lib/auth';
 import { rateLimit, clientIp } from '@/lib/ratelimit';
 import { apiError, apiOk, internalError } from '@/lib/api';
 import { mintPayToken } from '@/lib/paytoken';
-import { parseCartLines, sanitizeText, isValidPhone, isUuid, mapOrderError, toOrderItems } from '@idevtenancy/shared';
+import { parseCartLines, sanitizeText, isValidPhone, normaliseNgPhone, isUuid, mapOrderError, toOrderItems } from '@idevtenancy/shared';
 import { isZoneId, zoneLabel } from '@/lib/deliveryZones';
 import { ILORIN_AREAS, inIlorin } from '@/lib/ilorin';
 import { ensureDelivery } from '@/lib/delivery';
@@ -32,7 +32,8 @@ export async function POST(req: NextRequest) {
   const b = body as Record<string, unknown>;
   const slug = sanitizeText(b.slug, 80);
   const customerName = sanitizeText(b.customerName, 120);
-  const customerPhone = sanitizeText(b.customerPhone, 16);
+  // "0801 234 5678" and "+234 801 ..." are how buyers type; accept them.
+  const customerPhone = normaliseNgPhone(sanitizeText(b.customerPhone, 24));
   const promoInput = sanitizeText(b.promoCode, 40).toUpperCase();
   const deliveryMethod = sanitizeText(b.deliveryMethod, 20); // '', pickup, rider, courier or zone
   const deliveryZone = sanitizeText(b.deliveryZone, 40); // landmark id when deliveryMethod = 'zone'

@@ -7,6 +7,18 @@ export function isValidPhone(phone: string): boolean {
   return /^\+?[1-9][0-9]{6,14}$/.test(phone);
 }
 
+/**
+ * Turn the ways Nigerians type a number into the format isValidPhone accepts:
+ * strips spaces, dashes, dots and brackets, then "0801..." and "234801..."
+ * become "+234801...". Anything else is returned stripped, for the server to judge.
+ */
+export function normaliseNgPhone(raw: string): string {
+  const p = String(raw ?? '').replace(/[\s\-.()]/g, '');
+  if (/^0\d{10}$/.test(p)) return `+234${p.slice(1)}`;
+  if (/^234\d{10}$/.test(p)) return `+${p}`;
+  return p;
+}
+
 export function isValidSlug(slug: string): boolean {
   return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) && slug.length >= 2 && slug.length <= 80;
 }

@@ -77,15 +77,15 @@ async function BookingsList({ customerId }: { customerId: string }) {
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
               <span className={`badge ${STATUS_BADGE[b.status as string] ?? ''}`}>{b.status}</span>
               <span className="muted" style={{ fontSize: 13 }}>
-                {start.toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}
+                {start.toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Africa/Lagos' })}
               </span>
             </div>
             <span style={{ fontWeight: 600 }}>{listing?.title ?? 'Appointment'}</span>
             {store && <Link href={`/s/${store.slug}`}>{store.name}</Link>}
             <span className="muted" style={{ fontSize: 14 }}>
-              {start.toLocaleString('en-NG', { weekday: 'short', hour: 'numeric', minute: '2-digit' })}
+              {start.toLocaleString('en-NG', { weekday: 'short', hour: 'numeric', minute: '2-digit', timeZone: 'Africa/Lagos' })}
               {' — '}
-              {end.toLocaleTimeString('en-NG', { hour: 'numeric', minute: '2-digit' })}
+              {end.toLocaleTimeString('en-NG', { hour: 'numeric', minute: '2-digit', timeZone: 'Africa/Lagos' })}
             </span>
             {Number(b.deposit_paid_kobo) > 0 && (
               <span className="badge badge-success">Deposit paid</span>

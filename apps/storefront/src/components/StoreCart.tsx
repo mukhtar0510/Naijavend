@@ -34,7 +34,7 @@ import { newCheckoutKey } from '@/lib/checkout-key';
 import { ILORIN_AREAS, ILORIN_AREAS_SORTED } from '@/lib/ilorin';
 import { readArea } from '@/components/shell/AreaSelector';
 import { SPRING, T } from '@/lib/motion';
-import { formatNaira } from '@idevtenancy/shared';
+import { formatNaira, normaliseNgPhone } from '@idevtenancy/shared';
 import type { Pin } from '@/components/checkout/DeliveryPinMap';
 import '../styles/checkout.css';
 import { trackEvent } from '@/lib/track-event';
@@ -223,7 +223,7 @@ export function StoreCart({ slug, storeName }: { slug: string; storeName: string
           slug,
           items: items.map((i) => ({ listingId: i.listingId, quantity: i.quantity })),
           customerName: name.trim(),
-          customerPhone: normalisePhone(phone),
+          customerPhone: normaliseNgPhone(phone),
           deliveryMethod: method || undefined,
           deliveryZone: zoneId || undefined,
           deliveryArea: delivering ? area : undefined,
@@ -541,12 +541,4 @@ export function StoreCart({ slug, storeName }: { slug: string; storeName: string
       </AnimatePresence>
     </>
   );
-}
-
-/** "0801 234 5678" → "+2348012345678"; anything else is sent as typed (minus spaces). */
-function normalisePhone(raw: string): string {
-  const p = raw.replace(/[\s-]/g, '');
-  if (/^0\d{10}$/.test(p)) return `+234${p.slice(1)}`;
-  if (/^234\d{10}$/.test(p)) return `+${p}`;
-  return p;
 }
