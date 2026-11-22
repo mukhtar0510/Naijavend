@@ -8,6 +8,7 @@ import { getSellerClient } from '@/lib/auth';
 import { rateLimit, clientIp } from '@/lib/ratelimit';
 import { apiError, apiOk, internalError } from '@/lib/api';
 import { sanitizeText } from '@idevtenancy/shared';
+import { effectivePlan } from '@/lib/plans';
 
 async function ownerGate(slug: string) {
   const sb = await getSellerClient();
@@ -16,13 +17,13 @@ async function ownerGate(slug: string) {
   const uid = userData.user?.id ?? '';
   const { data: store } = await sb
     .from('stores')
-    .select('id, plan')
+    .select('id, plan, plan_expires_at')
     .eq('owner_id', uid)
     .eq('slug', slug)
     .maybeSingle();
   if (!store) return { error: apiError(403, 'not_owner', 'Only the store owner can manage staff.') as unknown as Response };
-  // POS & staff are free for everyone now — the old growth-plan gate is gone.
-  return { sb: supabaseService(), storeId: store.id as string, uid };
+  // Staff seats are limited per plan (Free 2, Business 5, Emirates Plus 25).
+  return { sb: supabaseService(), storeId: store.id as string, uid, plan: effectivePlan(store) };
 }
 
 export async function GET(req: NextRequest) {
@@ -72,6 +73,13 @@ export async function POST(req: NextRequest) {
   if ('error' in gate) return gate.error;
 
   try {
+    const seats = gate.plan.limits.staff;
+    if (seats != null) {
+      const { count } = await gate.sb.from('store_staff').select('id', { count: 'exact', head: true }).eq('store_id', gate.storeId).eq('active', true);
+      if ((count ?? 0) >= seats) {
+        return apiError(403, 'plan_limit', `Your ${gate.plan.name} plan has ${seats} staff seats, all in use. Upgrade in Plan or deactivate someone first.`);
+      }
+    }
     // 1. Create the auth user (service role can admin-create without email confirmation).
     const { data: created, error: createErr } = await gate.sb.auth.admin.createUser({
       email,

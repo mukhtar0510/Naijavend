@@ -4,6 +4,7 @@ import { getSellerClient, getOwnStore } from '@/lib/auth';
 import { apiError, apiOk, internalError } from '@/lib/api';
 import { sanitizeText } from '@idevtenancy/shared';
 import { isZoneId } from '@/lib/deliveryZones';
+import { planLocked, PLAN_COLUMNS, type PlanStore } from '@/lib/plan-gate';
 
 export async function GET() {
   const sb = await getSellerClient();
@@ -27,8 +28,10 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const sb = await getSellerClient();
   if (!sb) return apiError(401, 'unauthenticated', 'Sign in first.');
-  const store = await getOwnStore<{ id: string }>(sb, 'id');
+  const store = await getOwnStore<PlanStore>(sb, PLAN_COLUMNS);
   if (!store) return apiError(404, 'no_store', 'Create your store first.');
+  const locked = planLocked(store, 'discounts');
+  if (locked) return locked;
   const storeId = (store as { id: string }).id;
 
   let body: unknown;
@@ -70,8 +73,10 @@ export async function POST(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   const sb = await getSellerClient();
   if (!sb) return apiError(401, 'unauthenticated', 'Sign in first.');
-  const store = await getOwnStore<{ id: string }>(sb, 'id');
+  const store = await getOwnStore<PlanStore>(sb, PLAN_COLUMNS);
   if (!store) return apiError(404, 'no_store', 'Create your store first.');
+  const locked = planLocked(store, 'discounts');
+  if (locked) return locked;
 
   let body: unknown;
   try {

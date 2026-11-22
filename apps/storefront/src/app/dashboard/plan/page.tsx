@@ -2,10 +2,10 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getSellerClient, getOwnStore } from '@/lib/auth';
 import { getStaffMembership } from '@/lib/staff';
-import { LIMIT_LABELS, PLANS, effectivePlan, isAtLimit, planFor, planPriceKobo, usagePercent } from '@/lib/plans';
+import { LIMIT_LABELS, PLANS, effectivePlan, isAtLimit, planFor, planPriceKobo, riderActive, riderLabel, usagePercent } from '@/lib/plans';
 import type { LimitKey } from '@/lib/plans';
 import { supabaseServiceOptional } from '@/lib/supabase';
-import { getBillingBank, PAID_PLANS } from '@/lib/billing';
+import { getBillingBank, PAID_PLANS, riderPriceKobo } from '@/lib/billing';
 import { PlanCheckout, type OpenPurchase } from './PlanCheckout';
 import '../../../styles/checkout.css';
 import '../../../styles/plan.css';
@@ -23,7 +23,7 @@ export default async function PlanPage() {
   const membership = await getStaffMembership(sb);
   const store = membership
     ? null
-    : await getOwnStore<{ id: string; plan: string | null; plan_expires_at?: string | null }>(sb, '*');
+    : await getOwnStore<{ id: string; plan: string | null; plan_expires_at?: string | null; rider_expires_at?: string | null }>(sb, '*');
 
   if (!store) {
     return (
@@ -51,7 +51,7 @@ export default async function PlanPage() {
   // Open purchase (owner-readable via RLS) and Kwaravend's bank (server-only).
   const { data: openRow } = await sb
     .from('plan_payments')
-    .select('id, plan, months, amount_kobo, reference, status, proof_url')
+    .select('id, plan, months, rider_addon, amount_kobo, reference, status, proof_url')
     .eq('store_id', store.id)
     .in('status', ['pending', 'awaiting_confirmation'])
     .order('created_at', { ascending: false })
@@ -65,6 +65,7 @@ export default async function PlanPage() {
         plan: openRow.plan,
         planName: planFor(openRow.plan).name,
         months: openRow.months,
+        rider: Boolean(openRow.rider_addon),
         amountKobo: openRow.amount_kobo,
         reference: openRow.reference,
         status: openRow.status,
@@ -96,6 +97,13 @@ export default async function PlanPage() {
         {expires ? ` until ${expires.toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' })}` : ''}. Limits
         are checked when you add a listing, invite staff or open a location.
       </p>
+      {plan.limits.rider && (
+        <p className="muted" style={{ margin: '8px 0 0', fontSize: 14 }}>
+          {riderActive(store)
+            ? `${riderLabel(plan.limits.rider)} add-on is on until ${new Date(store.rider_expires_at!).toLocaleDateString('en-NG', { day: 'numeric', month: 'long' })}. Request riders from Dispatch.`
+            : `Add the ${riderLabel(plan.limits.rider)} when you renew, and request riders from Dispatch.`}
+        </p>
+      )}
       {lapsed && (
         <div className="alert" style={{ marginTop: 12 }}>
           Your {paidPlan.name} plan has ended, so the store is back on Free. Renew below to switch it on again.
@@ -108,7 +116,14 @@ export default async function PlanPage() {
       )}
 
       <PlanCheckout
-        plans={PAID_PLANS.map((id) => ({ id, name: planFor(id).name, priceKobo: planPriceKobo(id), current: plan.id === id }))}
+        plans={PAID_PLANS.map((id) => ({
+          id,
+          name: planFor(id).name,
+          priceKobo: planPriceKobo(id),
+          riderKobo: riderPriceKobo(id),
+          riderName: riderLabel(planFor(id).limits.rider ?? null),
+          current: plan.id === id,
+        }))}
         open={open}
         bank={bank}
         billingReady={Boolean(bank)}

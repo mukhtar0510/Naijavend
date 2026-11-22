@@ -9,7 +9,18 @@
 
 import { useRef, useState } from 'react';
 import { BarChart3, Bike, Check, ChevronDown, Layers, MapPin, Store, Tag, Users, type LucideIcon } from 'lucide-react';
-import { PLANS, LIMIT_LABELS, riderLabel, type PlanDef } from '@/lib/plans';
+import { PLANS, LIMIT_LABELS, hasFeature, riderLabel, type FeatureKeyPlan, type PlanDef } from '@/lib/plans';
+
+const FEATURE_ROWS: Array<{ key: FeatureKeyPlan; label: string }> = [
+  { key: 'reports', label: 'Deeper analytics' },
+  { key: 'discounts', label: 'Discount codes' },
+  { key: 'crm', label: 'Customer CRM' },
+  { key: 'dispatch', label: 'Dispatch board and own riders' },
+  { key: 'custom_domain', label: 'Your own domain' },
+  { key: 'priority_support', label: 'Priority support' },
+];
+/** A plan as if paid up, to read what it includes. */
+const asPaid = (id: string) => ({ plan: id, plan_expires_at: '2999-01-01T00:00:00Z' });
 import { ButtonLink } from '@/components/ui/button';
 import { Badge } from '@/components/ui/chip';
 
@@ -147,6 +158,14 @@ export function PlanCards() {
                   <th scope="row">{LIMIT_LABELS[k]}</th>
                   {PLANS.map((p) => (
                     <td key={p.id}>{p.limits[k] == null ? 'Unlimited' : p.limits[k]}</td>
+                  ))}
+                </tr>
+              ))}
+              {FEATURE_ROWS.map((f) => (
+                <tr key={f.key}>
+                  <th scope="row">{f.label}</th>
+                  {PLANS.map((p) => (
+                    <td key={p.id}>{hasFeature(asPaid(p.id), f.key, true) ? <Check size={16} aria-label="Included" style={{ color: 'var(--success)' }} /> : <span aria-label="Not included">—</span>}</td>
                   ))}
                 </tr>
               ))}

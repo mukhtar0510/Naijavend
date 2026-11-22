@@ -47,3 +47,10 @@ REDESIGN_V2.md, KWARAVEND_REBRAND_CHANGES.md.
 3. Check the approximate Ilorin area centres in `apps/storefront/src/lib/ilorin.ts`.
 4. Plans: the app has four tiers; the rebrand file lists three ("Starter"). Decide before merging tiers.
 5. 3D models (WebGL): built in code, supplied, or skip.
+
+## 23 Nov 2026 — three plans and their features
+
+- Plans are Free, Business (id `growth`, ₦3,000/mo) and Emirates Plus (id `plus`, ₦8,000/mo). Business Pro was folded into Emirates Plus (no store was on it; `planFor('pro')` maps to Emirates Plus).
+- Plan gating is ON by default (`NEXT_PUBLIC_FLAG_PLAN_GATING=off` opens everything). Business: deeper analytics, discount codes, 5 staff, 2 locations, all templates, Kwaravend rider add-on. Emirates Plus: unlimited listings, 25 staff, 10 locations, CRM, dispatch, own domain, priority support, express/same-day riders.
+- New: Kwaravend rider add-on (bought with a plan, `stores.rider_expires_at`) and requests (`/dashboard/kwaravend-rider`, admin → Kwaravend riders); support tickets (`/dashboard/support`, admin → Support, Emirates Plus = priority); custom domains (Settings → Business basics, admin → Domains, `src/middleware.ts` serves active domains). Migration `20261123100000_plan_features`.
+- Owner steps: add each custom domain in Vercel → Domains before switching it on in admin.

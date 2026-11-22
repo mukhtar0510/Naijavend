@@ -234,7 +234,7 @@ const FLAG_NOTES: Record<FeatureKey, string> = {
   multiBranchTools: 'Branch management and per-branch hours.',
   storefrontCustomisation: 'Heavy store customisation (layouts, section colours, fonts).',
   exampleStores: 'Labelled example stores in lists and on the map (they never take orders).',
-  planGating: 'Lock CRM, dispatch and reports to paid plans. Plans are on sale: turn on so paid features need an active plan.',
+  planGating: 'Paid features (CRM, dispatch, deeper analytics, discount codes, domain, priority support, riders) need an active plan. On by default.',
 };
 
 export function AdminFlags() {

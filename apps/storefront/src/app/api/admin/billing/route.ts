@@ -8,7 +8,7 @@ import { NextRequest } from 'next/server';
 import { audit, requireAdminActor } from '@/lib/admin';
 import { apiError, apiOk, internalError } from '@/lib/api';
 import { sanitizeText } from '@idevtenancy/shared';
-import { BANK_SETTING_KEY, getBillingBank, nextExpiry } from '@/lib/billing';
+import { BANK_SETTING_KEY, getBillingBank, nextExpiry, nextRiderExpiry } from '@/lib/billing';
 import type { PlanId } from '@/lib/plans';
 
 export async function GET() {
@@ -18,7 +18,7 @@ export async function GET() {
     const [{ data, error }, bank] = await Promise.all([
       actor.svc
         .from('plan_payments')
-        .select('id, plan, months, amount_kobo, reference, status, proof_url, note, created_at, confirmed_at, confirmed_by, stores(id, name, slug, plan, plan_expires_at)')
+        .select('id, plan, months, rider_addon, amount_kobo, reference, status, proof_url, note, created_at, confirmed_at, confirmed_by, stores(id, name, slug, plan, plan_expires_at, rider_expires_at)')
         .order('created_at', { ascending: false })
         .limit(200),
       getBillingBank(actor.svc),
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
 
     const id = sanitizeText(b.id, 40);
     if (!/^[0-9a-f-]{36}$/i.test(id)) return apiError(400, 'invalid', 'Invalid purchase.');
-    const { data: pay } = await svc.from('plan_payments').select('id, store_id, plan, months, status, reference').eq('id', id).maybeSingle();
+    const { data: pay } = await svc.from('plan_payments').select('id, store_id, plan, months, rider_addon, status, reference').eq('id', id).maybeSingle();
     if (!pay) return apiError(404, 'not_found', 'Purchase not found.');
     if (!['pending', 'awaiting_confirmation'].includes(pay.status)) return apiError(409, 'closed', `Already ${pay.status}.`);
 
@@ -71,15 +71,19 @@ export async function POST(req: NextRequest) {
     }
 
     if (b.action === 'confirm') {
-      const { data: store } = await svc.from('stores').select('id, plan, plan_expires_at').eq('id', pay.store_id).maybeSingle();
+      const { data: store } = await svc.from('stores').select('id, plan, plan_expires_at, rider_expires_at').eq('id', pay.store_id).maybeSingle();
       if (!store) return apiError(404, 'no_store', 'Store not found.');
       const expires = nextExpiry(store, pay.plan as PlanId, pay.months);
       // Service role: the plan guard trigger lets the server change the plan.
-      const { error: sErr } = await svc.from('stores').update({ plan: pay.plan, plan_expires_at: expires }).eq('id', pay.store_id);
+      const riderExpires = pay.rider_addon ? nextRiderExpiry(store, pay.months) : undefined;
+      const { error: sErr } = await svc
+        .from('stores')
+        .update({ plan: pay.plan, plan_expires_at: expires, ...(riderExpires ? { rider_expires_at: riderExpires } : {}) })
+        .eq('id', pay.store_id);
       if (sErr) throw sErr;
       const { error } = await svc.from('plan_payments').update({ status: 'paid', confirmed_by: actor.email, confirmed_at: new Date().toISOString() }).eq('id', id);
       if (error) throw error;
-      await audit(actor.email, 'plan_activated', undefined, { id, reference: pay.reference, storeId: pay.store_id, plan: pay.plan, months: pay.months, expires });
+      await audit(actor.email, 'plan_activated', undefined, { id, reference: pay.reference, storeId: pay.store_id, plan: pay.plan, months: pay.months, expires, riderExpires });
       return apiOk({ updated: true, expires });
     }
     return apiError(422, 'invalid_action', 'Unknown action.');

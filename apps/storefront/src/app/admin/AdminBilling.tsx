@@ -12,6 +12,7 @@ interface PlanPayment {
   id: string;
   plan: string;
   months: number;
+  rider_addon?: boolean;
   amount_kobo: number;
   reference: string;
   status: 'pending' | 'awaiting_confirmation' | 'paid' | 'rejected' | 'cancelled';
@@ -87,8 +88,8 @@ export function AdminBilling() {
     <li key={p.id} className="card">
       <div className="admin-report-head">
         <strong>{p.stores?.name ?? 'Deleted store'}</strong>
-        <span className="badge badge-gold" style={{ textTransform: 'capitalize' }}>
-          {p.plan} · {p.months} mo
+        <span className="badge badge-gold">
+          {p.plan === 'growth' ? 'Business' : p.plan === 'plus' ? 'Emirates Plus' : p.plan} · {p.months} mo{p.rider_addon ? ' + rider' : ''}
         </span>
         <span className={PAY_STATUS[p.status].cls}>{PAY_STATUS[p.status].label}</span>
         <span className="muted">{fmtDay(p.created_at)}</span>

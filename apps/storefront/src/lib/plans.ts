@@ -1,13 +1,14 @@
 // Plans and limits — the single source of truth for what a seller's plan lets
 // them do. Paid plans are bought in /dashboard/plan (bank transfer to Kwaravend, confirmed in /admin).
 // The `stores.plan` column maps to these public plan names.
-// Prices were set on 2026-11-18: Free (₦0), Business (₦3,000/mo), Emirates Plus (₦8,000/mo; the middle plan was renamed on 2026-11-21, id stays 'plus'),
-// Business Pro (₦15,000/mo). On sale since 2026-11-22; plan_expires_at ends a paid plan.
-// Rider delivery fees are additional monthly fees on top of the base plan price.
+// Three plans since 2026-11-23: Free (₦0), Business (id 'growth', ₦3,000/mo) and
+// Emirates Plus (id 'plus', ₦8,000/mo). On sale since 2026-11-22; plan_expires_at
+// ends a paid plan. The Kwaravend rider is an add-on bought with the plan
+// (riderPrice per month), active until stores.rider_expires_at.
 
 import type { Plan } from '@idevtenancy/shared';
 
-export type PlanId = 'free' | 'growth' | 'plus' | 'pro';
+export type PlanId = 'free' | 'growth' | 'plus';
 export type RiderId = 'standard' | 'express' | 'same-day';
 
 export type LimitKey = 'listings' | 'staff' | 'locations' | 'templates';
@@ -64,52 +65,39 @@ export const PLANS: PlanDef[] = [
     id: 'growth',
     name: 'Business',
     priceLabel: '₦3,000/mo',
-    riderPriceLabel: '₦500/mo rider',
+    riderPriceLabel: '+₦500/mo rider',
     available: true,
-    tagline: 'For a shop that is selling every week, with Standard Kwaravend rider delivery.',
+    tagline: 'For a shop that is selling every week. Add Standard Kwaravend rider delivery.',
     limits: { listings: 100, staff: 5, locations: 2, templates: null, rider: 'standard', riderPrice: 500 },
     includes: [
       'Everything in Free',
       'Up to 100 active listings',
-      'Staff accounts with roles',
-      'Deeper analytics',
+      'Up to 5 staff accounts with roles',
+      'Up to 2 locations',
+      'Deeper analytics and delivery reports',
       'All 20 storefront templates',
       'Discount codes',
-      'Standard Kwaravend rider delivery',
+      'Standard Kwaravend rider delivery (add-on)',
     ],
   },
   {
     id: 'plus',
     name: 'Emirates Plus',
     priceLabel: '₦8,000/mo',
-    riderPriceLabel: '₦1,000/mo rider',
+    riderPriceLabel: '+₦1,000/mo rider',
     available: true,
-    tagline: 'For a shop that has outgrown a one-person operation, with Express Kwaravend rider delivery.',
-    limits: { listings: 250, staff: 10, locations: 3, templates: null, rider: 'express', riderPrice: 1000 },
+    tagline: 'For a shop that has outgrown a one-person operation. Add Express and same-day Kwaravend riders.',
+    limits: { listings: null, staff: 25, locations: 10, templates: null, rider: 'express', riderPrice: 1000 },
     includes: [
       'Everything in Business',
-      'Up to 250 listings',
-      'Multiple locations and per-location hours',
-      'Customer CRM and notes',
-      'Priority support',
-      'Express Kwaravend rider delivery',
-    ],
-  },
-  {
-    id: 'pro',
-    name: 'Business Pro',
-    priceLabel: '₦15,000/mo',
-    riderPriceLabel: '₦2,000/mo rider',
-    available: true,
-    tagline: 'For multi-branch retailers and delivery-heavy catalogues, with Same-day Kwaravend rider delivery.',
-    limits: { listings: null, staff: 25, locations: 10, templates: null, rider: 'same-day', riderPrice: 2000 },
-    includes: [
-      'Everything in Emirates',
       'Unlimited listings',
       'Up to 25 staff seats',
-      'Up to 10 locations',
-      'Custom domain and advanced dispatch',
-      'Same-day Kwaravend rider delivery',
+      'Up to 10 locations with per-location hours',
+      'Customer CRM and notes',
+      'Dispatch board and your own riders',
+      'Your own domain name',
+      'Priority support',
+      'Express and same-day Kwaravend rider delivery (add-on)',
     ],
   },
 ];
@@ -118,12 +106,12 @@ const BY_ID: Record<PlanId, PlanDef> = {
   free: PLANS[0]!,
   growth: PLANS[1]!,
   plus: PLANS[2]!,
-  pro: PLANS[3]!,
 };
 
 /** Map the database enum (or a missing value) onto a plan definition. */
 export function planFor(plan: Plan | string | null | undefined): PlanDef {
-  if (plan === 'pro') return BY_ID.pro;
+  // Business Pro was folded into Emirates Plus on 2026-11-23 (no store was on it).
+  if (plan === 'pro') return BY_ID.plus;
   if (plan === 'plus') return BY_ID.plus;
   if (plan === 'growth') return BY_ID.growth;
   return BY_ID.free;
@@ -134,7 +122,7 @@ export function riderLabel(rider: RiderId | null): string {
   if (!rider) return 'No dedicated rider';
   return {
     standard: 'Standard Kwaravend rider',
-    express: 'Express Kwaravend rider',
+    express: 'Express + same-day Kwaravend rider',
     'same-day': 'Same-day Kwaravend rider',
   }[rider];
 }
@@ -159,16 +147,19 @@ export function isAtLimit(used: number, limit: number | null): boolean {
 
 // ------------------------------------------------------------- T11 gating
 /** Features a plan can unlock (BUILD.md T11). */
-export type FeatureKeyPlan = 'crm' | 'dispatch' | 'reports' | 'custom_domain';
+export type FeatureKeyPlan = 'crm' | 'dispatch' | 'reports' | 'discounts' | 'custom_domain' | 'priority_support' | 'kwaravend_rider';
 
 /** Lowest plan that includes each feature. Free gets none of these when gating is on. */
 const FEATURE_MIN_PLAN: Record<FeatureKeyPlan, PlanId> = {
-  crm: 'growth',
-  dispatch: 'plus',
   reports: 'growth',
-  custom_domain: 'pro',
+  discounts: 'growth',
+  kwaravend_rider: 'growth',
+  crm: 'plus',
+  dispatch: 'plus',
+  custom_domain: 'plus',
+  priority_support: 'plus',
 };
-const PLAN_RANK: Record<PlanId, number> = { free: 0, growth: 1, plus: 2, pro: 3 };
+const PLAN_RANK: Record<PlanId, number> = { free: 0, growth: 1, plus: 2 };
 
 /**
  * hasFeature(store, key): whether this store's plan includes a feature.
@@ -202,4 +193,19 @@ export function effectivePlan(store: { plan?: string | null; plan_expires_at?: s
 export function planPriceKobo(id: PlanId): number {
   const label = PLANS.find((p) => p.id === id)?.priceLabel ?? '₦0';
   return Number(label.replace(/[^0-9]/g, '') || 0) * 100;
+}
+
+/** Whether the store's Kwaravend rider add-on is paid up (needs a plan with a rider). */
+export function riderActive(store: { plan?: string | null; plan_expires_at?: string | null; rider_expires_at?: string | null } | null | undefined): boolean {
+  const plan = effectivePlan(store);
+  if (!plan.limits.rider) return false;
+  const exp = store?.rider_expires_at ? Date.parse(store.rider_expires_at) : NaN;
+  return Number.isFinite(exp) && exp > Date.now();
+}
+
+/** Rider speeds a plan may request. */
+export function riderSpeeds(plan: PlanDef): Array<'standard' | 'express' | 'same_day'> {
+  if (plan.limits.rider === 'express' || plan.limits.rider === 'same-day') return ['standard', 'express', 'same_day'];
+  if (plan.limits.rider === 'standard') return ['standard'];
+  return [];
 }

@@ -5,6 +5,7 @@ import { NextRequest } from 'next/server';
 import { getSellerClient, getOwnStore } from '@/lib/auth';
 import { apiError, apiOk, internalError } from '@/lib/api';
 import { sanitizeText } from '@idevtenancy/shared';
+import { planLocked, PLAN_COLUMNS, type PlanStore } from '@/lib/plan-gate';
 
 export async function POST(req: NextRequest) {
   const sb = await getSellerClient();
@@ -24,8 +25,10 @@ export async function POST(req: NextRequest) {
   if (phone.length < 5) return apiError(422, 'invalid_phone', 'Missing customer phone.');
 
   try {
-    const store = await getOwnStore<{ id: string }>(sb, 'id');
+    const store = await getOwnStore<PlanStore>(sb, PLAN_COLUMNS);
     if (!store) return apiError(404, 'no_store', 'You do not have a store yet.');
+    const locked = planLocked(store, 'crm');
+    if (locked) return locked;
 
     if (!note.trim()) {
       const { error } = await sb

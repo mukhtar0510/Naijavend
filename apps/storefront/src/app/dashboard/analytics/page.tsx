@@ -8,6 +8,9 @@ import { DailyChart, TopReferrers } from './Charts';
 import { InsightCard } from './InsightCard';
 import { classifyTrafficSource, ownHostsFromSiteUrl } from '@idevtenancy/shared';
 import type { Store } from '@idevtenancy/shared';
+import { PlanUpsell } from '@/components/PlanUpsell';
+import { hasFeature, planNameFor } from '@/lib/plans';
+import { FEATURES } from '@/lib/flags';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,7 +32,7 @@ export default async function AnalyticsPage() {
   const sb = await getSellerClient();
   if (!sb) redirect('/dashboard/signin'); // layout redirect races this page — guard here too
   await redirectStaffToPos(sb); // R4: analytics are owner-only
-  const store = await getOwnStore<Pick<Store, 'id' | 'name' | 'slug'>>(sb, 'id, name, slug');
+  const store = await getOwnStore<Pick<Store, 'id' | 'name' | 'slug'> & { plan?: string | null; plan_expires_at?: string | null }>(sb, 'id, name, slug, plan, plan_expires_at');
   if (!store) {
     return (
       <main>
@@ -143,6 +146,7 @@ export default async function AnalyticsPage() {
   ).sort((a, b) => b[1] - a[1]);
   const fmtDuration = (m: number) => (m < 60 ? `${m} min` : m < 1440 ? `${Math.round(m / 6) / 10} h` : `${Math.round(m / 144) / 10} days`);
 
+  const deep = hasFeature(store, 'reports', FEATURES.planGating);
   return (
     <main>
       <h1>Analytics</h1>
@@ -152,7 +156,7 @@ export default async function AnalyticsPage() {
 
       {/* Plain-language weekly summary — fetched in the background so these
           charts paint first. See /api/ai/insights. */}
-      <InsightCard />
+      {deep && <InsightCard />}
 
       <div className="metric-grid" style={{ margin: '20px 0 28px' }}>
         <div className="metric-card">
@@ -194,6 +198,8 @@ export default async function AnalyticsPage() {
         />
       </div>
 
+      {deep ? (
+        <>
       <div className="card">
         <h2 style={{ fontSize: 18 }}>Where visitors come from</h2>
         <p className="muted" style={{ margin: '0 0 14px', fontSize: 13.5 }}>
@@ -236,6 +242,12 @@ export default async function AnalyticsPage() {
             </p>
           )}
         </div>
+      )}
+        </>
+      ) : (
+        <PlanUpsell title="Traffic sources and delivery reports" planName={planNameFor('reports')}>
+          See where visitors come from, delivery success and the weekly AI summary on the {planNameFor('reports')} plan.
+        </PlanUpsell>
       )}
     </main>
   );

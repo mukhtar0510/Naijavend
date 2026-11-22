@@ -257,10 +257,10 @@ export function HomeBrowser({
           <Link href={area ? `/map?area=${area}` : '/map'} className="kvmini">
             <div className="kvmini-copy">
               <span className="badge badge-primary">
-                <MapIcon size={13} aria-hidden /> Ilorin map
+                <MapIcon size={13} aria-hidden /> Map of Kwara
               </span>
               <h2 id="kvh-map-title">See who is around you</h2>
-              <p>Stores on a map of Ilorin, with directions and WhatsApp in one tap. Your location stays on your phone.</p>
+              <p>Stores on a map of Kwara, with directions and WhatsApp in one tap. Your location stays on your phone.</p>
               <span className="btn btn-primary">
                 Explore the map <ArrowRight size={16} aria-hidden />
               </span>

@@ -950,7 +950,7 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
           <Link href="/discover" className="btn btn-ghost btn-sm">
             <ArrowLeft size={16} aria-hidden /> Back
           </Link>
-          <h1>Stores in Ilorin</h1>
+          <h1>Stores in Kwara</h1>
           <p>The map couldn&apos;t load (you may be offline). Here are the stores by area.</p>
         </header>
         {empty}
@@ -976,7 +976,7 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
         ))}
       </div>
 
-      <div ref={mapEl} className="fm-map" role="application" aria-label="Map of stores in Ilorin" />
+      <div ref={mapEl} className="fm-map" role="application" aria-label="Map of stores in Kwara" />
       {fallback}
       {!ready && <div className="fm-map-loading" aria-hidden />}
 
@@ -1122,7 +1122,7 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
             </button>
           )}
           <h1>
-            {rows.length} store{rows.length === 1 ? '' : 's'} in Ilorin
+            {rows.length} store{rows.length === 1 ? '' : 's'} in Kwara
           </h1>
           <p>
             {distOrigin
@@ -1152,7 +1152,7 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
             <div className={`fm-browse${sel ? ' is-covered' : ''}`} aria-hidden={sel && desktop ? true : undefined}>
               {trending.length > 0 && (
                 <section className="fm-trending">
-                  <h2>Trending in Ilorin</h2>
+                  <h2>Trending in Kwara</h2>
                   <div className="fm-peek">{trending.map((r) => card(r, true))}</div>
                 </section>
               )}

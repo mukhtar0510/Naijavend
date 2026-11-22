@@ -7,7 +7,7 @@ import { BRAND } from '@idevtenancy/shared';
 export const metadata: Metadata = {
   title: 'Pricing — one monthly plan, no commission',
   description:
-    'Kwaravend plans in naira: a free tier with 25 listings, then ₦3,000, ₦8,000 and ₦15,000 per month. No commission on your sales and no card to start.',
+    'Kwaravend plans in naira: a free tier with 25 listings, then Business at ₦3,000 and Emirates Plus at ₦8,000 per month. No commission on your sales and no card to start.',
 };
 
 export const dynamic = 'force-static';
@@ -49,7 +49,7 @@ export default function PricingPage() {
         </p>
       </div>
 
-      <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-8 grid gap-3 md:grid-cols-3">
         {PLANS.map((plan) => {
           const free = plan.priceLabel === '₦0';
           return (

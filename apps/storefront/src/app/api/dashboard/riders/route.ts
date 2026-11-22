@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server';
 import { getSellerClient, getOwnStore } from '@/lib/auth';
 import { apiError, apiOk, internalError } from '@/lib/api';
 import { sanitizeText } from '@idevtenancy/shared';
+import { planLocked, PLAN_COLUMNS, type PlanStore } from '@/lib/plan-gate';
 
 const VEHICLES = ['bike', 'tricycle', 'car', 'van', 'foot'];
 
@@ -23,8 +24,10 @@ export async function POST(req: NextRequest) {
     return apiError(400, 'invalid_json', 'Request body must be JSON.');
   }
   try {
-    const store = await getOwnStore<{ id: string }>(sb, 'id');
+    const store = await getOwnStore<PlanStore>(sb, PLAN_COLUMNS);
     if (!store) return apiError(403, 'no_store', 'Only the store owner can manage riders.');
+    const locked = planLocked(store, 'dispatch');
+    if (locked) return locked;
 
     const id = sanitizeText(b.id, 40);
     const name = sanitizeText(b.name, 60);

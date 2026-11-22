@@ -234,7 +234,7 @@ html.reduce-effects .sc *, html.reduce-effects .sc { animation: none !important;
 }
 
 /* ============================================================ plan cards */
-.plan-wrap { display: grid; gap: 18px; }
+.plan-wrap { display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr); min-width: 0; }
 .plan-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); perspective: 1200px; }
 .plan-card {
   --rx: 0deg;
@@ -256,25 +256,31 @@ html.reduce-effects .sc *, html.reduce-effects .sc { animation: none !important;
   transition: transform var(--dur-3) var(--ease-emphasised), box-shadow var(--dur-3) var(--ease-standard), opacity var(--dur-2) var(--ease-standard), border-color var(--dur-2) var(--ease-standard);
 }
 .plan-card.is-featured { border-color: color-mix(in srgb, var(--accent) 55%, var(--border)); }
+.plan-card.is-featured { padding-top: 44px; }
+/* Flat strip across the top: never covers the badge or the plan name. */
 .plan-card.is-featured::before {
   content: 'Most complete';
   position: absolute;
-  top: 14px;
-  right: -34px;
-  padding: 4px 40px;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 6px 12px;
   background: var(--accent);
   color: var(--on-accent);
   font: 800 10.5px var(--font-body);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
+  text-align: center;
   text-transform: uppercase;
-  transform: rotate(35deg);
 }
 .plan-card.is-active { transform: rotateX(var(--rx)) rotateY(var(--ry)) translateY(-6px); box-shadow: 0 26px 50px -24px color-mix(in srgb, var(--primary) 55%, transparent); border-color: var(--primary); }
 .plan-card:focus-visible { box-shadow: var(--focus-ring), var(--shadow-lg); }
 .plan-card.is-dim { opacity: 0.62; }
 .plan-glow { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(300px circle at var(--gx) var(--gy), color-mix(in srgb, var(--accent) 22%, transparent), transparent 60%); transition: opacity var(--dur-3) var(--ease-standard); }
 .plan-card.is-active .plan-glow { opacity: 1; }
-.plan-card header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.plan-card header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; min-height: 28px; }
+/* Same badge size on every card ("Free forever", "Available now"). */
+.plan-card header .badge { flex: none; justify-content: center; min-width: 118px; height: 26px; padding: 0 10px; white-space: nowrap; font-size: 12px; line-height: 1; box-sizing: border-box; }
+.plan-card header h3 { min-width: 0; overflow-wrap: normal; word-break: keep-all; hyphens: none; }
 .plan-card h3 { margin: 0; font: 800 18px var(--font-heading); letter-spacing: -0.02em; }
 .plan-price { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px; margin: 0; }
 .plan-price span { font: 800 30px var(--font-mono); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
@@ -292,11 +298,12 @@ html.reduce-effects .sc *, html.reduce-effects .sc { animation: none !important;
 .plan-card.is-active .plan-more svg { transform: rotate(180deg); }
 .plan-cta { margin-top: auto; padding-top: 10px; }
 .plan-soon { margin: 0; padding: 10px 12px; border-radius: 12px; background: var(--accent-tint); color: var(--text); font-size: 12.5px; }
-.plan-compare { border: 1px solid var(--border); border-radius: 18px; background: var(--surface); padding: 14px 18px; }
-.plan-compare > summary { font: 700 15px var(--font-body); }
-.plan-table-wrap { overflow-x: auto; margin-top: 12px; }
-.plan-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-.plan-table th, .plan-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+.plan-compare { min-width: 0; max-width: 100%; border: 1px solid var(--border); border-radius: 18px; background: var(--surface); padding: 14px 18px; }
+.plan-compare > summary { font: 700 15px var(--font-body); cursor: pointer; }
+.plan-table-wrap { overflow-x: auto; max-width: 100%; margin-top: 12px; -webkit-overflow-scrolling: touch; }
+.plan-table { width: 100%; min-width: 520px; border-collapse: collapse; font-size: 13.5px; table-layout: fixed; }
+.plan-table th, .plan-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; white-space: normal; overflow-wrap: anywhere; }
+.plan-table thead th:first-child, .plan-table tbody th { width: 26%; }
 .plan-table thead th { color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
 .plan-table tbody th { font-weight: 650; }
 @media (hover: none) { .plan-card { transform: none !important; } }

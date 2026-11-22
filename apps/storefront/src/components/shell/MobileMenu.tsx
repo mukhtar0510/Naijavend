@@ -37,7 +37,7 @@ import { AreaSelector } from './AreaSelector';
 const LINKS: Array<{ href: string; label: string; Icon: LucideIcon }> = [
   { href: '/home', label: 'Home', Icon: Home },
   { href: '/discover', label: 'Discover stores', Icon: Compass },
-  { href: '/map', label: 'Map of Ilorin', Icon: MapIcon },
+  { href: '/map', label: 'Map of Kwara', Icon: MapIcon },
   ...(FEATURES.rankings ? [{ href: '/rankings', label: 'Rankings', Icon: Trophy }] : []),
   { href: '/about', label: `About ${BRAND.name}`, Icon: Info },
   { href: '/faq', label: 'Help and FAQ', Icon: HelpCircle },

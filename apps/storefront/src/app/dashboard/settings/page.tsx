@@ -15,8 +15,11 @@ import { OwnStorePreview, loadOwnStorePreview } from '@/components/preview/OwnSt
 import { BankDetailsCard } from './BankCard';
 import type { Store, StoreSocialLinks, StoreTheme, WhatsAppSettings } from '@idevtenancy/shared';
 import { StoreDesigner, type DesignerSeller } from '@/components/brand/StoreDesigner';
-import { effectivePlan } from '@/lib/plans';
+import { effectivePlan, hasFeature, planNameFor } from '@/lib/plans';
 import '../../../styles/store-designer.css';
+import { DomainCard, type DomainState } from './DomainCard';
+import { dnsRecordsFor } from '@/lib/domains';
+import { PlanUpsell } from '@/components/PlanUpsell';
 
 export const dynamic = 'force-dynamic';
 
@@ -71,6 +74,11 @@ export default async function SettingsPage({ searchParams }: { searchParams?: { 
     ? { bankName: bankRow.bank_name as string, accountName: bankRow.account_name as string, accountNumber: bankRow.account_number as string }
     : null;
   const preview = await loadOwnStorePreview(sb, s, theme);
+  // Custom domain (Emirates Plus); owner-readable row, null before the migration.
+  const { data: domainRow } = await sb.from('store_domains').select('domain, status, note').eq('store_id', s.id).maybeSingle();
+  const domain: DomainState | null = domainRow
+    ? { domain: domainRow.domain as string, status: domainRow.status as DomainState['status'], note: (domainRow.note as string) ?? '', records: dnsRecordsFor(domainRow.domain as string) }
+    : null;
   const plan = effectivePlan(s as unknown as { plan?: string | null; plan_expires_at?: string | null });
   const bg = theme?.background_color ?? '#FFFFFF';
   const hex = bg.replace('#', '');
@@ -108,7 +116,7 @@ export default async function SettingsPage({ searchParams }: { searchParams?: { 
               <h2>Business basics</h2>
               <span className="muted">Name, address, hours, WhatsApp</span>
             </div>
-            {FEATURES.multiBranchTools ? (
+            {FEATURES.multiBranchTools || (plan.limits.locations ?? 2) > 1 ? (
               <LocationsCard storeName={s.name} initialLocations={locations} />
             ) : null}
             <SettingsForm
@@ -133,6 +141,13 @@ export default async function SettingsPage({ searchParams }: { searchParams?: { 
             <div style={{ marginTop: 16 }}>
               <BankDetailsCard initial={bank} />
             </div>
+            {hasFeature(s as unknown as { plan?: string | null; plan_expires_at?: string | null }, 'custom_domain', FEATURES.planGating) ? (
+              <DomainCard initial={domain} storeSlug={s.slug} />
+            ) : (
+              <PlanUpsell title="Your own domain" planName={planNameFor('custom_domain')}>
+                Put your store on your own address, like myshop.com, with {planNameFor('custom_domain')}.
+              </PlanUpsell>
+            )}
           </section>
         }
         announcement={

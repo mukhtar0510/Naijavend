@@ -11,6 +11,7 @@ import { apiError, apiOk, internalError } from '@/lib/api';
 import { rateLimit, clientIp } from '@/lib/ratelimit';
 import { sanitizeText } from '@idevtenancy/shared';
 import { applyStatus, ensureDelivery, isStatus, newToken, type DeliveryStatus } from '@/lib/delivery';
+import { planLocked, PLAN_COLUMNS, type PlanStore } from '@/lib/plan-gate';
 
 const UUID = /^[0-9a-f-]{36}$/i;
 
@@ -28,8 +29,10 @@ export async function POST(req: NextRequest) {
   const action = sanitizeText(b.action, 12);
 
   try {
-    const store = await getOwnStore<{ id: string }>(sb, 'id');
+    const store = await getOwnStore<PlanStore>(sb, PLAN_COLUMNS);
     if (!store) return apiError(403, 'no_store', 'Only the store owner can dispatch.');
+    const locked = planLocked(store, 'dispatch');
+    if (locked) return locked;
     const svc = supabaseService();
 
     if (action === 'create') {

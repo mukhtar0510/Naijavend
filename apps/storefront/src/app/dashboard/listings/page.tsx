@@ -10,6 +10,9 @@ import { DiscountManager, type DiscountRow } from './DiscountManager';
 import { ListingQrManager } from './ListingQrManager';
 import type { Listing, Store } from '@idevtenancy/shared';
 import { Calendar as IcCalendar, Image as IcImage, ShoppingBag as IcShoppingBag } from 'lucide-react';
+import { PlanUpsell } from '@/components/PlanUpsell';
+import { FEATURES } from '@/lib/flags';
+import { hasFeature as hasPlanFeature, planNameFor } from '@/lib/plans';
 
 export const dynamic = 'force-dynamic';
 
@@ -123,7 +126,13 @@ export default async function ListingsPage({ searchParams }: { searchParams: Pro
       <ListingEditor storeId={(store as Store).id} />
 
       <div style={{ marginTop: 28 }}>
-        <DiscountManager initial={(promoRows ?? []) as DiscountRow[]} />
+        {hasPlanFeature(store as { plan?: string | null; plan_expires_at?: string | null }, 'discounts', FEATURES.planGating) ? (
+          <DiscountManager initial={(promoRows ?? []) as DiscountRow[]} />
+        ) : (
+          <PlanUpsell title="Discount codes" planName={planNameFor('discounts')}>
+            Make codes like SALE10 for buyers to use at checkout on the {planNameFor('discounts')} plan.
+          </PlanUpsell>
+        )}
       </div>
     </main>
   );

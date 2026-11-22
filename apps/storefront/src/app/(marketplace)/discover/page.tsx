@@ -311,7 +311,7 @@ export default async function DiscoverPage({
               <div className="mb-4 flex flex-wrap items-center gap-2 text-[13px] font-semibold text-muted-foreground">
                 <Sparkles size={14} style={{ color: 'var(--blue)' }} />
                 {mapStores.length > 0
-                  ? `${mapStores.length} ${mapStores.length === 1 ? 'store' : 'stores'} pinned in Ilorin`
+                  ? `${mapStores.length} ${mapStores.length === 1 ? 'store' : 'stores'} on the Kwara map`
                   : 'No Ilorin stores have a location yet'}
                 {querySuffix ? (
                   <Link href="/discover" className="brand-chip no-underline" style={{ marginLeft: 'auto' }}>

@@ -15,6 +15,7 @@ const NAV = [
   { href: '/dashboard/orders', label: 'Orders' },
   { href: '/dashboard/dispatch', label: 'Dispatch' },
   { href: '/dashboard/riders', label: 'Riders' },
+  { href: '/dashboard/kwaravend-rider', label: 'Kwaravend rider' },
   { href: '/dashboard/bookings', label: 'Bookings' },
   { href: '/dashboard/customers', label: 'Customers' },
   { href: '/dashboard/staff', label: 'Staff' },
@@ -23,6 +24,7 @@ const NAV = [
   { href: '/dashboard/analytics', label: 'Analytics' },
   { href: '/dashboard/ratings', label: 'Ratings' },
   { href: '/dashboard/plan', label: 'Plan' },
+  { href: '/dashboard/support', label: 'Support' },
   { href: '/dashboard/settings', label: 'Settings' },
 ];
 

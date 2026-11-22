@@ -120,3 +120,7 @@
 .rdr-otp label { display: grid; gap: 4px; font-weight: 700; font-size: 14px; }
 .rdr-otp .input { font-size: 28px; letter-spacing: 0.4em; text-align: center; }
 .rdr-foot { font-size: 13px; }
+
+/* Kwaravend rider request + support forms */
+.rr-field { display: grid; gap: 6px; font-size: 13px; font-weight: 600; }
+.rr-field .input, .rr-field textarea { font-weight: 400; }

@@ -197,7 +197,7 @@ export default function AboutPage() {
               </span>
               <h3>Then we kept going</h3>
               <p>
-                Bookings, a counter POS, staff logins, branches, a live Ilorin map, honest rankings
+                Bookings, a counter POS, staff logins, branches, a live Kwara map, honest rankings
                 and the blue tick — because a storefront that only sells is a brochure.
               </p>
             </div>

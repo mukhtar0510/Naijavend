@@ -1,4 +1,4 @@
-// /map — full-screen store map of Ilorin (REDESIGN R4 §6). Server-renders
+// /map — full-screen store map of Kwara (headings say Kwara since 23 Nov 2026) (REDESIGN R4 §6). Server-renders
 // the store list (only stores pinned inside Ilorin); the interactive map is a
 // lazy client chunk. Outside the marketplace shell so the map is the page.
 import type { Metadata, Viewport } from 'next';
@@ -13,8 +13,8 @@ import type { FullMapStore } from '@/components/map/FullMap';
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: 'Map of stores in Ilorin',
-  description: 'Find stores near you in Ilorin on a live map: open now, directions and WhatsApp in one tap.',
+  title: 'Map of Kwara stores',
+  description: 'Find stores near you in Kwara on a live map, starting with Ilorin: open now, directions and WhatsApp in one tap.',
   alternates: { canonical: `${siteUrl()}/map` },
 };
 

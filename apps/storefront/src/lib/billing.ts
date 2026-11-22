@@ -5,9 +5,9 @@
 import { randomBytes } from 'node:crypto';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { PlanId } from './plans';
-import { planPriceKobo } from './plans';
+import { planFor, planPriceKobo } from './plans';
 
-export const PAID_PLANS: PlanId[] = ['growth', 'plus', 'pro'];
+export const PAID_PLANS: PlanId[] = ['growth', 'plus'];
 export const BANK_SETTING_KEY = 'billing_bank';
 export const DAYS_PER_MONTH = 30;
 
@@ -24,8 +24,21 @@ export function newPlanReference(): string {
   return `KVP-${Array.from(bytes, (b) => alphabet[b % alphabet.length]).join('')}`;
 }
 
-export function planAmountKobo(plan: PlanId, months: number): number {
-  return planPriceKobo(plan) * months;
+/** Monthly Kwaravend rider add-on price in kobo for a plan (0 if none). */
+export function riderPriceKobo(plan: PlanId): number {
+  return (planFor(plan).limits.riderPrice ?? 0) * 100;
+}
+
+export function planAmountKobo(plan: PlanId, months: number, rider = false): number {
+  return (planPriceKobo(plan) + (rider ? riderPriceKobo(plan) : 0)) * months;
+}
+
+/** Rider add-on expiry: extend a running add-on, else start from now. */
+export function nextRiderExpiry(current: { rider_expires_at?: string | null }, months: number): string {
+  const now = Date.now();
+  const cur = current.rider_expires_at ? Date.parse(current.rider_expires_at) : NaN;
+  const base = Number.isFinite(cur) && cur > now ? cur : now;
+  return new Date(base + months * DAYS_PER_MONTH * 86_400_000).toISOString();
 }
 
 /** Kwaravend's own account for plan payments, set by the owner in /admin. */

@@ -13,6 +13,7 @@ export interface OpenPurchase {
   plan: string;
   planName: string;
   months: number;
+  rider: boolean;
   amountKobo: number;
   reference: string;
   status: 'pending' | 'awaiting_confirmation';
@@ -23,6 +24,9 @@ export interface PlanOption {
   id: string;
   name: string;
   priceKobo: number;
+  /** Monthly Kwaravend rider add-on, 0 if the plan has none. */
+  riderKobo: number;
+  riderName: string;
   current: boolean;
 }
 
@@ -45,6 +49,7 @@ export function PlanCheckout({
   const [err, setErr] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [rider, setRider] = useState<Record<string, boolean>>({});
 
   async function choose(plan: string) {
     setBusy(plan);
@@ -53,7 +58,7 @@ export function PlanCheckout({
       const res = await fetch('/api/dashboard/plan', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ plan, months }),
+        body: JSON.stringify({ plan, months, rider: Boolean(rider[plan]) }),
       });
       const j = (await res.json()) as { error?: { message?: string } };
       if (!res.ok) throw new Error(j.error?.message ?? 'Could not start the purchase.');
@@ -111,6 +116,7 @@ export function PlanCheckout({
         <header>
           <h2>
             {open.planName} · {open.months} month{open.months === 1 ? '' : 's'}
+            {open.rider ? ' + Kwaravend rider' : ''}
           </h2>
           {open.status === 'awaiting_confirmation' ? (
             <span className="badge badge-warning">
@@ -200,9 +206,17 @@ export function PlanCheckout({
           <div key={p.id} className="card plan-opt">
             <strong>{p.name}</strong>
             <span className="mono">
-              {formatNaira(p.priceKobo * months)}
+              {formatNaira((p.priceKobo + (rider[p.id] ? p.riderKobo : 0)) * months)}
               <em> for {months} month{months === 1 ? '' : 's'}</em>
             </span>
+            {p.riderKobo > 0 && (
+              <label className="plan-rider">
+                <input type="checkbox" checked={Boolean(rider[p.id])} onChange={(e) => setRider({ ...rider, [p.id]: e.target.checked })} />
+                <span>
+                  Add {p.riderName} <em>+{formatNaira(p.riderKobo)}/month</em>
+                </span>
+              </label>
+            )}
             {p.current ? (
               <button type="button" className="btn btn-outline" disabled={!billingReady || busy !== null} onClick={() => choose(p.id)}>
                 <CheckCircle2 size={16} aria-hidden /> Renew

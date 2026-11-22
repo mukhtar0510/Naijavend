@@ -34,11 +34,12 @@ export const FEATURES = {
    */
   exampleStores: flag('EXAMPLE_STORES', true),
   /**
-   * Plan gating (BUILD.md T11): lock CRM, dispatch/riders and reports to the
-   * paid plans. Plans are on sale (22 Nov 2026); while this is off every
-   * store can still use everything. Turn on to enforce the plans.
+   * Plan gating (BUILD.md T11): paid features (CRM, dispatch, deeper
+   * analytics, discount codes, custom domain, priority support, Kwaravend
+   * riders) need an active plan. ON since 23 Nov 2026, when the three plans
+   * went on sale; set NEXT_PUBLIC_FLAG_PLAN_GATING=off to open everything.
    */
-  planGating: flag('PLAN_GATING'),
+  planGating: flag('PLAN_GATING', true),
 } as const;
 
 /** Env variable names, for the owner's flag panel. */
