@@ -1,0 +1,28 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="flyer.css">
+<style>
+h1{font-size:78px;margin-top:44px}
+.plans{display:grid;gap:26px;margin-top:44px}
+.plan{padding:28px 32px;display:grid;grid-template-columns:1fr auto;gap:8px 20px;align-items:center}
+.plan h2{font:800 38px Sora;letter-spacing:-.02em}
+.price{font:800 46px 'JetBrains Mono';letter-spacing:-.03em;text-align:right}
+.price small{font:600 20px Inter;color:var(--muted);letter-spacing:0}
+.plan ul{grid-column:1/-1;list-style:none;display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:8px}
+.plan li{font:500 22px Inter;color:#d8d7d2}
+.plan li::before{content:'✓';color:var(--green);font-weight:800;margin-right:8px}
+.plan.feat{border:2px solid var(--gold);background:linear-gradient(180deg,rgba(245,179,1,.12),var(--surface));position:relative}
+.plan.feat::before{content:'MOST COMPLETE';position:absolute;top:-18px;left:32px;padding:6px 16px;border-radius:999px;background:var(--gold);color:#1d1300;font:800 16px Inter;letter-spacing:.1em}
+.note{margin-top:28px;font-size:23px;color:var(--muted)}
+.note b{color:var(--text)}
+</style></head><body><div class="stage grain">
+<div class="top"><div class="brand"><img src="icon.png" alt=""><span>Kwara<b>vend</b></span></div><span class="tag">Plans</span></div>
+<h1>Start free. Grow when <span class="gold">you&rsquo;re ready.</span></h1>
+<div class="plans">
+<div class="plan card"><h2>Free</h2><div class="price">₦0 <small>forever</small></div><ul><li>Store page</li><li>25 listings</li><li>7 templates</li><li>AI store designer</li><li>Orders, bookings, chat</li></ul></div>
+<div class="plan card"><h2>Business</h2><div class="price">₦3,000<small>/mo</small></div><ul><li>100 listings</li><li>5 staff</li><li>All 20 templates</li><li>Discount codes</li><li>Deeper analytics</li><li>Kwaravend rider add-on</li></ul></div>
+<div class="plan card feat"><h2>Emirates Plus</h2><div class="price">₦8,000<small>/mo</small></div><ul><li>Unlimited listings</li><li>25 staff</li><li>10 branches</li><li>Customer CRM</li><li>Dispatch board</li><li>Your own domain</li><li>Priority support</li></ul></div>
+</div>
+<p class="note"><b>0% commission</b> on every plan. Pay monthly by bank transfer from your dashboard.</p>
+<div class="spacer"></div>
+<div class="cta-row"><span class="cta">See plans at kwaravend.ng/pricing</span></div>
+<div class="foot"><span>Kwaravend · Ilorin, Kwara State</span><span>Prices in naira</span></div>
+</div></body></html>

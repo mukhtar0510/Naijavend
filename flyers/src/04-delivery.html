@@ -1,0 +1,33 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="flyer.css">
+<style>
+h1{font-size:82px}
+.track{margin-top:44px;padding:34px 36px;display:grid;gap:0}
+.track h2{font:700 24px Inter;color:var(--muted);margin-bottom:22px;display:flex;justify-content:space-between}
+.track h2 span{font:700 22px 'JetBrains Mono';color:var(--text)}
+.step{display:grid;grid-template-columns:48px 1fr auto;gap:20px;align-items:start;position:relative;padding-bottom:40px}
+.step:not(:last-child)::before{content:'';position:absolute;left:23px;top:46px;bottom:4px;width:3px;background:var(--line)}
+.step.done:not(:last-child)::before{background:var(--green)}
+.dot{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font:800 22px Inter;background:var(--elevated);border:3px solid var(--line);color:var(--muted)}
+.done .dot{background:var(--green);border-color:var(--green);color:#052e16}
+.now .dot{border-color:var(--gold);color:var(--gold);box-shadow:0 0 0 10px rgba(245,179,1,.15)}
+.step b{display:block;font:700 28px Inter}
+.step p{font:500 21px Inter;color:var(--muted);margin-top:4px}
+.step time{font:600 20px 'JetBrains Mono';color:var(--muted)}
+.code{display:inline-block;margin-top:10px;padding:8px 16px;border-radius:12px;background:rgba(245,179,1,.12);border:1px solid rgba(245,179,1,.4);font:800 26px 'JetBrains Mono';letter-spacing:.3em;color:var(--gold)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:34px}
+.box{padding:22px 24px;border-radius:22px;background:var(--surface);border:1px solid var(--line);font:600 23px Inter}
+.box span{display:block;font:500 19px Inter;color:var(--muted);margin-top:6px}
+</style></head><body><div class="stage grain">
+<div class="top"><div class="brand"><img src="icon.png" alt=""><span>Kwara<b>vend</b></span></div><span class="tag green">Delivery</span></div>
+<h1>Every delivery, <span class="gold">tracked</span> to the door.</h1>
+<div class="track card">
+<h2>Order <span>KV-7H3KQ9</span></h2>
+<div class="step done"><div class="dot">✓</div><div><b>Order confirmed</b><p>The seller has your order</p></div><time>10:02</time></div>
+<div class="step done"><div class="dot">✓</div><div><b>Rider assigned</b><p>Tunde · Bike · Tanke to Asa-Dam</p></div><time>10:20</time></div>
+<div class="step now"><div class="dot">3</div><div><b>On the way</b><p>Give the rider your delivery code</p><span class="code">4 8 2 1</span></div><time>10:34</time></div>
+<div class="step"><div class="dot">4</div><div><b>Delivered</b><p>Confirmed with your code</p></div><time></time></div>
+</div>
+<div class="row"><div class="box">Buyers get a tracking link<span>No app, no sign-up</span></div><div class="box">Your riders or ours<span>Dispatch board or Kwaravend riders</span></div></div>
+<div class="spacer"></div>
+<div class="cta-row"><span class="cta">Sell with delivery</span><span class="url">kwaravend.ng</span></div>
+</div></body></html>

@@ -1,0 +1,37 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="flyer.css">
+<style>
+h1{font-size:82px}
+.prompt{margin-top:44px;padding:26px 30px;display:flex;align-items:center;gap:18px;font:500 28px Inter;color:#e7e5df}
+.prompt .spark{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:rgba(245,179,1,.15);color:var(--gold);font:800 28px Sora;flex:none}
+.prompt .go{margin-left:auto;padding:14px 22px;border-radius:999px;background:var(--blue);color:#04122b;font:800 22px Sora;flex:none}
+.arrow{text-align:center;font:800 44px Sora;color:var(--gold);margin:24px 0}
+.previews{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.pv{border-radius:24px;overflow:hidden;border:1px solid var(--line)}
+.pv .h{height:240px;padding:24px}
+.pv .h b{display:block;font:800 24px var(--f,Sora);letter-spacing:-.01em}
+.pv .h span{display:inline-block;margin-top:14px;padding:9px 16px;font:700 16px Inter}
+.pv .b{padding:20px 22px;background:#fff;color:#111;font:600 19px Inter}
+.pv .b em{display:block;font:500 15px Inter;color:#666;font-style:normal;margin-top:4px}
+.p1 .h{background:linear-gradient(135deg,#fffdf7,#f3e3b5);color:#3b2a00;--f:Georgia}
+.p1 .h span{background:#8a5f00;color:#fff;border-radius:999px}
+.p2 .h{background:#0b0c0e;color:#fff}
+.p2 .h span{background:#e0a106;color:#0b0c0e;border-radius:2px}
+.p3 .h{background:linear-gradient(135deg,#fff7fa,#fbcfe8);color:#831843}
+.p3 .h span{background:#be1e6b;color:#fff;border-radius:10px}
+.chips{display:flex;flex-wrap:wrap;gap:12px;margin-top:40px}
+.chip{padding:12px 20px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font:600 22px Inter}
+.chip.on{border-color:var(--gold);color:var(--gold);background:rgba(245,179,1,.1)}
+</style></head><body><div class="stage grain">
+<div class="top"><div class="brand"><img src="icon.png" alt=""><span>Kwara<b>vend</b></span></div><span class="tag">AI store designer</span></div>
+<h1>Describe your shop. <span class="gold">Watch it design itself.</span></h1>
+<div class="prompt card"><span class="spark">✦</span>&ldquo;Elegant fabric shop, gold accents, flat buttons&rdquo;<span class="go">Design it</span></div>
+<div class="arrow">↓</div>
+<div class="previews">
+<div class="pv p1"><div class="h"><b>Kwara Fashions</b><span>Pill buttons</span></div><div class="b">Gold &amp; calm<em>Serif headlines</em></div></div>
+<div class="pv p2"><div class="h"><b>Gadget Hub</b><span>Flat buttons</span></div><div class="b">Midnight<em>Night-market gold</em></div></div>
+<div class="pv p3"><div class="h"><b>Sweet Bites</b><span>Rounded buttons</span></div><div class="b">Pastel bakery<em>Soft and friendly</em></div></div>
+</div>
+<div class="chips"><span class="chip on">20 templates</span><span class="chip">Colours &amp; fonts</span><span class="chip">Rounded, pill or flat buttons</span><span class="chip">Live preview</span><span class="chip">Save in one tap</span></div>
+<div class="spacer"></div>
+<div class="cta-row"><span class="cta gold">Try it free</span><span class="url">kwaravend.ng<small>7 templates on the Free plan</small></span></div>
+</div></body></html>
