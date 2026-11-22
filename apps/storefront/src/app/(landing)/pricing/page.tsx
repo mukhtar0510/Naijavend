@@ -7,7 +7,7 @@ import { BRAND } from '@idevtenancy/shared';
 export const metadata: Metadata = {
   title: 'Pricing — one monthly plan, no commission',
   description:
-    'Kwaravend plans in naira: a free tier with 25 listings, then Business at ₦3,000 and Emirates Plus at ₦8,000 per month. No commission on your sales and no card to start.',
+    'Kwaravend plans in naira: a free tier with 25 listings, then Business at ₦5,000 and Emirates Plus at ₦12,500 per month. No commission on your sales and no card to start.',
 };
 
 export const dynamic = 'force-static';

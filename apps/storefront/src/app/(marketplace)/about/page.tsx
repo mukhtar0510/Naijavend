@@ -104,7 +104,7 @@ export default function AboutPage() {
               <div className="nv-hero-proof">
                 <p>
                   <strong>No commission · no card to start</strong>
-                  <span>Free plan forever · paid tiers from ₦3,000/mo · Ilorin only</span>
+                  <span>Free plan forever · paid plans from ₦5,000/mo · Ilorin only</span>
                 </p>
               </div>
             </Reveal>

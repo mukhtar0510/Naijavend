@@ -2,6 +2,7 @@
 // qualifies once it has 30+ reviews averaging 4.0+ stars. RLS scopes the
 // update to the owner's own store row.
 import { requireSeller, getOwnStore } from '@/lib/auth';
+import { supabaseService } from '@/lib/supabase';
 import { revalidateStore } from '@/lib/revalidate';
 import { apiError, apiOk, internalError } from '@/lib/api';
 
@@ -35,7 +36,10 @@ export async function POST() {
       );
     }
 
-    const { error } = await sb
+    // The DB guard (guard_store_plan) refuses verification changes from a
+    // seller's own session, so the tick is written with the service role only
+    // after the eligibility rule above has passed.
+    const { error } = await supabaseService()
       .from('stores')
       .update({ verification_status: 'verified', verified_at: new Date().toISOString() })
       .eq('id', store.id);

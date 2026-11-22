@@ -5,6 +5,7 @@
 // normal site. Lookups are cached per edge instance for five minutes.
 import { NextResponse, type NextRequest } from 'next/server';
 import { isPlatformHost } from '@/lib/domains';
+import { hasFeature } from '@/lib/plans';
 
 const TTL = 5 * 60_000;
 const cache = new Map<string, { slug: string | null; at: number }>();
@@ -17,13 +18,17 @@ async function slugFor(host: string): Promise<string | null> {
   if (!url || !key) return null;
   let slug: string | null = null;
   try {
-    const res = await fetch(`${url}/rest/v1/store_domains?select=stores(slug)&status=eq.active&domain=eq.${encodeURIComponent(host)}&limit=1`, {
+    const res = await fetch(`${url}/rest/v1/store_domains?select=stores(slug,plan,plan_expires_at)&status=eq.active&domain=eq.${encodeURIComponent(host)}&limit=1`, {
       headers: { apikey: key, Authorization: `Bearer ${key}` },
     });
     if (res.ok) {
-      const rows = (await res.json()) as Array<{ stores: { slug: string } | Array<{ slug: string }> | null }>;
-      const s = rows[0]?.stores;
-      slug = (Array.isArray(s) ? s[0]?.slug : s?.slug) ?? null;
+      type Row = { slug: string; plan?: string | null; plan_expires_at?: string | null };
+      const rows = (await res.json()) as Array<{ stores: Row | Row[] | null }>;
+      const raw = rows[0]?.stores;
+      const st = Array.isArray(raw) ? raw[0] : raw;
+      // Own domains are Emirates Plus: a lapsed plan stops serving the domain
+      // (gating is checked as on — the plan decides, not the flag).
+      slug = st && hasFeature(st, 'custom_domain', true) ? st.slug : null;
     }
   } catch {
     slug = null;

@@ -17,6 +17,14 @@ import { apiError, apiOk, internalError } from '@/lib/api';
 import { rateLimit, clientIp } from '@/lib/ratelimit';
 
 export async function POST(req: NextRequest) {
+  // Security (22 Nov 2026): the buyer receives the pay token, so this route let
+  // any buyer mark their OWN order paid without paying — the seller then saw a
+  // "paid" order and digital downloads were minted for free. No UI calls it;
+  // payments are confirmed by the seller (orders/payment). It only runs when
+  // explicitly enabled for local demos, never in production.
+  if (process.env.MOCK_PAY_ENABLED !== 'true' || process.env.VERCEL_ENV === 'production') {
+    return apiError(404, 'not_found', 'Not found.');
+  }
   const rl = rateLimit(`mock-pay:${clientIp(req)}`, 15, 60_000);
   if (!rl.allowed) {
     return apiError(429, 'rate_limited', `Too many attempts. Try again in ${rl.retryAfterSeconds}s.`);

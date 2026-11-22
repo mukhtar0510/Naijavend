@@ -25,6 +25,9 @@ async function currentSessionEmail(): Promise<string | null> {
     if (!url || !key) return null;
     const { data, error } = await createClient(url, key, { auth: { persistSession: false } }).auth.getUser(access);
     if (error || !data.user) return null;
+    // An unconfirmed address proves nothing: without this, signing up with
+    // an admin's email (before they ever do) would pass the allow-list.
+    if (!data.user.email_confirmed_at) return null;
     return data.user.email?.toLowerCase() ?? null;
   } catch {
     return null;

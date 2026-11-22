@@ -4,11 +4,13 @@
 // extensions, and attaches the resulting storage path to the given listing.
 import { NextRequest } from 'next/server';
 import { getSellerClient, getOwnStore } from '@/lib/auth';
+import { supabaseService } from '@/lib/supabase';
 import { apiError, apiOk, internalError } from '@/lib/api';
 import { rateLimit, clientIp } from '@/lib/ratelimit';
 import { revalidateStore } from '@/lib/revalidate';
 
 const ALLOWED_EXT = new Set(['pdf', 'epub', 'mobi', 'zip', 'txt', 'md', 'csv', 'doc', 'docx', 'mp3', 'wav', 'mp4']);
+const DIGITAL_BUCKET = 'digital-goods';
 const MAX_BYTES = 50 * 1024 * 1024; // matches digital_file_size check in migration
 
 export async function POST(req: NextRequest) {
@@ -56,15 +58,19 @@ export async function POST(req: NextRequest) {
   }
 
   const path = `digital/${(store as { id: string }).id}/${listingId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-  const { error: upErr } = await sb.storage
-    .from('store-media')
-    .upload(path, file, { contentType: file.type || 'application/octet-stream', upsert: false, cacheControl: 'private' });
+  // Paid files live in the PRIVATE digital-goods bucket (service role only):
+  // listings.digital_file_path is publicly readable, so a public bucket would
+  // hand the file to anyone. Ownership of the listing was checked above.
+  const svc = supabaseService();
+  const { error: upErr } = await svc.storage
+    .from(DIGITAL_BUCKET)
+    .upload(path, new Uint8Array(await file.arrayBuffer()), { contentType: file.type || 'application/octet-stream', upsert: false, cacheControl: 'private' });
   if (upErr) return internalError('digital-upload-storage', upErr);
 
   // Best-effort cleanup of the previous file when replacing one.
   if (typeof listing.digital_file_path === 'string' && listing.digital_file_path && listing.digital_file_path !== path) {
     try {
-      await sb.storage.from('store-media').remove([listing.digital_file_path]);
+      await svc.storage.from(DIGITAL_BUCKET).remove([listing.digital_file_path]);
     } catch {
       // old file may already be gone; not fatal
     }

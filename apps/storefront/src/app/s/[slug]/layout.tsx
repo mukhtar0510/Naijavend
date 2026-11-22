@@ -14,7 +14,17 @@ import { OpenBadge } from '@/components/OpenBadge';
 import { BackToMarket } from '@/components/BackToMarket';
 import { InstagramIcon, XIcon, FacebookIcon, TikTokIcon, YouTubeIcon } from '@/components/SocialIcons';
 import type { StoreSocialLinks, StoreTheme } from '@idevtenancy/shared';
-import { CURSIVE_FONTS, BACKGROUND_GRADIENTS, isBackgroundGradient } from '@idevtenancy/shared';
+import { CURSIVE_FONTS, BACKGROUND_GRADIENTS, isBackgroundGradient, STORE_TEMPLATES } from '@idevtenancy/shared';
+import { effectivePlan } from '@/lib/plans';
+
+/** A paid template only shows while the plan that allows it is active; otherwise Modern. */
+function allowedLayout(layout: string | null | undefined, store: { plan?: string | null; plan_expires_at?: string | null }): string {
+  const l = layout ?? 'modern';
+  const limit = effectivePlan(store).limits.templates;
+  if (limit == null) return l;
+  const i = STORE_TEMPLATES.findIndex((t) => t.id === l);
+  return i >= 0 && i < limit ? l : 'modern';
+}
 
 const SOCIAL_META: Array<{ key: keyof StoreSocialLinks; label: string; Icon: (p: { size?: number }) => React.ReactNode; prefix: string }> = [
   { key: 'instagram', label: 'Instagram', Icon: InstagramIcon, prefix: 'https://instagram.com/' },
@@ -99,7 +109,7 @@ export default async function StoreSiteLayout({
   const sb = supabaseAnon();
   const { data: store } = await sb
     .from('stores')
-    .select('id, name, slug, description, social_links, business_hours, announcement, is_dropshipper')
+    .select('id, name, slug, description, social_links, business_hours, announcement, is_dropshipper, plan, plan_expires_at')
     .eq('slug', slug)
     .maybeSingle();
   if (!store) notFound();
@@ -155,7 +165,7 @@ export default async function StoreSiteLayout({
   return (
     <div
       className="site-shell"
-      data-layout={t?.layout ?? 'modern'}
+      data-layout={allowedLayout(t?.layout, store as { plan?: string | null; plan_expires_at?: string | null })}
       data-buttons={t?.button_shape ?? DEFAULTS.button_shape}
       data-cards={t?.card_style ?? DEFAULTS.card_style}
       data-card-radius={t?.card_radius === 'sharp' ? 'sharp' : 'rounded'}

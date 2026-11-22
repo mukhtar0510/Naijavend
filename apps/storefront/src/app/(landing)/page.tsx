@@ -69,7 +69,7 @@ const OUTCOMES = [
 const FAQS = [
   {
     q: 'How much does it cost?',
-    a: 'The Free plan costs nothing and has no end date. There are two paid plans, Business at ₦3,000 and Emirates Plus at ₦8,000 a month, paid from your dashboard by bank transfer to Kwaravend. There is no commission on your sales.',
+    a: 'The Free plan costs nothing and has no end date. There are two paid plans, Business at ₦5,000 and Emirates Plus at ₦12,500 a month, paid from your dashboard by bank transfer to Kwaravend. There is no commission on your sales.',
   },
   {
     q: 'Can I take payments online?',

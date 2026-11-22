@@ -9,6 +9,7 @@ import { apiError, apiOk, internalError } from '@/lib/api';
 import { rateLimit, clientIp } from '@/lib/ratelimit';
 import { aiComplete } from '@idevtenancy/ai';
 import { insightInput, weeklyNumbers, type InsightNumbers } from '@/lib/insights';
+import { planLocked } from '@/lib/plan-gate';
 
 export interface InsightsPayload {
   numbers: InsightNumbers | null;
@@ -28,8 +29,11 @@ export async function GET(req: NextRequest) {
     const sb = await getSellerClient();
     if (!sb) return apiError(401, 'unauthenticated', 'Sign in first.');
 
-    const store = await getOwnStore<{ id: string; name: string }>(sb, 'id, name');
+    const store = await getOwnStore<{ id: string; name: string; plan?: string | null; plan_expires_at?: string | null }>(sb, 'id, name, plan, plan_expires_at');
     if (!store) return apiOk<InsightsPayload>({ numbers: null, summary: null, points: [], action: null, source: 'none' });
+    // The weekly AI summary is part of deeper analytics (Business and up).
+    const locked = planLocked(store, 'reports');
+    if (locked) return locked;
 
     const numbers = await weeklyNumbers(sb, store.id);
     const quiet =

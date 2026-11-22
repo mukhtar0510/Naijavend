@@ -10,12 +10,14 @@ let cachedSecret: string | null = null;
 
 function secret(): string {
   if (!cachedSecret) {
-    // Not a password-strength secret — it gates a demo payment flow. It exists
-    // so tokens can't be forged without reading the server env, and rotates
-    // whenever ADMIN_EMAILS changes (invalidating outstanding checkout links).
-    cachedSecret = createHash('sha256')
-      .update(`${process.env.ADMIN_EMAILS ?? 'idevtenancy'}::kwaravend-mock-pay-v1`)
-      .digest('hex');
+    // The token guards the buyer's bank details, receipt upload and digital
+    // downloads, so the key must be a real secret. It used to be derived from
+    // ADMIN_EMAILS — an email address is guessable, which let anyone forge a
+    // token for any order id. Prefer PAY_TOKEN_SECRET; otherwise derive from
+    // the service-role key, which never leaves the server.
+    const base = process.env.PAY_TOKEN_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!base) throw new Error('Set PAY_TOKEN_SECRET (or SUPABASE_SERVICE_ROLE_KEY) to mint payment tokens.');
+    cachedSecret = createHash('sha256').update(`${base}::kwaravend-pay-token-v2`).digest('hex');
   }
   return cachedSecret;
 }

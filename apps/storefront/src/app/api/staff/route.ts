@@ -3,6 +3,7 @@
 // their own seller sign-in) linked to the owner's store via store_staff.
 
 import { NextRequest } from 'next/server';
+import { randomBytes } from 'crypto';
 import { supabaseService } from '@/lib/supabase';
 import { getSellerClient } from '@/lib/auth';
 import { rateLimit, clientIp } from '@/lib/ratelimit';
@@ -63,7 +64,7 @@ export async function POST(req: NextRequest) {
   const locationIds = Array.isArray(b.locationIds)
     ? [...new Set(b.locationIds.filter((x): x is string => typeof x === 'string' && /^[0-9a-f-]{36}$/i.test(x)))].slice(0, 10)
     : [];
-  const tempPassword = `Nv-${Math.random().toString(36).slice(2, 10)}!7`;
+  const tempPassword = `Nv-${randomBytes(12).toString('base64url')}!7`; // CSPRNG, not Math.random
 
   if (!slug) return apiError(400, 'missing_store', 'Store is required.');
   if (name.length < 2) return apiError(422, 'invalid_name', 'Enter the staff member’s name.');

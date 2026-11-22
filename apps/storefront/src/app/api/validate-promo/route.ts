@@ -9,6 +9,8 @@ import { rateLimit, clientIp } from '@/lib/ratelimit';
 import { apiError, apiOk, internalError } from '@/lib/api';
 import { sanitizeText } from '@idevtenancy/shared';
 import { zoneLabel } from '@/lib/deliveryZones';
+import { hasFeature } from '@/lib/plans';
+import { FEATURES } from '@/lib/flags';
 
 export async function POST(req: NextRequest) {
   const rl = rateLimit(`validate-promo:${clientIp(req)}`, 20, 60_000);
@@ -32,8 +34,12 @@ export async function POST(req: NextRequest) {
   try {
     const sb = supabaseService();
 
-    const { data: store } = await sb.from('stores').select('id').eq('slug', slug).maybeSingle();
+    const { data: store } = await sb.from('stores').select('id, plan, plan_expires_at').eq('slug', slug).maybeSingle();
     if (!store) return apiError(404, 'store_not_found', 'That store does not exist.');
+    // Discount codes are a paid-plan feature: a Free (or lapsed) store's codes don't apply.
+    if (!hasFeature(store, 'discounts', FEATURES.planGating)) {
+      return apiOk({ valid: false, message: 'That code is not valid for this store.' });
+    }
 
     const { data: promo } = await sb
       .from('discount_codes')

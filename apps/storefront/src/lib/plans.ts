@@ -1,8 +1,8 @@
 // Plans and limits — the single source of truth for what a seller's plan lets
 // them do. Paid plans are bought in /dashboard/plan (bank transfer to Kwaravend, confirmed in /admin).
 // The `stores.plan` column maps to these public plan names.
-// Three plans since 2026-11-23: Free (₦0), Business (id 'growth', ₦3,000/mo) and
-// Emirates Plus (id 'plus', ₦8,000/mo). On sale since 2026-11-22; plan_expires_at
+// Three plans since 2026-11-23: Free (₦0), Business (id 'growth', ₦5,000/mo) and
+// Emirates Plus (id 'plus', ₦12,500/mo; prices raised by the owner on 2026-11-23). On sale since 2026-11-22; plan_expires_at
 // ends a paid plan. The Kwaravend rider is an add-on bought with the plan
 // (riderPrice per month), active until stores.rider_expires_at.
 
@@ -64,7 +64,7 @@ export const PLANS: PlanDef[] = [
   {
     id: 'growth',
     name: 'Business',
-    priceLabel: '₦3,000/mo',
+    priceLabel: '₦5,000/mo',
     riderPriceLabel: '+₦500/mo rider',
     available: true,
     tagline: 'For a shop that is selling every week. Add Standard Kwaravend rider delivery.',
@@ -83,7 +83,7 @@ export const PLANS: PlanDef[] = [
   {
     id: 'plus',
     name: 'Emirates Plus',
-    priceLabel: '₦8,000/mo',
+    priceLabel: '₦12,500/mo',
     riderPriceLabel: '+₦1,000/mo rider',
     available: true,
     tagline: 'For a shop that has outgrown a one-person operation. Add Express and same-day Kwaravend riders.',

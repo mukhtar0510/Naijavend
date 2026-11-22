@@ -14,6 +14,8 @@ import { isZoneId, zoneLabel, zonesOf } from '@/lib/deliveryZones';
 import { ILORIN_AREAS, inIlorin } from '@/lib/ilorin';
 import { ensureDelivery } from '@/lib/delivery';
 import { recordEvent } from '@/lib/events';
+import { hasFeature } from '@/lib/plans';
+import { FEATURES } from '@/lib/flags';
 
 // Idempotency cache keyed by CALLER IP + the client-supplied key — the raw key
 // alone would let anyone replay another buyer's key and receive their orderId.
@@ -93,7 +95,7 @@ export async function POST(req: NextRequest) {
   try {
     const sb = supabaseService();
 
-    const { data: store, error: storeErr } = await sb.from('stores').select('id, delivery_options, is_example').eq('slug', slug).maybeSingle();
+    const { data: store, error: storeErr } = await sb.from('stores').select('id, delivery_options, is_example, plan, plan_expires_at').eq('slug', slug).maybeSingle();
     if (storeErr) throw storeErr;
     if (!store) return apiError(404, 'store_not_found', 'That store does not exist.');
     // Example stores are sample data: never let a real buyer place an order.
@@ -131,6 +133,10 @@ export async function POST(req: NextRequest) {
     let discountKobo = 0;
     let appliedCode: string | null = null;
     if (promoInput) {
+      // Discount codes are a paid-plan feature (Business and up).
+      if (!hasFeature(store as { plan?: string | null; plan_expires_at?: string | null }, 'discounts', FEATURES.planGating)) {
+        return apiError(422, 'invalid_promo', 'That discount code is not valid for this store.');
+      }
       const { data: promo } = await sb
         .from('discount_codes')
         .select('code, percent_off, active, usage_count, max_uses, zone_id')

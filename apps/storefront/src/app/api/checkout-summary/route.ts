@@ -5,6 +5,7 @@ import { supabaseService } from '@/lib/supabase';
 import { apiError, apiOk, internalError } from '@/lib/api';
 import { rateLimit, clientIp } from '@/lib/ratelimit';
 import { verifyPayToken } from '@/lib/paytoken';
+import { getCustomerUser } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
   const rl = rateLimit(`checkout-summary:${clientIp(req)}`, 30, 60_000);
@@ -35,8 +36,16 @@ export async function GET(req: NextRequest) {
     // each digital item. We surface minted, UNUSED tokens so the buyer can
     // download straight from the receipt. Regenerating is impossible from the
     // client — the token only exists server-side.
+    // Private parts (download links, bank details, receipt) only go to the
+    // holder of this order's pay link (?pt=) or the signed-in buyer — never to
+    // anyone who merely has the order id (it appears in shared URLs).
+    const pt = req.nextUrl.searchParams.get('pt') ?? '';
+    const hasPayToken = Boolean(pt) && verifyPayToken(order.id, pt);
+    const customer = hasPayToken || !order.customer_id ? null : await getCustomerUser();
+    const isBuyer = hasPayToken || Boolean(customer && customer.id === order.customer_id);
+
     let digitalDownloads: Array<{ title: string; fileName: string; downloadUrl: string }> = [];
-    if (order.status === 'paid') {
+    if (order.status === 'paid' && isBuyer) {
       const { data: deliveries, error: ddErr } = await sb
         .from('digital_deliveries')
         .select('download_token, token_used_at, listings(title, type, digital_file_name)')
@@ -63,8 +72,7 @@ export async function GET(req: NextRequest) {
     // Where to transfer: only for bank-transfer orders, and only to the holder
     // of this order's private pay link (?pt=), never to anyone with the id.
     let bank: { bankName: string; accountName: string; accountNumber: string } | null = null;
-    const pt = req.nextUrl.searchParams.get('pt') ?? '';
-    if (order.payment_method === 'bank_transfer' && pt && verifyPayToken(order.id, pt)) {
+    if (order.payment_method === 'bank_transfer' && hasPayToken) {
       const { data: acct } = await sb
         .from('store_bank_accounts')
         .select('bank_name, account_name, account_number')
@@ -85,7 +93,7 @@ export async function GET(req: NextRequest) {
       deliveryFeeKobo: order.delivery_fee_kobo ?? 0,
       paymentStatus: order.payment_status ?? undefined,
       paymentMethod: order.payment_method ?? '',
-      paymentProofUrl: order.payment_proof_url ?? null,
+      paymentProofUrl: isBuyer ? order.payment_proof_url ?? null : null,
       storeName: (order.stores as unknown as { name: string } | null)?.name ?? 'Store',
       storeSlug: (order.stores as unknown as { slug: string } | null)?.slug ?? '',
       items: items.map((i) => ({ title: i.listings?.title ?? 'Item', quantity: i.quantity, unitPriceKobo: i.unit_price_kobo })),

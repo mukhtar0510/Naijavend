@@ -59,8 +59,8 @@ export async function GET(req: NextRequest, { params }: { params: { token: strin
     // Storage: private deliverable — no public URL is minted for store-media
     // digital paths; we build the signed URL here, server-side, 15-minute TTL.
     const { data: signed, error: signErr } = await sb.storage
-      .from('store-media')
-      .createSignedUrl(listing.digital_file_path, 15 * 60, { transform: undefined });
+      .from('digital-goods') // private bucket; see listings/digital-upload
+      .createSignedUrl(listing.digital_file_path, 15 * 60, { download: listing.digital_file_name || true });
     if (signErr || !signed) {
       return new Response(JSON.stringify({ error: { code: 'storage_error', message: 'The file is temporarily unavailable. Try again shortly.' } }), {
         status: 502,
