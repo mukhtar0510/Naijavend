@@ -631,11 +631,16 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
   }, [ready, distOrigin, locSource, accuracy, originLabel]);
 
   // ------------------------------------------------------------- route
-  // A new store, or no starting point, clears the route.
+  // Tapping a store draws the way there straight away (owner, 23 Nov 2026):
+  // the route line from you to the store shows without a second tap. With
+  // no starting point yet, ask for the device location once; the route
+  // follows as soon as a fix arrives.
   useEffect(() => {
-    setRouteWanted(false);
     setRoute(null);
     setAllSteps(false);
+    setRouteWanted(!!selected);
+    if (selected && !distOrigin && locState === 'idle') locate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- on a new selection only
   }, [selected]);
   useEffect(() => {
     const map = mapRef.current;
@@ -1004,8 +1009,8 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
             ) : null}
             <p className="fm-route-privacy">
               From {locSource === 'gps' ? 'your location' : (originLabel ?? 'your area')}. Your location stays on this device and is
-              never sent to Kwaravend. The route is worked out by OpenStreetMap&apos;s routing service, which receives the two points
-              only when you tap the button.
+              never sent to Kwaravend. The route is worked out by OpenStreetMap&apos;s routing service, which receives only the two
+              points when you open a store on the map.
             </p>
           </>
         )}

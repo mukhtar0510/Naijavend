@@ -4,7 +4,7 @@
 // to a dashed straight line when the router can't be reached.
 //
 // Privacy: a route request sends both points (the buyer's position and the
-// store's) to that routing service. Only call it after the buyer asks for a
+// store's) to that routing service. Only call it when the buyer opens a store or asks for a
 // route, and say so in the UI.
 
 export type Profile = 'foot' | 'bike' | 'driving';

@@ -1,44 +1,58 @@
 'use client';
 
 import { useState } from 'react';
-import { List as IcList, Map as IcMap } from 'lucide-react';
+import { LayoutGrid as IcGrid, List as IcList, Map as IcMap } from 'lucide-react';
 
-// Discover page tabs: the classic list (nearby list, search, store cards) and
-// the full street-map view in their own tabs.
+export type DiscoverView = 'explore' | 'list' | 'map';
+
+// Discover page tabs: the Explore mosaic (default), the store list (nearby
+// list, store cards) and the street map, each in its own tab.
 export function DiscoverTabs({
+  explore,
   list,
   map,
-  initial = 'list',
+  initial = 'explore',
 }: {
+  explore: React.ReactNode;
   list: React.ReactNode;
   map: React.ReactNode;
-  initial?: 'list' | 'map';
+  initial?: DiscoverView;
 }) {
-  const [tab, setTab] = useState<'list' | 'map'>(initial);
+  const [tab, setTab] = useState<DiscoverView>(initial);
+  const tabs: Array<{ id: DiscoverView; label: string; Icon: typeof IcGrid }> = [
+    { id: 'explore', label: 'Explore', Icon: IcGrid },
+    { id: 'list', label: 'Stores', Icon: IcList },
+    { id: 'map', label: 'Map', Icon: IcMap },
+  ];
 
   return (
     <>
       <div className="disc-tabs" role="tablist" aria-label="Browse mode">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === 'list'}
-          className={`disc-tab${tab === 'list' ? ' on' : ''}`}
-          onClick={() => setTab('list')}
-        >
-          <IcList className="ico-inline" aria-hidden /> List
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === 'map'}
-          className={`disc-tab${tab === 'map' ? ' on' : ''}`}
-          onClick={() => setTab('map')}
-        >
-          <IcMap className="ico-inline" aria-hidden /> Map
-        </button>
+        {tabs.map(({ id, label, Icon }) => (
+          <button
+            key={id}
+            type="button"
+            role="tab"
+            aria-selected={tab === id}
+            className={`disc-tab${tab === id ? ' on' : ''}`}
+            onClick={() => {
+              setTab(id);
+              // Keep the view in the URL so back/refresh return to it.
+              try {
+                const url = new URL(window.location.href);
+                if (id === 'explore') url.searchParams.delete('view');
+                else url.searchParams.set('view', id);
+                window.history.replaceState(window.history.state, '', url);
+              } catch {
+                /* ignore */
+              }
+            }}
+          >
+            <Icon className="ico-inline" aria-hidden /> {label}
+          </button>
+        ))}
       </div>
-      {tab === 'list' ? list : map}
+      {tab === 'explore' ? explore : tab === 'list' ? list : map}
     </>
   );
 }

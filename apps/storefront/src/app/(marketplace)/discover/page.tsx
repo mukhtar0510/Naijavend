@@ -5,6 +5,9 @@ import { NearbyStores } from '@/components/NearbyStores';
 import { StoreMap, type MapStore } from '@/components/StoreMap';
 import { inIlorin } from '@/lib/ilorin';
 import { DiscoverTabs } from '@/components/DiscoverTabs';
+import { ExploreGrid, type ExploreTile } from '@/components/ExploreGrid';
+import { fetchListingFeed, feedTerm, type FeedItem } from '@/lib/listing-feed';
+import { nearestArea } from '@/lib/ilorin';
 import { DiscoverCategories } from './DiscoverCategories';
 import { AiPickRow } from '@/components/AiPickRow';
 import { VerifiedTick } from '@/components/VerifiedTick';
@@ -12,15 +15,15 @@ import { ExampleTag } from '@/components/ExampleStoreBanner';
 import { SavedHeart } from '@/components/SavedHeart';
 import { isOpenNow, STORE_CATEGORIES, categoryLabel } from '@idevtenancy/shared';
 import type { Store, StoreRatingStats, StoreTheme } from '@idevtenancy/shared';
-import { ArrowRight, MapPin, Search, Sparkles, Store as StoreIcon } from 'lucide-react';
+import { ArrowRight, MapPin, Search, Sparkles } from 'lucide-react';
 
-import { Reveal, Stagger, StaggerItem } from '@/components/brand/Motion';
+import { Stagger, StaggerItem } from '@/components/brand/Motion';
 import { LISTED_EXAMPLE_VALUES } from '@/lib/flags';
 import { CategoryIcon } from '@/lib/categories';
 import { Search as IcSearch, Truck as IcTruck } from 'lucide-react';
 
 export const revalidate = 60; // ISR — static-fast, invalidated on seller writes via revalidatePath
-export const metadata = { title: 'Discover stores' };
+export const metadata = { title: 'Discover' };
 
 const CATEGORIES = STORE_CATEGORIES;
 
@@ -42,9 +45,20 @@ export default async function DiscoverPage({
     .order('created_at', { ascending: false })
     .limit(60);
   if (category) query = query.eq('category', category);
-  if (q) query = query.ilike('name', `%${q}%`);
+  // The search box matches store names, descriptions and addresses; the
+  // Explore grid below also matches listing titles and descriptions.
+  const term = feedTerm(q);
+  for (const w of term ? term.split(' ').slice(0, 4) : []) {
+    query = query.or(`name.ilike.%${w}%,description.ilike.%${w}%,address.ilike.%${w}%`);
+  }
 
-  const { data } = await query;
+  const [{ data }, feed] = await Promise.all([
+    query,
+    fetchListingFeed({ q, category, limit: 60 }).catch((err) => {
+      console.error('[discover] listing feed failed:', err);
+      return { items: [] as FeedItem[], total: 0 };
+    }),
+  ]);
   const stores = (data ?? []).map((s: Record<string, unknown>) => {
     const { store_rating_stats, store_themes, ...store } = s as Record<string, unknown> & {
       store_rating_stats?: StoreRatingStats[] | StoreRatingStats;
@@ -55,6 +69,47 @@ export default async function DiscoverPage({
   });
 
   const finalStores = openOnly ? stores.filter((s) => isOpenNow(s.business_hours)) : stores;
+
+  // Explore mosaic: listings from every store, with a store tile after every
+  // four items. "Open now" narrows both to stores that are open.
+  const openSlugs = new Set(finalStores.map((s) => s.slug));
+  const listingTiles: ExploreTile[] = feed.items
+    .filter((it) => !openOnly || openSlugs.has(it.storeSlug))
+    .map((it) => ({
+      kind: 'listing',
+      key: `l-${it.id}`,
+      href: `/s/${it.storeSlug}/listing/${it.id}`,
+      title: it.title,
+      priceKobo: it.priceKobo,
+      storeName: it.storeName,
+      category: it.storeCategory,
+      image: it.cover,
+      video: it.video,
+      isExample: it.isExample,
+    }));
+  const storeTiles: ExploreTile[] = finalStores.map((s) => ({
+    kind: 'store',
+    key: `s-${s.id}`,
+    href: `/s/${s.slug}`,
+    title: s.name,
+    area:
+      s.latitude != null && s.longitude != null && inIlorin(Number(s.latitude), Number(s.longitude))
+        ? nearestArea(Number(s.latitude), Number(s.longitude)).label
+        : (s.address ?? null),
+    category: s.category,
+    image: s.theme?.banner_url ?? s.theme?.subheader_url ?? null,
+    logo: s.theme?.logo_url ?? s.theme?.favicon_url ?? null,
+    isExample: !!s.is_example,
+  }));
+  const tiles: ExploreTile[] = [];
+  {
+    let si = 0;
+    listingTiles.forEach((t, i) => {
+      tiles.push(t);
+      if (i % 4 === 3 && si < storeTiles.length) tiles.push(storeTiles[si++]!);
+    });
+    while (si < storeTiles.length) tiles.push(storeTiles[si++]!);
+  }
 
   const nearbyStores = finalStores
     .filter((s) => s.latitude != null && s.longitude != null)
@@ -87,53 +142,30 @@ export default async function DiscoverPage({
 
   return (
     <main className="brand">
-      {/* ================================ HERO ================================ */}
-      <section className="brand-hero">
-        <div className="brand-hero-grid" aria-hidden />
-        <div className="relative mx-auto w-full max-w-6xl px-4 pb-10 pt-9 sm:px-7 sm:pb-14 sm:pt-12 lg:pb-16 lg:pt-16">
-          <Reveal>
-            <span className="brand-eyebrow">
-              <span className="brand-eyebrow-dot" aria-hidden>
-                <StoreIcon size={11} />
-              </span>
-              Marketplace · {finalStores.length} {finalStores.length === 1 ? 'store' : 'stores'}
-            </span>
-          </Reveal>
-
-          <Reveal delay={0.06}>
-            <h1 className="mb-4 mt-5 max-w-[22ch] font-heading text-[clamp(34px,5.2vw,56px)] font-extrabold leading-[1.0] tracking-[-0.045em] text-foreground">
-              Real businesses. <span className="brand-grad">Real addresses.</span>
-            </h1>
-          </Reveal>
-
-          <Reveal delay={0.12}>
-            <p className="mb-7 max-w-[56ch] text-[16px] leading-relaxed text-muted-foreground">
-              Ilorin businesses with their own store website, a pinned location on the map and reviews that only
-              come from real orders. Stores marked Example show sample data. Search by name, filter by trade, or
-              switch to the map.
-            </p>
-          </Reveal>
-
-          <Reveal delay={0.18}>
-            <form action="/discover" role="search" className="brand-search max-w-[620px]">
-              {category ? <input type="hidden" name="category" value={category} /> : null}
-              {openOnly ? <input type="hidden" name="open" value="1" /> : null}
-              <Search className="brand-search-icon" size={17} aria-hidden />
-              <input
-                type="text"
-                name="q"
-                defaultValue={q}
-                placeholder="Search store names…"
-                aria-label="Search store names"
-                style={{ flex: 1, minWidth: 0 }}
-              />
-              <button className="btn btn-primary" type="submit">
-                Search
-              </button>
-            </form>
-          </Reveal>
+      {/* ===================== TOP: search, like an explore page ===================== */}
+      <section className="ex-top">
+        <div className="mx-auto w-full max-w-6xl px-4 pb-3 pt-5 sm:px-7 sm:pt-7">
+          <h1 className="mb-3 font-heading text-[clamp(24px,3.4vw,32px)] font-extrabold tracking-[-0.03em] text-foreground">
+            Discover
+          </h1>
+          <form action="/discover" role="search" className="ex-search">
+            {category ? <input type="hidden" name="category" value={category} /> : null}
+            {openOnly ? <input type="hidden" name="open" value="1" /> : null}
+            <Search size={18} aria-hidden />
+            <input
+              type="search"
+              name="q"
+              defaultValue={q}
+              placeholder="Search products, stores and areas"
+              aria-label="Search products, stores and areas in Ilorin"
+              maxLength={60}
+              enterKeyHint="search"
+            />
+            <button className="btn btn-primary btn-sm" type="submit">
+              Search
+            </button>
+          </form>
         </div>
-        <div className="brand-hero-fade" aria-hidden />
       </section>
 
       {/* ============================== FILTER RAIL =========================== */}
@@ -146,7 +178,42 @@ export default async function DiscoverPage({
       {/* ================================ CONTENT ============================= */}
       <section className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-7 sm:py-9 lg:py-12">
         <DiscoverTabs
-          initial={searchParams.view === 'map' ? 'map' : 'list'}
+          initial={searchParams.view === 'map' ? 'map' : searchParams.view === 'list' ? 'list' : 'explore'}
+          explore={
+            tiles.length === 0 ? (
+              <div className="mt-2 rounded-[22px] border border-dashed border-border px-6 py-14 text-center" style={{ background: 'var(--elevated)' }}>
+                <h2 className="mb-1.5 font-heading text-[19px] font-extrabold tracking-[-0.02em] text-foreground">
+                  {q || category || openOnly ? 'Nothing matches that search' : 'Nothing to explore yet'}
+                </h2>
+                <p className="mx-auto mb-5 max-w-[44ch] text-[14px] leading-relaxed text-muted-foreground">
+                  {q || category || openOnly ? 'Try a shorter word or clear the filters.' : 'New Ilorin stores add products every week.'}
+                </p>
+                <Link href="/discover" className="btn btn-outline">
+                  Clear filters
+                </Link>
+              </div>
+            ) : (
+              <>
+                <div className="ex-head">
+                  <h2>
+                    {category ? categoryLabel(category) : 'Explore Ilorin'}
+                    {q ? <span className="text-muted-foreground"> · “{q}”</span> : null}
+                  </h2>
+                  <p>
+                    {listingTiles.length} {listingTiles.length === 1 ? 'item' : 'items'} · {storeTiles.length}{' '}
+                    {storeTiles.length === 1 ? 'store' : 'stores'} ·{' '}
+                    <Link href={`/products${q || category ? `?${[q ? `q=${encodeURIComponent(q)}` : '', category ? `category=${category}` : ''].filter(Boolean).join('&')}` : ''}`}>
+                      All products
+                    </Link>
+                  </p>
+                </div>
+                <ExploreGrid tiles={tiles} />
+                {stores.some((s) => s.is_example) ? (
+                  <p className="mt-3 text-[12.5px] text-muted-foreground">Tiles marked Example are sample data.</p>
+                ) : null}
+              </>
+            )
+          }
           list={
             <>
               <AiPickRow />

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { formatNaira } from '@idevtenancy/shared';
-import { CalendarDays, ShoppingBag, Store } from 'lucide-react';
+import { CalendarDays, Play, ShoppingBag, Store } from 'lucide-react';
 
 export interface ProductCardItem {
   id: string;
@@ -12,6 +12,8 @@ export interface ProductCardItem {
   storeSlug: string;
   compareAtKobo?: number | null;
   stock?: number | null;
+  /** The listing has a product video. */
+  hasVideo?: boolean;
 }
 
 // Shared product tile: homepage trending, search results, and anywhere a
@@ -31,6 +33,11 @@ export function ProductCard({ item }: { item: ProductCardItem }) {
           <img className="product-card-img" src={item.imageUrl} alt={item.title} loading="lazy" decoding="async" />
         ) : (
           <div className="product-card-img-ph" aria-hidden>{item.type === 'service' ? <CalendarDays size={28} /> : <ShoppingBag size={28} />}</div>
+        )}
+        {item.hasVideo && (
+          <span className="product-video-tag">
+            <Play size={11} aria-hidden /> Video
+          </span>
         )}
         {onSale && <span className="product-badge badge-sale">Sale · {pctOff}% off</span>}
         {soldOut && <span className="product-badge badge-soldout">Sold out</span>}

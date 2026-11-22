@@ -19,6 +19,7 @@ import { FEATURES } from '@/lib/flags';
 const LINKS = [
   { href: '/home', label: 'Home' },
   { href: '/discover', label: 'Discover' },
+  { href: '/products', label: 'Products' },
   { href: '/map', label: 'Map' },
   // Rankings stay hidden until a city has enough active stores (see T13).
   ...(FEATURES.rankings ? [{ href: '/rankings', label: 'Rankings' }] : []),
@@ -46,6 +47,14 @@ export function SiteHeader() {
 
   const closeMenu = useCallback(() => setOpen(false), []);
 
+  // The header box shows what was searched for on /search, and clears elsewhere.
+  // Read from the URL after navigation (no useSearchParams: this header sits
+  // in static layouts).
+  const [headerQ, setHeaderQ] = useState('');
+  useEffect(() => {
+    setHeaderQ(pathname === '/search' ? (new URLSearchParams(window.location.search).get('q') ?? '') : '');
+  }, [pathname]);
+
   return (
     <header className="nv-header">
       <div className="container nv-header-main">
@@ -56,11 +65,26 @@ export function SiteHeader() {
           </span>
         </Link>
 
-        <form className="nv-header-search" action="/search" role="search">
+        <form
+          className="nv-header-search"
+          action="/search"
+          role="search"
+          onSubmit={(e) => {
+            // An empty search goes nowhere: keep the buyer in the box instead.
+            if (!headerQ.trim()) {
+              e.preventDefault();
+              (e.currentTarget.elements.namedItem('q') as HTMLInputElement | null)?.focus();
+            }
+          }}
+        >
           <Search size={17} aria-hidden className="nv-header-search-icon" />
           <input
             type="search"
             name="q"
+            value={headerQ}
+            onChange={(e) => setHeaderQ(e.target.value)}
+            maxLength={80}
+            enterKeyHint="search"
             placeholder="Search products, services or stores…"
             aria-label="Search products, services or stores"
             autoComplete="off"
