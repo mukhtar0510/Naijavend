@@ -6,6 +6,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { isPlatformHost } from '@/lib/domains';
 import { hasFeature } from '@/lib/plans';
+import { SESSION_COOKIES, cookieOptions, needsRefresh, refreshSessionEdge, type SessionRole } from '@/lib/session-edge';
 
 const TTL = 5 * 60_000;
 const cache = new Map<string, { slug: string | null; at: number }>();
@@ -37,9 +38,34 @@ async function slugFor(host: string): Promise<string | null> {
   return slug;
 }
 
+/**
+ * Refresh an expired seller/buyer session before /dashboard or /account
+ * renders (pages can't set cookies). The new cookies go on the response for
+ * the browser AND on the forwarded request, so this render already sees them.
+ */
+async function withFreshSession(req: NextRequest): Promise<NextResponse | null> {
+  const p = req.nextUrl.pathname;
+  const role: SessionRole | null = p.startsWith('/dashboard') ? 'seller' : p.startsWith('/account') ? 'customer' : null;
+  if (!role || p.endsWith('/signin') || p.endsWith('/signout')) return null;
+  const names = SESSION_COOKIES[role];
+  const access = req.cookies.get(names.access)?.value;
+  const refresh = req.cookies.get(names.refresh)?.value;
+  if (!refresh || !needsRefresh(access, refresh)) return null;
+  const fresh = await refreshSessionEdge(refresh);
+  if (!fresh) return null; // leave it to the page (it will send them to sign in)
+  const headers = new Headers(req.headers);
+  const jar = req.cookies.getAll().filter((c) => c.name !== names.access && c.name !== names.refresh);
+  jar.push({ name: names.access, value: fresh.access }, { name: names.refresh, value: fresh.refresh });
+  headers.set('cookie', jar.map((c) => `${c.name}=${c.value}`).join('; '));
+  const res = NextResponse.next({ request: { headers } });
+  res.cookies.set(names.access, fresh.access, cookieOptions('access'));
+  res.cookies.set(names.refresh, fresh.refresh, cookieOptions('refresh'));
+  return res;
+}
+
 export async function middleware(req: NextRequest) {
   const host = (req.headers.get('host') ?? '').toLowerCase().replace(/:\d+$/, '');
-  if (!host || isPlatformHost(host)) return NextResponse.next();
+  if (!host || isPlatformHost(host)) return (await withFreshSession(req)) ?? NextResponse.next();
   const slug = await slugFor(host);
   if (!slug || !/^[a-z0-9-]{1,80}$/.test(slug)) return NextResponse.next();
   const { pathname } = req.nextUrl;

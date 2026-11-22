@@ -1,5 +1,5 @@
-// Kwaravend logo (23 Nov 2026): a gold tile with a market-stall awning across
-// the top and a bold K underneath — a shop, in Kwara. Same drawing as
+// Kwaravend logo (23 Nov 2026): a gold tile with a blue market-stall awning
+// across the top and a bold navy K underneath — a shop, in Kwara. Same drawing as
 // public/logo.svg and the PNG app icons in public/icons. Fixed colours so it
 // reads the same in light and dark mode (the gold rim keeps the awning edge
 // visible on near-black backgrounds).
@@ -20,13 +20,13 @@ export function KwaravendLogoMark({ size = 44 }: { size?: number }) {
       <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#kvlg-gold)" />
       <g clipPath="url(#kvlg-inner)">
         {/* Market-stall awning: alternating stripes, scalloped edge */}
-        <path d="M2 2H62V13a6 6 0 0 1-12 0a6 6 0 0 1-12 0a6 6 0 0 1-12 0a6 6 0 0 1-12 0a6 6 0 0 1-12 0Z" fill="#0B0B0E" />
+        <path d="M2 2H62V13a6 6 0 0 1-12 0a6 6 0 0 1-12 0a6 6 0 0 1-12 0a6 6 0 0 1-12 0a6 6 0 0 1-12 0Z" fill="#1456E0" />
         <path d="M14 2h12v11a6 6 0 0 1-12 0Z M38 2h12v11a6 6 0 0 1-12 0Z" fill="#FFF6DC" />
       </g>
       {/* The K */}
-      <rect x="17" y="24" width="8.5" height="29" rx="3" fill="#0B0B0E" />
-      <path d="M26 39L43 25" stroke="#0B0B0E" strokeWidth="8.5" strokeLinecap="round" fill="none" />
-      <path d="M30 37L44 51" stroke="#0B0B0E" strokeWidth="8.5" strokeLinecap="round" fill="none" />
+      <rect x="17" y="24" width="8.5" height="29" rx="3" fill="#0A2A6E" />
+      <path d="M26 39L43 25" stroke="#0A2A6E" strokeWidth="8.5" strokeLinecap="round" fill="none" />
+      <path d="M30 37L44 51" stroke="#0A2A6E" strokeWidth="8.5" strokeLinecap="round" fill="none" />
     </svg>
   );
 }
