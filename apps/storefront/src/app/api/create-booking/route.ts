@@ -6,6 +6,7 @@ import { getCustomerUser } from '@/lib/auth';
 import { apiError, apiOk, internalError } from '@/lib/api';
 import { rateLimit, clientIp } from '@/lib/ratelimit';
 import { sanitizeText, isValidPhone } from '@idevtenancy/shared';
+import { recordEvent } from '@/lib/events';
 
 const SLOT_MS = 60 * 60 * 1000; // 1-hour slots at MVP
 
@@ -95,6 +96,7 @@ export async function POST(req: NextRequest) {
       throw insertErr;
     }
 
+    await recordEvent('booking_created', (listing as { store_id?: string } | null)?.store_id ?? null);
     return apiOk({ booked: true }, 201);
   } catch (err) {
     return internalError('create-booking', err);

@@ -6,6 +6,7 @@ import { revalidateStore } from '@/lib/revalidate';
 import { apiError, apiOk, internalError } from '@/lib/api';
 import { sanitizeText, isValidPhone, isValidHexColor, isStoreCategory, categoryLabel, isStoreFont, isStoreLayout, LISTING_STYLES, HOVER_ANIMS, isBackgroundGradient, BACKGROUND_IMAGE_STYLES, BACKGROUND_OVERLAYS, CONTENT_WIDTHS } from '@idevtenancy/shared';
 import { zonesOf } from '@/lib/deliveryZones';
+import { inIlorin } from '@/lib/ilorin';
 
 const HEX = /^#[0-9a-fA-F]{6}$/;
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -200,6 +201,11 @@ export async function POST(req: NextRequest) {
     (latitude === undefined) !== (longitude === undefined)
   ) {
     return apiError(422, 'incomplete_location', 'Set both latitude and longitude, or clear both.');
+  }
+  // BUILD.md T07: Ilorin only. A pin outside the city is rejected; sellers
+  // elsewhere join the waitlist instead of getting a public listing.
+  if (typeof latitude === 'number' && typeof longitude === 'number' && !inIlorin(latitude, longitude)) {
+    return apiError(422, 'outside_ilorin', 'Kwaravend is currently only in Ilorin. Move the pin to your Ilorin shop, or join the waitlist at /waitlist.');
   }
   // Contrast guard: button text must be readable on the chosen accent.
   if (accentColor && accentText && !isValidHexColor(accentColor, accentText)) {

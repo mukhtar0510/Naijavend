@@ -13,6 +13,7 @@ import { parseCartLines, sanitizeText, isValidPhone } from '@idevtenancy/shared'
 import { isZoneId, zoneLabel, zonesOf } from '@/lib/deliveryZones';
 import { ILORIN_AREAS, inIlorin } from '@/lib/ilorin';
 import { ensureDelivery } from '@/lib/delivery';
+import { recordEvent } from '@/lib/events';
 
 // Idempotency cache keyed by CALLER IP + the client-supplied key — the raw key
 // alone would let anyone replay another buyer's key and receive their orderId.
@@ -230,6 +231,8 @@ export async function POST(req: NextRequest) {
         .eq('id', atomicOrderId);
       if (payMethodErr) console.warn('[create-order] payment_method not stored:', payMethodErr.message);
     }
+
+    await recordEvent('order_created', store.id, sb);
 
     // Delivery tracking (T09): rider, courier and campus orders get a delivery
     // straight away so the buyer's confirmation page has a tracking link.

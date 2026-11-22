@@ -156,3 +156,31 @@ export function usagePercent(used: number, limit: number | null): number {
 export function isAtLimit(used: number, limit: number | null): boolean {
   return limit != null && used >= limit;
 }
+
+// ------------------------------------------------------------- T11 gating
+/** Features a plan can unlock (BUILD.md T11). */
+export type FeatureKeyPlan = 'crm' | 'dispatch' | 'reports' | 'custom_domain';
+
+/** Lowest plan that includes each feature. Free gets none of these when gating is on. */
+const FEATURE_MIN_PLAN: Record<FeatureKeyPlan, PlanId> = {
+  crm: 'growth',
+  dispatch: 'plus',
+  reports: 'growth',
+  custom_domain: 'pro',
+};
+const PLAN_RANK: Record<PlanId, number> = { free: 0, growth: 1, plus: 2, pro: 3 };
+
+/**
+ * hasFeature(store, key): whether this store's plan includes a feature.
+ * While billing is off, gating is switched off (FEATURES.planGating) and
+ * every store gets everything, because nothing can be bought yet.
+ */
+export function hasFeature(store: { plan?: string | null } | null | undefined, key: FeatureKeyPlan, gatingOn: boolean): boolean {
+  if (!gatingOn) return true;
+  return PLAN_RANK[planFor(store?.plan).id] >= PLAN_RANK[FEATURE_MIN_PLAN[key]];
+}
+
+/** Name of the plan that unlocks a feature, for locked-state copy. */
+export function planNameFor(key: FeatureKeyPlan): string {
+  return PLANS.find((p) => p.id === FEATURE_MIN_PLAN[key])?.name ?? 'a paid plan';
+}

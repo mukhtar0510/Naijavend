@@ -6,6 +6,9 @@ import { CustomersClient } from './CustomersClient';
 import type { CustomerRow, CustomerOrder } from './CustomersClient';
 import { orderRef } from '@idevtenancy/shared';
 import '../../../styles/crm.css';
+import { FEATURES } from '@/lib/flags';
+import { hasFeature, planNameFor } from '@/lib/plans';
+import { LockedFeature } from '@/components/LockedFeature';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,7 +36,9 @@ export default async function CustomersPage() {
   if (!sb) redirect('/dashboard/signin'); // layout redirect races this page — guard here too
 
   const membership = await getStaffMembership(sb);
-  const store = membership ? { id: membership.storeId } : await getOwnStore<{ id: string }>(sb, 'id');
+  const store = membership
+    ? ((await sb.from('stores').select('id, plan').eq('id', membership.storeId).maybeSingle()).data as { id: string; plan: string | null } | null) ?? { id: membership.storeId, plan: null }
+    : await getOwnStore<{ id: string; plan: string | null }>(sb, 'id, plan');
 
   if (!store) {
     return (
@@ -46,6 +51,8 @@ export default async function CustomersPage() {
       </main>
     );
   }
+
+  if (!hasFeature(store, 'crm', FEATURES.planGating)) return <LockedFeature title="Customers" planName={planNameFor('crm')} />;
 
   const { data } = await sb
     .from('orders')

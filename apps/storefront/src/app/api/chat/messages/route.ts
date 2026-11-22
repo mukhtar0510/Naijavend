@@ -18,6 +18,7 @@ import { supabaseAnon } from '@/lib/supabase';
 import { apiError, apiOk, internalError } from '@/lib/api';
 import { rateLimit, clientIp } from '@/lib/ratelimit';
 import { sanitizeText } from '@idevtenancy/shared';
+import { recordEvent } from '@/lib/events';
 
 function roleError() {
   return apiError(401, 'sign_in_required', 'Sign in (as a customer or the seller) to use chat. You can also reach the store on WhatsApp.');
@@ -105,6 +106,7 @@ export async function POST(req: NextRequest) {
         .select('*')
         .single();
       if (error) throw error;
+      await recordEvent('buyer_enquiry', storeId);
       return apiOk({ role: 'customer', message: data }, 201);
     }
 

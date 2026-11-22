@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { WhatsAppIcon, XIcon, FacebookIcon, TelegramIcon, LinkIcon, ShareIcon, CheckIcon } from '@/components/SocialIcons';
 import { StoreQrCode } from '@/components/StoreQrCode';
+import { trackEvent } from '@/lib/track-event';
 
 const TARGETS = [
   { key: 'whatsapp', label: 'WhatsApp', Icon: WhatsAppIcon },
@@ -58,6 +59,7 @@ export function ShareBar({
   async function copy() {
     try {
       await navigator.clipboard.writeText(url);
+      trackEvent('store_link_shared', { storeId });
     } catch {
       // Fallback for older browsers
       const ta = document.createElement('textarea');
@@ -77,6 +79,7 @@ export function ShareBar({
     if (navigator.share) {
       try {
         await navigator.share({ title: storeName, text, url });
+        trackEvent('store_link_shared', { storeId });
         track(storeId, 'share', 'native');
         return;
       } catch {

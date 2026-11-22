@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { addToCart, type CartItem } from '@/lib/cart';
+import { trackEvent } from '@/lib/track-event';
 
 /** Adds one listing to this store's cart and opens the drawer via the cart event. */
 export function AddToCart({
@@ -17,6 +18,7 @@ export function AddToCart({
 
   function add() {
     addToCart(slug, item);
+    trackEvent('cart_item_added', { slug });
     setAdded(true);
     window.setTimeout(() => setAdded(false), 1600);
   }

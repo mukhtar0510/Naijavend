@@ -8,6 +8,7 @@ import { sanitizeText, isBusinessType, isValidSlug, detectStoreSignals } from '@
 import { recordFlag } from '@/lib/moderation';
 import { aiComplete } from '@idevtenancy/ai';
 import { rateLimit, clientIp } from '@/lib/ratelimit';
+import { recordEvent } from '@/lib/events';
 
 export async function POST(req: NextRequest) {
   const sb = await getSellerClient();
@@ -127,6 +128,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    await recordEvent('store_created', store.id);
     return apiOk({ storeId: store.id, slug: store.slug }, 201);
   } catch (err) {
     return internalError('onboarding', err);

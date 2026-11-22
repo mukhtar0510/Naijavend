@@ -264,3 +264,25 @@
   .admin-metric { padding: 11px 12px; }
   .admin-metric-value { font-size: 19px; }
 }
+
+/* Growth, moderation and flags panels (BUILD.md T10/T13/T03). Tokens only. */
+.admin-panel { display: grid; gap: 14px; }
+.admin-panel h3 { margin: 6px 0 0; font-size: 15px; }
+.admin-tiles { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+.admin-tile { display: grid; gap: 4px; padding: 12px 14px; border: 1px solid var(--border); border-top: 3px solid var(--primary); border-radius: 14px; background: var(--surface); }
+.admin-tile span { color: var(--text-muted); font-size: 12.5px; }
+.admin-tile strong { font: 800 22px/1.1 var(--font-display); }
+.admin-tile em { color: var(--text-muted); font-size: 12px; font-style: normal; }
+.admin-two { display: grid; gap: 16px; }
+@media (min-width: 860px) { .admin-two { grid-template-columns: 1fr 1fr; } }
+.admin-list { display: grid; gap: 4px; margin: 8px 0 0; padding: 0; list-style: none; }
+.admin-list.is-cols { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px 16px; }
+.admin-list li { display: flex; justify-content: space-between; gap: 10px; padding: 6px 10px; border-radius: 8px; background: var(--surface); font-size: 13.5px; }
+.admin-reports, .admin-flags { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.admin-reports .card { display: grid; gap: 8px; padding: 14px; }
+.admin-reports p { margin: 0; font-size: 14px; }
+.admin-report-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.admin-report-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.admin-flags .card { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; }
+.admin-flags p { margin: 2px 0; color: var(--text-muted); font-size: 13px; }
+.admin-flags .mono { font-size: 12px; color: var(--text-muted); }

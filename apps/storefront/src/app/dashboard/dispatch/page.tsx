@@ -8,6 +8,9 @@ import { zoneLabel } from '@/lib/deliveryZones';
 import { DispatchBoard, type BoardDelivery, type BoardRider, type DStatus } from './DispatchBoard';
 import { CreateDeliveryButton } from './CreateDeliveryButton';
 import '../../../styles/dispatch.css';
+import { FEATURES } from '@/lib/flags';
+import { hasFeature, planNameFor } from '@/lib/plans';
+import { LockedFeature } from '@/components/LockedFeature';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,7 +55,7 @@ export default async function DispatchPage() {
   const sb = await getSellerClient();
   if (!sb) redirect('/dashboard/signin');
   await redirectStaffToPos(sb);
-  const store = await getOwnStore<{ id: string; name: string }>(sb, 'id, name');
+  const store = await getOwnStore<{ id: string; name: string; plan: string | null }>(sb, 'id, name, plan');
   if (!store) {
     return (
       <main>
@@ -61,6 +64,8 @@ export default async function DispatchPage() {
       </main>
     );
   }
+
+  if (!hasFeature(store, 'dispatch', FEATURES.planGating)) return <LockedFeature title="Dispatch" planName={planNameFor('dispatch')} />;
 
   const sel =
     'id, status, tracking_token, rider_token, rider_id, eta_window, failure_reason, updated_at, orders(id, customer_name, customer_phone, total_kobo, payment_status, delivery_method, delivery_zone, delivery_area, delivery_address, delivery_landmark, drop_lat, drop_lng), riders(name, phone)';

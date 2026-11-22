@@ -16,6 +16,11 @@ const MAX_QTY = 99;
 function key(slug: string): string {
   return `kv-cart:${slug}`;
 }
+/** Carts expire after 30 days without a change (BUILD.md T05). */
+const MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
+function stampKey(slug: string): string {
+  return `kv-cart-at:${slug}`;
+}
 
 function isItem(v: unknown): v is CartItem {
   if (!v || typeof v !== 'object') return false;
@@ -33,6 +38,12 @@ export function readCart(slug: string): CartItem[] {
   try {
     const raw = window.localStorage.getItem(key(slug));
     if (!raw) return [];
+    const at = Number(window.localStorage.getItem(stampKey(slug)) ?? 0);
+    if (at && Date.now() - at > MAX_AGE_MS) {
+      window.localStorage.removeItem(key(slug));
+      window.localStorage.removeItem(stampKey(slug));
+      return [];
+    }
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
     return parsed.filter(isItem).map((i) => ({
@@ -46,8 +57,13 @@ export function readCart(slug: string): CartItem[] {
 
 function writeCart(slug: string, items: CartItem[]): void {
   try {
-    if (items.length === 0) window.localStorage.removeItem(key(slug));
-    else window.localStorage.setItem(key(slug), JSON.stringify(items));
+    if (items.length === 0) {
+      window.localStorage.removeItem(key(slug));
+      window.localStorage.removeItem(stampKey(slug));
+    } else {
+      window.localStorage.setItem(key(slug), JSON.stringify(items));
+      window.localStorage.setItem(stampKey(slug), String(Date.now()));
+    }
   } catch {
     // Storage disabled/full: the cart stays in memory for this page view.
   }

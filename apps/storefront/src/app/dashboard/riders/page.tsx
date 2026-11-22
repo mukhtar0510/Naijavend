@@ -4,6 +4,9 @@ import { getSellerClient, getOwnStore } from '@/lib/auth';
 import { redirectStaffToPos } from '@/lib/staff';
 import { RidersManager, type RiderRow } from './RidersManager';
 import '../../../styles/dispatch.css';
+import { FEATURES } from '@/lib/flags';
+import { hasFeature, planNameFor } from '@/lib/plans';
+import { LockedFeature } from '@/components/LockedFeature';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,7 +14,7 @@ export default async function RidersPage() {
   const sb = await getSellerClient();
   if (!sb) redirect('/dashboard/signin');
   await redirectStaffToPos(sb);
-  const store = await getOwnStore<{ id: string }>(sb, 'id');
+  const store = await getOwnStore<{ id: string; plan: string | null }>(sb, 'id, plan');
   if (!store) {
     return (
       <main>
@@ -20,6 +23,7 @@ export default async function RidersPage() {
       </main>
     );
   }
+  if (!hasFeature(store, 'dispatch', FEATURES.planGating)) return <LockedFeature title="Riders" planName={planNameFor('dispatch')} />;
   const { data, error } = await sb.from('riders').select('id, name, phone, vehicle, active').eq('store_id', store.id).order('active', { ascending: false }).order('created_at');
 
   return (

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import QRCode from 'qrcode';
 import { LinkIcon, CheckIcon } from '@/components/SocialIcons';
 import { Download as IcDownload } from 'lucide-react';
+import { trackEvent } from '@/lib/track-event';
 
 // Branded QR codes for Kwaravend store + product sharing — a custom card
 // layout, not just a bare square: glacier-blue frame with a header band
@@ -197,6 +198,7 @@ export function StoreQrCode({
     if (!canvas) return;
     const a = document.createElement('a');
     a.href = canvas.toDataURL('image/png');
+    trackEvent('qr_downloaded', { slug: url.match(/\/s\/([^/?#]+)/)?.[1] ?? '' });
     a.download = `${storeName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-qr.png`;
     a.click();
   }

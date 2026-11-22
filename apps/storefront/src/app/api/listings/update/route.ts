@@ -10,6 +10,7 @@ import { apiError, apiOk, internalError } from '@/lib/api';
 import { sanitizeText, parsePriceKobo, STORE_CATEGORIES, isDuplicateTitle, duplicateSimilarity, containment } from '@idevtenancy/shared';
 import { recordFlag } from '@/lib/moderation';
 import { isMissingColumn } from '@/lib/supabase';
+import { recordEvent } from '@/lib/events';
 
 export async function POST(req: NextRequest) {
   const sb = await getSellerClient();
@@ -166,6 +167,7 @@ export async function POST(req: NextRequest) {
     }
 
     revalidateStore(store.slug);
+    if (stock !== null) await recordEvent('stock_updated', store.id);
     return apiOk({ updated: true, duplicateOf });
   } catch (err) {
     return internalError('listings-update', err);

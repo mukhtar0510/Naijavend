@@ -5,6 +5,7 @@
 
 import { randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { recordEvent } from './events';
 
 export const DELIVERY_STATUSES = [
   'awaiting_dispatch',
@@ -141,6 +142,10 @@ export async function applyStatus(
     actor: opts.actor,
     note: next === 'failed_attempt' ? [opts.reason, note].filter(Boolean).join(' · ').slice(0, 200) : update.proof === 'seller_confirmed' ? `Confirmed by seller: ${note}` : note,
   });
+  if (next === 'assigned' || next === 'delivered') {
+    const { data: row } = await svc.from('deliveries').select('store_id').eq('id', delivery.id).maybeSingle();
+    await recordEvent(next === 'assigned' ? 'delivery_assigned' : 'delivery_completed', (row as { store_id?: string } | null)?.store_id ?? null, svc);
+  }
   // A delivered, already-paid order is done.
   if (next === 'delivered') {
     await svc.from('orders').update({ status: 'fulfilled' }).eq('id', delivery.order_id).eq('status', 'paid');

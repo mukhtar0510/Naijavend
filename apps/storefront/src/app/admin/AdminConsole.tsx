@@ -12,8 +12,7 @@ import {
   ShieldCheck,
   Store as StoreIcon,
   Trash2,
-  Users,
-} from 'lucide-react';
+  Users, ShieldAlert, ToggleRight, TrendingUp } from 'lucide-react';
 import { formatNaira } from '@idevtenancy/shared';
 import { ThemeToggleCompact } from '@/components/ThemeToggleCompact';
 import { Button } from '@/components/ui/button';
@@ -25,6 +24,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog } from '@/components/ui/dialog';
+import { AdminFlags, AdminGrowth, AdminModeration } from './AdminPanels';
 
 interface Metrics {
   users: number;
@@ -92,6 +92,9 @@ const SECTIONS = [
   { key: 'overview', label: 'Overview', icon: LayoutDashboard },
   { key: 'accounts', label: 'Accounts', icon: Users },
   { key: 'stores', label: 'Stores', icon: StoreIcon },
+  { key: 'growth', label: 'Growth', icon: TrendingUp },
+  { key: 'moderation', label: 'Moderation', icon: ShieldAlert },
+  { key: 'flags', label: 'Flags', icon: ToggleRight },
   { key: 'audit', label: 'Audit log', icon: ScrollText },
 ] as const;
 
@@ -285,8 +288,15 @@ export function AdminConsole({ adminEmail }: { adminEmail: string }) {
               {section === 'accounts' && `${users.length} shown — search, ban or delete.`}
               {section === 'stores' && `${filteredStores.length} storefronts — newest first.`}
               {section === 'audit' && 'Every admin action, newest first.'}
+              {section === 'growth' && 'Weekly active stores, setup, retention, orders and deliveries.'}
+              {section === 'moderation' && 'Store reports and blue ticks.'}
+              {section === 'flags' && 'Feature switches on this deploy.'}
             </p>
           </div>
+
+          {section === 'growth' && <AdminGrowth />}
+          {section === 'moderation' && <AdminModeration />}
+          {section === 'flags' && <AdminFlags />}
 
           {section === 'overview' && (
             <section aria-label="Platform metrics" className="grid gap-4">

@@ -166,11 +166,19 @@ export default async function DashboardHome({
   ];
   const needsYou = queue.some((q) => q.count > 0);
 
+  // Bank details live in their own owner-only table (null before the migration).
+  const { data: bankRow } = await sb.from('store_bank_accounts').select('store_id').eq('store_id', s.id).maybeSingle();
+  const deliveryOpts = (s as unknown as { delivery_options?: Record<string, { enabled?: boolean }> | null }).delivery_options ?? null;
+  const hasDelivery = Boolean(deliveryOpts && Object.values(deliveryOpts).some((o) => o && typeof o === 'object' && (o as { enabled?: boolean }).enabled));
+
   const checklist = [
     { label: 'Store created', done: true, href: `/s/${s.slug}`, cta: 'View' },
     { label: 'Add your first 3 products', done: listingIds.length >= 3, href: '/dashboard/listings/bulk', cta: 'Bulk add' },
     { label: 'Add a logo', done: Boolean(logo), href: '/dashboard/settings', cta: 'Add logo' },
     { label: 'Set your WhatsApp number', done: Boolean(s.whatsapp_number), href: '/dashboard/settings', cta: 'Set number' },
+    { label: 'Set your opening hours', done: Boolean(s.business_hours), href: '/dashboard/settings', cta: 'Set hours' },
+    { label: 'Add bank details for transfers', done: Boolean(bankRow), href: '/dashboard/settings', cta: 'Add bank' },
+    { label: 'Choose pickup or delivery', done: hasDelivery, href: '/dashboard/settings', cta: 'Set delivery' },
     {
       label: 'Get your first order',
       done: paidOrderCount > 0 || (pendingOrders ?? 0) > 0,

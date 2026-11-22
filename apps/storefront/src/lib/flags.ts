@@ -33,7 +33,23 @@ export const FEATURES = {
    * Example stores never take orders either way (create-order rejects them).
    */
   exampleStores: flag('EXAMPLE_STORES', true),
+  /**
+   * Plan gating (BUILD.md T11): lock CRM, dispatch/riders and reports to the
+   * paid plans. OFF while billing is off, so every store can use everything
+   * (nothing can be bought yet). Turn on only when plans go on sale.
+   */
+  planGating: flag('PLAN_GATING'),
 } as const;
+
+/** Env variable names, for the owner's flag panel. */
+export const FLAG_ENV: Record<FeatureKey, string> = {
+  dropshipperMode: 'NEXT_PUBLIC_FLAG_DROPSHIPPER',
+  rankings: 'NEXT_PUBLIC_FLAG_RANKINGS',
+  multiBranchTools: 'NEXT_PUBLIC_FLAG_MULTI_BRANCH',
+  storefrontCustomisation: 'NEXT_PUBLIC_FLAG_STOREFRONT_CUSTOMISATION',
+  exampleStores: 'NEXT_PUBLIC_FLAG_EXAMPLE_STORES',
+  planGating: 'NEXT_PUBLIC_FLAG_PLAN_GATING',
+};
 
 /** `is_example` values a public store list may include (for `.in('is_example', …)`). */
 export const LISTED_EXAMPLE_VALUES: boolean[] = FEATURES.exampleStores ? [false, true] : [false];

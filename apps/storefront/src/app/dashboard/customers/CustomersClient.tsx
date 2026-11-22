@@ -319,7 +319,7 @@ function CustomerDrawer({
         animate={{ x: 0 }}
         exit={{ x: '100%' }}
         transition={SPRING.sheet}
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e: { stopPropagation(): void }) => e.stopPropagation()}
       >
         <header className="crm-dhead">
           <span className="crm-avatar is-lg" aria-hidden>

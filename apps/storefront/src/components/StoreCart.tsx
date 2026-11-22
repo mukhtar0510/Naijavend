@@ -36,6 +36,7 @@ import { SPRING, T } from '@/lib/motion';
 import { formatNaira } from '@idevtenancy/shared';
 import type { Pin } from '@/components/checkout/DeliveryPinMap';
 import '../styles/checkout.css';
+import { trackEvent } from '@/lib/track-event';
 
 // The map is its own lazy chunk: it loads only when the buyer reaches delivery.
 const DeliveryPinMap = dynamic(() => import('@/components/checkout/DeliveryPinMap').then((m) => m.DeliveryPinMap), {
@@ -185,6 +186,7 @@ export function StoreCart({ slug, storeName }: { slug: string; storeName: string
   function next() {
     const msg = check(step);
     if (msg) return setError(msg);
+    if (step === 0) trackEvent('checkout_started', { slug });
     setStep((s) => Math.min(3, s + 1) as Step);
   }
 
@@ -273,7 +275,7 @@ export function StoreCart({ slug, storeName }: { slug: string; storeName: string
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={T.base}
-            onClick={(e) => e.target === e.currentTarget && setOpen(false)}
+            onClick={(e: { target: EventTarget; currentTarget: EventTarget }) => e.target === e.currentTarget && setOpen(false)}
           >
             <motion.div
               ref={panelRef}
@@ -519,6 +521,12 @@ export function StoreCart({ slug, storeName }: { slug: string; storeName: string
                     </button>
                   )}
                   <p className="kv-co-hint">You pay the seller directly. Kwaravend takes no card payments and adds no fee.</p>
+                  {step === 3 && (
+                    <p className="kv-co-hint">
+                      Changed your mind? Message the seller before they confirm. Cancellations and refunds are agreed with the
+                      seller; if something goes wrong, signed-in buyers can open a dispute from My account.
+                    </p>
+                  )}
                 </div>
               )}
             </motion.div>

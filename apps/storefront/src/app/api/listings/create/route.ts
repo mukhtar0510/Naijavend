@@ -6,6 +6,7 @@ import { apiError, apiOk, internalError } from '@/lib/api';
 import { sanitizeText, parsePriceKobo, isListingType, STORE_CATEGORIES, isDuplicateTitle, duplicateSimilarity, containment } from '@idevtenancy/shared';
 import { recordFlag } from '@/lib/moderation';
 import { isMissingColumn } from '@/lib/supabase';
+import { recordEvent } from '@/lib/events';
 
 export async function POST(req: NextRequest) {
   const sb = await getSellerClient();
@@ -127,6 +128,9 @@ export async function POST(req: NextRequest) {
     // New listing — refresh the store page, catalogue and marketplace caches now.
     revalidateStore(store.slug);
 
+    await recordEvent('product_added', storeId);
+    // "Published" = the store reaches 3 products (BUILD.md T10 definition).
+    if ((existingRows?.length ?? 0) + 1 === 3) await recordEvent('store_published', storeId);
     return apiOk({ created: true, duplicateOf: duplicateMatch }, 201);
   } catch (err) {
     return internalError('listings-create', err);

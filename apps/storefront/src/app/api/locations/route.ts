@@ -6,6 +6,7 @@ import { getSellerClient, getOwnStore } from '@/lib/auth';
 import { revalidateStore } from '@/lib/revalidate';
 import { apiError, apiOk, internalError } from '@/lib/api';
 import { sanitizeText, isValidPhone } from '@idevtenancy/shared';
+import { inIlorin } from '@/lib/ilorin';
 
 const MAX_LOCATIONS = 10;
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -46,7 +47,9 @@ function parseLocation(b: Record<string, unknown>): { loc: LocationInput | null;
   const lngRaw = typeof b.longitude === 'number' && b.longitude >= -180 && b.longitude <= 180 ? b.longitude : null;
   // A pin is stored only when BOTH coordinates are valid — never half-set
   // (a lat without lng previously produced a pin at the equator/prime-meridian).
-  const paired = latRaw !== null && lngRaw !== null;
+  // BUILD.md T07: only Ilorin branches get a map pin; a branch elsewhere keeps
+  // its address but isn't plotted.
+  const paired = latRaw !== null && lngRaw !== null && inIlorin(latRaw, lngRaw);
   const lat = paired ? latRaw : null;
   const lng = paired ? lngRaw : null;
   // Normalise common typing styles: "0801 234 5678", "+234-801-234-5678",

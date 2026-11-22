@@ -6,6 +6,7 @@ import { getSellerClient } from '@/lib/auth';
 import { apiError, apiOk, internalError } from '@/lib/api';
 import { sanitizeText } from '@idevtenancy/shared';
 import { ALL_PAYMENT_METHODS } from '@/lib/payments';
+import { recordEvent } from '@/lib/events';
 
 const ALLOWED = new Set<string>(ALL_PAYMENT_METHODS);
 
@@ -44,6 +45,8 @@ export async function POST(req: NextRequest) {
           : 'Could not confirm that payment.'
       );
     }
+    const { data: paidOrder } = await sb.from('orders').select('store_id').eq('id', orderId).maybeSingle();
+    await recordEvent('order_confirmed', (paidOrder as { store_id?: string } | null)?.store_id ?? null);
     return apiOk({ confirmed: true });
   } catch (err) {
     return internalError('orders-payment', err);
