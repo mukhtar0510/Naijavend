@@ -12,7 +12,7 @@ import {
   ShieldCheck,
   Store as StoreIcon,
   Trash2,
-  Users, ShieldAlert, ToggleRight, TrendingUp } from 'lucide-react';
+  Users, ShieldAlert, ToggleRight, TrendingUp, Wallet } from 'lucide-react';
 import { formatNaira } from '@idevtenancy/shared';
 import { ThemeToggleCompact } from '@/components/ThemeToggleCompact';
 import { Button } from '@/components/ui/button';
@@ -25,6 +25,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog } from '@/components/ui/dialog';
 import { AdminFlags, AdminGrowth, AdminModeration } from './AdminPanels';
+import { AdminBilling } from './AdminBilling';
 
 interface Metrics {
   users: number;
@@ -93,6 +94,7 @@ const SECTIONS = [
   { key: 'accounts', label: 'Accounts', icon: Users },
   { key: 'stores', label: 'Stores', icon: StoreIcon },
   { key: 'growth', label: 'Growth', icon: TrendingUp },
+  { key: 'billing', label: 'Billing', icon: Wallet },
   { key: 'moderation', label: 'Moderation', icon: ShieldAlert },
   { key: 'flags', label: 'Flags', icon: ToggleRight },
   { key: 'audit', label: 'Audit log', icon: ScrollText },
@@ -295,6 +297,7 @@ export function AdminConsole({ adminEmail }: { adminEmail: string }) {
           </div>
 
           {section === 'growth' && <AdminGrowth />}
+          {section === 'billing' && <AdminBilling />}
           {section === 'moderation' && <AdminModeration />}
           {section === 'flags' && <AdminFlags />}
 

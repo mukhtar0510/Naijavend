@@ -1,6 +1,6 @@
 // Locked-feature state (REDESIGN T11): an icon, one sentence and a clear next
-// step. While billing is off, paid plans say "Coming soon" (never a Buy
-// button). Only shown when FEATURES.planGating is on.
+// step. Links to /dashboard/plan to buy.
+// Only shown when FEATURES.planGating is on.
 import Link from 'next/link';
 import { Lock } from 'lucide-react';
 
@@ -13,10 +13,10 @@ export function LockedFeature({ title, planName, children }: { title: string; pl
           <Lock size={20} />
         </span>
         <p style={{ margin: 0, fontSize: 15 }}>
-          {children ?? `${title} is part of the ${planName} plan.`} Paid plans are coming soon, and nothing is charged today.
+          {children ?? `${title} is part of the ${planName} plan.`}
         </p>
-        <Link href="/dashboard/plan" className="btn btn-outline">
-          See plans
+        <Link href="/dashboard/plan" className="btn btn-primary">
+          Upgrade your plan
         </Link>
       </div>
     </main>

@@ -1,8 +1,8 @@
 // Plans and limits — the single source of truth for what a seller's plan lets
-// them do. This is a MOCK setup: there is no billing, no card form and no gateway.
+// them do. Paid plans are bought in /dashboard/plan (bank transfer to Kwaravend, confirmed in /admin).
 // The `stores.plan` column maps to these public plan names.
 // Prices were set on 2026-11-18: Free (₦0), Business (₦3,000/mo), Emirates Plus (₦8,000/mo; the middle plan was renamed on 2026-11-21, id stays 'plus'),
-// Business Pro (₦15,000/mo). Billing is not switched on yet, so no plan can be paid for.
+// Business Pro (₦15,000/mo). On sale since 2026-11-22; plan_expires_at ends a paid plan.
 // Rider delivery fees are additional monthly fees on top of the base plan price.
 
 import type { Plan } from '@idevtenancy/shared';
@@ -65,7 +65,7 @@ export const PLANS: PlanDef[] = [
     name: 'Business',
     priceLabel: '₦3,000/mo',
     riderPriceLabel: '₦500/mo rider',
-    available: false,
+    available: true,
     tagline: 'For a shop that is selling every week, with Standard Kwaravend rider delivery.',
     limits: { listings: 100, staff: 5, locations: 2, templates: null, rider: 'standard', riderPrice: 500 },
     includes: [
@@ -83,7 +83,7 @@ export const PLANS: PlanDef[] = [
     name: 'Emirates Plus',
     priceLabel: '₦8,000/mo',
     riderPriceLabel: '₦1,000/mo rider',
-    available: false,
+    available: true,
     tagline: 'For a shop that has outgrown a one-person operation, with Express Kwaravend rider delivery.',
     limits: { listings: 250, staff: 10, locations: 3, templates: null, rider: 'express', riderPrice: 1000 },
     includes: [
@@ -100,7 +100,7 @@ export const PLANS: PlanDef[] = [
     name: 'Business Pro',
     priceLabel: '₦15,000/mo',
     riderPriceLabel: '₦2,000/mo rider',
-    available: false,
+    available: true,
     tagline: 'For multi-branch retailers and delivery-heavy catalogues, with Same-day Kwaravend rider delivery.',
     limits: { listings: null, staff: 25, locations: 10, templates: null, rider: 'same-day', riderPrice: 2000 },
     includes: [
@@ -172,15 +172,34 @@ const PLAN_RANK: Record<PlanId, number> = { free: 0, growth: 1, plus: 2, pro: 3 
 
 /**
  * hasFeature(store, key): whether this store's plan includes a feature.
- * While billing is off, gating is switched off (FEATURES.planGating) and
- * every store gets everything, because nothing can be bought yet.
+ * When gating is off (FEATURES.planGating) every store gets everything;
+ * when on, the store's effective (unexpired) plan decides.
  */
-export function hasFeature(store: { plan?: string | null } | null | undefined, key: FeatureKeyPlan, gatingOn: boolean): boolean {
+export function hasFeature(store: { plan?: string | null; plan_expires_at?: string | null } | null | undefined, key: FeatureKeyPlan, gatingOn: boolean): boolean {
   if (!gatingOn) return true;
-  return PLAN_RANK[planFor(store?.plan).id] >= PLAN_RANK[FEATURE_MIN_PLAN[key]];
+  return PLAN_RANK[effectivePlan(store).id] >= PLAN_RANK[FEATURE_MIN_PLAN[key]];
 }
 
 /** Name of the plan that unlocks a feature, for locked-state copy. */
 export function planNameFor(key: FeatureKeyPlan): string {
   return PLANS.find((p) => p.id === FEATURE_MIN_PLAN[key])?.name ?? 'a paid plan';
+}
+
+// ------------------------------------------------------------- paid plans
+/**
+ * The plan a store is actually on right now: its paid plan while
+ * `plan_expires_at` is in the future (or unset for Free), otherwise Free.
+ * Paid plans are bought per month (see /dashboard/plan and admin Billing).
+ */
+export function effectivePlan(store: { plan?: string | null; plan_expires_at?: string | null } | null | undefined): PlanDef {
+  const def = planFor(store?.plan);
+  if (def.id === 'free') return def;
+  const exp = store?.plan_expires_at ? Date.parse(store.plan_expires_at) : NaN;
+  return Number.isFinite(exp) && exp > Date.now() ? def : planFor('free');
+}
+
+/** Monthly price in kobo, from the plan's ₦ label (single source of truth). */
+export function planPriceKobo(id: PlanId): number {
+  const label = PLANS.find((p) => p.id === id)?.priceLabel ?? '₦0';
+  return Number(label.replace(/[^0-9]/g, '') || 0) * 100;
 }

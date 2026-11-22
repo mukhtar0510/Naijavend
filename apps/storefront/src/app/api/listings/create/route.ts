@@ -7,6 +7,7 @@ import { sanitizeText, parsePriceKobo, isListingType, STORE_CATEGORIES, isDuplic
 import { recordFlag } from '@/lib/moderation';
 import { isMissingColumn } from '@/lib/supabase';
 import { recordEvent } from '@/lib/events';
+import { effectivePlan } from '@/lib/plans';
 
 export async function POST(req: NextRequest) {
   const sb = await getSellerClient();
@@ -74,8 +75,16 @@ export async function POST(req: NextRequest) {
 
   try {
     // Ownership check (RLS also enforces this — belt and suspenders).
-    const store = await getOwnStore<{ id: string; slug: string }>(sb, 'id, slug');
+    const store = await getOwnStore<{ id: string; slug: string; plan: string | null; plan_expires_at?: string | null }>(sb, '*');
     if (!store || store.id !== storeId) return apiError(403, 'not_your_store', 'You can only add listings to your own store.');
+    // Plan limit (the number shown on /pricing for each plan).
+    const plan = effectivePlan(store);
+    if (plan.limits.listings != null) {
+      const { count: listingTotal } = await sb.from('listings').select('id', { count: 'exact', head: true }).eq('store_id', storeId);
+      if ((listingTotal ?? 0) >= plan.limits.listings) {
+        return apiError(403, 'plan_limit', `Your ${plan.name} plan allows ${plan.limits.listings} listings. Upgrade in Plan to add more.`);
+      }
+    }
 
     // Duplicate-listing screen — a seller pasting the same item twice makes
     // the search results and their own catalogue worse. FLAG it (and carry on):

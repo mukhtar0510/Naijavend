@@ -5,7 +5,7 @@
 // with a gentle tilt (max 6°) that follows the pointer, a soft glow follows
 // the cursor, the feature list expands and the other cards dim. Touch: tap to
 // expand, no tilt. Reduced motion: no tilt or glow, expansion still works.
-// While billing is off, paid plans say "Coming soon" — there is no Buy button.
+// Paid plans link to /dashboard/plan, where the seller pays by bank transfer.
 
 import { useRef, useState } from 'react';
 import { BarChart3, Bike, Check, ChevronDown, Layers, MapPin, Store, Tag, Users, type LucideIcon } from 'lucide-react';
@@ -69,12 +69,11 @@ function Card({ plan, active, dim, onActivate, onLeave }: { plan: PlanDef; activ
       <div className="plan-glow" aria-hidden />
       <header>
         <h3>{plan.name}</h3>
-        {plan.available ? <Badge tone="success">Available now</Badge> : <Badge tone="warning">Coming soon</Badge>}
+        {plan.priceLabel === '₦0' ? <Badge tone="success">Free forever</Badge> : <Badge tone="success">Available now</Badge>}
       </header>
       <p className="plan-price">
         <span>{plan.priceLabel.replace('/mo', '')}</span>
-        {plan.priceLabel.includes('/mo') && <em>/month · planned price</em>}
-        {plan.available && <em>forever, no card</em>}
+        {plan.priceLabel.includes('/mo') ? <em>/month</em> : <em>forever, no card</em>}
       </p>
       <p className="plan-tagline">{plan.tagline}</p>
       <ul className="plan-features">
@@ -92,12 +91,14 @@ function Card({ plan, active, dim, onActivate, onLeave }: { plan: PlanDef; activ
         {active ? 'Show less' : `All ${plan.includes.length} features`} <ChevronDown size={14} aria-hidden />
       </button>
       <div className="plan-cta">
-        {plan.available ? (
+        {plan.priceLabel === '₦0' ? (
           <ButtonLink href="/dashboard" variant="primary" fullWidth>
             Open your store, free
           </ButtonLink>
         ) : (
-          <p className="plan-soon">Paid plans aren&apos;t on sale yet. Nothing is charged today.</p>
+          <ButtonLink href="/dashboard/plan" variant="outline" fullWidth>
+            Choose {plan.name}
+          </ButtonLink>
         )}
       </div>
     </article>
@@ -161,7 +162,7 @@ export function PlanCards() {
               <tr>
                 <th scope="row">Can buy today</th>
                 {PLANS.map((p) => (
-                  <td key={p.id}>{p.available ? 'Yes, free' : 'Not yet'}</td>
+                  <td key={p.id}>{p.priceLabel === '₦0' ? 'Yes, free' : 'Yes, by bank transfer'}</td>
                 ))}
               </tr>
             </tbody>

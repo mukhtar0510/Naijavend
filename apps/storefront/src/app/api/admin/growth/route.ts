@@ -1,7 +1,7 @@
 // Owner growth dashboard (BUILD.md T10): stores created and published,
 // weekly active stores, setup completion, stores with an order, 30-day
 // retention, orders and naira value, delivery performance, per-area
-// breakdown and the seller waitlist. Built from real rows only.
+// breakdown and stores by plan. Built from real rows only.
 import { requireAdminActor } from '@/lib/admin';
 import { apiError, apiOk, internalError } from '@/lib/api';
 import { ACTIVE_EVENTS } from '@/lib/events';
@@ -19,13 +19,12 @@ export async function GET() {
     const since30 = new Date(now - 30 * DAY).toISOString();
     const since60 = new Date(now - 60 * DAY).toISOString();
 
-    const [storesRes, listingsRes, ordersRes, eventsRes, deliveriesRes, waitlistRes] = await Promise.all([
-      svc.from('stores').select('id, created_at, latitude, longitude, business_hours, whatsapp_number, is_example').eq('is_example', false),
+    const [storesRes, listingsRes, ordersRes, eventsRes, deliveriesRes] = await Promise.all([
+      svc.from('stores').select('id, plan, plan_expires_at, created_at, latitude, longitude, business_hours, whatsapp_number, is_example').eq('is_example', false),
       svc.from('listings').select('store_id'),
       svc.from('orders').select('store_id, total_kobo, status, payment_status, created_at').gte('created_at', since60),
       svc.from('platform_events').select('event, store_id, created_at').gte('created_at', since60).limit(20000),
       svc.from('deliveries').select('status, failure_reason, created_at, delivered_at').gte('created_at', since30),
-      svc.from('seller_waitlist').select('city, created_at').order('created_at', { ascending: false }).limit(500),
     ]);
 
     const stores = (storesRes.data ?? []) as Array<{ id: string; created_at: string; latitude: number | null; longitude: number | null; business_hours: unknown; whatsapp_number: string | null }>;
@@ -62,9 +61,12 @@ export async function GET() {
       const label = s.latitude != null && s.longitude != null && inIlorin(Number(s.latitude), Number(s.longitude)) ? nearestArea(Number(s.latitude), Number(s.longitude)).label : 'No pin yet';
       byArea.set(label, (byArea.get(label) ?? 0) + 1);
     }
-    const waitlist = (waitlistRes.error ? [] : (waitlistRes.data ?? [])) as Array<{ city: string; created_at: string }>;
-    const waitByCity = new Map<string, number>();
-    for (const w of waitlist) waitByCity.set(w.city.trim(), (waitByCity.get(w.city.trim()) ?? 0) + 1);
+    const byPlan = new Map<string, number>();
+    for (const st of stores as Array<{ plan?: string | null; plan_expires_at?: string | null }>) {
+      const lapsed = st.plan && st.plan !== 'free' && st.plan_expires_at && Date.parse(st.plan_expires_at) < now;
+      const p = !st.plan || lapsed ? 'free' : st.plan;
+      byPlan.set(p, (byPlan.get(p) ?? 0) + 1);
+    }
 
     const eventCounts: Record<string, number> = {};
     for (const e of events) if (e.created_at >= since30) eventCounts[e.event] = (eventCounts[e.event] ?? 0) + 1;
@@ -72,7 +74,6 @@ export async function GET() {
     return apiOk({
       eventsReady: !eventsRes.error,
       deliveriesReady: !deliveriesRes.error,
-      waitlistReady: !waitlistRes.error,
       stores: {
         total: stores.length,
         new7: stores.filter((s) => s.created_at >= since7).length,
@@ -87,7 +88,7 @@ export async function GET() {
       orders30: { count: orders30.length, valueKobo: orders30.reduce((a, o) => a + Number(o.total_kobo ?? 0), 0), paidCount: paid30.length, paidKobo: paid30.reduce((a, o) => a + Number(o.total_kobo ?? 0), 0) },
       deliveries30: { total: deliveries.length, delivered: delivered.length, firstTryRate: delivered.length ? Math.round((firstTry / delivered.length) * 100) : null },
       areas: [...byArea.entries()].sort((a, b) => b[1] - a[1]).map(([area, count]) => ({ area, count })),
-      waitlist: { total: waitlist.length, byCity: [...waitByCity.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10).map(([city, count]) => ({ city, count })) },
+      plans: [...byPlan.entries()].sort((a, b) => b[1] - a[1]).map(([plan, count]) => ({ plan, count })),
       events30: eventCounts,
     });
   } catch (err) {

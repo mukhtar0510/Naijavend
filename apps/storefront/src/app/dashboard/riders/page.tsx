@@ -14,7 +14,7 @@ export default async function RidersPage() {
   const sb = await getSellerClient();
   if (!sb) redirect('/dashboard/signin');
   await redirectStaffToPos(sb);
-  const store = await getOwnStore<{ id: string; plan: string | null }>(sb, 'id, plan');
+  const store = await getOwnStore<{ id: string; plan: string | null; plan_expires_at?: string | null }>(sb, '*');
   if (!store) {
     return (
       <main>

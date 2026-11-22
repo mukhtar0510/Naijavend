@@ -2,9 +2,13 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getSellerClient, getOwnStore } from '@/lib/auth';
 import { getStaffMembership } from '@/lib/staff';
-import { LIMIT_LABELS, PLANS, isAtLimit, planFor, usagePercent } from '@/lib/plans';
+import { LIMIT_LABELS, PLANS, effectivePlan, isAtLimit, planFor, planPriceKobo, usagePercent } from '@/lib/plans';
 import type { LimitKey } from '@/lib/plans';
-import { RequestAccess } from './RequestAccess';
+import { supabaseServiceOptional } from '@/lib/supabase';
+import { getBillingBank, PAID_PLANS } from '@/lib/billing';
+import { PlanCheckout, type OpenPurchase } from './PlanCheckout';
+import '../../../styles/checkout.css';
+import '../../../styles/plan.css';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,7 +23,7 @@ export default async function PlanPage() {
   const membership = await getStaffMembership(sb);
   const store = membership
     ? null
-    : await getOwnStore<{ id: string; plan: string | null }>(sb, 'id, plan');
+    : await getOwnStore<{ id: string; plan: string | null; plan_expires_at?: string | null }>(sb, '*');
 
   if (!store) {
     return (
@@ -39,7 +43,42 @@ export default async function PlanPage() {
     sb.from('store_locations').select('*', { count: 'exact', head: true }).eq('store_id', store.id),
   ]);
 
-  const plan = planFor(store.plan);
+  const plan = effectivePlan(store);
+  const paidPlan = planFor(store.plan);
+  const lapsed = paidPlan.id !== 'free' && plan.id === 'free';
+  const expires = plan.id !== 'free' && store.plan_expires_at ? new Date(store.plan_expires_at) : null;
+
+  // Open purchase (owner-readable via RLS) and Kwaravend's bank (server-only).
+  const { data: openRow } = await sb
+    .from('plan_payments')
+    .select('id, plan, months, amount_kobo, reference, status, proof_url')
+    .eq('store_id', store.id)
+    .in('status', ['pending', 'awaiting_confirmation'])
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const svc = supabaseServiceOptional();
+  const bank = svc ? await getBillingBank(svc).catch(() => null) : null;
+  const open: OpenPurchase | null = openRow
+    ? {
+        id: openRow.id,
+        plan: openRow.plan,
+        planName: planFor(openRow.plan).name,
+        months: openRow.months,
+        amountKobo: openRow.amount_kobo,
+        reference: openRow.reference,
+        status: openRow.status,
+        proofUrl: openRow.proof_url,
+      }
+    : null;
+  const { data: lastRejected } = await sb
+    .from('plan_payments')
+    .select('reference, note, confirmed_at')
+    .eq('store_id', store.id)
+    .eq('status', 'rejected')
+    .order('confirmed_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
   const usage: Record<LimitKey, number> = {
     listings: listingsRes.count ?? 0,
     staff: staffRes.count ?? 0,
@@ -53,14 +92,27 @@ export default async function PlanPage() {
     <main>
       <h1>Plan &amp; limits</h1>
       <p className="muted">
-        You are on <strong>{plan.name}</strong>. Limits are checked when you add a listing, invite
-        staff or open a location.
+        You are on <strong>{plan.name}</strong>
+        {expires ? ` until ${expires.toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' })}` : ''}. Limits
+        are checked when you add a listing, invite staff or open a location.
       </p>
+      {lapsed && (
+        <div className="alert" style={{ marginTop: 12 }}>
+          Your {paidPlan.name} plan has ended, so the store is back on Free. Renew below to switch it on again.
+        </div>
+      )}
+      {lastRejected && !open && (
+        <div className="alert alert-error" style={{ marginTop: 12 }}>
+          We couldn&apos;t confirm payment {lastRejected.reference}: {lastRejected.note}. Start a new purchase or message us.
+        </div>
+      )}
 
-      <div className="alert" style={{ marginTop: 16 }}>
-        <strong>Preview build.</strong> Plans and billing are mocked. Nothing on this page charges
-        money, and requests are not sent anywhere.
-      </div>
+      <PlanCheckout
+        plans={PAID_PLANS.map((id) => ({ id, name: planFor(id).name, priceKobo: planPriceKobo(id), current: plan.id === id }))}
+        open={open}
+        bank={bank}
+        billingReady={Boolean(bank)}
+      />
 
       <section className="card" style={{ marginTop: 16 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
@@ -126,13 +178,7 @@ export default async function PlanPage() {
                 ))}
               </ul>
               <div style={{ marginTop: 'auto', paddingTop: 8 }}>
-                {current ? (
-                  <span className="badge">You are here</span>
-                ) : p.available ? (
-                  <RequestAccess planName={p.name} />
-                ) : (
-                  <span className="badge">{p.priceLabel}</span>
-                )}
+                {current ? <span className="badge badge-success">Your plan</span> : <span className="badge">{p.priceLabel}</span>}
               </div>
             </article>
           );
@@ -140,8 +186,7 @@ export default async function PlanPage() {
       </section>
 
       <p className="muted" style={{ marginTop: 20, fontSize: 13 }}>
-        Need a limit raised before paid plans open? Ask the team through the same number that
-        messaged you when your store was approved.
+        Plans are paid monthly by bank transfer to Kwaravend. There is no commission on your sales. Card payment is coming.
       </p>
     </main>
   );

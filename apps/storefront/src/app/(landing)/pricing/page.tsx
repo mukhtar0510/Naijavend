@@ -23,7 +23,7 @@ const FAQ = [
   },
   {
     q: 'Can I pay for a plan today?',
-    a: 'Not yet. The prices are set, but online billing is not switched on, so nothing is charged. When it opens, the change will be announced inside the dashboard first.',
+    a: 'Yes. Open Plan in your dashboard, pick a plan and 1, 3, 6 or 12 months, and transfer to Kwaravend with the reference shown. Upload the receipt and your plan switches on once we confirm the money, usually the same day. Card payments are coming.',
   },
   {
     q: 'What happens if I outgrow a plan?',
@@ -31,7 +31,7 @@ const FAQ = [
   },
   {
     q: 'Do I need a card to start?',
-    a: 'No card, ever, for the Free plan. Paid plans are not on sale yet, so no billing details are collected anywhere on the site.',
+    a: 'No card, ever, for the Free plan. Paid plans are paid by bank transfer, so no card details are collected anywhere on the site.',
   },
 ];
 
@@ -45,7 +45,7 @@ export default function PricingPage() {
         </h1>
         <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
           Every plan includes 0% commission and a public store page on {BRAND.name}. Prices are in naira, billed per
-          month. Online billing is not switched on yet, so nothing is charged today.
+          month. Pay for a plan from your dashboard by bank transfer.
         </p>
       </div>
 
@@ -64,7 +64,7 @@ export default function PricingPage() {
               <h2 className="mb-1 font-heading text-[16px] font-bold text-foreground">{plan.name}</h2>
               <p className="mb-1 font-mono text-[26px] font-bold text-foreground">{plan.priceLabel}</p>
               <p className="mb-3 text-[12px] font-semibold text-muted-foreground">
-                {free ? 'forever, no card' : plan.available ? 'per month' : 'per month · not yet on sale'}
+                {free ? 'forever, no card' : 'per month'}
               </p>
               <p className="m-0 text-[13px] leading-relaxed text-muted-foreground">{plan.tagline}</p>
               <ul className="m-0 mt-3 grid list-none gap-2 p-0 text-[13px] text-muted-foreground">
@@ -82,7 +82,7 @@ export default function PricingPage() {
                   </Link>
                 ) : (
                   <Link href="/dashboard/plan" className="btn btn-outline w-full justify-center">
-                    Ask for early access
+                    Choose {plan.name}
                   </Link>
                 )}
               </div>

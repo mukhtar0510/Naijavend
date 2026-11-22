@@ -286,3 +286,19 @@
 .admin-flags .card { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; }
 .admin-flags p { margin: 2px 0; color: var(--text-muted); font-size: 13px; }
 .admin-flags .mono { font-size: 12px; color: var(--text-muted); }
+
+/* Billing: Kwaravend bank account form */
+.admin-bank-form {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  align-items: end;
+  margin-bottom: 18px;
+}
+.admin-bank-form label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted-foreground, var(--text-2));
+}

@@ -7,6 +7,7 @@ import { revalidateStore } from '@/lib/revalidate';
 import { apiError, apiOk, internalError } from '@/lib/api';
 import { sanitizeText, isValidPhone } from '@idevtenancy/shared';
 import { inIlorin } from '@/lib/ilorin';
+import { effectivePlan } from '@/lib/plans';
 
 const MAX_LOCATIONS = 10;
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -132,6 +133,11 @@ export async function POST(req: NextRequest) {
       .eq('store_id', storeId);
     if ((count ?? 0) >= MAX_LOCATIONS) {
       return apiError(422, 'too_many', `Up to ${MAX_LOCATIONS} branches per store.`);
+    }
+    const { data: planRow } = await sb.from('stores').select('*').eq('id', storeId).maybeSingle();
+    const plan = effectivePlan(planRow as { plan?: string | null; plan_expires_at?: string | null } | null);
+    if (plan.limits.locations != null && (count ?? 0) >= plan.limits.locations) {
+      return apiError(403, 'plan_limit', `Your ${plan.name} plan allows ${plan.limits.locations} location${plan.limits.locations === 1 ? '' : 's'}. Upgrade in Plan to add more.`);
     }
 
     const { data: existing } = await sb

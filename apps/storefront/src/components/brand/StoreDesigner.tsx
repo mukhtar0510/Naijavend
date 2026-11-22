@@ -17,7 +17,7 @@ import {
 
 type Filter = 'starter' | 'all';
 
-interface ThemeState {
+export interface ThemeState {
   accent: string;
   accentText: string;
   accentSoft: string;
@@ -114,10 +114,26 @@ function isDarkHex(hex: string): boolean {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b < 110;
 }
 
-export function StoreDesigner({ compact = false }: { compact?: boolean }) {
-  const [filter, setFilter] = useState<Filter>('starter');
-  const [template, setTemplate] = useState<StoreLayout>('modern');
-  const [theme, setTheme] = useState<ThemeState>(DEFAULT_THEME);
+/** First family name from a CSS font stack: "'Playfair Display', serif" -> "Playfair Display". */
+function fontName(stack: string): string {
+  return (stack.split(',')[0] ?? '').replace(/['"]/g, '').trim();
+}
+
+/** Seller mode (Settings > Look & feel): starts from the store's look and saves to it. */
+export interface DesignerSeller {
+  layout: StoreLayout;
+  theme: ThemeState;
+  /** How many templates (from the start of the list) the plan may publish; null = all. */
+  templateLimit: number | null;
+  planName: string;
+}
+
+export function StoreDesigner({ compact = false, seller }: { compact?: boolean; seller?: DesignerSeller }) {
+  const [filter, setFilter] = useState<Filter>(seller ? 'all' : 'starter');
+  const [template, setTemplate] = useState<StoreLayout>(seller?.layout ?? 'modern');
+  const [theme, setTheme] = useState<ThemeState>(seller?.theme ?? DEFAULT_THEME);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState<string | null>(null);
   const [brief, setBrief] = useState('');
   const [category, setCategory] = useState<string>('general');
   const [busy, setBusy] = useState(false);
@@ -130,6 +146,38 @@ export function StoreDesigner({ compact = false }: { compact?: boolean }) {
   );
 
   const active = STORE_TEMPLATES.find((t) => t.id === template);
+  const templateIndex = STORE_TEMPLATES.findIndex((t) => t.id === template);
+  const lockedForPlan = Boolean(seller && seller.templateLimit != null && templateIndex >= seller.templateLimit);
+
+  async function saveToStore() {
+    if (!seller) return;
+    setSaving(true);
+    setSaved(null);
+    setError(null);
+    try {
+      const res = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          layout: template,
+          accentColor: theme.accent,
+          accentSoft: theme.accentSoft,
+          accentText: theme.accentText,
+          backgroundColor: theme.bg,
+          fontHeading: fontName(theme.headingFont),
+          fontBody: fontName(theme.bodyFont),
+          heroStyle: theme.heroStyle,
+        }),
+      });
+      const body = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(body?.error?.message ?? 'Could not save your design.');
+      setSaved('Saved. Your store page now uses this design.');
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setSaving(false);
+    }
+  }
 
   function applyTheme(next: ThemeState, message: string) {
     setTheme(next);
@@ -321,6 +369,27 @@ export function StoreDesigner({ compact = false }: { compact?: boolean }) {
             ))}
           </div>
         </div>
+
+        {seller && (
+          <div className="sdg-block sdg-save">
+            {lockedForPlan ? (
+              <p className="sdg-error">
+                {active?.name ?? 'This'} template is on paid plans. Your {seller.planName} plan includes the first{' '}
+                {seller.templateLimit}. Pick one of those, or upgrade in Plan.
+              </p>
+            ) : (
+              <p className="sdg-note">Happy with the preview? Save it and your store page changes straight away.</p>
+            )}
+            <button type="button" className="btn btn-primary" onClick={saveToStore} disabled={saving || lockedForPlan}>
+              {saving ? 'Saving…' : 'Save to my store'}
+            </button>
+            {saved && (
+              <p className="sdg-note" role="status">
+                <Check size={13} aria-hidden /> {saved}
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ------------------------------ preview ----------------------------- */}

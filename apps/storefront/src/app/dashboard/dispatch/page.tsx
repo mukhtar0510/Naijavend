@@ -55,7 +55,7 @@ export default async function DispatchPage() {
   const sb = await getSellerClient();
   if (!sb) redirect('/dashboard/signin');
   await redirectStaffToPos(sb);
-  const store = await getOwnStore<{ id: string; name: string; plan: string | null }>(sb, 'id, name, plan');
+  const store = await getOwnStore<{ id: string; name: string; plan: string | null; plan_expires_at?: string | null }>(sb, '*');
   if (!store) {
     return (
       <main>

@@ -14,6 +14,9 @@ import { GalleryCard } from './GalleryCard';
 import { OwnStorePreview, loadOwnStorePreview } from '@/components/preview/OwnStorePreview';
 import { BankDetailsCard } from './BankCard';
 import type { Store, StoreSocialLinks, StoreTheme, WhatsAppSettings } from '@idevtenancy/shared';
+import { StoreDesigner, type DesignerSeller } from '@/components/brand/StoreDesigner';
+import { effectivePlan } from '@/lib/plans';
+import '../../../styles/store-designer.css';
 
 export const dynamic = 'force-dynamic';
 
@@ -68,6 +71,25 @@ export default async function SettingsPage({ searchParams }: { searchParams?: { 
     ? { bankName: bankRow.bank_name as string, accountName: bankRow.account_name as string, accountNumber: bankRow.account_number as string }
     : null;
   const preview = await loadOwnStorePreview(sb, s, theme);
+  const plan = effectivePlan(s as unknown as { plan?: string | null; plan_expires_at?: string | null });
+  const bg = theme?.background_color ?? '#FFFFFF';
+  const hex = bg.replace('#', '');
+  const lum = hex.length === 6 ? 0.2126 * parseInt(hex.slice(0, 2), 16) + 0.7152 * parseInt(hex.slice(2, 4), 16) + 0.0722 * parseInt(hex.slice(4, 6), 16) : 255;
+  const designer: DesignerSeller = {
+    layout: (theme?.layout ?? 'modern') as DesignerSeller['layout'],
+    theme: {
+      accent: theme?.accent_color ?? '#1456E0',
+      accentSoft: theme?.accent_soft ?? '#3B82F6',
+      accentText: theme?.accent_text ?? '#FFFFFF',
+      bg,
+      headingFont: `'${theme?.font_heading ?? 'Sora'}', 'Inter', sans-serif`,
+      bodyFont: `'${theme?.font_body ?? 'Inter'}', system-ui, sans-serif`,
+      heroStyle: (theme?.hero_style ?? 'gradient') as DesignerSeller['theme']['heroStyle'],
+      dark: lum < 110,
+    },
+    templateLimit: plan.limits.templates,
+    planName: plan.name,
+  };
   const gallery = Array.isArray(theme?.gallery_urls) ? (theme!.gallery_urls as string[]) : [];
 
   return (
@@ -133,6 +155,14 @@ export default async function SettingsPage({ searchParams }: { searchParams?: { 
             </div>
             {/* The live store preview sits with the controls that change it. */}
             <OwnStorePreview data={preview} />
+            {/* The full store designer (20 templates + AI theme designer), saving to this store. */}
+            <div className="dash-subsection" style={{ marginBottom: 20 }}>
+              <h3 style={{ margin: '0 0 4px', fontSize: 15 }}>Store designer</h3>
+              <p className="muted" style={{ margin: '0 0 10px', fontSize: 13 }}>
+                Pick a template, describe a vibe for the AI, or tap a preset. Save, and your store page changes.
+              </p>
+              <StoreDesigner seller={designer} />
+            </div>
             {/* App UI theme — separate from the storefront branding below. */}
             <div className="dash-subsection" style={{ marginBottom: 20 }}>
               <h3 style={{ margin: '0 0 4px', fontSize: 15 }}>Your dashboard theme</h3>

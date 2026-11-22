@@ -7,6 +7,8 @@ import { apiError, apiOk, internalError } from '@/lib/api';
 import { sanitizeText, isValidPhone, isValidHexColor, isStoreCategory, categoryLabel, isStoreFont, isStoreLayout, LISTING_STYLES, HOVER_ANIMS, isBackgroundGradient, BACKGROUND_IMAGE_STYLES, BACKGROUND_OVERLAYS, CONTENT_WIDTHS } from '@idevtenancy/shared';
 import { zonesOf } from '@/lib/deliveryZones';
 import { inIlorin } from '@/lib/ilorin';
+import { effectivePlan } from '@/lib/plans';
+import { STORE_TEMPLATES } from '@idevtenancy/shared';
 
 const HEX = /^#[0-9a-fA-F]{6}$/;
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -202,10 +204,9 @@ export async function POST(req: NextRequest) {
   ) {
     return apiError(422, 'incomplete_location', 'Set both latitude and longitude, or clear both.');
   }
-  // BUILD.md T07: Ilorin only. A pin outside the city is rejected; sellers
-  // elsewhere join the waitlist instead of getting a public listing.
+  // BUILD.md T07: Ilorin only. A pin outside the city is rejected.
   if (typeof latitude === 'number' && typeof longitude === 'number' && !inIlorin(latitude, longitude)) {
-    return apiError(422, 'outside_ilorin', 'Kwaravend is currently only in Ilorin. Move the pin to your Ilorin shop, or join the waitlist at /waitlist.');
+    return apiError(422, 'outside_ilorin', 'Kwaravend is currently only in Ilorin. Move the pin to your shop in Ilorin.');
   }
   // Contrast guard: button text must be readable on the chosen accent.
   if (accentColor && accentText && !isValidHexColor(accentColor, accentText)) {
@@ -213,8 +214,16 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const store = await getOwnStore<{ id: string; slug: string }>(sb, 'id, slug');
+    const store = await getOwnStore<{ id: string; slug: string; plan: string | null; plan_expires_at?: string | null }>(sb, '*');
     if (!store) return apiError(404, 'no_store', 'Create your store first.');
+    // Templates beyond the plan's allowance can be previewed but not saved.
+    if (layout !== undefined) {
+      const limit = effectivePlan(store).limits.templates;
+      const idx = STORE_TEMPLATES.findIndex((t) => t.id === layout);
+      if (limit != null && idx >= limit) {
+        return apiError(403, 'template_locked', `That template is on paid plans. Your plan includes the first ${limit} templates.`);
+      }
+    }
 
     const { error: storeErr } = await sb
       .from('stores')

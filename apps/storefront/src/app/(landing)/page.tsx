@@ -69,7 +69,7 @@ const OUTCOMES = [
 const FAQS = [
   {
     q: 'How much does it cost?',
-    a: 'The Free plan costs nothing and has no end date. Paid plans are ₦3,000, ₦8,000 and ₦15,000 a month. There is no commission on your sales, and online billing is not switched on yet, so nothing is charged today.',
+    a: 'The Free plan costs nothing and has no end date. Paid plans are ₦3,000, ₦8,000 and ₦15,000 a month, paid from your dashboard by bank transfer to Kwaravend. There is no commission on your sales.',
   },
   {
     q: 'Can I take payments online?',
@@ -77,7 +77,7 @@ const FAQS = [
   },
   {
     q: 'Where does Kwaravend work?',
-    a: `Kwaravend is launching in ${BRAND.launchRegion.city}, ${BRAND.launchRegion.state} State. Store addresses must be in an Ilorin area. Sellers elsewhere can join the waitlist.`,
+    a: `Kwaravend is launching in ${BRAND.launchRegion.city}, ${BRAND.launchRegion.state} State. Store addresses must be in an Ilorin area.`,
   },
   {
     q: 'Do I need a laptop?',
@@ -282,7 +282,7 @@ export default function LandingPage() {
       {/* =============================== PRICING ============================== */}
       <section className="mx-auto w-full max-w-6xl px-5 py-14 sm:px-7 lg:py-16">
         <SectionHead eyebrow={<span className="badge badge-gold">Pricing</span>} title="Monthly plans. No commission.">
-          Priced in naira, billed per month, with no cut of your sales. Online billing is not switched on yet.
+          Priced in naira, billed per month, with no cut of your sales. Pay from your dashboard by bank transfer.
         </SectionHead>
         <PlanCards />
         <Link href="/pricing" className="btn btn-outline mt-5">

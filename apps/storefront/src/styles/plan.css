@@ -1,0 +1,14 @@
+/* Seller plan purchase (22 Nov 2026). Tokens only. */
+.plan-buy, .plan-choose { display: grid; gap: 12px; margin-top: 16px; }
+.plan-buy { padding: 18px; }
+.plan-buy header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.plan-buy h2 { margin: 0; font-size: 18px; }
+.plan-buy-upload { display: grid; gap: 8px; justify-items: start; }
+.plan-buy-upload label { display: grid; gap: 6px; font-size: 14px; font-weight: 600; }
+.plan-err { margin: 0; color: var(--danger); font-size: 13.5px; font-weight: 600; }
+.plan-months { display: flex; flex-wrap: wrap; gap: 8px; }
+.plan-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.plan-opt { display: grid; gap: 8px; padding: 16px; }
+.plan-opt strong { font-size: 17px; }
+.plan-opt .mono { font-size: 18px; font-weight: 700; }
+.plan-opt em { color: var(--text-muted); font-size: 12.5px; font-style: normal; font-weight: 500; }

@@ -37,8 +37,8 @@ export default async function CustomersPage() {
 
   const membership = await getStaffMembership(sb);
   const store = membership
-    ? ((await sb.from('stores').select('id, plan').eq('id', membership.storeId).maybeSingle()).data as { id: string; plan: string | null } | null) ?? { id: membership.storeId, plan: null }
-    : await getOwnStore<{ id: string; plan: string | null }>(sb, 'id, plan');
+    ? ((await sb.from('stores').select('*').eq('id', membership.storeId).maybeSingle()).data as { id: string; plan: string | null } | null) ?? { id: membership.storeId, plan: null }
+    : await getOwnStore<{ id: string; plan: string | null; plan_expires_at?: string | null }>(sb, '*');
 
   if (!store) {
     return (

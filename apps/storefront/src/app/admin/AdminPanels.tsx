@@ -4,7 +4,6 @@
 // blue tick) and T03 (feature flags). Each loads its own data.
 
 import { useCallback, useEffect, useState } from 'react';
-import Link from 'next/link';
 import { BadgeCheck, CheckCircle2, Eye, ShieldOff } from 'lucide-react';
 import { formatNaira } from '@idevtenancy/shared';
 import { FEATURES, FLAG_ENV, type FeatureKey } from '@/lib/flags';
@@ -13,12 +12,11 @@ import { FEATURES, FLAG_ENV, type FeatureKey } from '@/lib/flags';
 interface Growth {
   eventsReady: boolean;
   deliveriesReady: boolean;
-  waitlistReady: boolean;
   stores: { total: number; new7: number; published: number; setupDone: number; setupRate: number; weeklyActive: number; withOrder: number; retention30: number | null; cohortSize: number };
   orders30: { count: number; valueKobo: number; paidCount: number; paidKobo: number };
   deliveries30: { total: number; delivered: number; firstTryRate: number | null };
   areas: Array<{ area: string; count: number }>;
-  waitlist: { total: number; byCity: Array<{ city: string; count: number }> };
+  plans: Array<{ plan: string; count: number }>;
   events30: Record<string, number>;
 }
 
@@ -84,23 +82,15 @@ export function AdminGrowth() {
           </ul>
         </div>
         <div>
-          <h3>Seller waitlist (outside Ilorin)</h3>
-          {!g.waitlistReady ? (
-            <p className="muted">Needs the waitlist database update.</p>
-          ) : g.waitlist.total === 0 ? (
-            <p className="muted">
-              Nobody yet. The form is at <Link href="/waitlist">/waitlist</Link>.
-            </p>
-          ) : (
-            <ul className="admin-list">
-              {g.waitlist.byCity.map((w) => (
-                <li key={w.city}>
-                  <span>{w.city}</span>
-                  <strong>{w.count}</strong>
-                </li>
-              ))}
-            </ul>
-          )}
+          <h3>Stores by plan</h3>
+          <ul className="admin-list">
+            {g.plans.map((p) => (
+              <li key={p.plan}>
+                <span style={{ textTransform: 'capitalize' }}>{p.plan}</span>
+                <strong>{p.count}</strong>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
       {g.eventsReady && Object.keys(g.events30).length > 0 && (
@@ -244,7 +234,7 @@ const FLAG_NOTES: Record<FeatureKey, string> = {
   multiBranchTools: 'Branch management and per-branch hours.',
   storefrontCustomisation: 'Heavy store customisation (layouts, section colours, fonts).',
   exampleStores: 'Labelled example stores in lists and on the map (they never take orders).',
-  planGating: 'Lock CRM, dispatch and reports to paid plans. Keep off until plans are on sale.',
+  planGating: 'Lock CRM, dispatch and reports to paid plans. Plans are on sale: turn on so paid features need an active plan.',
 };
 
 export function AdminFlags() {

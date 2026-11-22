@@ -44,7 +44,7 @@ export function SiteFooter() {
             <h4>For sellers</h4>
             <Link href="/dashboard">Sell on Kwaravend</Link>
             <Link href="/dashboard/signin">Seller sign in</Link>
-            <Link href="/waitlist">Not in Ilorin? Join the waitlist</Link>
+            <Link href="/pricing">Plans and pricing</Link>
             <Link href="/account/signin">My account</Link>
           </nav>
           <nav className="footer-col" aria-label="Legal and help">
