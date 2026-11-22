@@ -14,3 +14,6 @@ coverage/
 .env*
 # …but DO track the names-only example (never contains real values).
 !.env.example
+
+# Local tool output (once held a Vercel token; never commit)
+.freebuff/

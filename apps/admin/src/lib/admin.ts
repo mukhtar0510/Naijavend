@@ -30,7 +30,7 @@ export async function signInAdmin(
     if (error || !data.session) {
       return { ok: false, error: 'Invalid email or password.' };
     }
-    if (!adminEmails().includes(normalized)) {
+    if (!adminEmails().includes(normalized) || !data.user?.email_confirmed_at) {
       return { ok: false, error: 'This account is not an administrator.' };
     }
     return { ok: true, accessToken: data.session.access_token, email: normalized };
@@ -50,7 +50,7 @@ export async function currentAdmin(): Promise<{ email: string } | null> {
   if (!url || !key) return null;
   try {
     const { data, error } = await createClient(url, key, { auth: { persistSession: false } }).auth.getUser(access);
-    if (error || !data.user?.email) return null;
+    if (error || !data.user?.email || !data.user.email_confirmed_at) return null;
     const email = data.user.email.toLowerCase();
     if (!adminEmails().includes(email)) return null;
     return { email };

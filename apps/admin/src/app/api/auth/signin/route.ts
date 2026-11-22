@@ -5,7 +5,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { signInAdmin, SESSION_COOKIE } from '@/lib/admin';
 import { apiOk, apiError } from '@/lib/api';
 
+// Brute-force guard: 5 attempts per IP per 10 minutes (per server instance).
+const attempts = new Map<string, number[]>();
+function limited(ip: string): boolean {
+  const now = Date.now();
+  const recent = (attempts.get(ip) ?? []).filter((t) => now - t < 10 * 60_000);
+  recent.push(now);
+  attempts.set(ip, recent);
+  if (attempts.size > 5000) attempts.clear();
+  return recent.length > 5;
+}
+
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get('x-real-ip') ?? req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown';
+  if (limited(ip)) return apiError(429, 'rate_limited', 'Too many sign-in attempts. Wait 10 minutes.');
   let email = '';
   let password = '';
   try {
@@ -26,7 +39,7 @@ export async function POST(req: NextRequest) {
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
     path: '/',
-    maxAge: 60 * 60 * 24 * 7, // Supabase access tokens last 1h; re-login weekly is fine for an admin console
+    maxAge: 60 * 60, // matches the Supabase access-token lifetime; the token is useless after that anyway
   });
   return res;
 }
