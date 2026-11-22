@@ -564,6 +564,12 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
       });
       el.addEventListener('click', (e) => {
         e.stopPropagation();
+        // A second tap on the open store's pin closes it (and its route).
+        if (selectedRef.current === s.slug) {
+          setSelected(null);
+          setSheet('peek');
+          return;
+        }
         setSelected(s.slug);
         setSheet((cur) => (cur === 'full' ? 'full' : 'half'));
         track('pin_tapped', s.id);
@@ -839,7 +845,13 @@ export function FullMap({ stores }: { stores: FullMapStore[] }) {
       type="button"
       data-slug={s.slug}
       className={`fm-card${compact ? ' is-compact' : ''}${selected === s.slug ? ' is-active' : ''}`}
+      aria-pressed={selected === s.slug}
       onClick={() => {
+        // Tapping the open store's card again closes it.
+        if (selectedRef.current === s.slug) {
+          setSelected(null);
+          return;
+        }
         setSelected(s.slug);
         if (!desktop && sheet === 'peek') setSheet('half');
       }}
