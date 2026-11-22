@@ -128,7 +128,7 @@ export function MobileMenu({
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={SPRING.sheet}
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e: { stopPropagation(): void }) => e.stopPropagation()}
           >
             <div className="kv-mmenu-head">
               <span className="kv-mmenu-brand">

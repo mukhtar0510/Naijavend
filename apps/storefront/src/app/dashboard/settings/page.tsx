@@ -11,7 +11,7 @@ import { SettingsTabs } from './SettingsTabs';
 import { ThemeSetting } from '@/components/ThemeSetting';
 import { LocationsCard, type LocationRow } from './LocationsCard';
 import { GalleryCard } from './GalleryCard';
-import { OwnStorePreview } from '@/components/preview/OwnStorePreview';
+import { OwnStorePreview, loadOwnStorePreview } from '@/components/preview/OwnStorePreview';
 import { BankDetailsCard } from './BankCard';
 import type { Store, StoreSocialLinks, StoreTheme, WhatsAppSettings } from '@idevtenancy/shared';
 
@@ -67,6 +67,7 @@ export default async function SettingsPage({ searchParams }: { searchParams?: { 
   const bank = bankRow
     ? { bankName: bankRow.bank_name as string, accountName: bankRow.account_name as string, accountNumber: bankRow.account_number as string }
     : null;
+  const preview = await loadOwnStorePreview(sb, s, theme);
   const gallery = Array.isArray(theme?.gallery_urls) ? (theme!.gallery_urls as string[]) : [];
 
   return (
@@ -131,7 +132,7 @@ export default async function SettingsPage({ searchParams }: { searchParams?: { 
               <span className="muted">Logo, accent colour and template</span>
             </div>
             {/* The live store preview sits with the controls that change it. */}
-            <OwnStorePreview sb={sb} store={s} theme={theme} />
+            <OwnStorePreview data={preview} />
             {/* App UI theme — separate from the storefront branding below. */}
             <div className="dash-subsection" style={{ marginBottom: 20 }}>
               <h3 style={{ margin: '0 0 4px', fontSize: 15 }}>Your dashboard theme</h3>
