@@ -1,3 +1,10 @@
 packages:
   - "apps/*"
   - "packages/*"
+
+# One copy of the React type definitions for the whole monorepo. With two
+# (seller's ~18.2.79 and storefront's 18.3.x), Next's `react/experimental`
+# reference could bind to the seller's copy on Vercel's fresh installs, and
+# `next build` then failed with "bigint is not assignable to ReactNode".
+overrides:
+  "@types/react": "18.3.31"
