@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import type { Listing } from '@idevtenancy/shared';
+import { MAX_HASHTAGS, parseHashtags, type Listing } from '@idevtenancy/shared';
 import { CreditCard as IcCreditCard, Image as IcImage, Sparkles as IcSparkles, Video as IcVideo, X as IcX } from 'lucide-react';
 
 const MAX_IMAGES = 5;
@@ -206,7 +206,7 @@ export function ListingEditor({ storeId, listing }: { storeId: string; listing?:
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          hint: `${type === 'product' ? 'Product' : 'Service'}: ${title}. ${description}`,
+          hint: `${type === 'product' ? 'Product' : type === 'digital' ? 'Digital download' : 'Service'}: ${title}. ${description}`,
           imageUrl: imageUrls[0] ?? null,
         }),
       });
@@ -221,7 +221,7 @@ export function ListingEditor({ storeId, listing }: { storeId: string; listing?:
         setAiDescription(true);
       }
       if (Array.isArray(draft.tags)) {
-        const next = draft.tags.filter((t: unknown): t is string => typeof t === 'string').slice(0, 6);
+        const next = parseHashtags(draft.tags);
         if (next.length) setTags(next);
       }
       if (typeof draft.category === 'string' && draft.category) setCategory(draft.category);
@@ -239,6 +239,38 @@ export function ListingEditor({ storeId, listing }: { storeId: string; listing?:
       setError((err as Error).message);
     } finally {
       setAiBusy(false);
+    }
+  }
+
+  // Hashtags: typed by the seller or suggested by the AI. Stored without the
+  // "#", lowercase letters and digits only, and they link buyers to /tags/<tag>.
+  const [tagDraft, setTagDraft] = useState('');
+  const [tagBusy, setTagBusy] = useState(false);
+  function addTags(raw: string) {
+    const next = parseHashtags([...tags, ...raw.split(/[\s,]+/)]);
+    setTags(next);
+    setTagDraft('');
+  }
+  async function suggestTags() {
+    setTagBusy(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/ai/draft-listing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          hint: `${type === 'product' ? 'Product' : type === 'digital' ? 'Digital download' : 'Service'}: ${title}. ${description}`,
+          imageUrl: imageUrls[0] ?? null,
+        }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body?.error?.message ?? 'Could not suggest hashtags.');
+      // Keep the seller's own tags first; the AI only fills the remaining slots.
+      setTags(parseHashtags([...tags, ...(Array.isArray(body.draft?.tags) ? body.draft.tags : [])]));
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setTagBusy(false);
     }
   }
 
@@ -381,21 +413,53 @@ export function ListingEditor({ storeId, listing }: { storeId: string; listing?:
         </div>
         {aiSuggestion && <p className="hint">{aiSuggestion}</p>}
         {aiDescription && <p className="hint">AI-drafted — edit freely; changing the text clears the AI-assisted label.</p>}
+      </div>
+      <div className="field">
+        <label htmlFor={editing ? `ltags-${listing!.id}` : 'ltags'}>Hashtags</label>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <input
+            id={editing ? `ltags-${listing!.id}` : 'ltags'}
+            type="text"
+            value={tagDraft}
+            onChange={(e) => setTagDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ',') {
+                e.preventDefault();
+                if (tagDraft.trim()) addTags(tagDraft);
+              }
+            }}
+            placeholder="ankara, partydress"
+            maxLength={120}
+            style={{ flex: '1 1 180px' }}
+            disabled={tags.length >= MAX_HASHTAGS}
+          />
+          <button type="button" className="btn btn-outline btn-sm" onClick={() => addTags(tagDraft)} disabled={!tagDraft.trim() || tags.length >= MAX_HASHTAGS}>
+            Add
+          </button>
+          <button type="button" className="btn btn-outline btn-sm" onClick={suggestTags} disabled={tagBusy || tags.length >= MAX_HASHTAGS || (title.trim().length < 2 && imageUrls.length === 0)}>
+            {tagBusy ? 'Suggesting…' : 'Suggest with AI'}
+          </button>
+        </div>
         {tags.length > 0 && (
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }} aria-label="Search tags">
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }} aria-label="Hashtags">
             {tags.map((t) => (
-              <span key={t} className="badge" style={{ fontSize: 11.5 }}># {t}</span>
+              <button
+                key={t}
+                type="button"
+                className="badge"
+                style={{ fontSize: 12, cursor: 'pointer', border: 0 }}
+                onClick={() => setTags(tags.filter((x) => x !== t))}
+                aria-label={`Remove hashtag ${t}`}
+                title="Remove"
+              >
+                #{t} <span aria-hidden>×</span>
+              </button>
             ))}
-            <button
-              type="button"
-              className="btn btn-outline btn-sm"
-              onClick={() => setTags([])}
-              title="Remove the drafted search tags"
-            >
-              Clear tags
-            </button>
           </div>
         )}
+        <p className="hint">
+          Up to {MAX_HASHTAGS}. Buyers tap a hashtag to see every listing with it, best sellers first. Letters and numbers only.
+        </p>
       </div>
 
       <div className="field">

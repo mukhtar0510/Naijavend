@@ -100,8 +100,8 @@ Plainly: **no channel tells a seller that an order or booking has arrived.** The
 | B1 | High | Direct "Order" page offered rider/courier delivery but never asked for the Ilorin area or address, so `create-order` rejected every such order (`invalid_area`). | **Fixed**: area select, address and landmark fields appear when rider or courier is picked. |
 | B2 | High | Booking time zone: the page sends the `datetime-local` value with no zone; the server parsed it in UTC (Vercel), so a 10:00 booking was stored as 11:00 Ilorin time. The account and dashboard booking lists also formatted times in the server's zone. | **Fixed**: zoneless slot values are read as WAT (+01:00); both booking lists format with `timeZone: 'Africa/Lagos'`. |
 | B3 | High | Direct order and booking pages rejected normal Nigerian numbers (`0801...`, `+234 801 ...`), including the order page's own placeholder. Only the cart normalised them. Also the 16-character cut truncated spaced numbers. | **Fixed**: `normaliseNgPhone` in `@idevtenancy/shared` (with tests), applied on the server in `create-order` and `create-booking`; the cart uses the shared helper. |
-| B4 | High | "Buy & get download" on digital listings leads to the order page, which always fails (`NOT_ORDERABLE`). Digital products cannot be bought. | Not fixed (product decision: either let `create_order_v2` accept digital listings, or hide the button). No digital listings exist yet. |
-| B5 | Medium | Direct order page shows no product name, price or total before "Place order". | Not fixed. |
+| B4 | High | "Buy & get download" on digital listings leads to the order page, which always fails (`NOT_ORDERABLE`). Digital products cannot be bought. | **Fixed in code + migration `20261123120000_digital_products_orderable.sql`** (follow-up commit). Store page shows "Buy download"; order page skips delivery and takes bank transfer only. |
+| B5 | Medium | Direct order page shows no product name, price or total before "Place order". | **Fixed** (follow-up commit): the page loads the listing on the server and shows title and price. |
 | B6 | Low | Direct order quantity allowed 999; the database caps at 50. | **Fixed**: input capped at 50. |
 | B7 | Medium | Buyer confirmation says the seller "has been given your order" though no notification is sent (see section 3). | Not fixed (copy/product decision). |
 | B8 | Low | "Order" buttons and the cart are shown on example stores; buyers fill the form before learning the store cannot take orders. | Not fixed. |
@@ -113,3 +113,10 @@ Plainly: **no channel tells a seller that an order or booking has arrived.** The
 - A full order on a non-example store (creation → seller confirms payment → buyer alert → digital minting) was not run, because it would write real rows to production. Options: a Supabase branch, a transaction that is rolled back, or a clearly named test store the owner approves.
 - POS signed in, receipt upload, and the payment confirmation route with a real seller session.
 - Whether `RESEND_API_KEY` / `EMAIL_FROM` are set on Vercel (irrelevant for orders today, since no order email exists).
+
+## Follow-up (23 Nov 2026, second change)
+
+- Digital products orderable (B4, B5 above).
+- Look and feel: a marketplace hero style with `!important` (`styles/system.css`) overrode every store template's hero, so no template hero showed and Executive rendered white text on a white band. It is now scoped to marketplace pages. The "Logo and colour" card on Settings > Look & feel no longer saves a template or button style, which used to reset a template picked in the Store designer back to Modern.
+- Plans: Business is capped at the first 20 templates; three new designs (Royale, Skyline, Atelier) are Emirates Plus only (migration `20261123120100_plus_store_templates.sql`).
+- Hashtags: sellers add or AI-suggest up to 8 per listing; `/tags/<tag>` ranks listings by units sold.

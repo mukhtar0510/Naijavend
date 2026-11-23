@@ -42,7 +42,7 @@ export interface AiImageDraft {
 
 /** Per-store appearance theme rendered by /s/* pages (one row per store). */
 /** Structural templates a store site can use (see packages/shared/src/templates.ts). */
-export type StoreLayout = 'modern' | 'classic' | 'bold' | 'minimal' | 'boutique' | 'merchant' | 'luxury' | 'playful' | 'sunset' | 'marketplace' | 'editorial' | 'neon' | 'pastel' | 'monochrome' | 'showcase' | 'festival' | 'artisan' | 'executive' | 'aurora' | 'corner';
+export type StoreLayout = 'modern' | 'classic' | 'bold' | 'minimal' | 'boutique' | 'merchant' | 'luxury' | 'playful' | 'sunset' | 'marketplace' | 'editorial' | 'neon' | 'pastel' | 'monochrome' | 'showcase' | 'festival' | 'artisan' | 'executive' | 'aurora' | 'corner' | 'royale' | 'skyline' | 'atelier';
 
 export interface StoreTheme {
   store_id: string;

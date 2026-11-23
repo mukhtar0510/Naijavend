@@ -392,6 +392,10 @@ export default async function StorePage({ params }: { params: { slug: string } }
                         }}
                       />
                     </>
+                  ) : listing.type === 'digital' ? (
+                    <Link className="btn btn-primary btn-sm" href={`/s/${store.slug}/order/${listing.id}`}>
+                      Buy download
+                    </Link>
                   ) : (
                     <Link className="btn btn-primary btn-sm" href={`/s/${store.slug}/book/${listing.id}`}>
                       Book appointment

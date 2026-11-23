@@ -14,7 +14,7 @@ import { NextRequest } from 'next/server';
 import { getSellerClient, getOwnStore } from '@/lib/auth';
 import { apiError, apiOk, internalError } from '@/lib/api';
 import { rateLimit, clientIp } from '@/lib/ratelimit';
-import { sanitizeText, STORE_CATEGORIES } from '@idevtenancy/shared';
+import { sanitizeText, STORE_CATEGORIES, parseHashtags } from '@idevtenancy/shared';
 import { aiComplete } from '@idevtenancy/ai';
 import { loadBucketImage } from '@/lib/bucket-image';
 
@@ -62,10 +62,7 @@ export async function POST(req: NextRequest) {
     // Belt and braces: the provider already whitelists the category.
     const rawCategory = typeof draft.category === 'string' ? draft.category.trim().toLowerCase() : '';
     const category = (STORE_CATEGORIES as readonly string[]).includes(rawCategory) ? rawCategory : null;
-    const tags = (Array.isArray(draft.tags) ? draft.tags : [])
-      .map((t) => sanitizeText(t, 40).toLowerCase())
-      .filter((t) => t.length >= 2)
-      .slice(0, 6);
+    const tags = parseHashtags(draft.tags);
 
     // Log usage — user_id is REQUIRED by the ai_usage_owner_insert policy.
     const { data: userData } = await sb.auth.getUser();

@@ -932,6 +932,16 @@
 .tpl-corner .tpl-thumb-hero { background: var(--blue-tint); border-radius: 8px; }
 .tpl-corner .tpl-thumb-row i { border-radius: 6px; }
 
+.tpl-royale .tpl-thumb-nav { background: #0b3b2e; border-bottom: 2px solid #c9a227; }
+.tpl-royale .tpl-thumb-hero { background: #0b3b2e; }
+.tpl-royale .tpl-thumb-row i { border-color: #c9a227; border-radius: 0; }
+.tpl-skyline .tpl-thumb-nav { background: #0a1024; }
+.tpl-skyline .tpl-thumb-hero { background: linear-gradient(180deg, #0a1024, #3b4fd8); height: 34px; }
+.tpl-skyline .tpl-thumb-row i { box-shadow: 0 2px 4px rgba(10, 16, 36, 0.25); }
+.tpl-atelier .tpl-thumb-nav { border-bottom: 1px solid var(--black); }
+.tpl-atelier .tpl-thumb-hero { background: linear-gradient(90deg, var(--surface) 0 58%, var(--blue-tint) 58%); border-radius: 0; }
+.tpl-atelier .tpl-thumb-row i { border-radius: 0; height: 18px; }
+
 /* ================= Store template: MINIMAL ================= */
 .site-shell[data-layout='minimal'] { --st-radius: 4px; }
 .site-shell[data-layout='minimal'] .store-masthead { border-bottom: 1px solid var(--st-border, var(--border)); box-shadow: none; background: var(--st-bg); }
@@ -1182,6 +1192,109 @@
 .site-shell[data-layout='corner'] .site-footer-store .footer-col a,
 .site-shell[data-layout='corner'] .site-footer-store .footer-tagline { color: var(--st-accent-text); }
 .site-shell[data-layout='corner'] .site-footer-store .footer-base { border-top-color: color-mix(in srgb, var(--st-accent-text) 35%, transparent); }
+
+/* Dark template heroes: lift body and muted text so it stays readable on the band. */
+.site-shell:is([data-layout='executive'], [data-layout='royale'], [data-layout='skyline']) .page-hero {
+  --text: #f2f4f7;
+  --text-muted: rgba(242, 244, 247, 0.74);
+  color: var(--text);
+}
+
+/* ================= Emirates Plus only: ROYALE (emerald and gold) ================= */
+.site-shell[data-layout='royale'] { --st-listing-radius: 4px; --royale-ink: #0b3b2e; --royale-gold: #c9a227; }
+.site-shell[data-layout='royale'] .store-masthead {
+  background: var(--royale-ink);
+  border-bottom: 1px solid var(--royale-gold);
+  box-shadow: inset 0 -4px 0 color-mix(in srgb, var(--royale-gold) 35%, transparent);
+}
+.site-shell[data-layout='royale'] .store-masthead-name { color: #f7f1dc; letter-spacing: 0.16em; text-transform: uppercase; }
+.site-shell[data-layout='royale'] .store-masthead-links a { color: #e9dfbd; }
+.site-shell[data-layout='royale'] .page-hero {
+  background:
+    radial-gradient(520px 260px at 50% -30%, color-mix(in srgb, var(--royale-gold) 28%, transparent), transparent 70%),
+    linear-gradient(180deg, var(--royale-ink), color-mix(in srgb, var(--royale-ink) 82%, #000));
+  text-align: center;
+}
+.site-shell[data-layout='royale'] .page-hero h1 { color: #f7f1dc; font-family: var(--st-font-heading); font-size: 46px; letter-spacing: 0.02em; }
+.site-shell[data-layout='royale'] .page-hero p { color: color-mix(in srgb, #f7f1dc 78%, transparent); }
+.site-shell[data-layout='royale'] .btn { border-radius: 2px; letter-spacing: 0.06em; text-transform: uppercase; font-size: 13px; }
+.site-shell[data-layout='royale'] .listing-card,
+.site-shell[data-layout='royale'] .catalogue-card {
+  border: 1px solid color-mix(in srgb, var(--royale-gold) 55%, var(--border));
+  outline: 1px solid color-mix(in srgb, var(--royale-gold) 30%, transparent);
+  outline-offset: -6px;
+  box-shadow: none;
+}
+.site-shell[data-layout='royale'] .listing-card:hover { box-shadow: 0 10px 28px rgba(11, 59, 46, 0.18); }
+.site-shell[data-layout='royale'] .listing-card h3,
+.site-shell[data-layout='royale'] .catalogue-card h3 { font-family: var(--st-font-heading); }
+.site-shell[data-layout='royale'] .site-footer-store { background: var(--royale-ink); color: #cfc6a6; border-top: 1px solid var(--royale-gold); }
+.site-shell[data-layout='royale'] .site-footer-store a,
+.site-shell[data-layout='royale'] .site-footer-store .footer-col h4 { color: #f7f1dc; }
+
+/* ================= Emirates Plus only: SKYLINE (night sky, lifted cards) ================= */
+.site-shell[data-layout='skyline'] { --st-listing-radius: 16px; --skyline-night: #0a1024; }
+.site-shell[data-layout='skyline'] .store-masthead {
+  position: sticky; top: 0; z-index: 20;
+  background: color-mix(in srgb, var(--skyline-night) 72%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.site-shell[data-layout='skyline'] .store-masthead-name,
+.site-shell[data-layout='skyline'] .store-masthead-links a { color: #eef2ff; }
+.site-shell[data-layout='skyline'] .page-hero {
+  background:
+    radial-gradient(800px 320px at 80% 0%, color-mix(in srgb, var(--st-accent) 45%, transparent), transparent 65%),
+    linear-gradient(180deg, var(--skyline-night) 0%, color-mix(in srgb, var(--skyline-night) 70%, var(--st-accent)) 100%);
+  padding-top: 72px; padding-bottom: 72px;
+}
+.site-shell[data-layout='skyline'] .page-hero h1 { color: #ffffff; font-size: 56px; line-height: 1.02; letter-spacing: -0.03em; }
+.site-shell[data-layout='skyline'] .page-hero p { color: rgba(238, 242, 255, 0.78); }
+.site-shell[data-layout='skyline'] .btn { border-radius: 999px; }
+.site-shell[data-layout='skyline'] .listing-card,
+.site-shell[data-layout='skyline'] .catalogue-card {
+  border: 1px solid var(--border);
+  box-shadow: 0 6px 20px rgba(10, 16, 36, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.site-shell[data-layout='skyline'] .listing-card:hover,
+.site-shell[data-layout='skyline'] .catalogue-card:hover { transform: translateY(-4px); box-shadow: 0 18px 40px rgba(10, 16, 36, 0.16); }
+.site-shell[data-layout='skyline'] .site-footer-store { background: var(--skyline-night); color: #a5b0cf; }
+.site-shell[data-layout='skyline'] .site-footer-store a,
+.site-shell[data-layout='skyline'] .site-footer-store .footer-col h4 { color: #eef2ff; }
+@media (prefers-reduced-motion: reduce) {
+  .site-shell[data-layout='skyline'] .listing-card:hover,
+  .site-shell[data-layout='skyline'] .catalogue-card:hover { transform: none; }
+}
+
+/* ================= Emirates Plus only: ATELIER (split editorial) ================= */
+.site-shell[data-layout='atelier'] { --st-listing-radius: 0px; }
+.site-shell[data-layout='atelier'] .store-masthead { background: var(--st-bg); border-bottom: 1px solid var(--text, #111); }
+.site-shell[data-layout='atelier'] .store-masthead-name { font-family: var(--st-font-heading); font-size: 22px; font-style: italic; }
+.site-shell[data-layout='atelier'] .page-hero {
+  background: linear-gradient(90deg, var(--st-bg) 0 58%, color-mix(in srgb, var(--st-accent) 18%, var(--st-bg)) 58% 100%);
+  text-align: left;
+  border-bottom: 1px solid var(--text, #111);
+}
+.site-shell[data-layout='atelier'] .page-hero h1 { font-family: var(--st-font-heading); font-size: 50px; font-weight: 500; max-width: 14ch; }
+.site-shell[data-layout='atelier'] .btn { border-radius: 0; }
+.site-shell[data-layout='atelier'] .listing-card,
+.site-shell[data-layout='atelier'] .catalogue-card { border: none; box-shadow: none; background: transparent; }
+.site-shell[data-layout='atelier'] .listing-card .catalogue-cover,
+.site-shell[data-layout='atelier'] .catalogue-card .catalogue-cover { border-radius: 0; aspect-ratio: 3 / 4; }
+.site-shell[data-layout='atelier'] .listing-card h3,
+.site-shell[data-layout='atelier'] .catalogue-card h3 {
+  font-family: var(--st-font-heading); font-weight: 500;
+  border-top: 1px solid var(--text, #111); padding-top: 8px;
+}
+.site-shell[data-layout='atelier'] .site-footer-store { border-top: 1px solid var(--text, #111); }
+@media (max-width: 720px) {
+  .site-shell[data-layout='atelier'] .page-hero { background: color-mix(in srgb, var(--st-accent) 10%, var(--st-bg)); }
+  .site-shell[data-layout='atelier'] .page-hero h1,
+  .site-shell[data-layout='royale'] .page-hero h1 { font-size: 34px; }
+  .site-shell[data-layout='skyline'] .page-hero h1 { font-size: 38px; }
+}
 
 /* ================= Product badges + sale pricing ================= */
 .product-card-media { position: relative; }

@@ -239,16 +239,22 @@
   backdrop-filter: var(--glass-blur);
 }
 
-/* Page hero bands: one brand glow instead of the old blue/beige wash */
-.page-hero,
+/* Page hero bands: one brand glow instead of the old blue/beige wash.
+   Marketplace pages only: inside a store site (.site-shell) or the template
+   preview (.sdg-page) the store's template paints its own hero. The !important
+   used to reach those too, so no template hero showed and Executive put white
+   text on a white band. */
+.page-hero:not(.site-shell .page-hero):not(.sdg-page .page-hero),
 .page-intro,
 .page-intro-gold {
   background: var(--hero-glow), var(--bg-0) !important;
   border-bottom: 1px solid var(--border);
 }
-[data-theme='dark'] .page-hero,
+[data-theme='dark'] .page-hero:not(.site-shell .page-hero):not(.sdg-page .page-hero),
 [data-theme='dark'] .page-intro,
 [data-theme='dark'] .page-intro-gold { background: var(--hero-glow), var(--surface) !important; }
+/* Store sites keep the same glow by default; template rules (more specific) win. */
+.site-shell .page-hero { background: var(--hero-glow), var(--bg-0); border-bottom: 1px solid var(--border); }
 
 /* --------------------------------------------------------------- forms */
 :where(input:not([type='checkbox']):not([type='radio']):not([type='range']), select, textarea) {

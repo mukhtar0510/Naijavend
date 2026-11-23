@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { supabaseAnon } from '@/lib/supabase';
-import { formatNaira, buildWhatsAppLink, isValidPhone } from '@idevtenancy/shared';
+import { formatNaira, buildWhatsAppLink, isValidPhone, parseHashtags } from '@idevtenancy/shared';
 import { Stars } from '@/components/Stars';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { ListingGallery } from '@/components/ListingGallery';
@@ -122,6 +122,7 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
 
   const isService = listing.type === 'service';
   const isDigital = listing.type === 'digital';
+  const hashtags = parseHashtags((listing as unknown as { tags?: unknown }).tags);
   const orderHref = `/s/${store.slug}/${isService ? 'book' : 'order'}/${listing.id}`;
   const onSale = listing.compare_at_kobo != null && listing.compare_at_kobo > listing.price_kobo;
   const soldOut = listing.stock === 0;
@@ -180,6 +181,15 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
                 </p>
               )}
               {listing.description && <p style={{ fontSize: 15.5 }}>{listing.description}</p>}
+              {hashtags.length > 0 && (
+                <p style={{ display: 'flex', flexWrap: 'wrap', gap: 6, margin: '0 0 8px' }} aria-label="Hashtags">
+                  {hashtags.map((t) => (
+                    <Link key={t} href={`/tags/${t}`} className="badge" style={{ fontSize: 12.5 }}>
+                      #{t}
+                    </Link>
+                  ))}
+                </p>
+              )}
 
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 18 }}>
                 {!isService && soldOut ? (

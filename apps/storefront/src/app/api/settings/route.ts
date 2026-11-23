@@ -13,7 +13,7 @@ import { STORE_TEMPLATES } from '@idevtenancy/shared';
 const HEX = /^#[0-9a-fA-F]{6}$/;
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 const FONT_NAMES = new Set<string>(['Sora', 'Inter', 'Playfair Display', 'DM Sans', 'Space Grotesk', 'Manrope', 'Outfit', 'Plus Jakarta Sans', 'Urbanist', 'Merriweather', 'Lora', 'Libre Baskerville', 'Fraunces', 'Cormorant Garamond', 'Bricolage Grotesque', 'Bebas Neue', 'Unbounded', 'Oswald', 'Dancing Script', 'Pacifico', 'Great Vibes', 'Satisfy', 'Caveat'].filter(isStoreFont));
-const LAYOUTS = new Set<string>(['modern', 'classic', 'bold', 'minimal', 'boutique', 'merchant', 'luxury', 'playful', 'sunset', 'marketplace', 'editorial', 'neon', 'pastel', 'monochrome', 'showcase', 'festival', 'artisan', 'executive', 'aurora', 'corner'].filter(isStoreLayout));
+const LAYOUTS = new Set<string>(['modern', 'classic', 'bold', 'minimal', 'boutique', 'merchant', 'luxury', 'playful', 'sunset', 'marketplace', 'editorial', 'neon', 'pastel', 'monochrome', 'showcase', 'festival', 'artisan', 'executive', 'aurora', 'corner', 'royale', 'skyline', 'atelier'].filter(isStoreLayout));
 const HERO_STYLES = new Set(['gradient', 'image', 'solid']);
 const BUTTON_SHAPES = new Set(['pill', 'rounded', 'square']);
 const CARD_STYLES = new Set(['soft', 'outline', 'shadow']);
@@ -221,7 +221,14 @@ export async function POST(req: NextRequest) {
       const limit = effectivePlan(store).limits.templates;
       const idx = STORE_TEMPLATES.findIndex((t) => t.id === layout);
       if (limit != null && idx >= limit) {
-        return apiError(403, 'template_locked', `That template is on paid plans. Your plan includes the first ${limit} templates.`);
+        const plusOnly = STORE_TEMPLATES[idx]?.tier === 'plus';
+        return apiError(
+          403,
+          'template_locked',
+          plusOnly
+            ? 'That design is only on Emirates Plus. Upgrade in Plan to use it.'
+            : `That template is on Business and Emirates Plus. Your plan includes the first ${limit} templates.`,
+        );
       }
     }
 

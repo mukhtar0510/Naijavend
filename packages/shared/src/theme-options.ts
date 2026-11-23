@@ -66,6 +66,9 @@ export const STORE_LAYOUTS = [
   'executive',
   'aurora',
   'corner',
+  'royale',
+  'skyline',
+  'atelier',
 ] as const;
 
 export type StoreLayoutOption = (typeof STORE_LAYOUTS)[number];

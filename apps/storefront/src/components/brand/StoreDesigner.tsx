@@ -13,10 +13,12 @@ import { Check, Loader2, Sparkles, Wand2 } from 'lucide-react';
 import {
   STORE_TEMPLATES,
   STARTER_TEMPLATE_COUNT,
+  BUSINESS_TEMPLATE_COUNT,
+  PLUS_TEMPLATES,
   type StoreLayout,
 } from '@idevtenancy/shared';
 
-type Filter = 'starter' | 'all';
+type Filter = 'starter' | 'all' | 'plus';
 
 export interface ThemeState {
   accent: string;
@@ -153,7 +155,12 @@ export function StoreDesigner({ compact = false, seller }: { compact?: boolean; 
   const [error, setError] = useState<string | null>(null);
 
   const templates = useMemo(
-    () => (filter === 'starter' ? STORE_TEMPLATES.slice(0, STARTER_TEMPLATE_COUNT) : STORE_TEMPLATES),
+    () =>
+      filter === 'starter'
+        ? STORE_TEMPLATES.slice(0, STARTER_TEMPLATE_COUNT)
+        : filter === 'plus'
+          ? STORE_TEMPLATES.filter((t) => t.tier === 'plus')
+          : STORE_TEMPLATES,
     [filter],
   );
 
@@ -258,7 +265,9 @@ export function StoreDesigner({ compact = false, seller }: { compact?: boolean; 
               <p>
                 {filter === 'starter'
                   ? `The ${STARTER_TEMPLATE_COUNT} templates on every plan, including Free.`
-                  : `All ${STORE_TEMPLATES.length} templates. The first ${STARTER_TEMPLATE_COUNT} are on Free.`}
+                  : filter === 'plus'
+                    ? 'Designs only Emirates Plus stores can publish. Anyone can preview them.'
+                    : `All ${STORE_TEMPLATES.length} templates. ${STARTER_TEMPLATE_COUNT} on Free, ${BUSINESS_TEMPLATE_COUNT} on Business, all on Emirates Plus.`}
               </p>
             </div>
             <div className="sdg-tabs" role="radiogroup" aria-label="Template set">
@@ -279,6 +288,15 @@ export function StoreDesigner({ compact = false, seller }: { compact?: boolean; 
                 onClick={() => setFilter('all')}
               >
                 All · {STORE_TEMPLATES.length}
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={filter === 'plus'}
+                className={`sdg-tab${filter === 'plus' ? ' is-active' : ''}`}
+                onClick={() => setFilter('plus')}
+              >
+                Emirates Plus · {PLUS_TEMPLATES.length}
               </button>
             </div>
           </div>
@@ -304,7 +322,8 @@ export function StoreDesigner({ compact = false, seller }: { compact?: boolean; 
                 </span>
                 <span className="sdg-tpl-name">
                   {t.name}
-                  {t.tier === 'premium' && <em>Paid</em>}
+                  {t.tier === 'premium' && <em>Business</em>}
+                  {t.tier === 'plus' && <em className="sdg-tier-plus">Emirates Plus</em>}
                 </span>
                 <span className="sdg-tpl-best">{t.bestFor}</span>
               </button>
@@ -406,8 +425,9 @@ export function StoreDesigner({ compact = false, seller }: { compact?: boolean; 
           <div className="sdg-block sdg-save">
             {lockedForPlan ? (
               <p className="sdg-error">
-                {active?.name ?? 'This'} template is on paid plans. Your {seller.planName} plan includes the first{' '}
-                {seller.templateLimit}. Pick one of those, or upgrade in Plan.
+                {active?.tier === 'plus'
+                  ? `${active.name} is only on Emirates Plus. Your ${seller.planName} plan can preview it; upgrade in Plan to publish it.`
+                  : `${active?.name ?? 'This'} template is on Business and Emirates Plus. Your ${seller.planName} plan includes the first ${seller.templateLimit}. Pick one of those, or upgrade in Plan.`}
               </p>
             ) : (
               <p className="sdg-note">Happy with the preview? Save it and your store page changes straight away.</p>

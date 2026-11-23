@@ -1,7 +1,10 @@
 import { describe, it, expect } from 'vitest';
+import { STORE_TEMPLATES, STARTER_TEMPLATE_COUNT, BUSINESS_TEMPLATE_COUNT, PLUS_TEMPLATES } from './templates';
 import {
   isValidPhone,
   normaliseNgPhone,
+  normaliseHashtag,
+  parseHashtags,
   isValidSlug,
   sanitizeText,
   parsePriceKobo,
@@ -32,6 +35,16 @@ describe('validation', () => {
     expect(normaliseNgPhone('(0801) 234 5678')).toBe('+2348012345678');
     expect(normaliseNgPhone('+447700900123')).toBe('+447700900123');
     expect(isValidPhone(normaliseNgPhone('0801 234 5678'))).toBe(true);
+  });
+
+  it('normalises hashtags', () => {
+    expect(normaliseHashtag('#Ankara Bags')).toBe('ankarabags');
+    expect(normaliseHashtag('Café')).toBe('cafe');
+    expect(normaliseHashtag('#')).toBe('');
+    expect(normaliseHashtag(42)).toBe('');
+    expect(parseHashtags(['#Jollof', 'jollof', 'party rice', 'x', 7])).toEqual(['jollof', 'partyrice']);
+    expect(parseHashtags(Array.from({ length: 20 }, (_, i) => `tag${i}`))).toHaveLength(8);
+    expect(parseHashtags('nope')).toEqual([]);
   });
 
   it('rejects bad slugs', () => {
@@ -170,5 +183,18 @@ describe('rankings math', () => {
     expect(rankDirection(5, 3)).toBe('up');
     expect(rankDirection(3, 5)).toBe('down');
     expect(rankDirection(3, 3)).toBe('same');
+  });
+});
+
+describe('store templates', () => {
+  // Plans allow "the first N templates", so tiers must stay in order.
+  it('keeps starter, then premium, then Emirates Plus templates', () => {
+    const rank = { starter: 0, premium: 1, plus: 2 } as const;
+    const tiers = STORE_TEMPLATES.map((t) => rank[t.tier ?? 'starter']);
+    expect([...tiers].sort((a, b) => a - b)).toEqual(tiers);
+    expect(STORE_TEMPLATES.slice(0, STARTER_TEMPLATE_COUNT).every((t) => t.tier === 'starter')).toBe(true);
+    expect(STORE_TEMPLATES.slice(BUSINESS_TEMPLATE_COUNT).every((t) => t.tier === 'plus')).toBe(true);
+    expect(PLUS_TEMPLATES.map((t) => t.id)).toEqual(['royale', 'skyline', 'atelier']);
+    expect(new Set(STORE_TEMPLATES.map((t) => t.id)).size).toBe(STORE_TEMPLATES.length);
   });
 });

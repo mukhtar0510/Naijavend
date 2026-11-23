@@ -3,7 +3,7 @@ import { NextRequest } from 'next/server';
 import { getSellerClient, getOwnStore } from '@/lib/auth';
 import { revalidateStore } from '@/lib/revalidate';
 import { apiError, apiOk, internalError } from '@/lib/api';
-import { sanitizeText, parsePriceKobo, isListingType, STORE_CATEGORIES, isDuplicateTitle, duplicateSimilarity, containment } from '@idevtenancy/shared';
+import { sanitizeText, parsePriceKobo, isListingType, STORE_CATEGORIES, parseHashtags, isDuplicateTitle, duplicateSimilarity, containment } from '@idevtenancy/shared';
 import { recordFlag } from '@/lib/moderation';
 import { isMissingColumn } from '@/lib/supabase';
 import { recordEvent } from '@/lib/events';
@@ -58,10 +58,7 @@ export async function POST(req: NextRequest) {
   // a model-written tag never reaches the DB unchecked.
   const rawCategory = sanitizeText(b.category, 40).toLowerCase();
   const category = (STORE_CATEGORIES as readonly string[]).includes(rawCategory) ? rawCategory : 'general';
-  const tagList = (Array.isArray(b.tags) ? b.tags : [])
-    .map((t) => sanitizeText(t, 40).toLowerCase())
-    .filter((t) => t.length >= 2)
-    .slice(0, 6);
+  const tagList = parseHashtags(b.tags);
   if (priceKobo === null) return apiError(422, 'invalid_price', 'Enter a valid price.');
   if (compareKobo !== null && (!Number.isFinite(compareKobo) || compareKobo < 0)) {
     return apiError(422, 'invalid_compare_at', 'Compare-at price must be a positive number.');

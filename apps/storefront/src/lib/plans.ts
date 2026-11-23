@@ -6,7 +6,7 @@
 // ends a paid plan. The Kwaravend rider is an add-on bought with the plan
 // (riderPrice per month), active until stores.rider_expires_at.
 
-import type { Plan } from '@idevtenancy/shared';
+import { BUSINESS_TEMPLATE_COUNT, PLUS_TEMPLATES, type Plan } from '@idevtenancy/shared';
 
 export type PlanId = 'free' | 'growth' | 'plus';
 export type RiderId = 'standard' | 'express' | 'same-day';
@@ -68,14 +68,15 @@ export const PLANS: PlanDef[] = [
     riderPriceLabel: '+₦500/mo rider',
     available: true,
     tagline: 'For a shop that is selling every week. Add Standard Kwaravend rider delivery.',
-    limits: { listings: 100, staff: 5, locations: 2, templates: null, rider: 'standard', riderPrice: 500 },
+    // Every template except the Emirates Plus-only designs.
+    limits: { listings: 100, staff: 5, locations: 2, templates: BUSINESS_TEMPLATE_COUNT, rider: 'standard', riderPrice: 500 },
     includes: [
       'Everything in Free',
       'Up to 100 active listings',
       'Up to 5 staff accounts with roles',
       'Up to 2 locations',
       'Deeper analytics and delivery reports',
-      'All 20 storefront templates',
+      `All ${BUSINESS_TEMPLATE_COUNT} storefront templates`,
       'Discount codes',
       'Standard Kwaravend rider delivery (add-on)',
     ],
@@ -91,6 +92,7 @@ export const PLANS: PlanDef[] = [
     includes: [
       'Everything in Business',
       'Unlimited listings',
+      `${PLUS_TEMPLATES.length} storefront designs only on Emirates Plus (${PLUS_TEMPLATES.map((t) => t.name).join(', ')})`,
       'Up to 25 staff seats',
       'Up to 10 locations with per-location hours',
       'Customer CRM and notes',

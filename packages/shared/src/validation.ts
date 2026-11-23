@@ -19,6 +19,37 @@ export function normaliseNgPhone(raw: string): string {
   return p;
 }
 
+/** Most hashtags a listing keeps. */
+export const MAX_HASHTAGS = 8;
+
+/**
+ * One hashtag in the form we store and link to: lowercase letters and digits
+ * only ("#Ankara Bags" -> "ankarabags"), 2-30 characters. Returns '' when
+ * nothing usable is left.
+ */
+export function normaliseHashtag(raw: unknown): string {
+  if (typeof raw !== 'string') return '';
+  const t = raw
+    .normalize('NFKD')
+    .replace(/\p{M}/gu, '') // drop accents (é -> e)
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '')
+    .slice(0, 30);
+  return t.length >= 2 ? t : '';
+}
+
+/** Clean, de-duplicate and cap a list of hashtags from the browser or the AI. */
+export function parseHashtags(input: unknown, max = MAX_HASHTAGS): string[] {
+  if (!Array.isArray(input)) return [];
+  const out: string[] = [];
+  for (const raw of input) {
+    const t = normaliseHashtag(raw);
+    if (t && !out.includes(t)) out.push(t);
+    if (out.length >= max) break;
+  }
+  return out;
+}
+
 export function isValidSlug(slug: string): boolean {
   return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) && slug.length >= 2 && slug.length <= 80;
 }

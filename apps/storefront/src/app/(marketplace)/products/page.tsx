@@ -63,7 +63,9 @@ export default async function ProductsPage({
       <div className="page-intro">
         <div className="container">
           <h1>All products</h1>
-          <p>Products and services from every store in Ilorin, in one place.</p>
+          <p>
+            Products and services from every store in Ilorin, in one place. <Link href="/tags">Browse by hashtag</Link>.
+          </p>
         </div>
       </div>
       <div className="container" style={{ padding: '24px 20px 48px' }}>

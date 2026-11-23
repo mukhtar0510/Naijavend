@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { normaliseHashtag } from '@idevtenancy/shared';
 import { supabaseAnon } from '@/lib/supabase';
 import { ProductCard, type ProductCardItem } from '@/components/ProductCard';
 import { Stars } from '@/components/Stars';
@@ -25,6 +27,11 @@ export default async function SearchPage({
   searchParams: { q?: string; kind?: string };
 }) {
   const q = (searchParams.q ?? '').trim().slice(0, 80);
+  // "#ankara" is a hashtag: go straight to its ranked listings.
+  if (/^#\S/.test(q)) {
+    const tag = normaliseHashtag(q);
+    if (tag) redirect(`/tags/${tag}`);
+  }
   const kind = KINDS.has(searchParams.kind ?? '') ? (searchParams.kind as string) : 'all';
 
   // What the buyer actually asked for ("…under 15k in Tanke" → budget + city).

@@ -8,9 +8,12 @@ export interface StoreTemplate {
   bestFor: string;
   /**
    * Starter templates ship with every plan, including the free tier (7 of them).
-   * Premium templates unlock on the paid plans, and can be previewed by anyone.
+   * Premium templates unlock on Business and above. Plus templates are only for
+   * Emirates Plus. Anyone can preview every template; saving is plan-checked.
+   * Order matters: starter, then premium, then plus, because plans allow the
+   * first N templates (see apps/storefront/src/lib/plans.ts).
    */
-  tier?: 'starter' | 'premium';
+  tier?: 'starter' | 'premium' | 'plus';
 }
 
 export const STORE_TEMPLATES: StoreTemplate[] = [
@@ -34,6 +37,10 @@ export const STORE_TEMPLATES: StoreTemplate[] = [
   { id: 'executive',   name: 'Executive',   tagline: 'Corporate navy and grey, structured tables, no-nonsense cards', bestFor: 'Consultants, law & B2B services', tier: 'premium' },
   { id: 'aurora',      name: 'Aurora',      tagline: 'Iridescent gradient washes with soft glass cards', bestFor: 'Beauty tech, nails & glam', tier: 'premium' },
   { id: 'corner',      name: 'Corner Shop', tagline: 'Neighbourhood-shop warmth: awning header, friendly rounded everything', bestFor: 'Groceries & provisions', tier: 'premium' },
+  // Emirates Plus only.
+  { id: 'royale',      name: 'Royale',      tagline: 'Deep emerald and gold, crest masthead, framed gallery cards', bestFor: 'Flagship and premium brands', tier: 'plus' },
+  { id: 'skyline',     name: 'Skyline',     tagline: 'Night-sky hero with oversized type, floating glass masthead and lifted cards', bestFor: 'Electronics, autos and big catalogues', tier: 'plus' },
+  { id: 'atelier',     name: 'Atelier',     tagline: 'Split editorial hero, tall image cards, captions under fine rules', bestFor: 'Fashion houses, studios and interiors', tier: 'plus' },
 ];
 
 /**
@@ -45,6 +52,12 @@ export const STARTER_TEMPLATE_COUNT = 7;
 export const STARTER_TEMPLATES: StoreTemplate[] = STORE_TEMPLATES.filter((t) => t.tier === 'starter');
 
 export const PREMIUM_TEMPLATES: StoreTemplate[] = STORE_TEMPLATES.filter((t) => t.tier === 'premium');
+
+/** Templates only Emirates Plus may publish. */
+export const PLUS_TEMPLATES: StoreTemplate[] = STORE_TEMPLATES.filter((t) => t.tier === 'plus');
+
+/** Starter + premium: what Business may publish (everything before the Plus-only ones). */
+export const BUSINESS_TEMPLATE_COUNT = STORE_TEMPLATES.length - PLUS_TEMPLATES.length;
 
 /** Which templates a plan may publish. `null` means every template. */
 export function templatesForPlan(templateLimit: number | null): StoreTemplate[] {

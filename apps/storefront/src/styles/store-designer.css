@@ -131,6 +131,11 @@
 .sdg-aurora .sdg-thumb-hero { background: linear-gradient(135deg, #a5b4fc, #f0abfc, #67e8f9); }
 .sdg-corner .sdg-thumb-hero { background: repeating-linear-gradient(90deg, #16a34a 0 8px, #fefce8 8px 16px); }
 
+.sdg-royale .sdg-thumb-hero { background: linear-gradient(180deg, #0b3b2e, #14532d); box-shadow: inset 0 -2px 0 #c9a227; }
+.sdg-skyline .sdg-thumb-hero { background: linear-gradient(180deg, #0a1024, #4f46e5); }
+.sdg-atelier .sdg-thumb-hero { background: linear-gradient(90deg, #fafaf9 0 58%, #e7e5e4 58%); border-bottom: 1px solid #111; }
+.sdg-tpl-name em.sdg-tier-plus { color: #f7f1dc; background: #0b3b2e; }
+
 /* AI row */
 .sdg-ai-row { display: flex; flex-wrap: wrap; gap: 8px; }
 .sdg-ai-row input {
@@ -276,6 +281,20 @@
 .sdg-page[data-layout='aurora'] .sdg-hero { background: linear-gradient(135deg, rgba(165,180,252,.35), rgba(240,171,252,.30), rgba(103,232,249,.30)); }
 .sdg-page[data-layout='corner'] .sdg-masthead { background: repeating-linear-gradient(90deg, var(--st-accent) 0 14px, var(--st-accent-text) 14px 28px); }
 .sdg-page[data-layout='corner'] .sdg-brand { background: var(--st-bg); padding: 2px 8px; border-radius: 6px; }
+
+.sdg-page[data-layout='royale'] .sdg-masthead { background: #0b3b2e; color: #f7f1dc; border-bottom: 1px solid #c9a227; }
+.sdg-page[data-layout='royale'] .sdg-brand { letter-spacing: .16em; text-transform: uppercase; font-size: 12px; }
+.sdg-page[data-layout='royale'] .sdg-hero { background: linear-gradient(180deg, #0b3b2e, #062a20); color: #f7f1dc; text-align: center; }
+.sdg-page[data-layout='royale'] .sdg-product { border: 1px solid #c9a227; outline: 1px solid rgba(201, 162, 39, .3); outline-offset: -4px; border-radius: 2px; }
+.sdg-page[data-layout='skyline'] .sdg-masthead { background: rgba(10, 16, 36, .85); color: #eef2ff; }
+.sdg-page[data-layout='skyline'] .sdg-hero { background: linear-gradient(180deg, #0a1024, color-mix(in srgb, #0a1024 60%, var(--st-accent))); color: #fff; }
+.sdg-page[data-layout='skyline'] .sdg-hero h3 { font-size: 1.5em; letter-spacing: -.02em; }
+.sdg-page[data-layout='skyline'] .sdg-product { border-radius: 14px; box-shadow: 0 8px 20px rgba(10, 16, 36, .12); }
+.sdg-page[data-layout='atelier'] .sdg-masthead { border-bottom: 1px solid #111; }
+.sdg-page[data-layout='atelier'] .sdg-brand { font-style: italic; }
+.sdg-page[data-layout='atelier'] .sdg-hero { background: linear-gradient(90deg, var(--st-bg) 0 58%, color-mix(in srgb, var(--st-accent) 18%, var(--st-bg)) 58%); text-align: left; border-bottom: 1px solid #111; }
+.sdg-page[data-layout='atelier'] .sdg-product { border: none; border-radius: 0; box-shadow: none; }
+.sdg-page[data-layout='atelier'] .sdg-products { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
 /* Home / about refresh: gold + Naija green accents over the marketplace chrome. */
 .nv-home .nv-grad-text {

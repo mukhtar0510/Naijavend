@@ -1,17 +1,17 @@
 'use client';
 
-// Simple store-brand editor (default experience).
+// Logo and accent colour (default experience).
 //
+// Template and button style live in the Store designer above, which is the one
+// place to pick them. This card used to have its own template and button
+// pickers and always saved them, so saving a logo reset a designer-picked
+// template (for example Aurora) back to Modern. It now saves only the logo and,
+// when changed, the accent colour.
 // Heavy per-section customisation lives behind FEATURES.storefrontCustomisation.
-// What every seller gets: a logo, an accent colour and one of five structural
-// templates. That covers the branding a buyer actually notices without a
-// twenty-control panel.
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { STORE_TEMPLATES, type StoreLayout } from '@idevtenancy/shared';
 
-const TEMPLATE_IDS: StoreLayout[] = ['modern', 'boutique', 'bold', 'minimal', 'merchant'];
 const ACCENTS = ['#1D4ED8', '#0F766E', '#BE1E6B', '#B45309', '#7C3AED', '#0B0C0E'];
 
 /** Mix a hex colour toward white — used for the softer accent tint. */
@@ -24,33 +24,18 @@ function softAccent(hex: string): string {
   return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
 }
 
-type ButtonShape = 'pill' | 'rounded' | 'square';
-const BUTTON_SHAPES: Array<{ id: ButtonShape; label: string; hint: string; radius: number }> = [
-  { id: 'pill', label: 'Round', hint: 'Fully rounded ends', radius: 999 },
-  { id: 'rounded', label: 'Soft rectangle', hint: 'Gently rounded corners', radius: 10 },
-  { id: 'square', label: 'Rectangle', hint: 'Sharp, square corners', radius: 2 },
-];
-
 export function SimpleBrandCard({
   slug,
   initialLogoUrl,
   initialAccent,
-  initialLayout,
-  initialButtonShape = 'rounded',
 }: {
   slug: string;
   initialLogoUrl: string | null;
   initialAccent: string;
-  initialLayout: StoreLayout;
-  initialButtonShape?: ButtonShape;
 }) {
   const router = useRouter();
   const [logoUrl, setLogoUrl] = useState(initialLogoUrl ?? '');
   const [accent, setAccent] = useState(initialAccent);
-  const [layout, setLayout] = useState<StoreLayout>(
-    TEMPLATE_IDS.includes(initialLayout) ? initialLayout : 'modern'
-  );
-  const [buttonShape, setButtonShape] = useState<ButtonShape>(initialButtonShape);
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -92,10 +77,7 @@ export function SimpleBrandCard({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           logoUrl: logoUrl || null,
-          accentColor: accent,
-          accentSoft: softAccent(accent),
-          layout,
-          buttonShape,
+          ...(accent !== initialAccent ? { accentColor: accent, accentSoft: softAccent(accent) } : {}),
         }),
       });
       const body = await res.json();
@@ -111,9 +93,9 @@ export function SimpleBrandCard({
 
   return (
     <div className="card" style={{ marginBottom: 16 }}>
-      <h2 style={{ fontSize: 18 }}>Store branding</h2>
+      <h2 style={{ fontSize: 18 }}>Logo and colour</h2>
       <p className="hint" style={{ marginTop: 0 }}>
-        What buyers notice first: your logo, your accent colour, your button style and how the page is laid out.
+        Your logo and your own accent colour. Pick the template and button style in the Store designer above.
       </p>
 
       <div className="field">
@@ -173,56 +155,6 @@ export function SimpleBrandCard({
             onChange={(e) => setAccent(e.target.value)}
             style={{ width: 44, height: 36, padding: 2, borderRadius: 8 }}
           />
-        </div>
-      </div>
-
-      <div className="field">
-        <label id="btn-shape-label">Button style</label>
-        <div className="shape-picker" role="radiogroup" aria-labelledby="btn-shape-label">
-          {BUTTON_SHAPES.map((o) => (
-            <button
-              key={o.id}
-              type="button"
-              role="radio"
-              aria-checked={buttonShape === o.id}
-              className={`shape-option${buttonShape === o.id ? ' is-active' : ''}`}
-              onClick={() => setButtonShape(o.id)}
-            >
-              <span className="shape-sample" style={{ borderRadius: o.radius, background: accent }}>
-                Order
-              </span>
-              <strong>{o.label}</strong>
-              <em>{o.hint}</em>
-            </button>
-          ))}
-        </div>
-        <p className="hint">Changes every button on your store site.</p>
-      </div>
-
-      <div className="field">
-        <label>Template</label>
-        <div style={{ display: 'grid', gap: 8 }}>
-          {STORE_TEMPLATES.filter((t) => TEMPLATE_IDS.includes(t.id)).map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => setLayout(t.id)}
-              aria-pressed={layout === t.id}
-              style={{
-                textAlign: 'left',
-                padding: 12,
-                borderRadius: 12,
-                border: layout === t.id ? '2px solid var(--blue)' : '1px solid var(--border)',
-                background: layout === t.id ? 'var(--blue-tint)' : 'var(--surface)',
-                cursor: 'pointer',
-              }}
-            >
-              <strong style={{ display: 'block', fontSize: 14 }}>{t.name}</strong>
-              <span className="muted" style={{ fontSize: 12.5 }}>
-                {t.tagline}
-              </span>
-            </button>
-          ))}
         </div>
       </div>
 
