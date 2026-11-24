@@ -8,11 +8,11 @@ Follows `docs/SECURITY_AUDIT_2026-11-22.md` and `docs/PAYOUT_CHECKOUT_AUDIT_2026
 
 | # | Severity | Finding | Status |
 |---|---|---|---|
-| S0 | **Critical** | Sellers cannot confirm any payment. The `mint_digital_deliveries` trigger (runs when an order moves to `paid`) called `gen_random_bytes()` without its `extensions` schema, so every `pending -> paid` update failed with "function gen_random_bytes(integer) does not exist". Found by the rolled-back order test below. | Fix written: `20261124090000_fix_mint_digital_deliveries.sql`, verified inside a rolled-back transaction. **Not applied yet: needs your approval.** |
-| S1 | High | A seller's own token could write `orders` and `order_items` directly through the database API (policy `orders_owner_all` plus full column grants): raise a buyer's total after checkout, set `payment_status` without the confirm function, or insert fake "paid" orders that unlock verified reviews. The status trigger only looked at `status`. | Fix written: guard triggers in `20261124100000_security_performance_hardening.sql` (direct writes may change `status` only; inserts and deletes go through checkout, POS and server functions). **Not applied yet: needs your approval.** |
-| S2 | Medium | Staff could insert POS orders with any total through the old `orders_pos_insert` / `order_items_pos_insert` policies, bypassing `create_pos_order` pricing. | Same migration drops both policies. Not applied yet. |
+| S0 | **Critical** | Sellers cannot confirm any payment. The `mint_digital_deliveries` trigger (runs when an order moves to `paid`) called `gen_random_bytes()` without its `extensions` schema, so every `pending -> paid` update failed with "function gen_random_bytes(integer) does not exist". Found by the rolled-back order test below. | Fix written: `20261124090000_fix_mint_digital_deliveries.sql`, verified inside a rolled-back transaction. **Applied 24 Nov 2026.** |
+| S1 | High | A seller's own token could write `orders` and `order_items` directly through the database API (policy `orders_owner_all` plus full column grants): raise a buyer's total after checkout, set `payment_status` without the confirm function, or insert fake "paid" orders that unlock verified reviews. The status trigger only looked at `status`. | Fix written: guard triggers in `20261124100000_security_performance_hardening.sql` (direct writes may change `status` only; inserts and deletes go through checkout, POS and server functions). **Applied 24 Nov 2026.** |
+| S2 | Medium | Staff could insert POS orders with any total through the old `orders_pos_insert` / `order_items_pos_insert` policies, bypassing `create_pos_order` pricing. | Same migration drops both policies. **Applied.** |
 | S3 | Medium | `trending_products` view ran with its creator's rights (advisor ERROR `security_definer_view`), so anyone could read per-listing order counts. | App now reads it on the server only (this commit). Migration switches it to `security_invoker` and revokes public access. Not applied yet. |
-| S4 | Low | `confirm_order_payment` could mark a cancelled or refunded order as paid. | Migration adds the check. Not applied yet. |
+| S4 | Low | `confirm_order_payment` could mark a cancelled or refunded order as paid. | Migration adds the check. **Applied.** |
 | S5 | Low | Public endpoints `/api/map/store-preview` and `/api/delivery-options` had no rate limit. | Fixed in this commit (60 per minute per IP). |
 | S6 | Low | Leaked password protection is off in Supabase Auth. | Owner action: Supabase dashboard → Authentication → Password security → turn on "Leaked password protection". |
 | S7 | Info | `vector` extension lives in the `public` schema. | Left alone: moving it is risky for little gain. |
@@ -24,8 +24,8 @@ Checked and fine: `stores` plan, verification and example fields are guarded by 
 
 | # | Finding | Status |
 |---|---|---|
-| P1 | 59 RLS policies call `auth.uid()` once per row (advisor `auth_rls_initplan`). | Migration rewrites them in place to call it once per query. Not applied yet. |
-| P2 | 17 foreign keys without an index (alerts, chat, deliveries, staff and others). | Migration adds the indexes. Not applied yet. |
+| P1 | 59 RLS policies call `auth.uid()` once per row (advisor `auth_rls_initplan`). | Migration rewrites them in place to call it once per query. **Applied**; the advisor no longer reports it. |
+| P2 | 17 foreign keys without an index (alerts, chat, deliveries, staff and others). | Migration adds the indexes. **Applied.** |
 | P3 | Trending score (Discover, `/tags`, map preview) reads views and orders. | Cached for 5 minutes server-side (`lib/trending.ts`), so pages don't recompute it per request. |
 | P4 | 19 unused indexes, 80 "multiple permissive policies" notices. | Left: tables are small and most indexes will be used as data grows. |
 
@@ -47,3 +47,12 @@ Approved by the owner (option A). One SQL transaction briefly set `is_example = 
 | Seller cancels | Stock stayed 8: cancelling never restocks (fix in the hardening migration) |
 | Quantity 60 | Refused (`BAD_QUANTITY`) |
 | Seller notifications from the database | 0 alert rows, 0 events. Sellers are still not notified of new orders (see the 23 Nov audit, section 3) |
+
+### After applying (24 Nov 2026)
+
+Rolled-back check on production, acting as the store owner through the API role (order number KV-1057 used up):
+- Editing an order total: refused ("Only the order status can be changed here").
+- Confirming payment: `paid` / `paid`.
+- Cancelling: allowed, stock went back from 8 to 10.
+
+Advisors afterwards: the security-definer view error, the 59 `auth_rls_initplan` warnings and the 17 unindexed foreign keys are gone. Remaining: checkout and POS functions callable by design, leaked password protection (owner setting), `vector` in `public`, unused-index and multiple-policy notices.
