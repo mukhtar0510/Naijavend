@@ -69,6 +69,7 @@ export default async function TagPage({ params }: { params: { tag: string } }) {
                     storeName: it.isExample ? `${it.storeName} (Example)` : it.storeName,
                     storeSlug: it.storeSlug,
                     hasVideo: it.hasVideo,
+                    tags: [tag, ...it.tags.filter((x) => x !== tag)],
                   }}
                 />
               </li>

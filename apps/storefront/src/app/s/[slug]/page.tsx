@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { supabaseAnon } from '@/lib/supabase';
-import { formatNaira, buildWhatsAppLink } from '@idevtenancy/shared';
+import { formatNaira, buildWhatsAppLink, parseHashtags } from '@idevtenancy/shared';
 import { Stars } from '@/components/Stars';
 import { MapEmbed } from '@/components/MapEmbed';
 import { DistanceCard } from '@/components/DistanceCard';
@@ -369,6 +369,17 @@ export default async function StorePage({ params }: { params: { slug: string } }
                   <h3 style={{ margin: 0, fontSize: 17 }}>{listing.title}</h3>
                 </Link>
                 <span className="price">{formatNaira(listing.price_kobo)}</span>
+                {parseHashtags((listing as unknown as { tags?: unknown }).tags).length > 0 && (
+                  <span className="kv-card-tags">
+                    {parseHashtags((listing as unknown as { tags?: unknown }).tags)
+                      .slice(0, 3)
+                      .map((t) => (
+                        <Link key={t} href={`/tags/${t}`}>
+                          #{t}
+                        </Link>
+                      ))}
+                  </span>
+                )}
                 {listing.description && (
                   <p className="muted" style={{ margin: 0, fontSize: 14.5 }}>
                     {listing.description.slice(0, 130)}

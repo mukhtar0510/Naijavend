@@ -42,6 +42,13 @@ export interface PlanDef {
   rider?: RiderId | null;
 }
 
+/**
+ * Kwaravend's own riders are not running yet (24 Nov 2026). While this is true
+ * the rider add-on cannot be bought or used and every surface says "coming
+ * soon". A seller's OWN riders and the dispatch board are free on every plan.
+ */
+export const KWARAVEND_RIDERS_COMING_SOON = true;
+
 export const PLANS: PlanDef[] = [
   {
     id: 'free',
@@ -57,6 +64,7 @@ export const PLANS: PlanDef[] = [
       '7 starter storefront templates',
       'AI theme designer for your storefront',
       'Orders, bookings and buyer chat',
+      'Add your own riders and dispatch deliveries',
       'WhatsApp hand-off for every order',
       'Rankings and reviews',
     ],
@@ -65,9 +73,9 @@ export const PLANS: PlanDef[] = [
     id: 'growth',
     name: 'Business',
     priceLabel: '₦5,000/mo',
-    riderPriceLabel: '+₦500/mo rider',
+    riderPriceLabel: '',
     available: true,
-    tagline: 'For a shop that is selling every week. Add Standard Kwaravend rider delivery.',
+    tagline: 'For a shop that is selling every week.',
     // Every template except the Emirates Plus-only designs.
     limits: { listings: 100, staff: 5, locations: 2, templates: BUSINESS_TEMPLATE_COUNT, rider: 'standard', riderPrice: 500 },
     includes: [
@@ -78,16 +86,16 @@ export const PLANS: PlanDef[] = [
       'Deeper analytics and delivery reports',
       `All ${BUSINESS_TEMPLATE_COUNT} storefront templates`,
       'Discount codes',
-      'Standard Kwaravend rider delivery (add-on)',
+      'Kwaravend rider delivery (coming soon)',
     ],
   },
   {
     id: 'plus',
     name: 'Emirates Plus',
     priceLabel: '₦12,500/mo',
-    riderPriceLabel: '+₦1,000/mo rider',
+    riderPriceLabel: '',
     available: true,
-    tagline: 'For a shop that has outgrown a one-person operation. Add Express and same-day Kwaravend riders.',
+    tagline: 'For a shop that has outgrown a one-person operation.',
     limits: { listings: null, staff: 25, locations: 10, templates: null, rider: 'express', riderPrice: 1000 },
     includes: [
       'Everything in Business',
@@ -96,10 +104,9 @@ export const PLANS: PlanDef[] = [
       'Up to 25 staff seats',
       'Up to 10 locations with per-location hours',
       'Customer CRM and notes',
-      'Dispatch board and your own riders',
       'Your own domain name',
       'Priority support',
-      'Express and same-day Kwaravend rider delivery (add-on)',
+      'Express and same-day Kwaravend riders (coming soon)',
     ],
   },
 ];
@@ -121,6 +128,7 @@ export function planFor(plan: Plan | string | null | undefined): PlanDef {
 
 /** Map a plan's rider field to a human label. */
 export function riderLabel(rider: RiderId | null): string {
+  if (KWARAVEND_RIDERS_COMING_SOON) return 'Coming soon';
   if (!rider) return 'No dedicated rider';
   return {
     standard: 'Standard Kwaravend rider',
@@ -157,7 +165,8 @@ const FEATURE_MIN_PLAN: Record<FeatureKeyPlan, PlanId> = {
   discounts: 'growth',
   kwaravend_rider: 'growth',
   crm: 'plus',
-  dispatch: 'plus',
+  // Own riders and the dispatch board are free for every seller (24 Nov 2026).
+  dispatch: 'free',
   custom_domain: 'plus',
   priority_support: 'plus',
 };
@@ -199,6 +208,7 @@ export function planPriceKobo(id: PlanId): number {
 
 /** Whether the store's Kwaravend rider add-on is paid up (needs a plan with a rider). */
 export function riderActive(store: { plan?: string | null; plan_expires_at?: string | null; rider_expires_at?: string | null } | null | undefined): boolean {
+  if (KWARAVEND_RIDERS_COMING_SOON) return false;
   const plan = effectivePlan(store);
   if (!plan.limits.rider) return false;
   const exp = store?.rider_expires_at ? Date.parse(store.rider_expires_at) : NaN;

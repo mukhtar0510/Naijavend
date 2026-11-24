@@ -5,7 +5,7 @@
 import { randomBytes } from 'node:crypto';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { PlanId } from './plans';
-import { planFor, planPriceKobo } from './plans';
+import { KWARAVEND_RIDERS_COMING_SOON, planFor, planPriceKobo } from './plans';
 
 export const PAID_PLANS: PlanId[] = ['growth', 'plus'];
 export const BANK_SETTING_KEY = 'billing_bank';
@@ -26,6 +26,7 @@ export function newPlanReference(): string {
 
 /** Monthly Kwaravend rider add-on price in kobo for a plan (0 if none). */
 export function riderPriceKobo(plan: PlanId): number {
+  if (KWARAVEND_RIDERS_COMING_SOON) return 0; // the add-on cannot be bought yet
   return (planFor(plan).limits.riderPrice ?? 0) * 100;
 }
 

@@ -3,7 +3,7 @@
 // see every listing with it, ranked by what actually sells. Public columns only,
 // read with the anon key so RLS decides visibility.
 import { normaliseHashtag } from '@idevtenancy/shared';
-import { supabaseAnon } from '@/lib/supabase';
+import { supabaseAnon, supabaseServiceOptional } from '@/lib/supabase';
 import { LISTED_EXAMPLE_VALUES } from '@/lib/flags';
 
 export interface TaggedListing {
@@ -62,7 +62,8 @@ export async function fetchTaggedListings(raw: string, limit = 60): Promise<{ ta
   // Units sold per listing. The view only counts paid and fulfilled orders.
   const sold = new Map<string, number>();
   if (rows.length) {
-    const { data: trend } = await sb
+    // The view reads orders, so only the server (service role) may query it.
+    const { data: trend } = await (supabaseServiceOptional() ?? sb)
       .from('trending_products')
       .select('id, order_count')
       .in('id', rows.map((r) => r.id));
@@ -94,28 +95,4 @@ export async function fetchTaggedListings(raw: string, limit = 60): Promise<{ ta
   // Real sales first; ties keep the newest listing on top. Example stores go last.
   items.sort((a, b) => Number(a.isExample) - Number(b.isExample) || b.sold - a.sold || b.createdAt.localeCompare(a.createdAt));
   return { tag, items: items.slice(0, limit) };
-}
-
-/** The most used hashtags across listed stores, with how many listings carry each. */
-export async function popularHashtags(limit = 40): Promise<Array<{ tag: string; count: number }>> {
-  const sb = supabaseAnon();
-  const { data, error } = await sb
-    .from('listings')
-    .select('tags, stores!inner(is_example)')
-    .in('stores.is_example', LISTED_EXAMPLE_VALUES)
-    .not('tags', 'is', null)
-    .limit(2000);
-  if (error) throw error;
-  const counts = new Map<string, number>();
-  for (const row of (data ?? []) as Array<{ tags: unknown }>) {
-    if (!Array.isArray(row.tags)) continue;
-    for (const t of row.tags) {
-      const tag = normaliseHashtag(t);
-      if (tag) counts.set(tag, (counts.get(tag) ?? 0) + 1);
-    }
-  }
-  return [...counts.entries()]
-    .map(([tag, count]) => ({ tag, count }))
-    .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag))
-    .slice(0, limit);
 }

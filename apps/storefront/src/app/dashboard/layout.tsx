@@ -15,7 +15,7 @@ const NAV = [
   { href: '/dashboard/orders', label: 'Orders' },
   { href: '/dashboard/dispatch', label: 'Dispatch' },
   { href: '/dashboard/riders', label: 'Riders' },
-  { href: '/dashboard/kwaravend-rider', label: 'Kwaravend rider' },
+  { href: '/dashboard/kwaravend-rider', label: 'Kwaravend rider (soon)' },
   { href: '/dashboard/bookings', label: 'Bookings' },
   { href: '/dashboard/customers', label: 'Customers' },
   { href: '/dashboard/staff', label: 'Staff' },

@@ -14,6 +14,8 @@ export interface ProductCardItem {
   stock?: number | null;
   /** The listing has a product video. */
   hasVideo?: boolean;
+  /** Hashtags; the first two show under the title. */
+  tags?: string[];
 }
 
 // Shared product tile: homepage trending, search results, and anywhere a
@@ -46,6 +48,13 @@ export function ProductCard({ item }: { item: ProductCardItem }) {
       <div className="product-card-body">
         <span className="product-card-meta">{item.type}</span>
         <h3 className="product-card-title">{item.title}</h3>
+        {item.tags && item.tags.length > 0 && (
+          <span className="kv-card-tags">
+            {item.tags.slice(0, 2).map((t) => (
+              <span key={t}>#{t}</span>
+            ))}
+          </span>
+        )}
         <span className="product-card-store"><Store size={13} aria-hidden /> <span>{item.storeName}</span></span>
         <span className="product-card-priceline">
           <span className="product-card-price">{formatNaira(item.priceKobo)}</span>

@@ -8,7 +8,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ExternalLink, Image as IcImage, Play, ShoppingBag, Calendar } from 'lucide-react';
+import { ExternalLink, Flame, Image as IcImage, Play, ShoppingBag, Calendar } from 'lucide-react';
 import { STORE_TEMPLATES, formatNaira } from '@idevtenancy/shared';
 import { ThemeFonts } from '@/components/ThemeFonts';
 import type { StorePreviewData } from '@/app/api/map/store-preview/route';
@@ -120,6 +120,17 @@ export function StorePreview({ slug, onOpen }: { slug: string; onOpen?: () => vo
             ))}
           </span>
         )}
+        {data.listings.length > 0 && (
+          <span className="fmp-section-label">
+            {data.hasTrending ? (
+              <>
+                <Flame size={12} aria-hidden /> Trending at {data.name}
+              </>
+            ) : (
+              'Newest from this store'
+            )}
+          </span>
+        )}
         {data.listings.length > 0 ? (
           <span className="fmp-grid">
             {data.listings.map((l) => (
@@ -134,6 +145,11 @@ export function StorePreview({ slug, onOpen }: { slug: string; onOpen?: () => vo
                     <Calendar size={20} aria-hidden />
                   ) : (
                     <ShoppingBag size={20} aria-hidden />
+                  )}
+                  {l.trending && (
+                    <span className="fmp-trend-tag">
+                      <Flame size={10} aria-hidden /> Trending
+                    </span>
                   )}
                   {l.video && (
                     <span className="fmp-video-tag">

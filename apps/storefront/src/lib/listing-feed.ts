@@ -2,6 +2,7 @@
 // Explore grid. Public columns only (never digital_file_path), read with the
 // anon key so RLS decides visibility. Sample (is_example) stores follow the
 // same listing rule as the rest of the marketplace.
+import { parseHashtags } from '@idevtenancy/shared';
 import { supabaseAnon } from '@/lib/supabase';
 import { LISTED_EXAMPLE_VALUES } from '@/lib/flags';
 
@@ -21,6 +22,7 @@ export interface FeedItem {
   storeSlug: string;
   storeCategory: string;
   isExample: boolean;
+  tags: string[];
 }
 
 const https = (u: unknown): u is string => typeof u === 'string' && /^https:\/\//.test(u) && u.length <= 1000;
@@ -49,7 +51,7 @@ export async function fetchListingFeed(opts: {
   let query = sb
     .from('listings')
     .select(
-      'id, title, price_kobo, compare_at_kobo, stock, type, image_urls, video_url, created_at, stores!inner(name, slug, category, is_example)',
+      'id, title, price_kobo, compare_at_kobo, stock, type, image_urls, video_url, tags, created_at, stores!inner(name, slug, category, is_example)',
       { count: 'exact' },
     )
     .in('stores.is_example', LISTED_EXAMPLE_VALUES);
@@ -91,6 +93,7 @@ export async function fetchListingFeed(opts: {
     type: string;
     image_urls: unknown;
     video_url: string | null;
+    tags: unknown;
     stores: { name: string; slug: string; category: string; is_example: boolean } | Array<{ name: string; slug: string; category: string; is_example: boolean }>;
   };
   const items = ((data ?? []) as unknown as Row[]).map((r) => {
@@ -108,6 +111,7 @@ export async function fetchListingFeed(opts: {
       storeName: store?.name ?? '',
       storeSlug: store?.slug ?? '',
       storeCategory: store?.category ?? 'general',
+      tags: parseHashtags(r.tags),
       isExample: !!store?.is_example,
     };
   });

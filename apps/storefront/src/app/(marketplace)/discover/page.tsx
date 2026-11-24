@@ -19,6 +19,8 @@ import { ArrowRight, MapPin, Search, Sparkles } from 'lucide-react';
 
 import { Stagger, StaggerItem } from '@/components/brand/Motion';
 import { LISTED_EXAMPLE_VALUES } from '@/lib/flags';
+import { getTrending, sortByHeat } from '@/lib/trending';
+import { TrendingTags } from '@/components/TrendingTags';
 import { CategoryIcon } from '@/lib/categories';
 import { Search as IcSearch, Truck as IcTruck } from 'lucide-react';
 
@@ -52,12 +54,13 @@ export default async function DiscoverPage({
     query = query.or(`name.ilike.%${w}%,description.ilike.%${w}%,address.ilike.%${w}%`);
   }
 
-  const [{ data }, feed] = await Promise.all([
+  const [{ data }, feed, trending] = await Promise.all([
     query,
     fetchListingFeed({ q, category, limit: 60 }).catch((err) => {
       console.error('[discover] listing feed failed:', err);
       return { items: [] as FeedItem[], total: 0 };
     }),
+    getTrending(),
   ]);
   const stores = (data ?? []).map((s: Record<string, unknown>) => {
     const { store_rating_stats, store_themes, ...store } = s as Record<string, unknown> & {
@@ -73,9 +76,14 @@ export default async function DiscoverPage({
   // Explore mosaic: listings from every store, with a store tile after every
   // four items. "Open now" narrows both to stores that are open.
   const openSlugs = new Set(finalStores.map((s) => s.slug));
-  const listingTiles: ExploreTile[] = feed.items
-    .filter((it) => !openOnly || openSlugs.has(it.storeSlug))
-    .map((it) => ({
+  // Hottest listings first (views, orders and newness this week, lib/trending.ts);
+  // listings with no heat keep the feed's newest-first order.
+  const hotTags = new Set(trending.tags.filter((t) => t.onHeat).map((t) => t.tag));
+  const listingTiles: ExploreTile[] = sortByHeat(
+    feed.items.filter((it) => !openOnly || openSlugs.has(it.storeSlug)),
+    (it) => it.id,
+    trending.listingHeat,
+  ).map((it) => ({
       kind: 'listing',
       key: `l-${it.id}`,
       href: `/s/${it.storeSlug}/listing/${it.id}`,
@@ -86,6 +94,9 @@ export default async function DiscoverPage({
       image: it.cover,
       video: it.video,
       isExample: it.isExample,
+      // Show the hottest of its hashtags.
+      tag: it.tags.find((t) => hotTags.has(t)) ?? it.tags[0] ?? null,
+      hot: (trending.listingHeat[it.id] ?? 0) >= 3,
     }));
   const storeTiles: ExploreTile[] = finalStores.map((s) => ({
     kind: 'store',
@@ -174,6 +185,14 @@ export default async function DiscoverPage({
           <DiscoverCategories current={category} q={q} openOnly={openOnly} />
         </div>
       </section>
+
+      {trending.tags.length > 0 && (
+        <section className="border-b border-border" aria-label="Trending hashtags">
+          <div className="mx-auto w-full max-w-6xl px-4 py-3 sm:px-7">
+            <TrendingTags tags={trending.tags} />
+          </div>
+        </section>
+      )}
 
       {/* ================================ CONTENT ============================= */}
       <section className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-7 sm:py-9 lg:py-12">

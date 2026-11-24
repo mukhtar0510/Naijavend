@@ -6,7 +6,7 @@ import { getSellerClient, getOwnStore } from '@/lib/auth';
 import { redirectStaffToPos } from '@/lib/staff';
 import { LockedFeature } from '@/components/LockedFeature';
 import { FEATURES } from '@/lib/flags';
-import { effectivePlan, hasFeature, planNameFor, riderActive, riderLabel, riderSpeeds } from '@/lib/plans';
+import { KWARAVEND_RIDERS_COMING_SOON, effectivePlan, hasFeature, planNameFor, riderActive, riderLabel, riderSpeeds } from '@/lib/plans';
 import { PLAN_COLUMNS, type PlanStore } from '@/lib/plan-gate';
 import { RiderRequests, type RiderRequestRow } from './RiderRequests';
 import '../../../styles/dispatch.css';
@@ -25,6 +25,33 @@ export default async function KwaravendRiderPage() {
       <main>
         <h1>Kwaravend rider</h1>
         <p className="muted">Create your store first.</p>
+      </main>
+    );
+  }
+  if (KWARAVEND_RIDERS_COMING_SOON) {
+    return (
+      <main style={{ maxWidth: 720 }}>
+        <h1>
+          Kwaravend rider <span className="badge">Coming soon</span>
+        </h1>
+        <p className="dash-sub">
+          Soon you&apos;ll be able to ask Kwaravend for a rider who picks up from your shop and delivers across Ilorin. It
+          isn&apos;t running yet, and nothing is charged for it.
+        </p>
+        <div className="card" style={{ marginTop: 16 }}>
+          <h2 style={{ fontSize: 17, marginTop: 0 }}>Deliver with your own riders today, free</h2>
+          <p className="muted" style={{ marginTop: 0 }}>
+            Add the riders you already work with, then assign them to orders from Dispatch. Buyers get a tracking link.
+          </p>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <Link className="btn btn-primary" href="/dashboard/riders">
+              Add your riders
+            </Link>
+            <Link className="btn btn-outline" href="/dashboard/dispatch">
+              Open Dispatch
+            </Link>
+          </div>
+        </div>
       </main>
     );
   }

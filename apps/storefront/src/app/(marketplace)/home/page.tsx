@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { ArrowRight } from 'lucide-react';
-import { supabaseAnon } from '@/lib/supabase';
+import { supabaseAnon, supabaseServiceOptional } from '@/lib/supabase';
 import type { BusinessHours } from '@idevtenancy/shared';
 import { ProductCard, type ProductCardItem } from '@/components/ProductCard';
 import { RecentlyViewed } from '@/components/RecentlyViewed';
@@ -85,7 +85,8 @@ export default async function HomePage() {
   let trending: ProductCardItem[] = [];
   try {
     const sb = supabaseAnon();
-    const { data: rows } = await sb
+    // The view reads orders, so only the server (service role) may query it.
+    const { data: rows } = await (supabaseServiceOptional() ?? sb)
       .from('trending_products')
       .select('id, title, price_kobo, compare_at_kobo, type, image_urls, store_name, store_slug, order_count')
       .order('order_count', { ascending: false })

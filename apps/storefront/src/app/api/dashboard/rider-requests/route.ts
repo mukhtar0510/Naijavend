@@ -10,7 +10,7 @@ import { supabaseService } from '@/lib/supabase';
 import { apiError, apiOk, internalError } from '@/lib/api';
 import { rateLimit, clientIp } from '@/lib/ratelimit';
 import { sanitizeText } from '@idevtenancy/shared';
-import { effectivePlan, riderActive, riderSpeeds } from '@/lib/plans';
+import { KWARAVEND_RIDERS_COMING_SOON, effectivePlan, riderActive, riderSpeeds } from '@/lib/plans';
 import { planLocked, PLAN_COLUMNS, type PlanStore } from '@/lib/plan-gate';
 
 const UUID = /^[0-9a-f-]{36}$/i;
@@ -59,6 +59,9 @@ export async function POST(req: NextRequest) {
       return apiOk({ cancelled: true });
     }
 
+    if (KWARAVEND_RIDERS_COMING_SOON) {
+      return apiError(503, 'coming_soon', 'Kwaravend riders are coming soon. Use your own riders from Dispatch for now.');
+    }
     const locked = planLocked(store, 'kwaravend_rider');
     if (locked) return locked;
     if (!riderActive(store)) {

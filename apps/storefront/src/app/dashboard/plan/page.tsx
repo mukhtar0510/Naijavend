@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getSellerClient, getOwnStore } from '@/lib/auth';
 import { getStaffMembership } from '@/lib/staff';
-import { LIMIT_LABELS, PLANS, effectivePlan, isAtLimit, planFor, planPriceKobo, riderActive, riderLabel, usagePercent } from '@/lib/plans';
+import { KWARAVEND_RIDERS_COMING_SOON, LIMIT_LABELS, PLANS, effectivePlan, isAtLimit, planFor, planPriceKobo, riderActive, riderLabel, usagePercent } from '@/lib/plans';
 import type { LimitKey } from '@/lib/plans';
 import { supabaseServiceOptional } from '@/lib/supabase';
 import { getBillingBank, PAID_PLANS, riderPriceKobo } from '@/lib/billing';
@@ -97,7 +97,11 @@ export default async function PlanPage() {
         {expires ? ` until ${expires.toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' })}` : ''}. Limits
         are checked when you add a listing, invite staff or open a location.
       </p>
-      {plan.limits.rider && (
+      {KWARAVEND_RIDERS_COMING_SOON ? (
+        <p className="muted" style={{ margin: '8px 0 0', fontSize: 14 }}>
+          Kwaravend riders are coming soon. Until then, add your own riders free under Riders and send them from Dispatch.
+        </p>
+      ) : plan.limits.rider && (
         <p className="muted" style={{ margin: '8px 0 0', fontSize: 14 }}>
           {riderActive(store)
             ? `${riderLabel(plan.limits.rider)} add-on is on until ${new Date(store.rider_expires_at!).toLocaleDateString('en-NG', { day: 'numeric', month: 'long' })}. Request riders from Dispatch.`

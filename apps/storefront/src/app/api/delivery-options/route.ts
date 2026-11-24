@@ -4,6 +4,7 @@
 import { NextRequest } from 'next/server';
 import { supabaseAnon } from '@/lib/supabase';
 import { apiError, apiOk, internalError } from '@/lib/api';
+import { rateLimit, clientIp } from '@/lib/ratelimit';
 import { enabledZones } from '@/lib/deliveryZones';
 
 // Not exported: Next.js route files may only export HTTP handlers + route
@@ -18,6 +19,8 @@ const METHOD_LABELS: Record<DeliveryMethod, string> = {
 };
 
 export async function GET(req: NextRequest) {
+  const rl = rateLimit(`delivery-options:${clientIp(req)}`, 60, 60_000);
+  if (!rl.allowed) return apiError(429, 'rate_limited', `Slow down. Try again in ${rl.retryAfterSeconds}s.`);
   const slug = (req.nextUrl.searchParams.get('slug') ?? '').trim().slice(0, 80);
   if (!slug) return apiError(400, 'missing_store', 'Store is required.');
 

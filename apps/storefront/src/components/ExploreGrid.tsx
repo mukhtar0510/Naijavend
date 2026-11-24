@@ -11,7 +11,7 @@
 
 import { useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Play, Store as StoreIcon } from 'lucide-react';
+import { Flame, Play, Store as StoreIcon } from 'lucide-react';
 import { formatNaira } from '@idevtenancy/shared';
 import { CategoryIcon, categoryColor, categoryMeta } from '@/lib/categories';
 
@@ -27,6 +27,10 @@ export type ExploreTile =
       image: string | null;
       video: string | null;
       isExample: boolean;
+      /** First hashtag, shown in the caption. */
+      tag?: string | null;
+      /** Getting a lot of attention right now (lib/trending.ts). */
+      hot?: boolean;
     }
   | {
       kind: 'store';
@@ -79,7 +83,7 @@ export function ExploreGrid({ tiles }: { tiles: ExploreTile[] }) {
         const color = categoryColor(t.category);
         const label =
           t.kind === 'listing'
-            ? `${t.title}, ${formatNaira(t.priceKobo)}, from ${t.storeName}${t.video ? ', has a video' : ''}`
+            ? `${t.title}, ${formatNaira(t.priceKobo)}, from ${t.storeName}${t.hot ? ', trending now' : ''}${t.tag ? `, tagged ${t.tag}` : ''}${t.video ? ', has a video' : ''}`
             : `${t.title} store${t.area ? ` in ${t.area}` : ''}`;
         const hasMedia = !!t.image || (t.kind === 'listing' && !!t.video);
         return (
@@ -112,6 +116,7 @@ export function ExploreGrid({ tiles }: { tiles: ExploreTile[] }) {
               </span>
             )}
             <span className="ex-badges" aria-hidden>
+              {t.kind === 'listing' && t.hot && <Flame size={15} />}
               {t.kind === 'listing' && t.video && <Play size={15} fill="currentColor" />}
               {t.kind === 'store' && <StoreIcon size={15} />}
             </span>
@@ -119,7 +124,11 @@ export function ExploreGrid({ tiles }: { tiles: ExploreTile[] }) {
             {hasMedia && (
               <span className="ex-caption" aria-hidden>
                 <strong>{t.title}</strong>
-                <span>{t.kind === 'listing' ? `${formatNaira(t.priceKobo)} · ${t.storeName}` : (t.area ?? categoryMeta(t.category).label)}</span>
+                <span>
+                  {t.kind === 'listing'
+                    ? `${formatNaira(t.priceKobo)} · ${t.storeName}${t.tag ? ` · #${t.tag}` : ''}`
+                    : (t.area ?? categoryMeta(t.category).label)}
+                </span>
               </span>
             )}
           </Link>

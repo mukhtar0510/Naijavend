@@ -144,6 +144,7 @@ export default async function ProductsPage({
                   storeName: it.isExample ? `${it.storeName} (Example)` : it.storeName,
                   storeSlug: it.storeSlug,
                   hasVideo: !!it.video,
+                  tags: it.tags,
                 }}
               />
             ))}
