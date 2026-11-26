@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { MAX_HASHTAGS, parseHashtags, type Listing } from '@idevtenancy/shared';
+import { MAX_HASHTAGS, autoHashtags, parseHashtags, type Listing } from '@idevtenancy/shared';
 import { CreditCard as IcCreditCard, Image as IcImage, Sparkles as IcSparkles, Video as IcVideo, X as IcX } from 'lucide-react';
 
 const MAX_IMAGES = 5;
@@ -459,6 +459,9 @@ export function ListingEditor({ storeId, listing }: { storeId: string; listing?:
         )}
         <p className="hint">
           Up to {MAX_HASHTAGS}. Buyers tap a hashtag to see every listing with it, best sellers first. Letters and numbers only.
+          {tags.length === 0 && autoHashtags(title, category).length > 0 && (
+            <> Until you add your own, buyers see {autoHashtags(title, category).map((t) => `#${t}`).join(' ')} (from the title and category).</>
+          )}
         </p>
       </div>
 

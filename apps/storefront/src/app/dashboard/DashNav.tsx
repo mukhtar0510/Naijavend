@@ -1,13 +1,14 @@
 'use client';
 
 import type { ComponentType } from 'react';
-import { Bike, LifeBuoy, PackageCheck, Truck } from 'lucide-react';
+import { Bike, LifeBuoy, PackageCheck, Palette, Truck } from 'lucide-react';
 
 // Lucide icons adapted to the nav's simple { size } icon type.
 const IconTruck = ({ size = 17 }: { size?: number }) => <Truck size={size} aria-hidden />;
 const IconBike = ({ size = 17 }: { size?: number }) => <Bike size={size} aria-hidden />;
 const IconHelp = ({ size = 17 }: { size?: number }) => <LifeBuoy size={size} aria-hidden />;
 const IconParcel = ({ size = 17 }: { size?: number }) => <PackageCheck size={size} aria-hidden />;
+const IconPalette = ({ size = 17 }: { size?: number }) => <Palette size={size} aria-hidden />;
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -19,6 +20,7 @@ const ICONS: Record<string, ComponentType<{ size?: number }>> = {
   '/dashboard': IconHome,
   '/dashboard/pos': IconTerminal,
   '/dashboard/listings': IconTag,
+  '/dashboard/design': IconPalette,
   '/dashboard/orders': IconBox,
   '/dashboard/dispatch': IconTruck,
   '/dashboard/riders': IconBike,

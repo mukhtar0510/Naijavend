@@ -5,7 +5,7 @@
 //   1. the template gallery (all 20 layouts, 7 marked as Starter),
 //   2. the AI theme designer, which turns a one-line vibe brief into colours,
 //      fonts and a layout for the live preview.
-// On "/" it is illustrative. With `seller` (Settings > Look & feel) it starts
+// On "/" it is illustrative. With `seller` it starts
 // from the store's look and "Save to my store" writes it, button shape included.
 
 import { useMemo, useState } from 'react';
@@ -54,7 +54,7 @@ const DEFAULT_THEME: ThemeState = {
 
 // Keyless-safe presets. They use the same shape the AI returns, so the preview
 // behaves identically whether the model answers or these are picked by hand.
-const PRESETS: Array<{ label: string; theme: ThemeState; note: string }> = [
+export const PRESETS: Array<{ label: string; theme: ThemeState; note: string }> = [
   {
     label: 'Gold & calm',
     theme: {
@@ -93,7 +93,7 @@ const PRESETS: Array<{ label: string; theme: ThemeState; note: string }> = [
   },
 ];
 
-const CATEGORY_OPTIONS = [
+export const CATEGORY_OPTIONS = [
   { value: 'general', label: 'General store' },
   { value: 'fashion', label: 'Fashion & tailoring' },
   { value: 'beauty', label: 'Beauty & hair' },
@@ -104,7 +104,7 @@ const CATEGORY_OPTIONS = [
   { value: 'home-services', label: 'Home services' },
 ] as const;
 
-interface AiStyleResult {
+export interface AiStyleResult {
   accent_color: string;
   accent_soft: string;
   accent_text: string;
@@ -118,7 +118,7 @@ interface AiStyleResult {
   note: string;
 }
 
-function isDarkHex(hex: string): boolean {
+export function isDarkHex(hex: string): boolean {
   const m = /^#([0-9a-fA-F]{6})$/.exec(hex);
   if (!m) return false;
   const n = parseInt(m[1], 16);
@@ -129,11 +129,11 @@ function isDarkHex(hex: string): boolean {
 }
 
 /** First family name from a CSS font stack: "'Playfair Display', serif" -> "Playfair Display". */
-function fontName(stack: string): string {
+export function fontName(stack: string): string {
   return (stack.split(',')[0] ?? '').replace(/['"]/g, '').trim();
 }
 
-/** Seller mode (Settings > Look & feel): starts from the store's look and saves to it. */
+/** Seller mode: starts from the store's look and saves to it. (The dashboard now uses DesignStudio.) */
 export interface DesignerSeller {
   layout: StoreLayout;
   theme: ThemeState;

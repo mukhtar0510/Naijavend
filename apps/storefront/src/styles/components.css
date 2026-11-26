@@ -2852,6 +2852,16 @@
 }
 [data-theme='dark'] .kv-trend-chip.is-hot { color: #fdba74; background: color-mix(in srgb, #c2410c 22%, var(--surface)); }
 .kv-trend-all { font-size: 13px; font-weight: 600; }
-.kv-card-tags { display: flex; flex-wrap: wrap; gap: 4px 8px; margin: 2px 0 0; font-size: 12px; color: var(--text-muted); }
-.kv-card-tags a { color: inherit; text-decoration: none; }
-.kv-card-tags a:hover { color: var(--text); text-decoration: underline; }
+.kv-card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin: 2px 0 0; }
+.kv-card-tags > a,
+.kv-card-tags > span {
+  display: inline-block; padding: 2px 8px; border-radius: 999px;
+  font-size: 11.5px; font-weight: 600; line-height: 1.5;
+  color: var(--blue, #1d4ed8); background: color-mix(in srgb, var(--blue, #1d4ed8) 9%, transparent);
+  text-decoration: none;
+}
+.kv-card-tags > a:hover { background: color-mix(in srgb, var(--blue, #1d4ed8) 16%, transparent); }
+[data-theme='dark'] .kv-card-tags > a,
+[data-theme='dark'] .kv-card-tags > span { color: #93b4ff; background: rgba(147, 180, 255, 0.12); }
+/* Inside a store site, hashtags take the store's own colour. */
+.site-shell .kv-card-tags > a { color: var(--st-accent, var(--blue)); background: color-mix(in srgb, var(--st-accent, var(--blue)) 10%, transparent); }

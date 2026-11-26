@@ -1,25 +1,24 @@
 'use client';
 
 import { useState } from 'react';
-import { Megaphone as IcMegaphone, Palette as IcPalette, Store as IcStore } from 'lucide-react';
+import { Megaphone as IcMegaphone, Store as IcStore } from 'lucide-react';
 
 /**
  * Dashboard settings tabs, styled like the discover page tabs (.disc-tabs).
  * The page was one long scroll of three unrelated forms; this splits it into
- * Business / Announcement / Look & feel without changing any form internals.
+ * Business / Announcement without changing any form internals. Look & feel
+ * has its own dashboard section (/dashboard/design) since 26 Nov 2026.
  */
 export function SettingsTabs({
   business,
   announcement,
-  appearance,
   initial = 'business',
 }: {
   business: React.ReactNode;
   announcement: React.ReactNode;
-  appearance: React.ReactNode;
-  initial?: 'business' | 'announcement' | 'appearance';
+  initial?: 'business' | 'announcement';
 }) {
-  const [tab, setTab] = useState<'business' | 'announcement' | 'appearance'>(initial);
+  const [tab, setTab] = useState<'business' | 'announcement'>(initial);
 
   return (
     <>
@@ -42,19 +41,9 @@ export function SettingsTabs({
         >
           <IcMegaphone className="ico-inline" aria-hidden /> Announcement
         </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === 'appearance'}
-          className={`disc-tab${tab === 'appearance' ? ' on' : ''}`}
-          onClick={() => setTab('appearance')}
-        >
-          <IcPalette className="ico-inline" aria-hidden /> Look &amp; feel
-        </button>
       </div>
       {tab === 'business' && business}
       {tab === 'announcement' && announcement}
-      {tab === 'appearance' && appearance}
     </>
   );
 }

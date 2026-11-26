@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { supabaseAnon } from '@/lib/supabase';
-import { formatNaira, buildWhatsAppLink, isValidPhone, parseHashtags } from '@idevtenancy/shared';
+import { formatNaira, buildWhatsAppLink, isValidPhone, listingHashtags } from '@idevtenancy/shared';
 import { Stars } from '@/components/Stars';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { ListingGallery } from '@/components/ListingGallery';
@@ -122,7 +122,8 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
 
   const isService = listing.type === 'service';
   const isDigital = listing.type === 'digital';
-  const hashtags = parseHashtags((listing as unknown as { tags?: unknown }).tags);
+  // Own hashtags, or automatic ones from the title and category.
+  const hashtags = listingHashtags((listing as unknown as { tags?: unknown }).tags, listing.title, (listing as unknown as { category?: string | null }).category ?? store.category);
   const orderHref = `/s/${store.slug}/${isService ? 'book' : 'order'}/${listing.id}`;
   const onSale = listing.compare_at_kobo != null && listing.compare_at_kobo > listing.price_kobo;
   const soldOut = listing.stock === 0;

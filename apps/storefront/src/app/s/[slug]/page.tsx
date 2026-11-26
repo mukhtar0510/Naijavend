@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { supabaseAnon } from '@/lib/supabase';
-import { formatNaira, buildWhatsAppLink, parseHashtags } from '@idevtenancy/shared';
+import { formatNaira, buildWhatsAppLink, listingHashtags } from '@idevtenancy/shared';
 import { Stars } from '@/components/Stars';
 import { MapEmbed } from '@/components/MapEmbed';
 import { DistanceCard } from '@/components/DistanceCard';
@@ -369,9 +369,9 @@ export default async function StorePage({ params }: { params: { slug: string } }
                   <h3 style={{ margin: 0, fontSize: 17 }}>{listing.title}</h3>
                 </Link>
                 <span className="price">{formatNaira(listing.price_kobo)}</span>
-                {parseHashtags((listing as unknown as { tags?: unknown }).tags).length > 0 && (
+                {listingHashtags((listing as unknown as { tags?: unknown }).tags, listing.title, (listing as unknown as { category?: string | null }).category ?? store.category).length > 0 && (
                   <span className="kv-card-tags">
-                    {parseHashtags((listing as unknown as { tags?: unknown }).tags)
+                    {listingHashtags((listing as unknown as { tags?: unknown }).tags, listing.title, (listing as unknown as { category?: string | null }).category ?? store.category)
                       .slice(0, 3)
                       .map((t) => (
                         <Link key={t} href={`/tags/${t}`}>

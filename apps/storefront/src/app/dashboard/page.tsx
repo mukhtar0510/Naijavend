@@ -238,7 +238,7 @@ export default async function DashboardHome({
           <Link className="btn btn-outline" href={`/s/${s.slug}`} target="_blank">
             <ExternalLink size={16} aria-hidden /> View live store
           </Link>
-          <Link className="btn btn-ghost" href="/dashboard/settings?tab=appearance">
+          <Link className="btn btn-ghost" href="/dashboard/design">
             <Settings size={16} aria-hidden /> Look &amp; feel
           </Link>
         </div>

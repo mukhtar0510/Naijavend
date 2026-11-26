@@ -12,7 +12,7 @@
 // not public), aggregated here, and only scores leave this module: no buyer,
 // order or path is ever returned. Cached for 5 minutes.
 import { unstable_cache } from 'next/cache';
-import { normaliseHashtag } from '@idevtenancy/shared';
+import { listingHashtags } from '@idevtenancy/shared';
 import { supabaseAnon, supabaseServiceOptional } from '@/lib/supabase';
 import { LISTED_EXAMPLE_VALUES } from '@/lib/flags';
 
@@ -51,10 +51,21 @@ async function computeTrending(): Promise<TrendingSnapshot> {
 
   const { data: listingRows } = await anon
     .from('listings')
-    .select('id, tags, created_at, stores!inner(is_example)')
+    .select('id, title, tags, category, created_at, stores!inner(is_example, category)')
     .in('stores.is_example', LISTED_EXAMPLE_VALUES)
     .limit(3000);
-  const listings = (listingRows ?? []) as Array<{ id: string; tags: unknown; created_at: string }>;
+  const listings = ((listingRows ?? []) as unknown as Array<{
+    id: string;
+    title: string;
+    tags: unknown;
+    category: string | null;
+    created_at: string;
+    stores: { category: string } | Array<{ category: string }>;
+  }>).map((l) => {
+    const store = Array.isArray(l.stores) ? l.stores[0] : l.stores;
+    // Own hashtags, or automatic ones from the title and category.
+    return { ...l, hashtags: listingHashtags(l.tags, l.title, l.category ?? store?.category) };
+  });
   const known = new Set(listings.map((l) => l.id));
 
   const heat = new Map<string, number>();
@@ -102,12 +113,7 @@ async function computeTrending(): Promise<TrendingSnapshot> {
 
   const tagHeat = new Map<string, { heat: number; recent: number; listings: number }>();
   for (const l of listings) {
-    if (!Array.isArray(l.tags)) continue;
-    const seen = new Set<string>();
-    for (const raw of l.tags) {
-      const tag = normaliseHashtag(raw);
-      if (!tag || seen.has(tag)) continue;
-      seen.add(tag);
+    for (const tag of l.hashtags) {
       const cur = tagHeat.get(tag) ?? { heat: 0, recent: 0, listings: 0 };
       cur.heat += heat.get(l.id) ?? 0;
       cur.recent += recent.get(l.id) ?? 0;

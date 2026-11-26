@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { autoHashtags, listingHashtags } from './hashtags';
 import { STORE_TEMPLATES, STARTER_TEMPLATE_COUNT, BUSINESS_TEMPLATE_COUNT, PLUS_TEMPLATES } from './templates';
 import {
   isValidPhone,
@@ -196,5 +197,20 @@ describe('store templates', () => {
     expect(STORE_TEMPLATES.slice(BUSINESS_TEMPLATE_COUNT).every((t) => t.tier === 'plus')).toBe(true);
     expect(PLUS_TEMPLATES.map((t) => t.id)).toEqual(['royale', 'skyline', 'atelier']);
     expect(new Set(STORE_TEMPLATES.map((t) => t.id)).size).toBe(STORE_TEMPLATES.length);
+  });
+});
+
+describe('automatic hashtags', () => {
+  it('derives tags from the title and category', () => {
+    expect(autoHashtags('Jollof rice and chicken', 'food')).toEqual(['jollof', 'rice', 'chicken', 'food']);
+    expect(autoHashtags('Power bank, 20,000 mAh', 'electronics')).toEqual(['power', 'bank', 'electronics']);
+    expect(autoHashtags('Birthday cake, 8 inch', 'food')).toEqual(['birthday', 'cake', 'food']);
+    expect(autoHashtags('Plumbing visit', 'home-services')).toEqual(['plumbing', 'homeservices']);
+    expect(autoHashtags('', 'general')).toEqual([]);
+  });
+  it("prefers the seller's own tags", () => {
+    expect(listingHashtags(['#Ankara'], 'Ankara gown', 'fashion')).toEqual(['ankara']);
+    expect(listingHashtags([], 'Ankara gown', 'fashion')).toEqual(['ankara', 'gown', 'fashion']);
+    expect(listingHashtags(null, 'Adire shirt', 'fashion')).toEqual(['adire', 'shirt', 'fashion']);
   });
 });

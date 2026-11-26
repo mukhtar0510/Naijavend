@@ -1,6 +1,7 @@
 export * from './types';
 export * from './brand';
 export * from './validation';
+export * from './hashtags';
 export * from './whatsapp';
 export * from './rankings';
 export * from './colors';

@@ -2,7 +2,7 @@
 // type them or let the AI suggest them in the listing editor; buyers tap one to
 // see every listing with it, ranked by what actually sells. Public columns only,
 // read with the anon key so RLS decides visibility.
-import { normaliseHashtag } from '@idevtenancy/shared';
+import { listingHashtags, normaliseHashtag } from '@idevtenancy/shared';
 import { supabaseAnon, supabaseServiceOptional } from '@/lib/supabase';
 import { LISTED_EXAMPLE_VALUES } from '@/lib/flags';
 
@@ -36,12 +36,13 @@ export async function fetchTaggedListings(raw: string, limit = 60): Promise<{ ta
   const sb = supabaseAnon();
   const { data, error } = await sb
     .from('listings')
-    .select('id, title, price_kobo, compare_at_kobo, stock, type, image_urls, video_url, tags, created_at, stores!inner(name, slug, is_example)')
-    // tags is jsonb, so the containment value must be JSON (cs.["tag"]), not a Postgres array.
-    .filter('tags', 'cs', JSON.stringify([tag]))
+    .select('id, title, price_kobo, compare_at_kobo, stock, type, image_urls, video_url, tags, category, created_at, stores!inner(name, slug, is_example, category)')
     .in('stores.is_example', LISTED_EXAMPLE_VALUES)
     .order('created_at', { ascending: false })
-    .limit(200);
+    // Listings without their own hashtags get automatic ones (title and
+    // category), which only exist here, so matching happens below rather than
+    // in the database. Fine at Ilorin's size; move to a stored column later.
+    .limit(3000);
   if (error) throw error;
 
   type Row = {
@@ -54,10 +55,16 @@ export async function fetchTaggedListings(raw: string, limit = 60): Promise<{ ta
     image_urls: unknown;
     video_url: string | null;
     tags: unknown;
+    category: string | null;
     created_at: string;
-    stores: { name: string; slug: string; is_example: boolean } | Array<{ name: string; slug: string; is_example: boolean }>;
+    stores: { name: string; slug: string; is_example: boolean; category: string } | Array<{ name: string; slug: string; is_example: boolean; category: string }>;
   };
-  const rows = (data ?? []) as unknown as Row[];
+  const rows = ((data ?? []) as unknown as Row[])
+    .map((r) => {
+      const store = Array.isArray(r.stores) ? r.stores[0] : r.stores;
+      return { ...r, hashtags: listingHashtags(r.tags, r.title, r.category ?? store?.category) };
+    })
+    .filter((r) => r.hashtags.includes(tag));
 
   // Units sold per listing. The view only counts paid and fulfilled orders.
   const sold = new Map<string, number>();
@@ -88,7 +95,7 @@ export async function fetchTaggedListings(raw: string, limit = 60): Promise<{ ta
       storeSlug: store?.slug ?? '',
       isExample: Boolean(store?.is_example),
       sold: sold.get(r.id) ?? 0,
-      tags: Array.isArray(r.tags) ? (r.tags as unknown[]).filter((t): t is string => typeof t === 'string') : [],
+      tags: r.hashtags,
       createdAt: r.created_at,
     };
   });
